@@ -1,0 +1,483 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang=""><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Installing Oracle WebLogic Server 12cR2 on SUSE Linux Enterprise Server 12 SP1  | SUSE Linux Enterprise Server 12 SP1</title><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" /><link rel="stylesheet" type="text/css" href="static/css/style.css" /><link rel="stylesheet" type="text/css" href="static/css/highlight.css" /><meta name="generator" content="DAPS 3.2.0 (https://opensuse.github.io/daps) using SUSE XSL Stylesheets for SUSE Best Practices 2.0.17 (based on DocBook XSL Stylesheets 1.79.2)" /><meta name="product-name" content="SUSE Linux Enterprise Server" /><meta name="product-number" content="12 SP1" /><meta name="book-title" content="Installing Oracle WebLogic Server 12cR2 on SUSE Linux Enterprise Server 12 SP1 " /><meta name="description" content="Oracle WebLogic Server 12c R2 is a reliable application server for building and deploying enterprise Java EE applications with support for new features for lowering cost of operations, improving performance, enhancing scalability and supporting the Oracle Applications portfolio. WebLogic Server Java EE applications are based on standardized, modular components. Oracle WebLogic Server provides a complete set of services for those modules and handles many details of application behavior automatically, without requiring programming." /><meta name="tracker-url" content="https://github.com/SUSE/suse-best-practices/issues/new" /><meta name="tracker-type" content="gh" />
+<script type="text/javascript">
+
+if ( window.location.protocol.toLowerCase() != 'file:' ) {
+  document.write('<link rel="stylesheet" type="text/css" href="https://static.opensuse.org/fonts/fonts.css"></link>');
+}
+else {
+  document.write('<link rel="stylesheet" type="text/css" href="static/css/fonts-onlylocal.css"></link>');
+}
+
+</script><noscript><link rel="stylesheet" type="text/css" href="https://static.opensuse.org/fonts/fonts.css" /></noscript><script src="static/js/jquery-1.10.2.min.js" type="text/javascript"></script><script src="static/js/script.js" type="text/javascript"></script><script src="static/js/highlight.min.js" type="text/javascript"></script><script>
+
+$(document).ready(function() {
+  $('.verbatim-wrap.highlight').each(function(i, block) {
+    hljs.highlightBlock(block);
+  });
+});
+hljs.configure({
+  useBR: false
+});
+
+</script></head><body class="draft single offline js-off" onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="bypass-block"><a href="#_content">Jump to content</a></div><div id="_outer-wrap"><div id="_white-bg" style="background-color: #E11;"><div id="_header"><div id="_logo"><img src="static/images/logo.png" alt="Logo" /></div><div class="crumbs inactive"><a class="single-crumb" href="#art-sbp-oraclerac" accesskey="c"><span class="single-contents-icon"></span>Installing Oracle WebLogic Server 12cR2 on SUSE Linux Enterprise Server 12 SP1 </a><div class="bubble-corner active-contents"></div></div><div class="clearme"></div></div></div><div id="_fixed-header-wrap" style="background-color: #E11;" class="inactive"><div id="_fixed-header"><div class="crumbs inactive"><a class="single-crumb" href="#art-sbp-oraclerac" accesskey="c"><span class="single-contents-icon"></span>Show Contents: Installing Oracle WebLogic Server 12cR2 on SUSE Linux Enterprise Server 12 SP1 </a></div><div class="buttons"><a class="top-button button" href="#">Top</a><div class="clearme"></div></div><div class="clearme"></div></div><div class="active-contents bubble"><div class="bubble-container"><div id="_bubble-toc"><ol><li class="inactive"><a href="#sec-intro"><span class="number">1 </span><span class="name">Introduction</span></a></li><li class="inactive"><a href="#sec-sys-requirements"><span class="number">2 </span><span class="name">System Requirements and Specifications</span></a></li><li class="inactive"><a href="#sec-prereq"><span class="number">3 </span><span class="name">Prerequisites</span></a></li><li class="inactive"><a href="#sec-weblogic-install"><span class="number">4 </span><span class="name">Oracle WebLogic Server 12cR2 Installation</span></a></li><li class="inactive"><a href="#sec-comments"><span class="number">5 </span><span class="name">Additional Comments</span></a></li><li class="inactive"><a href="#sec-legal-notice"><span class="number">6 </span><span class="name">Legal Notice</span></a></li><li class="inactive"><a href="#id-1.8"><span class="number">7 </span><span class="name">GNU Free Documentation License</span></a></li></ol></div><div class="clearme"></div></div></div></div><div id="_toc-bubble-wrap"></div><div id="_content" class="draft "><div class="documentation"><div xml:lang="en" class="article " id="art-sbp-oraclerac" lang="en"><div class="titlepage"><div><h6 class="version-info"><span class="productname ">SUSE Linux Enterprise Server</span> <span class="productnumber ">12 SP1</span></h6><div><h1 class="title">Installing Oracle WebLogic Server 12cR2 on SUSE Linux Enterprise Server 12 SP1 </h1></div><div><h3 class="subtitle"><em>For x86-64 Architectures</em></h3></div><div class="abstract "><p>Oracle WebLogic Server 12c R2 is a reliable application server for building and
+                deploying enterprise Java EE applications with support for new features for lowering
+                cost of operations, improving performance, enhancing scalability and supporting the
+                Oracle Applications portfolio. WebLogic Server Java EE applications are based on
+                standardized, modular components. Oracle WebLogic Server provides a complete set of
+                services for those modules and handles many details of application behavior
+                automatically, without requiring programming.</p><p>SUSE Linux Enterprise Server provides Oracle customers a scalable platform for
+                demanding workloads and applications. Oracle and SUSE have teamed up to enable Linux
+                in enterprises and have created world-class solutions that offer real-grid benefits
+                for IT data centers today. This document provides the details for installing Oracle
+                WebLogic Server 12cR2 on SUSE Linux Enterprise Server 12 SP1.</p></div><div class="author"><span class="imprint-label">Author: </span><span class="firstname ">Chen</span> <span class="surname ">Wu, ISV Technical Manager, SUSE</span></div><div class="author"><span class="imprint-label">Author: </span><span class="firstname ">Arun</span> <span class="surname ">Singh, ISV Technical Manager, SUSE</span></div><div class="date"><span class="imprint-label">Publication Date: </span>January 23, 2017</div></div></div><div class="line"><div class="toc"><dl><dt><span class="sect1"><a href="#sec-intro"><span class="number">1 </span><span class="name">Introduction</span></a></span></dt><dt><span class="sect1"><a href="#sec-sys-requirements"><span class="number">2 </span><span class="name">System Requirements and Specifications</span></a></span></dt><dt><span class="sect1"><a href="#sec-prereq"><span class="number">3 </span><span class="name">Prerequisites</span></a></span></dt><dt><span class="sect1"><a href="#sec-weblogic-install"><span class="number">4 </span><span class="name">Oracle WebLogic Server 12cR2 Installation</span></a></span></dt><dt><span class="sect1"><a href="#sec-comments"><span class="number">5 </span><span class="name">Additional Comments</span></a></span></dt><dt><span class="sect1"><a href="#sec-legal-notice"><span class="number">6 </span><span class="name">Legal Notice</span></a></span></dt><dt><span class="sect1"><a href="#id-1.8"><span class="number">7 </span><span class="name">GNU Free Documentation License</span></a></span></dt></dl></div></div><div class="sect1 " id="sec-intro"><div class="titlepage"><div><div><h2 class="title"><span class="number">1 </span><span xmlns:dm="urn:x-suse:ns:docmanager" class="name">Introduction</span> <a title="Permalink" class="permalink" href="#sec-intro">#</a><a class="report-bug" target="_blank" href="https://github.com/SUSE/suse-best-practices/edit/main/xml/MAIN-SBP-oracleweblogic.xml" title="Edit the source file for this section">Edit source</a></h2><div class="doc-status"><ul><li><span class="ds-label">File Name: </span>MAIN-SBP-oracleweblogic.xml</li><li><span class="ds-label">ID: </span>sec-intro</li></ul></div></div></div></div><p>This document provides the details for installing Oracle WebLogic Server 12cR2 on SUSE
+            Linux Enterprise Server 12 SP1. Details are provided for the Intel x86-64 versions of
+            both Oracle WebLogic Server 12cR2 and SUSE Linux Enterprise Server 12. Similar steps
+            apply to other platforms (x86, ia64, IBM z Systems, etc.). If you encounter issues or
+            have general questions, post your query to
+            &lt;<a class="email" href="mailto:suse-oracle@listx.novell.com">suse-oracle@listx.novell.com</a>&gt;.</p><p>The official Oracle product documentation is available at: <a class="link" href="http://docs.oracle.com/en/" target="_blank">http://docs.oracle.com/en/</a></p></div><div class="sect1 " id="sec-sys-requirements"><div class="titlepage"><div><div><h2 class="title"><span class="number">2 </span><span xmlns:dm="urn:x-suse:ns:docmanager" class="name">System Requirements and Specifications</span> <a title="Permalink" class="permalink" href="#sec-sys-requirements">#</a><a class="report-bug" target="_blank" href="https://github.com/SUSE/suse-best-practices/edit/main/xml/MAIN-SBP-oracleweblogic.xml" title="Edit the source file for this section">Edit source</a></h2><div class="doc-status"><ul><li><span class="ds-label">File Name: </span>MAIN-SBP-oracleweblogic.xml</li><li><span class="ds-label">ID: </span>sec-sys-requirements</li></ul></div></div></div></div><p>The following paragraphs provide details about the hardware and software requirements
+            that need to be met to install Oracle WebLogic Server 12cR2 on top of SUSE Linux
+            Enterprise Server 12 SP1. They also contain the specification of the test
+            environment.</p><div class="sect2 " id="sec-hw-req"><div class="titlepage"><div><div><h3 class="title"><span class="number">2.1 </span><span xmlns:dm="urn:x-suse:ns:docmanager" class="name">Hardware Requirements</span> <a title="Permalink" class="permalink" href="#sec-hw-req">#</a><a class="report-bug" target="_blank" href="https://github.com/SUSE/suse-best-practices/edit/main/xml/MAIN-SBP-oracleweblogic.xml" title="Edit the source file for this section">Edit source</a></h3><div class="doc-status"><ul><li><span class="ds-label">File Name: </span>MAIN-SBP-oracleweblogic.xml</li><li><span class="ds-label">ID: </span>sec-hw-req</li></ul></div></div></div></div><div class="table" id="id-1.3.3.2"><div class="table-title-wrap"><h6 class="table-title"><span class="number">Table 1: </span><span class="name">Hardware Requirements </span><a title="Permalink" class="permalink" href="#id-1.3.3.2">#</a></h6></div><div class="table-contents"><table class="table" summary="Hardware Requirements" border="1"><colgroup><col /><col /></colgroup><thead><tr><th>Requirement</th><th>Minimum</th></tr></thead><tbody><tr><td>CPU</td><td>1-GHz CPU</td></tr><tr><td>Physical Memory</td><td>4 GB</td></tr><tr><td>Swap space</td><td>Approximately twice the size of RAM</td></tr><tr><td>Disk space in /tmp</td><td>2 GB</td></tr><tr><td>Disk space for software files</td><td>2 GB</td></tr></tbody></table></div></div></div><div class="sect2 " id="sec-sw-req"><div class="titlepage"><div><div><h3 class="title"><span class="number">2.2 </span><span xmlns:dm="urn:x-suse:ns:docmanager" class="name">Software Requirements</span> <a title="Permalink" class="permalink" href="#sec-sw-req">#</a><a class="report-bug" target="_blank" href="https://github.com/SUSE/suse-best-practices/edit/main/xml/MAIN-SBP-oracleweblogic.xml" title="Edit the source file for this section">Edit source</a></h3><div class="doc-status"><ul><li><span class="ds-label">File Name: </span>MAIN-SBP-oracleweblogic.xml</li><li><span class="ds-label">ID: </span>sec-sw-req</li></ul></div></div></div></div><p>SUSE:</p><div class="itemizedlist "><ul class="itemizedlist"><li class="listitem "><p>SUSE Linux Enterprise Server 12 SP1 (x86_64)</p><p>(<a class="link" href="http://download.suse.de/install" target="_blank">http://download.suse.de/install</a>)</p></li></ul></div><p>Oracle:</p><div class="itemizedlist "><ul class="itemizedlist"><li class="listitem "><p>WebLogic Server 12cR2 (12.2.1) (fmw_12.2.1.0.0_wls_Disk1_1of1.zip)</p><p>(<a class="link" href="http://www.oracle.com/technetwork/middleware/fusion-middleware/downloads/index.html" target="_blank">http://www.oracle.com/technetwork/middleware/fusion-middleware/downloads/index.html</a>)</p></li><li class="listitem "><p>Java SE Development Kit 8 (jdk-8u91-linux-x64.tar.gz)</p><p>(<a class="link" href="http://www.oracle.com/technetwork/indexes/downloads/index.html#java" target="_blank">http://www.oracle.com/technetwork/indexes/downloads/index.html#java</a>)</p></li></ul></div></div><div class="sect2 " id="sec-test-machine-info"><div class="titlepage"><div><div><h3 class="title"><span class="number">2.3 </span><span xmlns:dm="urn:x-suse:ns:docmanager" class="name">Testing Machine information</span> <a title="Permalink" class="permalink" href="#sec-test-machine-info">#</a><a class="report-bug" target="_blank" href="https://github.com/SUSE/suse-best-practices/edit/main/xml/MAIN-SBP-oracleweblogic.xml" title="Edit the source file for this section">Edit source</a></h3><div class="doc-status"><ul><li><span class="ds-label">File Name: </span>MAIN-SBP-oracleweblogic.xml</li><li><span class="ds-label">ID: </span>sec-test-machine-info</li></ul></div></div></div></div><div class="itemizedlist "><ul class="itemizedlist"><li class="listitem "><p>HP DL388 Gen9 Server</p></li><li class="listitem "><p>CPU: 2 * Intel(R) Xeon(R) CPU E5-2630 v3 @ 2.40GHz</p></li><li class="listitem "><p>RAM: 64 GB</p></li><li class="listitem "><p>NIC: 8</p></li><li class="listitem "><p>Local HDD: 2 TB</p></li><li class="listitem "><p>Operating System: SUSE Linux Enterprise Server 12 SP1 (x86_64)</p></li><li class="listitem "><p>Kernel version: 3.12.49-11-default</p></li></ul></div></div></div><div class="sect1 " id="sec-prereq"><div class="titlepage"><div><div><h2 class="title"><span class="number">3 </span><span xmlns:dm="urn:x-suse:ns:docmanager" class="name">Prerequisites</span> <a title="Permalink" class="permalink" href="#sec-prereq">#</a><a class="report-bug" target="_blank" href="https://github.com/SUSE/suse-best-practices/edit/main/xml/MAIN-SBP-oracleweblogic.xml" title="Edit the source file for this section">Edit source</a></h2><div class="doc-status"><ul><li><span class="ds-label">File Name: </span>MAIN-SBP-oracleweblogic.xml</li><li><span class="ds-label">ID: </span>sec-prereq</li></ul></div></div></div></div><div class="sect2 " id="sec-install-sles"><div class="titlepage"><div><div><h3 class="title"><span class="number">3.1 </span><span xmlns:dm="urn:x-suse:ns:docmanager" class="name">Installing SUSE Linux Enterprise Server 12</span> <a title="Permalink" class="permalink" href="#sec-install-sles">#</a><a class="report-bug" target="_blank" href="https://github.com/SUSE/suse-best-practices/edit/main/xml/MAIN-SBP-oracleweblogic.xml" title="Edit the source file for this section">Edit source</a></h3><div class="doc-status"><ul><li><span class="ds-label">File Name: </span>MAIN-SBP-oracleweblogic.xml</li><li><span class="ds-label">ID: </span>sec-install-sles</li></ul></div></div></div></div><p>Install SUSE Linux Enterprise Server 12 on your testing machine. To do so, follow the instructions in
+                the official SUSE Linux Enterprise Server documentation at <a class="link" href="https://documentation.suse.com/sles/12-SP1/" target="_blank">https://documentation.suse.com/sles/12-SP1/</a>
+            </p><div class="figure" id="id-1.4.2.3"><div class="figure-contents"><div class="mediaobject"><a xmlns="" href="images/oracle-weblog-slesinstall-1.png" target="_blank"><img src="images/oracle-weblog-slesinstall-1.png" width="" alt="Installation of SUSE Linux Enterprise Server- 1" /></a></div></div><div class="figure-title-wrap"><h6 class="figure-title"><span class="number">Figure 1: </span><span class="name">Installation of SUSE Linux Enterprise Server- 1 </span><a title="Permalink" class="permalink" href="#id-1.4.2.3">#</a></h6></div></div><p>In YaST, select the patterns you need. Make sure you select the patterns and
+                packages required to run Oracle products (for example
+                    <code class="command">orarun</code>).</p><div class="figure" id="id-1.4.2.5"><div class="figure-contents"><div class="mediaobject"><a xmlns="" href="images/oracle-weblog-slesinstall-2.png" target="_blank"><img src="images/oracle-weblog-slesinstall-2.png" width="" alt="Installation of SUSE Linux Enterprise Server- 2" /></a></div></div><div class="figure-title-wrap"><h6 class="figure-title"><span class="number">Figure 2: </span><span class="name">Installation of SUSE Linux Enterprise Server- 2 </span><a title="Permalink" class="permalink" href="#id-1.4.2.5">#</a></h6></div></div><p>After the installation of SUSE Linux Enterprise Server, the following information about the operating
+                system and the kernel version is displayed:</p><div class="figure" id="id-1.4.2.7"><div class="figure-contents"><div class="mediaobject"><a xmlns="" href="images/oracle-weblog-oskernel.png" target="_blank"><img src="images/oracle-weblog-oskernel.png" width="" alt="Operating System and Kernel Version" /></a></div></div><div class="figure-title-wrap"><h6 class="figure-title"><span class="number">Figure 3: </span><span class="name">Operating System and Kernel Version </span><a title="Permalink" class="permalink" href="#id-1.4.2.7">#</a></h6></div></div></div><div class="sect2 " id="sec-install-java"><div class="titlepage"><div><div><h3 class="title"><span class="number">3.2 </span><span xmlns:dm="urn:x-suse:ns:docmanager" class="name">Installing Java</span> <a title="Permalink" class="permalink" href="#sec-install-java">#</a><a class="report-bug" target="_blank" href="https://github.com/SUSE/suse-best-practices/edit/main/xml/MAIN-SBP-oracleweblogic.xml" title="Edit the source file for this section">Edit source</a></h3><div class="doc-status"><ul><li><span class="ds-label">File Name: </span>MAIN-SBP-oracleweblogic.xml</li><li><span class="ds-label">ID: </span>sec-install-java</li></ul></div></div></div></div><p>Oracle WebLogic Server 12cR2 (12.2.1) requires JDK version 1.8. Log in to the
+                target system (SUSE Linux Enterprise Server 12 64-bit operating system) as a non-administration user.
+                Download the Java SE Development Kit 8 (jdk-8u91-linux- x64.tar.gz) from <a class="link" href="http://www.oracle.com/technetwork/indexes/downloads/index.html#java" target="_blank">http://www.oracle.com/technetwork/indexes/downloads/index.html#java</a>. </p><p>Set the environment variables JAVA_HOME and PATH to ensure the proper JDK version
+                is installed and ready for use.</p><div class="figure" id="id-1.4.3.4"><div class="figure-contents"><div class="mediaobject"><a xmlns="" href="images/oracle-weblog-javainfo.png" target="_blank"><img src="images/oracle-weblog-javainfo.png" width="" alt="Java Information" /></a></div></div><div class="figure-title-wrap"><h6 class="figure-title"><span class="number">Figure 4: </span><span class="name">Java Information </span><a title="Permalink" class="permalink" href="#id-1.4.3.4">#</a></h6></div></div></div></div><div class="sect1 " id="sec-weblogic-install"><div class="titlepage"><div><div><h2 class="title"><span class="number">4 </span><span xmlns:dm="urn:x-suse:ns:docmanager" class="name">Oracle WebLogic Server 12cR2 Installation</span> <a title="Permalink" class="permalink" href="#sec-weblogic-install">#</a><a class="report-bug" target="_blank" href="https://github.com/SUSE/suse-best-practices/edit/main/xml/MAIN-SBP-oracleweblogic.xml" title="Edit the source file for this section">Edit source</a></h2><div class="doc-status"><ul><li><span class="ds-label">File Name: </span>MAIN-SBP-oracleweblogic.xml</li><li><span class="ds-label">ID: </span>sec-weblogic-install</li></ul></div></div></div></div><p>The following sections explain how to perform your Oracle WebLogic Server 12cR2
+            installation.</p><div class="sect2 " id="sec-weblogic-server"><div class="titlepage"><div><div><h3 class="title"><span class="number">4.1 </span><span xmlns:dm="urn:x-suse:ns:docmanager" class="name">Installing Oracle WebLogic Server Software</span> <a title="Permalink" class="permalink" href="#sec-weblogic-server">#</a><a class="report-bug" target="_blank" href="https://github.com/SUSE/suse-best-practices/edit/main/xml/MAIN-SBP-oracleweblogic.xml" title="Edit the source file for this section">Edit source</a></h3><div class="doc-status"><ul><li><span class="ds-label">File Name: </span>MAIN-SBP-oracleweblogic.xml</li><li><span class="ds-label">ID: </span>sec-weblogic-server</li></ul></div></div></div></div><p>Log in to the target system (SUSE Linux Enterprise Server 12 64-bit operating system) as a
+                non-administration user. Download the Oracle WebLogic Server 12cR2 (12.2.1) from
+                    <a class="link" href="http://www.oracle.com/technetwork/middleware/fusion-                 middleware/downloads/index.html" target="_blank">http://www.oracle.com/technetwork/middleware/fusion-                 middleware/downloads/index.html</a>. </p><div id="id-1.5.3.3" class="admonition note normal"><img class="symbol" alt="Note" title="Note" src="static/images/icon-note.png" /><h6>Note: Permissions</h6><p>Ensure the installation user has the proper permissions to install and
+                    configure the software.</p></div><p>Go to the directory where you downloaded the installation program. Extract the
+                contents of the .zip file <code class="filename">fmw_12.2.1.0.0_wls_Disk1_1of1.zip</code>)
+                and launch the installation program by running <code class="command">java -jar
+                    fmw.xxxx.jar</code>.</p><p>For the actual installation, follow the steps below:</p><div class="procedure "><div class="procedure-contents"><ol class="procedure" type="1"><li class="step "><p>Go to <span class="strong"><strong>Installation Inventory
+                        Setup</strong></span>.</p><div class="figure" id="id-1.5.3.6.1.2"><div class="figure-contents"><div class="mediaobject"><a xmlns="" href="images/oracle-weblog-inventory.png" target="_blank"><img src="images/oracle-weblog-inventory.png" width="" alt="Installation Inventory Setup" /></a></div></div><div class="figure-title-wrap"><h6 class="figure-title"><span class="number">Figure 5: </span><span class="name">Installation Inventory Setup  </span><a title="Permalink" class="permalink" href="#id-1.5.3.6.1.2">#</a></h6></div></div><p>If this is your first Oracle installation on a host that is running
+                        SUSE Linux Enterprise Server, use the <span class="emphasis"><em>Oracle Fusion Middleware 12c Installation
+                            Inventory Setup</em></span> screen to specify the location of the Oracle
+                        Central Inventory Directory and Operating System Group Name. Click <span class="strong"><strong>OK</strong></span> to continue.</p></li><li class="step "><p>Proceed to <span class="strong"><strong>Welcome</strong></span>.</p><div class="figure" id="id-1.5.3.6.2.2"><div class="figure-contents"><div class="mediaobject"><a xmlns="" href="images/oracle-weblog-welcome.png" target="_blank"><img src="images/oracle-weblog-welcome.png" width="" alt="Welcome" /></a></div></div><div class="figure-title-wrap"><h6 class="figure-title"><span class="number">Figure 6: </span><span class="name">Welcome </span><a title="Permalink" class="permalink" href="#id-1.5.3.6.2.2">#</a></h6></div></div><p>Review the information on this screen carefully to be sure you have
+                        performed all the necessary prerequisites. Click <span class="strong"><strong>Next</strong></span> to continue.</p></li><li class="step "><p>Proceed to <span class="strong"><strong>Auto Updates</strong></span>.</p><div class="figure" id="id-1.5.3.6.3.2"><div class="figure-contents"><div class="mediaobject"><a xmlns="" href="images/oracle-weblog-autoupdates.png" target="_blank"><img src="images/oracle-weblog-autoupdates.png" width="" alt="Auto Updates" /></a></div></div><div class="figure-title-wrap"><h6 class="figure-title"><span class="number">Figure 7: </span><span class="name">Auto Updates  </span><a title="Permalink" class="permalink" href="#id-1.5.3.6.3.2">#</a></h6></div></div><p>Select the option <span class="strong"><strong>Skip Auto Updates</strong></span>",
+                        to skip this screen. Click <span class="strong"><strong>Next</strong></span> to
+                        continue.</p></li><li class="step "><p>Proceed to <span class="strong"><strong>Installation
+                        Location</strong></span>.</p><div class="figure" id="id-1.5.3.6.4.2"><div class="figure-contents"><div class="mediaobject"><a xmlns="" href="images/oracle-weblog-installloc.png" target="_blank"><img src="images/oracle-weblog-installloc.png" width="" alt="Installation Location" /></a></div></div><div class="figure-title-wrap"><h6 class="figure-title"><span class="number">Figure 8: </span><span class="name">Installation Location </span><a title="Permalink" class="permalink" href="#id-1.5.3.6.4.2">#</a></h6></div></div><p>Type the full path of the directory into the Oracle Home field. Click
+                            <span class="strong"><strong>Next</strong></span> to continue.</p></li><li class="step "><p>Proceed to <span class="strong"><strong>Installation Type</strong></span>.</p><div class="figure" id="id-1.5.3.6.5.2"><div class="figure-contents"><div class="mediaobject"><a xmlns="" href="images/oracle-weblog-installtype.png" target="_blank"><img src="images/oracle-weblog-installtype.png" width="" alt="Installation Type" /></a></div></div><div class="figure-title-wrap"><h6 class="figure-title"><span class="number">Figure 9: </span><span class="name">Installation Type </span><a title="Permalink" class="permalink" href="#id-1.5.3.6.5.2">#</a></h6></div></div><p>Use this screen to determine the type of installation you want to perform,
+                        then click <span class="strong"><strong>Next</strong></span> to continue.</p></li><li class="step "><p>Proceed to <span class="strong"><strong>Prerequisite Checks</strong></span>.</p><div class="figure" id="id-1.5.3.6.6.2"><div class="figure-contents"><div class="mediaobject"><a xmlns="" href="images/oracle-weblog-precheck.png" target="_blank"><img src="images/oracle-weblog-precheck.png" width="" alt="Prerequisite Checks" /></a></div></div><div class="figure-title-wrap"><h6 class="figure-title"><span class="number">Figure 10: </span><span class="name">Prerequisite Checks </span><a title="Permalink" class="permalink" href="#id-1.5.3.6.6.2">#</a></h6></div></div><p>The <span class="strong"><strong>Prerequisite Checks</strong></span> results will be
+                        shown as above. Click <span class="strong"><strong>Next</strong></span> to
+                        continue.</p></li><li class="step "><p>Proceed to <span class="strong"><strong>Security Updates</strong></span>.</p><div class="figure" id="id-1.5.3.6.7.2"><div class="figure-contents"><div class="mediaobject"><a xmlns="" href="images/oracle-weblog-secupdates.png" target="_blank"><img src="images/oracle-weblog-secupdates.png" width="" alt="Security Updates" /></a></div></div><div class="figure-title-wrap"><h6 class="figure-title"><span class="number">Figure 11: </span><span class="name">Security Updates </span><a title="Permalink" class="permalink" href="#id-1.5.3.6.7.2">#</a></h6></div></div><p>If you want to register your installation, enter your e-mail address and
+                        your <span class="strong"><strong>My Oracle Support</strong></span> password.</p><div class="figure" id="id-1.5.3.6.7.4"><div class="figure-contents"><div class="mediaobject"><a xmlns="" href="images/oracle-weblog-secupdates-2.png" target="_blank"><img src="images/oracle-weblog-secupdates-2.png" width="" alt="Security Updates - 2" /></a></div></div><div class="figure-title-wrap"><h6 class="figure-title"><span class="number">Figure 12: </span><span class="name">Security Updates - 2 </span><a title="Permalink" class="permalink" href="#id-1.5.3.6.7.4">#</a></h6></div></div><p>If you want to decline registration, deselect <span class="strong"><strong>I
+                            wish to receive security updates via My Oracle Support</strong></span> and
+                        confirm your choice. </p></li><li class="step "><p>Proceed to <span class="strong"><strong>Installation Summary
+                        </strong></span>.</p><div class="figure" id="id-1.5.3.6.8.2"><div class="figure-contents"><div class="mediaobject"><a xmlns="" href="images/oracle-weblog-installsummary.png" target="_blank"><img src="images/oracle-weblog-installsummary.png" width="" alt="Installation Summary" /></a></div></div><div class="figure-title-wrap"><h6 class="figure-title"><span class="number">Figure 13: </span><span class="name">Installation Summary </span><a title="Permalink" class="permalink" href="#id-1.5.3.6.8.2">#</a></h6></div></div><p>This screen contains a list of the feature sets you selected for your
+                        installation, along with the approximate amount of disk space to be used by
+                        the feature sets when the installation is complete. Check the information,
+                        then click <span class="strong"><strong>Install</strong></span> to continue.</p></li><li class="step "><p>Proceed to <span class="strong"><strong>Installation
+                        Progress</strong></span>.</p><div class="figure" id="id-1.5.3.6.9.2"><div class="figure-contents"><div class="mediaobject"><a xmlns="" href="images/oracle-weblog-installprogress.png" target="_blank"><img src="images/oracle-weblog-installprogress.png" width="" alt="Installation Progress" /></a></div></div><div class="figure-title-wrap"><h6 class="figure-title"><span class="number">Figure 14: </span><span class="name">Installation Progress </span><a title="Permalink" class="permalink" href="#id-1.5.3.6.9.2">#</a></h6></div></div><p>This screen shows the progress of the installation. When the progress bar
+                        reaches 100 percent, the installation is complete. Click <span class="strong"><strong>Finish</strong></span> to continue.</p></li><li class="step "><p>Proceed to <span class="strong"><strong>Installation
+                        Complete</strong></span>.</p><div class="figure" id="id-1.5.3.6.10.2"><div class="figure-contents"><div class="mediaobject"><a xmlns="" href="images/oracle-weblog-installcomplete.png" target="_blank"><img src="images/oracle-weblog-installcomplete.png" width="" alt="Installation Complete" /></a></div></div><div class="figure-title-wrap"><h6 class="figure-title"><span class="number">Figure 15: </span><span class="name">Installation Complete </span><a title="Permalink" class="permalink" href="#id-1.5.3.6.10.2">#</a></h6></div></div><p>This screen appears at the conclusion of the installation. Select the
+                            option<span class="strong"><strong>Automatically Launch the Configuration
+                            Wizard</strong></span>, then click <span class="strong"><strong>Finish</strong></span>
+                        to exit the installer.</p></li></ol></div></div></div><div class="sect2 " id="sec-weblogic-config"><div class="titlepage"><div><div><h3 class="title"><span class="number">4.2 </span><span xmlns:dm="urn:x-suse:ns:docmanager" class="name">Creating and Configuring the WebLogic Domain</span> <a title="Permalink" class="permalink" href="#sec-weblogic-config">#</a><a class="report-bug" target="_blank" href="https://github.com/SUSE/suse-best-practices/edit/main/xml/MAIN-SBP-oracleweblogic.xml" title="Edit the source file for this section">Edit source</a></h3><div class="doc-status"><ul><li><span class="ds-label">File Name: </span>MAIN-SBP-oracleweblogic.xml</li><li><span class="ds-label">ID: </span>sec-weblogic-config</li></ul></div></div></div></div><p>To start the domain configuration, you can choose from two option </p><div class="orderedlist "><ol class="orderedlist" type="1"><li class="listitem "><p>From the last-shown screen <span class="strong"><strong>Installation
+                            Complete</strong></span>, you can automatically launch the WebLogic
+                        Configuration Wizard through the option <span class="strong"><strong>Automatically Launch the Configuration Wizard</strong></span>.</p></li><li class="listitem "><p>You can also navigate to the directory
+                            <code class="filename">ORACLE_HOME/oracle_common/common/bin</code> and start the
+                        WebLogic Server Configuration Wizard by running the command
+                            <code class="command">./config.sh</code>.</p></li></ol></div><p>To set up your configuration, follow the steps below:</p><div class="procedure "><div class="procedure-contents"><ol class="procedure" type="1"><li class="step "><p>Go to <span class="strong"><strong>Configuration Type</strong></span>.</p><div class="figure" id="id-1.5.4.5.1.2"><div class="figure-contents"><div class="mediaobject"><a xmlns="" href="images/oracle-weblog-configtype.png" target="_blank"><img src="images/oracle-weblog-configtype.png" width="" alt="Configuration Type" /></a></div></div><div class="figure-title-wrap"><h6 class="figure-title"><span class="number">Figure 16: </span><span class="name">Configuration Type </span><a title="Permalink" class="permalink" href="#id-1.5.4.5.1.2">#</a></h6></div></div><p>Select the option <span class="strong"><strong>Create a New Domain</strong></span>
+                        and specify the Domain home directory in the <span class="strong"><strong>Domain
+                            Location</strong></span> field. Click <span class="strong"><strong>Next</strong></span>
+                        to continue.</p></li><li class="step "><p>Proceed to <span class="strong"><strong>Templates</strong></span>.</p><div class="figure" id="id-1.5.4.5.2.2"><div class="figure-contents"><div class="mediaobject"><a xmlns="" href="images/oracle-weblog-templates.png" target="_blank"><img src="images/oracle-weblog-templates.png" width="" alt="Templates" /></a></div></div><div class="figure-title-wrap"><h6 class="figure-title"><span class="number">Figure 17: </span><span class="name">Templates </span><a title="Permalink" class="permalink" href="#id-1.5.4.5.2.2">#</a></h6></div></div><p>On the <span class="strong"><strong>Templates</strong></span> screen select
+                            <span class="strong"><strong>Basic WebLogic Server Domain</strong></span> which is
+                        pre-selected by default, and <span class="strong"><strong>WebLogic Coherence
+                            Cluster Extension</strong></span> for the configuration. Click <span class="strong"><strong>Next</strong></span> to continue.</p></li><li class="step "><p>Proceed to <span class="strong"><strong>Administrator
+                        Account</strong></span>.</p><div class="figure" id="id-1.5.4.5.3.2"><div class="figure-contents"><div class="mediaobject"><a xmlns="" href="images/oracle-weblog-adminaccount.png" target="_blank"><img src="images/oracle-weblog-adminaccount.png" width="" alt="Administrator Account" /></a></div></div><div class="figure-title-wrap"><h6 class="figure-title"><span class="number">Figure 18: </span><span class="name">Administrator Account </span><a title="Permalink" class="permalink" href="#id-1.5.4.5.3.2">#</a></h6></div></div><p>Specify the user name and password for the default WebLogic Administrator
+                        account for the domain. Click <span class="strong"><strong>Next</strong></span> to
+                        continue.</p></li><li class="step "><p>Proceed to <span class="strong"><strong>Domain Mode and JDK</strong></span>.</p><div class="figure" id="id-1.5.4.5.4.2"><div class="figure-contents"><div class="mediaobject"><a xmlns="" href="images/oracle-weblog-domainmode.png" target="_blank"><img src="images/oracle-weblog-domainmode.png" width="" alt="Domain Mode and JDK" /></a></div></div><div class="figure-title-wrap"><h6 class="figure-title"><span class="number">Figure 19: </span><span class="name">Domain Mode and JDK </span><a title="Permalink" class="permalink" href="#id-1.5.4.5.4.2">#</a></h6></div></div><p>Select <span class="strong"><strong>Development</strong></span> in the Domain Mode
+                        field and the <span class="strong"><strong>Oracle HotSpot</strong></span> in the JDK
+                        field. Click <span class="strong"><strong>Next</strong></span> to continue.</p></li><li class="step "><p>Proceed to <span class="strong"><strong>Advanced
+                        Configuration</strong></span>.</p><div class="figure" id="id-1.5.4.5.5.2"><div class="figure-contents"><div class="mediaobject"><a xmlns="" href="images/oracle-weblog-advconfig.png" target="_blank"><img src="images/oracle-weblog-advconfig.png" width="" alt="Advanced Configuration" /></a></div></div><div class="figure-title-wrap"><h6 class="figure-title"><span class="number">Figure 20: </span><span class="name">Advanced Configuration </span><a title="Permalink" class="permalink" href="#id-1.5.4.5.5.2">#</a></h6></div></div><p>According to your requirements, select the desired options on the
+                            <span class="strong"><strong>Advanced Configuration</strong></span> screen. Click
+                            <span class="strong"><strong>Next</strong></span> to continue.</p></li><li class="step "><p>Proceed to <span class="strong"><strong>Configuration
+                        Summary</strong></span>.</p><div class="figure" id="id-1.5.4.5.6.2"><div class="figure-contents"><div class="mediaobject"><a xmlns="" href="images/oracle-weblog-configsummary.png" target="_blank"><img src="images/oracle-weblog-configsummary.png" width="" alt="Configuration Summary" /></a></div></div><div class="figure-title-wrap"><h6 class="figure-title"><span class="number">Figure 21: </span><span class="name">Configuration Summary </span><a title="Permalink" class="permalink" href="#id-1.5.4.5.6.2">#</a></h6></div></div><p>Review the information on the <span class="strong"><strong>Configuration
+                            Summary</strong></span> screen to verify everything is correct, then click
+                            <span class="strong"><strong>Create</strong></span> to continue.</p></li><li class="step "><p>Proceed to <span class="strong"><strong>Configuration
+                        Progress</strong></span>.</p><div class="figure" id="id-1.5.4.5.7.2"><div class="figure-contents"><div class="mediaobject"><a xmlns="" href="images/oracle-weblog-configprogress.png" target="_blank"><img src="images/oracle-weblog-configprogress.png" width="" alt="Configuration Progress" /></a></div></div><div class="figure-title-wrap"><h6 class="figure-title"><span class="number">Figure 22: </span><span class="name">Configuration Progress </span><a title="Permalink" class="permalink" href="#id-1.5.4.5.7.2">#</a></h6></div></div><p>The <span class="strong"><strong>Configuration Progress</strong></span> screen shows
+                        the progress of your configuration. For different progress states, different
+                        messages are displayed. When you see the message <span class="strong"><strong>Domain Created successfully</strong></span>, click <span class="strong"><strong>Next</strong></span> to continue.</p></li><li class="step "><p>Proceed to <span class="strong"><strong>End Of Configuration</strong></span>.</p><div class="figure" id="id-1.5.4.5.8.2"><div class="figure-contents"><div class="mediaobject"><a xmlns="" href="images/oracle-weblog-configend.png" target="_blank"><img src="images/oracle-weblog-configend.png" width="" alt="Configuration Progress" /></a></div></div><div class="figure-title-wrap"><h6 class="figure-title"><span class="number">Figure 23: </span><span class="name">Configuration Progress </span><a title="Permalink" class="permalink" href="#id-1.5.4.5.8.2">#</a></h6></div></div><p>When you see the message <span class="strong"><strong>Oracle Weblogic Server
+                            Configuration Succeeded</strong></span>, record the <span class="strong"><strong>Domain Location</strong></span> and <span class="strong"><strong>Admin Server
+                            URL</strong></span>. Click <span class="strong"><strong>Finish</strong></span> to exit
+                        the Configuration Wizard.</p></li></ol></div></div></div><div class="sect2 " id="sec-start-adminserver"><div class="titlepage"><div><div><h3 class="title"><span class="number">4.3 </span><span xmlns:dm="urn:x-suse:ns:docmanager" class="name">Starting the Administration Server and Verifying the Configuration</span> <a title="Permalink" class="permalink" href="#sec-start-adminserver">#</a><a class="report-bug" target="_blank" href="https://github.com/SUSE/suse-best-practices/edit/main/xml/MAIN-SBP-oracleweblogic.xml" title="Edit the source file for this section">Edit source</a></h3><div class="doc-status"><ul><li><span class="ds-label">File Name: </span>MAIN-SBP-oracleweblogic.xml</li><li><span class="ds-label">ID: </span>sec-start-adminserver</li></ul></div></div></div></div><p>To start the Administration Server through a terminal, go to the
+                    <code class="filename">DOMAIN_HOME/bin</code> directory and run the command
+                    <code class="command">./startWebLogic.sh</code>.</p><div class="figure" id="id-1.5.5.3"><div class="figure-contents"><div class="mediaobject"><a xmlns="" href="images/oracle-weblog-startadminserv.png" target="_blank"><img src="images/oracle-weblog-startadminserv.png" width="" alt="Starting the Administration Server" /></a></div></div><div class="figure-title-wrap"><h6 class="figure-title"><span class="number">Figure 24: </span><span class="name">Starting the Administration Server </span><a title="Permalink" class="permalink" href="#id-1.5.5.3">#</a></h6></div></div><p>Review the information displayed on the screen.</p><p>Access the Oracle WebLogic Server Administration Console.</p><div class="figure" id="id-1.5.5.6"><div class="figure-contents"><div class="mediaobject"><a xmlns="" href="images/oracle-weblog-adminconsole.png" target="_blank"><img src="images/oracle-weblog-adminconsole.png" width="" alt="Oracle WebLogic Server Administration Console" /></a></div></div><div class="figure-title-wrap"><h6 class="figure-title"><span class="number">Figure 25: </span><span class="name">Oracle WebLogic Server Administration Console </span><a title="Permalink" class="permalink" href="#id-1.5.5.6">#</a></h6></div></div><p>Fill in your user name and password. You are then proceeded to the <span class="strong"><strong>WebLogic Server 12cR2 Administration Console</strong></span> home
+                page.</p><p>The installation and configuration of your Oracle WebLogic Server 12cR2 is now
+                successfully finished.</p></div></div><div class="sect1 " id="sec-comments"><div class="titlepage"><div><div><h2 class="title"><span class="number">5 </span><span xmlns:dm="urn:x-suse:ns:docmanager" class="name">Additional Comments</span> <a title="Permalink" class="permalink" href="#sec-comments">#</a><a class="report-bug" target="_blank" href="https://github.com/SUSE/suse-best-practices/edit/main/xml/MAIN-SBP-oracleweblogic.xml" title="Edit the source file for this section">Edit source</a></h2><div class="doc-status"><ul><li><span class="ds-label">File Name: </span>MAIN-SBP-oracleweblogic.xml</li><li><span class="ds-label">ID: </span>sec-comments</li></ul></div></div></div></div><p>This document shows how to create a standard installation topology for Oracle WebLogic
+            Server. You can extend this topology to make it highly available and secure so that it
+            is suitable for a production system.</p></div><div class="sect1 " id="sec-legal-notice"><div class="titlepage"><div><div><h2 class="title"><span class="number">6 </span><span xmlns:dm="urn:x-suse:ns:docmanager" class="name">Legal Notice</span> <a title="Permalink" class="permalink" href="#sec-legal-notice">#</a><a class="report-bug" target="_blank" href="https://github.com/SUSE/suse-best-practices/edit/main/xml/MAIN-SBP-oracleweblogic.xml" title="Edit the source file for this section">Edit source</a></h2><div class="doc-status"><ul><li><span class="ds-label">File Name: </span>MAIN-SBP-oracleweblogic.xml</li><li><span class="ds-label">ID: </span>sec-legal-notice</li></ul></div></div></div></div><p>Copyright ©2006–2020 SUSE LLC and contributors. All
+            rights reserved. </p><p>Permission is granted to copy, distribute and/or modify this
+            document under the terms of the GNU Free Documentation License,
+            Version 1.2 or (at your option) version 1.3; with the Invariant
+            Section being this copyright notice and license. A copy of the
+            license version 1.2 is included in the section entitled <span class="quote">“<span class="quote ">GNU
+                Free Documentation License</span>”</span>.</p><p>SUSE, the SUSE logo and YaST are registered trademarks of SUSE
+            LLC in the United States and other countries. For SUSE trademarks,
+            see <a class="link" href="http://www.suse.com/company/legal/" target="_blank">http://www.suse.com/company/legal/</a>. Linux is a registered
+            trademark of Linus Torvalds. All other names or trademarks mentioned
+            in this document may be trademarks or registered trademarks of their
+            respective owners.</p><p>This article is part of a series of documents called "SUSE Best
+            Practices". The individual documents in the series were contributed
+            voluntarily by SUSE's employees and by third parties.</p><p> All information found in this article has been compiled with
+            utmost attention to detail. However, this does not guarantee complete
+            accuracy.
+            </p><p>Therefore, we need to specifically state that neither SUSE LLC,
+            its affiliates, the authors, nor the translators may be held liable
+            for possible errors or the consequences thereof. Below we draw your
+            attention to the license under which the articles are
+            published.</p></div><div class="legal-section"><div class="sect1 " id="id-1.8"><div class="titlepage"><div><div><h2 class="title"><span class="number">7 </span><span xmlns:dm="urn:x-suse:ns:docmanager" class="name">GNU Free Documentation License</span> <a title="Permalink" class="permalink" href="#id-1.8">#</a><a class="report-bug" target="_blank" href="https://github.com/SUSE/suse-best-practices/edit/main/xml/license-gfdl.xml" title="Edit the source file for this section">Edit source</a></h2><div class="doc-status"><ul><li><span class="ds-label">File Name: </span>license-gfdl.xml</li><li><span class="ds-label">ID: </span><span class="ds-message">no ID found</span></li></ul></div></div></div></div><p>
+  Copyright (C) 2000, 2001, 2002 Free Software Foundation, Inc. 51 Franklin St,
+  Fifth Floor, Boston, MA 02110-1301 USA. Everyone is permitted to copy and
+  distribute verbatim copies of this license document, but changing it is not
+  allowed.
+ </p><div xmlns:dm="urn:x-suse:ns:docmanager" class="sect4 bridgehead"><h5 class="title legal" id="id-1.8.4"><span class="name"> 0. PREAMBLE </span><a title="Permalink" class="permalink" href="#id-1.8.4">#</a><a class="report-bug" target="_blank" href="https://github.com/SUSE/suse-best-practices/edit/main/xml/license-gfdl.xml" title="Edit the source file for this section">Edit source</a></h5></div><p>
+  The purpose of this License is to make a manual, textbook, or other
+  functional and useful document "free" in the sense of freedom: to assure
+  everyone the effective freedom to copy and redistribute it, with or without
+  modifying it, either commercially or non-commercially. Secondarily, this
+  License preserves for the author and publisher a way to get credit for their
+  work, while not being considered responsible for modifications made by
+  others.
+ </p><p>
+  This License is a kind of "copyleft", which means that derivative works of
+  the document must themselves be free in the same sense. It complements the
+  GNU General Public License, which is a copyleft license designed for free
+  software.
+ </p><p>
+  We have designed this License to use it for manuals for free software,
+  because free software needs free documentation: a free program should come
+  with manuals providing the same freedoms that the software does. But this
+  License is not limited to software manuals; it can be used for any textual
+  work, regardless of subject matter or whether it is published as a printed
+  book. We recommend this License principally for works whose purpose is
+  instruction or reference.
+ </p><div xmlns:dm="urn:x-suse:ns:docmanager" class="sect4 bridgehead"><h5 class="title legal" id="id-1.8.8"><span class="name"> 1. APPLICABILITY AND DEFINITIONS </span><a title="Permalink" class="permalink" href="#id-1.8.8">#</a><a class="report-bug" target="_blank" href="https://github.com/SUSE/suse-best-practices/edit/main/xml/license-gfdl.xml" title="Edit the source file for this section">Edit source</a></h5></div><p>
+  This License applies to any manual or other work, in any medium, that
+  contains a notice placed by the copyright holder saying it can be distributed
+  under the terms of this License. Such a notice grants a world-wide,
+  royalty-free license, unlimited in duration, to use that work under the
+  conditions stated herein. The "Document", below, refers to any such manual or
+  work. Any member of the public is a licensee, and is addressed as "you". You
+  accept the license if you copy, modify or distribute the work in a way
+  requiring permission under copyright law.
+ </p><p>
+  A "Modified Version" of the Document means any work containing the Document
+  or a portion of it, either copied verbatim, or with modifications and/or
+  translated into another language.
+ </p><p>
+  A "Secondary Section" is a named appendix or a front-matter section of the
+  Document that deals exclusively with the relationship of the publishers or
+  authors of the Document to the Document's overall subject (or to related
+  matters) and contains nothing that could fall directly within that overall
+  subject. (Thus, if the Document is in part a textbook of mathematics, a
+  Secondary Section may not explain any mathematics.) The relationship could be
+  a matter of historical connection with the subject or with related matters,
+  or of legal, commercial, philosophical, ethical or political position
+  regarding them.
+ </p><p>
+  The "Invariant Sections" are certain Secondary Sections whose titles are
+  designated, as being those of Invariant Sections, in the notice that says
+  that the Document is released under this License. If a section does not fit
+  the above definition of Secondary then it is not allowed to be designated as
+  Invariant. The Document may contain zero Invariant Sections. If the Document
+  does not identify any Invariant Sections then there are none.
+ </p><p>
+  The "Cover Texts" are certain short passages of text that are listed, as
+  Front-Cover Texts or Back-Cover Texts, in the notice that says that the
+  Document is released under this License. A Front-Cover Text may be at most 5
+  words, and a Back-Cover Text may be at most 25 words.
+ </p><p>
+  A "Transparent" copy of the Document means a machine-readable copy,
+  represented in a format whose specification is available to the general
+  public, that is suitable for revising the document straightforwardly with
+  generic text editors or (for images composed of pixels) generic paint
+  programs or (for drawings) some widely available drawing editor, and that is
+  suitable for input to text formatters or for automatic translation to a
+  variety of formats suitable for input to text formatters. A copy made in an
+  otherwise Transparent file format whose markup, or absence of markup, has
+  been arranged to thwart or discourage subsequent modification by readers is
+  not Transparent. An image format is not Transparent if used for any
+  substantial amount of text. A copy that is not "Transparent" is called
+  "Opaque".
+ </p><p>
+  Examples of suitable formats for Transparent copies include plain ASCII
+  without markup, Texinfo input format, LaTeX input format, SGML or XML using a
+  publicly available DTD, and standard-conforming simple HTML, PostScript or
+  PDF designed for human modification. Examples of transparent image formats
+  include PNG, XCF and JPG. Opaque formats include proprietary formats that can
+  be read and edited only by proprietary word processors, SGML or XML for which
+  the DTD and/or processing tools are not generally available, and the
+  machine-generated HTML, PostScript or PDF produced by some word processors
+  for output purposes only.
+ </p><p>
+  The "Title Page" means, for a printed book, the title page itself, plus such
+  following pages as are needed to hold, legibly, the material this License
+  requires to appear in the title page. For works in formats which do not have
+  any title page as such, "Title Page" means the text near the most prominent
+  appearance of the work's title, preceding the beginning of the body of the
+  text.
+ </p><p>
+  A section "Entitled XYZ" means a named subunit of the Document whose title
+  either is precisely XYZ or contains XYZ in parentheses following text that
+  translates XYZ in another language. (Here XYZ stands for a specific section
+  name mentioned below, such as "Acknowledgements", "Dedications",
+  "Endorsements", or "History".) To "Preserve the Title" of such a section when
+  you modify the Document means that it remains a section "Entitled XYZ"
+  according to this definition.
+ </p><p>
+  The Document may include Warranty Disclaimers next to the notice which states
+  that this License applies to the Document. These Warranty Disclaimers are
+  considered to be included by reference in this License, but only as regards
+  disclaiming warranties: any other implication that these Warranty Disclaimers
+  may have is void and has no effect on the meaning of this License.
+ </p><div xmlns:dm="urn:x-suse:ns:docmanager" class="sect4 bridgehead"><h5 class="title legal" id="id-1.8.19"><span class="name"> 2. VERBATIM COPYING </span><a title="Permalink" class="permalink" href="#id-1.8.19">#</a><a class="report-bug" target="_blank" href="https://github.com/SUSE/suse-best-practices/edit/main/xml/license-gfdl.xml" title="Edit the source file for this section">Edit source</a></h5></div><p>
+  You may copy and distribute the Document in any medium, either commercially
+  or noncommercially, provided that this License, the copyright notices, and
+  the license notice saying this License applies to the Document are reproduced
+  in all copies, and that you add no other conditions whatsoever to those of
+  this License. You may not use technical measures to obstruct or control the
+  reading or further copying of the copies you make or distribute. However, you
+  may accept compensation in exchange for copies. If you distribute a large
+  enough number of copies you must also follow the conditions in section 3.
+ </p><p>
+  You may also lend copies, under the same conditions stated above, and you may
+  publicly display copies.
+ </p><div xmlns:dm="urn:x-suse:ns:docmanager" class="sect4 bridgehead"><h5 class="title legal" id="id-1.8.22"><span class="name"> 3. COPYING IN QUANTITY </span><a title="Permalink" class="permalink" href="#id-1.8.22">#</a><a class="report-bug" target="_blank" href="https://github.com/SUSE/suse-best-practices/edit/main/xml/license-gfdl.xml" title="Edit the source file for this section">Edit source</a></h5></div><p>
+  If you publish printed copies (or copies in media that commonly have printed
+  covers) of the Document, numbering more than 100, and the Document's license
+  notice requires Cover Texts, you must enclose the copies in covers that
+  carry, clearly and legibly, all these Cover Texts: Front-Cover Texts on the
+  front cover, and Back-Cover Texts on the back cover. Both covers must also
+  clearly and legibly identify you as the publisher of these copies. The front
+  cover must present the full title with all words of the title equally
+  prominent and visible. You may add other material on the covers in addition.
+  Copying with changes limited to the covers, as long as they preserve the
+  title of the Document and satisfy these conditions, can be treated as
+  verbatim copying in other respects.
+ </p><p>
+  If the required texts for either cover are too voluminous to fit legibly, you
+  should put the first ones listed (as many as fit reasonably) on the actual
+  cover, and continue the rest onto adjacent pages.
+ </p><p>
+  If you publish or distribute Opaque copies of the Document numbering more
+  than 100, you must either include a machine-readable Transparent copy along
+  with each Opaque copy, or state in or with each Opaque copy a
+  computer-network location from which the general network-using public has
+  access to download using public-standard network protocols a complete
+  Transparent copy of the Document, free of added material. If you use the
+  latter option, you must take reasonably prudent steps, when you begin
+  distribution of Opaque copies in quantity, to ensure that this Transparent
+  copy will remain thus accessible at the stated location until at least one
+  year after the last time you distribute an Opaque copy (directly or through
+  your agents or retailers) of that edition to the public.
+ </p><p>
+  It is requested, but not required, that you contact the authors of the
+  Document well before redistributing any large number of copies, to give them
+  a chance to provide you with an updated version of the Document.
+ </p><div xmlns:dm="urn:x-suse:ns:docmanager" class="sect4 bridgehead"><h5 class="title legal" id="id-1.8.27"><span class="name"> 4. MODIFICATIONS </span><a title="Permalink" class="permalink" href="#id-1.8.27">#</a><a class="report-bug" target="_blank" href="https://github.com/SUSE/suse-best-practices/edit/main/xml/license-gfdl.xml" title="Edit the source file for this section">Edit source</a></h5></div><p>
+  You may copy and distribute a Modified Version of the Document under the
+  conditions of sections 2 and 3 above, provided that you release the Modified
+  Version under precisely this License, with the Modified Version filling the
+  role of the Document, thus licensing distribution and modification of the
+  Modified Version to whoever possesses a copy of it. In addition, you must do
+  these things in the Modified Version:
+ </p><div class="orderedlist "><ol class="orderedlist" type="A"><li class="listitem "><p>
+    Use in the Title Page (and on the covers, if any) a title distinct from
+    that of the Document, and from those of previous versions (which should, if
+    there were any, be listed in the History section of the Document). You may
+    use the same title as a previous version if the original publisher of that
+    version gives permission.
+   </p></li><li class="listitem "><p>
+    List on the Title Page, as authors, one or more persons or entities
+    responsible for authorship of the modifications in the Modified Version,
+    together with at least five of the principal authors of the Document (all
+    of its principal authors, if it has fewer than five), unless they release
+    you from this requirement.
+   </p></li><li class="listitem "><p>
+    State on the Title page the name of the publisher of the Modified Version,
+    as the publisher.
+   </p></li><li class="listitem "><p>
+    Preserve all the copyright notices of the Document.
+   </p></li><li class="listitem "><p>
+    Add an appropriate copyright notice for your modifications adjacent to the
+    other copyright notices.
+   </p></li><li class="listitem "><p>
+    Include, immediately after the copyright notices, a license notice giving
+    the public permission to use the Modified Version under the terms of this
+    License, in the form shown in the Addendum below.
+   </p></li><li class="listitem "><p>
+    Preserve in that license notice the full lists of Invariant Sections and
+    required Cover Texts given in the Document's license notice.
+   </p></li><li class="listitem "><p>
+    Include an unaltered copy of this License.
+   </p></li><li class="listitem "><p>
+    Preserve the section Entitled "History", Preserve its Title, and add to it
+    an item stating at least the title, year, new authors, and publisher of the
+    Modified Version as given on the Title Page. If there is no section
+    Entitled "History" in the Document, create one stating the title, year,
+    authors, and publisher of the Document as given on its Title Page, then add
+    an item describing the Modified Version as stated in the previous sentence.
+   </p></li><li class="listitem "><p>
+    Preserve the network location, if any, given in the Document for public
+    access to a Transparent copy of the Document, and likewise the network
+    locations given in the Document for previous versions it was based on.
+    These may be placed in the "History" section. You may omit a network
+    location for a work that was published at least four years before the
+    Document itself, or if the original publisher of the version it refers to
+    gives permission.
+   </p></li><li class="listitem "><p>
+    For any section Entitled "Acknowledgements" or "Dedications", Preserve the
+    Title of the section, and preserve in the section all the substance and
+    tone of each of the contributor acknowledgements and/or dedications given
+    therein.
+   </p></li><li class="listitem "><p>
+    Preserve all the Invariant Sections of the Document, unaltered in their
+    text and in their titles. Section numbers or the equivalent are not
+    considered part of the section titles.
+   </p></li><li class="listitem "><p>
+    Delete any section Entitled "Endorsements". Such a section may not be
+    included in the Modified Version.
+   </p></li><li class="listitem "><p>
+    Do not retitle any existing section to be Entitled "Endorsements" or to
+    conflict in title with any Invariant Section.
+   </p></li><li class="listitem "><p>
+    Preserve any Warranty Disclaimers.
+   </p></li></ol></div><p>
+  If the Modified Version includes new front-matter sections or appendices that
+  qualify as Secondary Sections and contain no material copied from the
+  Document, you may at your option designate some or all of these sections as
+  invariant. To do this, add their titles to the list of Invariant Sections in
+  the Modified Version's license notice. These titles must be distinct from any
+  other section titles.
+ </p><p>
+  You may add a section Entitled "Endorsements", provided it contains nothing
+  but endorsements of your Modified Version by various parties--for example,
+  statements of peer review or that the text has been approved by an
+  organization as the authoritative definition of a standard.
+ </p><p>
+  You may add a passage of up to five words as a Front-Cover Text, and a
+  passage of up to 25 words as a Back-Cover Text, to the end of the list of
+  Cover Texts in the Modified Version. Only one passage of Front-Cover Text and
+  one of Back-Cover Text may be added by (or through arrangements made by) any
+  one entity. If the Document already includes a cover text for the same cover,
+  previously added by you or by arrangement made by the same entity you are
+  acting on behalf of, you may not add another; but you may replace the old
+  one, on explicit permission from the previous publisher that added the old
+  one.
+ </p><p>
+  The author(s) and publisher(s) of the Document do not by this License give
+  permission to use their names for publicity for or to assert or imply
+  endorsement of any Modified Version.
+ </p><div xmlns:dm="urn:x-suse:ns:docmanager" class="sect4 bridgehead"><h5 class="title legal" id="id-1.8.34"><span class="name"> 5. COMBINING DOCUMENTS </span><a title="Permalink" class="permalink" href="#id-1.8.34">#</a><a class="report-bug" target="_blank" href="https://github.com/SUSE/suse-best-practices/edit/main/xml/license-gfdl.xml" title="Edit the source file for this section">Edit source</a></h5></div><p>
+  You may combine the Document with other documents released under this
+  License, under the terms defined in section 4 above for modified versions,
+  provided that you include in the combination all of the Invariant Sections of
+  all of the original documents, unmodified, and list them all as Invariant
+  Sections of your combined work in its license notice, and that you preserve
+  all their Warranty Disclaimers.
+ </p><p>
+  The combined work need only contain one copy of this License, and multiple
+  identical Invariant Sections may be replaced with a single copy. If there are
+  multiple Invariant Sections with the same name but different contents, make
+  the title of each such section unique by adding at the end of it, in
+  parentheses, the name of the original author or publisher of that section if
+  known, or else a unique number. Make the same adjustment to the section
+  titles in the list of Invariant Sections in the license notice of the
+  combined work.
+ </p><p>
+  In the combination, you must combine any sections Entitled "History" in the
+  various original documents, forming one section Entitled "History"; likewise
+  combine any sections Entitled "Acknowledgements", and any sections Entitled
+  "Dedications". You must delete all sections Entitled "Endorsements".
+ </p><div xmlns:dm="urn:x-suse:ns:docmanager" class="sect4 bridgehead"><h5 class="title legal" id="id-1.8.38"><span class="name"> 6. COLLECTIONS OF DOCUMENTS </span><a title="Permalink" class="permalink" href="#id-1.8.38">#</a><a class="report-bug" target="_blank" href="https://github.com/SUSE/suse-best-practices/edit/main/xml/license-gfdl.xml" title="Edit the source file for this section">Edit source</a></h5></div><p>
+  You may make a collection consisting of the Document and other documents
+  released under this License, and replace the individual copies of this
+  License in the various documents with a single copy that is included in the
+  collection, provided that you follow the rules of this License for verbatim
+  copying of each of the documents in all other respects.
+ </p><p>
+  You may extract a single document from such a collection, and distribute it
+  individually under this License, provided you insert a copy of this License
+  into the extracted document, and follow this License in all other respects
+  regarding verbatim copying of that document.
+ </p><div xmlns:dm="urn:x-suse:ns:docmanager" class="sect4 bridgehead"><h5 class="title legal" id="id-1.8.41"><span class="name"> 7. AGGREGATION WITH INDEPENDENT WORKS </span><a title="Permalink" class="permalink" href="#id-1.8.41">#</a><a class="report-bug" target="_blank" href="https://github.com/SUSE/suse-best-practices/edit/main/xml/license-gfdl.xml" title="Edit the source file for this section">Edit source</a></h5></div><p>
+  A compilation of the Document or its derivatives with other separate and
+  independent documents or works, in or on a volume of a storage or
+  distribution medium, is called an "aggregate" if the copyright resulting from
+  the compilation is not used to limit the legal rights of the compilation's
+  users beyond what the individual works permit. When the Document is included
+  in an aggregate, this License does not apply to the other works in the
+  aggregate which are not themselves derivative works of the Document.
+ </p><p>
+  If the Cover Text requirement of section 3 is applicable to these copies of
+  the Document, then if the Document is less than one half of the entire
+  aggregate, the Document's Cover Texts may be placed on covers that bracket
+  the Document within the aggregate, or the electronic equivalent of covers if
+  the Document is in electronic form. Otherwise they must appear on printed
+  covers that bracket the whole aggregate.
+ </p><div xmlns:dm="urn:x-suse:ns:docmanager" class="sect4 bridgehead"><h5 class="title legal" id="id-1.8.44"><span class="name"> 8. TRANSLATION </span><a title="Permalink" class="permalink" href="#id-1.8.44">#</a><a class="report-bug" target="_blank" href="https://github.com/SUSE/suse-best-practices/edit/main/xml/license-gfdl.xml" title="Edit the source file for this section">Edit source</a></h5></div><p>
+  Translation is considered a kind of modification, so you may distribute
+  translations of the Document under the terms of section 4. Replacing
+  Invariant Sections with translations requires special permission from their
+  copyright holders, but you may include translations of some or all Invariant
+  Sections in addition to the original versions of these Invariant Sections.
+  You may include a translation of this License, and all the license notices in
+  the Document, and any Warranty Disclaimers, provided that you also include
+  the original English version of this License and the original versions of
+  those notices and disclaimers. In case of a disagreement between the
+  translation and the original version of this License or a notice or
+  disclaimer, the original version will prevail.
+ </p><p>
+  If a section in the Document is Entitled "Acknowledgements", "Dedications",
+  or "History", the requirement (section 4) to Preserve its Title (section 1)
+  will typically require changing the actual title.
+ </p><div xmlns:dm="urn:x-suse:ns:docmanager" class="sect4 bridgehead"><h5 class="title legal" id="id-1.8.47"><span class="name"> 9. TERMINATION </span><a title="Permalink" class="permalink" href="#id-1.8.47">#</a><a class="report-bug" target="_blank" href="https://github.com/SUSE/suse-best-practices/edit/main/xml/license-gfdl.xml" title="Edit the source file for this section">Edit source</a></h5></div><p>
+  You may not copy, modify, sublicense, or distribute the Document except as
+  expressly provided for under this License. Any other attempt to copy, modify,
+  sublicense or distribute the Document is void, and will automatically
+  terminate your rights under this License. However, parties who have received
+  copies, or rights, from you under this License will not have their licenses
+  terminated so long as such parties remain in full compliance.
+ </p><div xmlns:dm="urn:x-suse:ns:docmanager" class="sect4 bridgehead"><h5 class="title legal" id="id-1.8.49"><span class="name"> 10. FUTURE REVISIONS OF THIS LICENSE </span><a title="Permalink" class="permalink" href="#id-1.8.49">#</a><a class="report-bug" target="_blank" href="https://github.com/SUSE/suse-best-practices/edit/main/xml/license-gfdl.xml" title="Edit the source file for this section">Edit source</a></h5></div><p>
+  The Free Software Foundation may publish new, revised versions of the GNU
+  Free Documentation License from time to time. Such new versions will be
+  similar in spirit to the present version, but may differ in detail to address
+  new problems or concerns. See
+  <a class="link" href="http://www.gnu.org/copyleft/" target="_blank">http://www.gnu.org/copyleft/</a>.
+ </p><p>
+  Each version of the License is given a distinguishing version number. If the
+  Document specifies that a particular numbered version of this License "or any
+  later version" applies to it, you have the option of following the terms and
+  conditions either of that specified version or of any later version that has
+  been published (not as a draft) by the Free Software Foundation. If the
+  Document does not specify a version number of this License, you may choose
+  any version ever published (not as a draft) by the Free Software Foundation.
+ </p><div xmlns:dm="urn:x-suse:ns:docmanager" class="sect4 bridgehead"><h5 class="title legal" id="id-1.8.52"><span class="name"> ADDENDUM: How to use this License for your
+  documents </span><a title="Permalink" class="permalink" href="#id-1.8.52">#</a><a class="report-bug" target="_blank" href="https://github.com/SUSE/suse-best-practices/edit/main/xml/license-gfdl.xml" title="Edit the source file for this section">Edit source</a></h5></div><div class="verbatim-wrap"><pre class="screen">Copyright (c) YEAR YOUR NAME.
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.2
+or any later version published by the Free Software Foundation;
+with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
+A copy of the license is included in the section entitled "GNU
+ Free Documentation License".</pre></div><p>
+  If you have Invariant Sections, Front-Cover Texts and Back-Cover Texts,
+  replace the "with...Texts". line with this:
+ </p><div class="verbatim-wrap"><pre class="screen">with the Invariant Sections being LIST THEIR TITLES, with the
+Front-Cover Texts being LIST, and with the Back-Cover Texts being LIST.</pre></div><p>
+  If you have Invariant Sections without Cover Texts, or some other combination
+  of the three, merge those two alternatives to suit the situation.
+ </p><p>
+  If your document contains nontrivial examples of program code, we recommend
+  releasing these examples in parallel under your choice of free software
+  license, such as the GNU General Public License, to permit their use in free
+  software.
+ </p></div></div></div></div><div class="page-bottom"><div class="_share-print"><div class="online-contents share"><strong>Share this page: </strong><span class="share-buttons"><span class="_share-fb bottom-button">Facebook</span><span class="spacer"> • </span><span class="_share-in bottom-button">LinkedIn</span><span class="spacer"> • </span><span class="_share-tw bottom-button">Twitter</span><span class="spacer"> • </span><span class="_share-mail bottom-button">E-Mail</span></span></div><div class="print"><span class="_print-button bottom-button">Print this page</span></div><div class="clearme"></div></div></div></div><div id="_inward"></div></div><div id="_footer-wrap"><div id="_footer"><p>©
+        2021 
+        SUSE</p><ul><li><a href="https://jobs.suse.com/" target="_top">Careers</a></li><li><a href="https://www.suse.com/company/legal/" target="_top">Legal</a></li><li><a href="https://www.suse.com/company/about/" target="_top">About</a></li><li><a href="https://www.suse.com/contact/" target="_top">Contact Us</a></li></ul></div></div></body></html>

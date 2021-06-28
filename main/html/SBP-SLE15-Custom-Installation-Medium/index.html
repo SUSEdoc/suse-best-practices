@@ -1,0 +1,471 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang=""><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>How to Create a Custom Installation Medium for SUSE Linux Enterprise 15 | SUSE Linux Enterprise 15</title><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" /><link rel="stylesheet" type="text/css" href="static/css/style.css" /><link rel="stylesheet" type="text/css" href="static/css/highlight.css" /><meta name="generator" content="DAPS 3.2.0 (https://opensuse.github.io/daps) using SUSE XSL Stylesheets for SUSE Best Practices 2.0.17 (based on DocBook XSL Stylesheets 1.79.2) - chunked" /><meta name="product-name" content="SUSE Linux Enterprise" /><meta name="product-number" content="15" /><meta name="book-title" content="How to Create a Custom Installation Medium for SUSE Linux Enterprise 15" /><meta name="description" content="This document provides guidance on how to create one single custom installation media for SUSE Linux Enterprise 15." /><meta name="tracker-url" content="https://github.com/SUSE/suse-best-practices/issues/new" /><meta name="tracker-type" content="gh" /><link rel="home" href="index.html" title="How to Create a Custom Installation Medium for SUSE Linux Enterprise 15" />
+<script type="text/javascript">
+
+if ( window.location.protocol.toLowerCase() != 'file:' ) {
+  document.write('<link rel="stylesheet" type="text/css" href="https://static.opensuse.org/fonts/fonts.css"></link>');
+}
+else {
+  document.write('<link rel="stylesheet" type="text/css" href="static/css/fonts-onlylocal.css"></link>');
+}
+
+</script><noscript><link rel="stylesheet" type="text/css" href="https://static.opensuse.org/fonts/fonts.css" /></noscript><script src="static/js/jquery-1.10.2.min.js" type="text/javascript"></script><script src="static/js/script.js" type="text/javascript"></script><script src="static/js/highlight.min.js" type="text/javascript"></script><script>
+
+$(document).ready(function() {
+  $('.verbatim-wrap.highlight').each(function(i, block) {
+    hljs.highlightBlock(block);
+  });
+});
+hljs.configure({
+  useBR: false
+});
+
+</script></head><body class="draft offline js-off" onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="bypass-block"><a href="#_content">Jump to content</a><a href="#_bottom-navigation">Jump to page navigation: previous page [access key p]/next page [access key n]</a></div><div id="_outer-wrap"><div id="_white-bg" style="background-color: #E11;"><div id="_header"><div id="_logo"><img src="static/images/logo.png" alt="Logo" /></div><div class="crumbs"><a class="single-crumb" href="index.html"><span class="single-contents-icon"></span>How to Create a Custom Installation Medium for SUSE Linux Enterprise 15</a><div class="bubble-corner active-contents"></div></div><div class="clearme"></div></div></div><div id="_fixed-header-wrap" style="background-color: #E11;" class="inactive"><div id="_fixed-header"><div class="crumbs"><a class="single-crumb" href="index.html"><span class="single-contents-icon"></span>Show Contents: How to Create a Custom Installation Medium for SUSE Linux Enterprise 15</a></div><div class="buttons"><a class="top-button button" href="#">Top</a><div class="clearme"></div></div><div class="clearme"></div></div><div class="active-contents bubble"><div class="bubble-container"><div id="_bubble-toc"><ol><li class="inactive"><a href="index.html#sec-intro"><span class="number">1 </span><span class="name">Introduction</span></a></li><li class="inactive"><a href="index.html#sec-preparing"><span class="number">2 </span><span class="name">Preparing the Installation</span></a></li><li class="inactive"><a href="index.html#sec-single-medium"><span class="number">3 </span><span class="name">Creating One Single Installation Medium for SUSE Linux Enterprise 15</span></a></li><li class="inactive"><a href="index.html#sec-legal-notice"><span class="number">4 </span><span class="name">Legal Notice</span></a></li><li class="inactive"><a href="index.html#id-1.6"><span class="number">5 </span><span class="name">GNU Free Documentation License</span></a></li></ol></div><div class="clearme"></div></div></div></div><div id="_toc-bubble-wrap"></div><div id="_content" class="draft "><div class="documentation"><div xml:lang="en" class="article " id="art-sbp-iaas-sapcloud" lang="en"><div class="titlepage"><div><h6 class="version-info"><span class="productname ">SUSE Linux Enterprise</span> <span class="productnumber ">15</span></h6><div><h1 class="title">How to Create a Custom Installation Medium for SUSE Linux Enterprise 15</h1></div><div class="abstract "><p>This document provides guidance on how to create one single custom installation media for
+    SUSE Linux Enterprise 15.</p></div><div class="author"><span class="imprint-label">Author: </span><span class="firstname ">Jiri</span> <span class="surname ">Srain, Project Manager Engineering, SUSE</span></div><div class="date"><span class="imprint-label">Publication Date: </span>January 14, 2019</div></div></div><div class="line"><div class="toc"><dl><dt><span class="sect1"><a href="index.html#sec-intro"><span class="number">1 </span><span class="name">Introduction</span></a></span></dt><dt><span class="sect1"><a href="index.html#sec-preparing"><span class="number">2 </span><span class="name">Preparing the Installation</span></a></span></dt><dt><span class="sect1"><a href="index.html#sec-single-medium"><span class="number">3 </span><span class="name">Creating One Single Installation Medium for SUSE Linux Enterprise 15</span></a></span></dt><dt><span class="sect1"><a href="index.html#sec-legal-notice"><span class="number">4 </span><span class="name">Legal Notice</span></a></span></dt><dt><span class="sect1"><a href="index.html#id-1.6"><span class="number">5 </span><span class="name">GNU Free Documentation License</span></a></span></dt></dl></div></div><div class="sect1 " id="sec-intro"><div class="titlepage"><div><div><h2 class="title"><span class="number">1 </span><span xmlns:dm="urn:x-suse:ns:docmanager" class="name">Introduction</span> <a title="Permalink" class="permalink" href="index.html#sec-intro">#</a><a class="report-bug" target="_blank" href="https://github.com/SUSE/suse-best-practices/edit/main/xml/MAIN-SBP-SLE15-Custom-Installation-Medium.xml" title="Edit the source file for this section">Edit source</a></h2><div class="doc-status"><ul><li><span class="ds-label">File Name: </span>MAIN-SBP-SLE15-Custom-Installation-Medium.xml</li><li><span class="ds-label">ID: </span>sec-intro</li></ul></div></div></div></div><p>The release of SUSE Linux Enterprise 15 is a modern, modular operating system and the next
+   major release since SUSE Linux Enterprise 12 in 2014. It helps simplify multimedia's IT, makes
+   traditional IT infrastructure more efficient and provides an engaging platform for developers. a
+   result, customers can easily deploy and transition business-critical workloads across on-premise
+   and public cloud environments. </p><p>With a focus on the developer community, SUSE Linux Enterprise 15 also accelerates the
+   enterprise transition from free developer subscription or community Linux (openSUSE Leap) setups
+   to production deployments of fully supported enterprise Linux. Existing customers can use this
+   release as an opportunity to baseline their systems to SUSE Linux Enterprise 15 from older
+   releases, so they are well positioned for many years to come.</p><p>The SUSE Linux Enterprise 15 platform uses a <span class="strong"><strong>common code
+    base</strong></span>. This means that all SUSE Linux Enterprise 15 products share the same code base
+   across all architectures. Packages are built using the same source code to ensure consistency and
+   improve application portability across a multi-modal IT to ensure application mobility across
+   multimodal IT environments. With the <span class="strong"><strong>Modular+</strong></span> architecture,
+   everything is a module. Delivery of new features is easy, and you can get product updates and
+   patches more frequently.</p></div><div class="sect1 " id="sec-preparing"><div class="titlepage"><div><div><h2 class="title"><span class="number">2 </span><span xmlns:dm="urn:x-suse:ns:docmanager" class="name">Preparing the Installation</span> <a title="Permalink" class="permalink" href="index.html#sec-preparing">#</a><a class="report-bug" target="_blank" href="https://github.com/SUSE/suse-best-practices/edit/main/xml/MAIN-SBP-SLE15-Custom-Installation-Medium.xml" title="Edit the source file for this section">Edit source</a></h2><div class="doc-status"><ul><li><span class="ds-label">File Name: </span>MAIN-SBP-SLE15-Custom-Installation-Medium.xml</li><li><span class="ds-label">ID: </span>sec-preparing</li></ul></div></div></div></div><p>SUSE Linux Enterprise 15 products are distributed via two different kinds of media:</p><div class="orderedlist "><ol class="orderedlist" type="1"><li class="listitem "><p>The installer media</p></li><li class="listitem "><p>The <span class="quote">“<span class="quote ">Packages</span>”</span> media which contains the (optional) modules</p></li></ol></div><p>The installer media (<span class="quote">“<span class="quote ">SLE-15-Installer-DVD-&lt;architecture&gt;-GM-DVD1.iso</span>”</span>)
+   contain only a minimal set of packages to ensure you have available a minimal, command line based
+   system for installing, updating and registering SUSE Linux Enterprise products. All other
+   packages must be installed either from online repositories like the SUSE Customer Center (SCC),
+   the Subscription Management Tool (SMT) or the Repository Mirroring Tool (RMT), or from the
+   Packages media (<span class="quote">“<span class="quote ">SLE-15-Packages-DVD-&lt;architecture&gt;-GM-DVD1.iso</span>”</span>). Using RMT
+   for mirroring the repositories will save bandwidth though.</p><p>For a regular offline installation without Internet access, the following downloads are
+   required in advance for each architecture you want to install on:</p><div class="orderedlist "><ol class="orderedlist" type="1"><li class="listitem "><p>DVD1 of the installer medium</p></li><li class="listitem "><p>DVD1 of the packages medium</p></li></ol></div><p>Download the ISO images from <a class="link" href="https://download.suse.com" target="_blank">https://download.suse.com</a> to a workstation or to a network drive. Burn a DVD from the
+   ISO image (AMD64, Intel 64, and AArch64 only).</p><div id="id-1.3.8" class="admonition important normal"><img class="symbol" alt="Important" title="Important" src="static/images/icon-important.png" /><h6>Important: Use Content of ISO Images</h6><p>Create the DVDs using the <span class="strong"><strong>content</strong></span> of the ISO images. Do
+    not create the DVDs by burning the <code class="filename">.iso</code> files themselves, for example as a
+    single <span class="quote">“<span class="quote ">track</span>”</span> to the DVD. Instead always choose <span class="quote">“<span class="quote ">burn image</span>”</span>,
+     <span class="quote">“<span class="quote ">burn ISO</span>”</span>, <span class="quote">“<span class="quote ">write premastered image</span>”</span> or similar. For example, if you
+    are using GNOME, right-click the ISO image and select <span class="quote">“<span class="quote ">Open with CD/DVD Creator</span>”</span>,
+    then click <span class="quote">“<span class="quote ">Write</span>”</span>.</p></div><p>After that, prepare booting into the installation system.</p><p>In some cases, it can be useful to create one single custom medium containing the installer
+   and a specific set of modules. For exammple, this can be the case if you want to prepare for an
+   unattended autoinstallation with AutoYaST.</p></div><div class="sect1 " id="sec-single-medium"><div class="titlepage"><div><div><h2 class="title"><span class="number">3 </span><span xmlns:dm="urn:x-suse:ns:docmanager" class="name">Creating One Single Installation Medium for SUSE Linux Enterprise 15</span> <a title="Permalink" class="permalink" href="index.html#sec-single-medium">#</a><a class="report-bug" target="_blank" href="https://github.com/SUSE/suse-best-practices/edit/main/xml/MAIN-SBP-SLE15-Custom-Installation-Medium.xml" title="Edit the source file for this section">Edit source</a></h2><div class="doc-status"><ul><li><span class="ds-label">File Name: </span>MAIN-SBP-SLE15-Custom-Installation-Medium.xml</li><li><span class="ds-label">ID: </span>sec-single-medium</li></ul></div></div></div></div><p>You can easily create a combined installation medium by following the steps described
+   below.</p><div class="procedure "><div class="procedure-contents"><ol class="procedure" type="1"><li class="step "><p>Download the installer medium and create a directory for each module on it.</p><p>The initial structure of your custom installation medium looks like the following
+     example:</p><div class="verbatim-wrap"><pre class="screen">/
+- media.1
+- repodata
+- noarch
+- x86_64
+- [...]
+- SLE-Module-Basesystem
+- SLE-Module-XXX</pre></div></li><li class="step "><p>Copy the repository from the module to the respective directory for all modules. You can
+     copy it either from the modules DVD or from the repository mirror on your local SMT or RMT
+     server. Type the following command:</p><div class="verbatim-wrap"><pre class="screen">cp -a /srv/www/htdocs/repo/SUSE/Products/SLE-Module-&lt;name&gt;/15/&lt;arch&gt;/product/* SLE-Module-&lt;name&gt;</pre></div><p>Alternatively, you can create your own repository with the command
+      <code class="command">createrepo</code> or import the repository from any other source as long as the
+     repository uses the <span class="italic">rpm-md</span> format of metadata.</p><div id="id-1.4.3.2.4" class="admonition important normal"><img class="symbol" alt="Important" title="Important" src="static/images/icon-important.png" /><h6>Important: SUSE Tags</h6><p>Do not use repositories with the <span class="italic">SUSE Tags</span> metadata
+      format.</p></div></li><li class="step "><p>Append new lines to the end of the file <code class="filename">/media.1/products</code> on the
+    medium. For each of the modules, add one line in the following format:</p><p><code class="literal">
+      <em class="replaceable ">&lt;Path on media&gt;</em>
+      <em class="replaceable ">&lt;Name of the module&gt;</em>
+    </code></p><p>The module name can consist of any text, which will later be presented by the installer.
+     For example, it can be as follows: </p><p>
+     <span class="italic">/SLE-Module-Basesystem SLE-15-Module Basesystem</span>
+    </p></li><li class="step "><p><span class="step-optional">(Optional)</span> Automate the selection of modules.</p><p>To automatically preselect the modules, create an <code class="filename">add_on_products.xml</code>
+     file in the root of the media and specify all modules which should be pre-selected by the
+     installer. Find an example for such a file below:</p><div class="verbatim-wrap"><pre class="screen">&lt;add_on_products xmlns="http://www.suse.com/1.0/yast2ns"
+        xmlns:config="http://www.suse.com/1.0/configns"&gt;
+ &lt;product_items config:type="list"&gt;
+  &lt;product_item&gt;
+   &lt;url&gt;relurl:////&lt;/url&gt;
+   &lt;path&gt;/SLE-15-Module-Basesystem&lt;/path&gt;
+   &lt;install_products config:type="list"&gt;
+    &lt;product&gt;sle-module-basesystem&lt;/product&gt;
+   &lt;/install_products&gt;
+  &lt;/product_item&gt;
+ &lt;/product_items&gt;
+&lt;/add_on_products&gt;</pre></div><p>Repeat the <span class="italic">product_item</span> element for every module you
+     want to pre-select. The <span class="italic">&lt;product&gt;</span> entry must match
+     the identifier of the product to ensure the correct release package gets installed.</p></li><li class="step "><p>Create a bootable DVD with the following command: </p><div class="verbatim-wrap"><pre class="screen">mksusecd --create My-SLE-15-Installer-DVD.iso &lt;path&gt;</pre></div></li><li class="step "><p>Boot the DVD.</p></li><li class="step "><p>In the add-on step, select the additional modules you want to install.</p><div id="id-1.4.3.7.2" class="admonition important normal"><img class="symbol" alt="Important" title="Important" src="static/images/icon-important.png" /><h6>Important: Modules Selection</h6><p>In the list of modules to select, the installer will also offer the product which comes
+      from the root of media (corresponding to the already existing line in the
+       <code class="filename">media.1/products</code> file). Do <span class="strong"><strong>not</strong></span> select
+      this one. Also, do <span class="strong"><strong>not</strong></span> remove this entry from
+       <code class="filename">media.1/products</code>, as it is necessary for bootstratpping the
+      installation.</p></div></li></ol></div></div><p>At this point, having followed the steps as described above, your custom installation medium
+   for SUSE Linux Enterprise 15 containing the installer plus the modules you have chosen to install
+   is ready to use. </p><p>Find an example structure of the final custom installation medium below:</p><div class="verbatim-wrap"><pre class="screen">/
+ - media.1
+ - repodata
+ - noarch
+ - x86_64
+ - [...]
+ - SLE-Module-Basesystem
+   - repodata
+   - noarch
+   - x86_64
+   - [...]
+ - SLE-Module-XXX
+   - repodata
+   - noarch
+   - x86_64
+   - [...]</pre></div></div><div class="sect1 " id="sec-legal-notice"><div class="titlepage"><div><div><h2 class="title"><span class="number">4 </span><span xmlns:dm="urn:x-suse:ns:docmanager" class="name">Legal Notice</span> <a title="Permalink" class="permalink" href="index.html#sec-legal-notice">#</a><a class="report-bug" target="_blank" href="https://github.com/SUSE/suse-best-practices/edit/main/xml/MAIN-SBP-SLE15-Custom-Installation-Medium.xml" title="Edit the source file for this section">Edit source</a></h2><div class="doc-status"><ul><li><span class="ds-label">File Name: </span>MAIN-SBP-SLE15-Custom-Installation-Medium.xml</li><li><span class="ds-label">ID: </span>sec-legal-notice</li></ul></div></div></div></div><p>Copyright ©2006–2018 SUSE LLC and contributors. All rights reserved. </p><p>Permission is granted to copy, distribute and/or modify this document under the terms of the
+   GNU Free Documentation License, Version 1.2 or (at your option) version 1.3; with the Invariant
+   Section being this copyright notice and license. A copy of the license version 1.2 is included in
+   the section entitled <span class="quote">“<span class="quote ">GNU Free Documentation License</span>”</span>.</p><p>SUSE, the SUSE logo and YaST are registered trademarks of SUSE LLC in the United States and
+   other countries. For SUSE trademarks, see <a class="link" href="http://www.suse.com/company/legal/" target="_blank">http://www.suse.com/company/legal/</a>. Linux is a registered trademark of Linus Torvalds.
+   All other names or trademarks mentioned in this document may be trademarks or registered
+   trademarks of their respective owners.</p><p>This article is part of a series of documents called "SUSE Best Practices". The individual
+   documents in the series were contributed voluntarily by SUSE's employees and by third
+   parties.</p><p> All information found in this document has been compiled with utmost attention to detail.
+   However, this does not guarantee complete accuracy.
+   </p><p>Therefore, we need to specifically state that neither SUSE LLC, its affiliates, the authors,
+   nor the translators may be held liable for possible errors or the consequences thereof. Below we
+   draw your attention to the license under which the articles are published.</p></div><div class="sect1 " id="id-1.6"><div class="titlepage"><div><div><h2 class="title"><span class="number">5 </span><span xmlns:dm="urn:x-suse:ns:docmanager" class="name">GNU Free Documentation License</span> <a title="Permalink" class="permalink" href="index.html#id-1.6">#</a><a class="report-bug" target="_blank" href="https://github.com/SUSE/suse-best-practices/edit/main/xml/license-gfdl.xml" title="Edit the source file for this section">Edit source</a></h2><div class="doc-status"><ul><li><span class="ds-label">File Name: </span>license-gfdl.xml</li><li><span class="ds-label">ID: </span><span class="ds-message">no ID found</span></li></ul></div></div></div></div><p>
+  Copyright (C) 2000, 2001, 2002 Free Software Foundation, Inc. 51 Franklin St,
+  Fifth Floor, Boston, MA 02110-1301 USA. Everyone is permitted to copy and
+  distribute verbatim copies of this license document, but changing it is not
+  allowed.
+ </p><div xmlns:dm="urn:x-suse:ns:docmanager" class="sect4 bridgehead"><h5 class="title legal" id="id-1.6.4"><span class="name"> 0. PREAMBLE </span><a title="Permalink" class="permalink" href="index.html#id-1.6.4">#</a><a class="report-bug" target="_blank" href="https://github.com/SUSE/suse-best-practices/edit/main/xml/license-gfdl.xml" title="Edit the source file for this section">Edit source</a></h5></div><p>
+  The purpose of this License is to make a manual, textbook, or other
+  functional and useful document "free" in the sense of freedom: to assure
+  everyone the effective freedom to copy and redistribute it, with or without
+  modifying it, either commercially or non-commercially. Secondarily, this
+  License preserves for the author and publisher a way to get credit for their
+  work, while not being considered responsible for modifications made by
+  others.
+ </p><p>
+  This License is a kind of "copyleft", which means that derivative works of
+  the document must themselves be free in the same sense. It complements the
+  GNU General Public License, which is a copyleft license designed for free
+  software.
+ </p><p>
+  We have designed this License to use it for manuals for free software,
+  because free software needs free documentation: a free program should come
+  with manuals providing the same freedoms that the software does. But this
+  License is not limited to software manuals; it can be used for any textual
+  work, regardless of subject matter or whether it is published as a printed
+  book. We recommend this License principally for works whose purpose is
+  instruction or reference.
+ </p><div xmlns:dm="urn:x-suse:ns:docmanager" class="sect4 bridgehead"><h5 class="title legal" id="id-1.6.8"><span class="name"> 1. APPLICABILITY AND DEFINITIONS </span><a title="Permalink" class="permalink" href="index.html#id-1.6.8">#</a><a class="report-bug" target="_blank" href="https://github.com/SUSE/suse-best-practices/edit/main/xml/license-gfdl.xml" title="Edit the source file for this section">Edit source</a></h5></div><p>
+  This License applies to any manual or other work, in any medium, that
+  contains a notice placed by the copyright holder saying it can be distributed
+  under the terms of this License. Such a notice grants a world-wide,
+  royalty-free license, unlimited in duration, to use that work under the
+  conditions stated herein. The "Document", below, refers to any such manual or
+  work. Any member of the public is a licensee, and is addressed as "you". You
+  accept the license if you copy, modify or distribute the work in a way
+  requiring permission under copyright law.
+ </p><p>
+  A "Modified Version" of the Document means any work containing the Document
+  or a portion of it, either copied verbatim, or with modifications and/or
+  translated into another language.
+ </p><p>
+  A "Secondary Section" is a named appendix or a front-matter section of the
+  Document that deals exclusively with the relationship of the publishers or
+  authors of the Document to the Document's overall subject (or to related
+  matters) and contains nothing that could fall directly within that overall
+  subject. (Thus, if the Document is in part a textbook of mathematics, a
+  Secondary Section may not explain any mathematics.) The relationship could be
+  a matter of historical connection with the subject or with related matters,
+  or of legal, commercial, philosophical, ethical or political position
+  regarding them.
+ </p><p>
+  The "Invariant Sections" are certain Secondary Sections whose titles are
+  designated, as being those of Invariant Sections, in the notice that says
+  that the Document is released under this License. If a section does not fit
+  the above definition of Secondary then it is not allowed to be designated as
+  Invariant. The Document may contain zero Invariant Sections. If the Document
+  does not identify any Invariant Sections then there are none.
+ </p><p>
+  The "Cover Texts" are certain short passages of text that are listed, as
+  Front-Cover Texts or Back-Cover Texts, in the notice that says that the
+  Document is released under this License. A Front-Cover Text may be at most 5
+  words, and a Back-Cover Text may be at most 25 words.
+ </p><p>
+  A "Transparent" copy of the Document means a machine-readable copy,
+  represented in a format whose specification is available to the general
+  public, that is suitable for revising the document straightforwardly with
+  generic text editors or (for images composed of pixels) generic paint
+  programs or (for drawings) some widely available drawing editor, and that is
+  suitable for input to text formatters or for automatic translation to a
+  variety of formats suitable for input to text formatters. A copy made in an
+  otherwise Transparent file format whose markup, or absence of markup, has
+  been arranged to thwart or discourage subsequent modification by readers is
+  not Transparent. An image format is not Transparent if used for any
+  substantial amount of text. A copy that is not "Transparent" is called
+  "Opaque".
+ </p><p>
+  Examples of suitable formats for Transparent copies include plain ASCII
+  without markup, Texinfo input format, LaTeX input format, SGML or XML using a
+  publicly available DTD, and standard-conforming simple HTML, PostScript or
+  PDF designed for human modification. Examples of transparent image formats
+  include PNG, XCF and JPG. Opaque formats include proprietary formats that can
+  be read and edited only by proprietary word processors, SGML or XML for which
+  the DTD and/or processing tools are not generally available, and the
+  machine-generated HTML, PostScript or PDF produced by some word processors
+  for output purposes only.
+ </p><p>
+  The "Title Page" means, for a printed book, the title page itself, plus such
+  following pages as are needed to hold, legibly, the material this License
+  requires to appear in the title page. For works in formats which do not have
+  any title page as such, "Title Page" means the text near the most prominent
+  appearance of the work's title, preceding the beginning of the body of the
+  text.
+ </p><p>
+  A section "Entitled XYZ" means a named subunit of the Document whose title
+  either is precisely XYZ or contains XYZ in parentheses following text that
+  translates XYZ in another language. (Here XYZ stands for a specific section
+  name mentioned below, such as "Acknowledgements", "Dedications",
+  "Endorsements", or "History".) To "Preserve the Title" of such a section when
+  you modify the Document means that it remains a section "Entitled XYZ"
+  according to this definition.
+ </p><p>
+  The Document may include Warranty Disclaimers next to the notice which states
+  that this License applies to the Document. These Warranty Disclaimers are
+  considered to be included by reference in this License, but only as regards
+  disclaiming warranties: any other implication that these Warranty Disclaimers
+  may have is void and has no effect on the meaning of this License.
+ </p><div xmlns:dm="urn:x-suse:ns:docmanager" class="sect4 bridgehead"><h5 class="title legal" id="id-1.6.19"><span class="name"> 2. VERBATIM COPYING </span><a title="Permalink" class="permalink" href="index.html#id-1.6.19">#</a><a class="report-bug" target="_blank" href="https://github.com/SUSE/suse-best-practices/edit/main/xml/license-gfdl.xml" title="Edit the source file for this section">Edit source</a></h5></div><p>
+  You may copy and distribute the Document in any medium, either commercially
+  or noncommercially, provided that this License, the copyright notices, and
+  the license notice saying this License applies to the Document are reproduced
+  in all copies, and that you add no other conditions whatsoever to those of
+  this License. You may not use technical measures to obstruct or control the
+  reading or further copying of the copies you make or distribute. However, you
+  may accept compensation in exchange for copies. If you distribute a large
+  enough number of copies you must also follow the conditions in section 3.
+ </p><p>
+  You may also lend copies, under the same conditions stated above, and you may
+  publicly display copies.
+ </p><div xmlns:dm="urn:x-suse:ns:docmanager" class="sect4 bridgehead"><h5 class="title legal" id="id-1.6.22"><span class="name"> 3. COPYING IN QUANTITY </span><a title="Permalink" class="permalink" href="index.html#id-1.6.22">#</a><a class="report-bug" target="_blank" href="https://github.com/SUSE/suse-best-practices/edit/main/xml/license-gfdl.xml" title="Edit the source file for this section">Edit source</a></h5></div><p>
+  If you publish printed copies (or copies in media that commonly have printed
+  covers) of the Document, numbering more than 100, and the Document's license
+  notice requires Cover Texts, you must enclose the copies in covers that
+  carry, clearly and legibly, all these Cover Texts: Front-Cover Texts on the
+  front cover, and Back-Cover Texts on the back cover. Both covers must also
+  clearly and legibly identify you as the publisher of these copies. The front
+  cover must present the full title with all words of the title equally
+  prominent and visible. You may add other material on the covers in addition.
+  Copying with changes limited to the covers, as long as they preserve the
+  title of the Document and satisfy these conditions, can be treated as
+  verbatim copying in other respects.
+ </p><p>
+  If the required texts for either cover are too voluminous to fit legibly, you
+  should put the first ones listed (as many as fit reasonably) on the actual
+  cover, and continue the rest onto adjacent pages.
+ </p><p>
+  If you publish or distribute Opaque copies of the Document numbering more
+  than 100, you must either include a machine-readable Transparent copy along
+  with each Opaque copy, or state in or with each Opaque copy a
+  computer-network location from which the general network-using public has
+  access to download using public-standard network protocols a complete
+  Transparent copy of the Document, free of added material. If you use the
+  latter option, you must take reasonably prudent steps, when you begin
+  distribution of Opaque copies in quantity, to ensure that this Transparent
+  copy will remain thus accessible at the stated location until at least one
+  year after the last time you distribute an Opaque copy (directly or through
+  your agents or retailers) of that edition to the public.
+ </p><p>
+  It is requested, but not required, that you contact the authors of the
+  Document well before redistributing any large number of copies, to give them
+  a chance to provide you with an updated version of the Document.
+ </p><div xmlns:dm="urn:x-suse:ns:docmanager" class="sect4 bridgehead"><h5 class="title legal" id="id-1.6.27"><span class="name"> 4. MODIFICATIONS </span><a title="Permalink" class="permalink" href="index.html#id-1.6.27">#</a><a class="report-bug" target="_blank" href="https://github.com/SUSE/suse-best-practices/edit/main/xml/license-gfdl.xml" title="Edit the source file for this section">Edit source</a></h5></div><p>
+  You may copy and distribute a Modified Version of the Document under the
+  conditions of sections 2 and 3 above, provided that you release the Modified
+  Version under precisely this License, with the Modified Version filling the
+  role of the Document, thus licensing distribution and modification of the
+  Modified Version to whoever possesses a copy of it. In addition, you must do
+  these things in the Modified Version:
+ </p><div class="orderedlist "><ol class="orderedlist" type="A"><li class="listitem "><p>
+    Use in the Title Page (and on the covers, if any) a title distinct from
+    that of the Document, and from those of previous versions (which should, if
+    there were any, be listed in the History section of the Document). You may
+    use the same title as a previous version if the original publisher of that
+    version gives permission.
+   </p></li><li class="listitem "><p>
+    List on the Title Page, as authors, one or more persons or entities
+    responsible for authorship of the modifications in the Modified Version,
+    together with at least five of the principal authors of the Document (all
+    of its principal authors, if it has fewer than five), unless they release
+    you from this requirement.
+   </p></li><li class="listitem "><p>
+    State on the Title page the name of the publisher of the Modified Version,
+    as the publisher.
+   </p></li><li class="listitem "><p>
+    Preserve all the copyright notices of the Document.
+   </p></li><li class="listitem "><p>
+    Add an appropriate copyright notice for your modifications adjacent to the
+    other copyright notices.
+   </p></li><li class="listitem "><p>
+    Include, immediately after the copyright notices, a license notice giving
+    the public permission to use the Modified Version under the terms of this
+    License, in the form shown in the Addendum below.
+   </p></li><li class="listitem "><p>
+    Preserve in that license notice the full lists of Invariant Sections and
+    required Cover Texts given in the Document's license notice.
+   </p></li><li class="listitem "><p>
+    Include an unaltered copy of this License.
+   </p></li><li class="listitem "><p>
+    Preserve the section Entitled "History", Preserve its Title, and add to it
+    an item stating at least the title, year, new authors, and publisher of the
+    Modified Version as given on the Title Page. If there is no section
+    Entitled "History" in the Document, create one stating the title, year,
+    authors, and publisher of the Document as given on its Title Page, then add
+    an item describing the Modified Version as stated in the previous sentence.
+   </p></li><li class="listitem "><p>
+    Preserve the network location, if any, given in the Document for public
+    access to a Transparent copy of the Document, and likewise the network
+    locations given in the Document for previous versions it was based on.
+    These may be placed in the "History" section. You may omit a network
+    location for a work that was published at least four years before the
+    Document itself, or if the original publisher of the version it refers to
+    gives permission.
+   </p></li><li class="listitem "><p>
+    For any section Entitled "Acknowledgements" or "Dedications", Preserve the
+    Title of the section, and preserve in the section all the substance and
+    tone of each of the contributor acknowledgements and/or dedications given
+    therein.
+   </p></li><li class="listitem "><p>
+    Preserve all the Invariant Sections of the Document, unaltered in their
+    text and in their titles. Section numbers or the equivalent are not
+    considered part of the section titles.
+   </p></li><li class="listitem "><p>
+    Delete any section Entitled "Endorsements". Such a section may not be
+    included in the Modified Version.
+   </p></li><li class="listitem "><p>
+    Do not retitle any existing section to be Entitled "Endorsements" or to
+    conflict in title with any Invariant Section.
+   </p></li><li class="listitem "><p>
+    Preserve any Warranty Disclaimers.
+   </p></li></ol></div><p>
+  If the Modified Version includes new front-matter sections or appendices that
+  qualify as Secondary Sections and contain no material copied from the
+  Document, you may at your option designate some or all of these sections as
+  invariant. To do this, add their titles to the list of Invariant Sections in
+  the Modified Version's license notice. These titles must be distinct from any
+  other section titles.
+ </p><p>
+  You may add a section Entitled "Endorsements", provided it contains nothing
+  but endorsements of your Modified Version by various parties--for example,
+  statements of peer review or that the text has been approved by an
+  organization as the authoritative definition of a standard.
+ </p><p>
+  You may add a passage of up to five words as a Front-Cover Text, and a
+  passage of up to 25 words as a Back-Cover Text, to the end of the list of
+  Cover Texts in the Modified Version. Only one passage of Front-Cover Text and
+  one of Back-Cover Text may be added by (or through arrangements made by) any
+  one entity. If the Document already includes a cover text for the same cover,
+  previously added by you or by arrangement made by the same entity you are
+  acting on behalf of, you may not add another; but you may replace the old
+  one, on explicit permission from the previous publisher that added the old
+  one.
+ </p><p>
+  The author(s) and publisher(s) of the Document do not by this License give
+  permission to use their names for publicity for or to assert or imply
+  endorsement of any Modified Version.
+ </p><div xmlns:dm="urn:x-suse:ns:docmanager" class="sect4 bridgehead"><h5 class="title legal" id="id-1.6.34"><span class="name"> 5. COMBINING DOCUMENTS </span><a title="Permalink" class="permalink" href="index.html#id-1.6.34">#</a><a class="report-bug" target="_blank" href="https://github.com/SUSE/suse-best-practices/edit/main/xml/license-gfdl.xml" title="Edit the source file for this section">Edit source</a></h5></div><p>
+  You may combine the Document with other documents released under this
+  License, under the terms defined in section 4 above for modified versions,
+  provided that you include in the combination all of the Invariant Sections of
+  all of the original documents, unmodified, and list them all as Invariant
+  Sections of your combined work in its license notice, and that you preserve
+  all their Warranty Disclaimers.
+ </p><p>
+  The combined work need only contain one copy of this License, and multiple
+  identical Invariant Sections may be replaced with a single copy. If there are
+  multiple Invariant Sections with the same name but different contents, make
+  the title of each such section unique by adding at the end of it, in
+  parentheses, the name of the original author or publisher of that section if
+  known, or else a unique number. Make the same adjustment to the section
+  titles in the list of Invariant Sections in the license notice of the
+  combined work.
+ </p><p>
+  In the combination, you must combine any sections Entitled "History" in the
+  various original documents, forming one section Entitled "History"; likewise
+  combine any sections Entitled "Acknowledgements", and any sections Entitled
+  "Dedications". You must delete all sections Entitled "Endorsements".
+ </p><div xmlns:dm="urn:x-suse:ns:docmanager" class="sect4 bridgehead"><h5 class="title legal" id="id-1.6.38"><span class="name"> 6. COLLECTIONS OF DOCUMENTS </span><a title="Permalink" class="permalink" href="index.html#id-1.6.38">#</a><a class="report-bug" target="_blank" href="https://github.com/SUSE/suse-best-practices/edit/main/xml/license-gfdl.xml" title="Edit the source file for this section">Edit source</a></h5></div><p>
+  You may make a collection consisting of the Document and other documents
+  released under this License, and replace the individual copies of this
+  License in the various documents with a single copy that is included in the
+  collection, provided that you follow the rules of this License for verbatim
+  copying of each of the documents in all other respects.
+ </p><p>
+  You may extract a single document from such a collection, and distribute it
+  individually under this License, provided you insert a copy of this License
+  into the extracted document, and follow this License in all other respects
+  regarding verbatim copying of that document.
+ </p><div xmlns:dm="urn:x-suse:ns:docmanager" class="sect4 bridgehead"><h5 class="title legal" id="id-1.6.41"><span class="name"> 7. AGGREGATION WITH INDEPENDENT WORKS </span><a title="Permalink" class="permalink" href="index.html#id-1.6.41">#</a><a class="report-bug" target="_blank" href="https://github.com/SUSE/suse-best-practices/edit/main/xml/license-gfdl.xml" title="Edit the source file for this section">Edit source</a></h5></div><p>
+  A compilation of the Document or its derivatives with other separate and
+  independent documents or works, in or on a volume of a storage or
+  distribution medium, is called an "aggregate" if the copyright resulting from
+  the compilation is not used to limit the legal rights of the compilation's
+  users beyond what the individual works permit. When the Document is included
+  in an aggregate, this License does not apply to the other works in the
+  aggregate which are not themselves derivative works of the Document.
+ </p><p>
+  If the Cover Text requirement of section 3 is applicable to these copies of
+  the Document, then if the Document is less than one half of the entire
+  aggregate, the Document's Cover Texts may be placed on covers that bracket
+  the Document within the aggregate, or the electronic equivalent of covers if
+  the Document is in electronic form. Otherwise they must appear on printed
+  covers that bracket the whole aggregate.
+ </p><div xmlns:dm="urn:x-suse:ns:docmanager" class="sect4 bridgehead"><h5 class="title legal" id="id-1.6.44"><span class="name"> 8. TRANSLATION </span><a title="Permalink" class="permalink" href="index.html#id-1.6.44">#</a><a class="report-bug" target="_blank" href="https://github.com/SUSE/suse-best-practices/edit/main/xml/license-gfdl.xml" title="Edit the source file for this section">Edit source</a></h5></div><p>
+  Translation is considered a kind of modification, so you may distribute
+  translations of the Document under the terms of section 4. Replacing
+  Invariant Sections with translations requires special permission from their
+  copyright holders, but you may include translations of some or all Invariant
+  Sections in addition to the original versions of these Invariant Sections.
+  You may include a translation of this License, and all the license notices in
+  the Document, and any Warranty Disclaimers, provided that you also include
+  the original English version of this License and the original versions of
+  those notices and disclaimers. In case of a disagreement between the
+  translation and the original version of this License or a notice or
+  disclaimer, the original version will prevail.
+ </p><p>
+  If a section in the Document is Entitled "Acknowledgements", "Dedications",
+  or "History", the requirement (section 4) to Preserve its Title (section 1)
+  will typically require changing the actual title.
+ </p><div xmlns:dm="urn:x-suse:ns:docmanager" class="sect4 bridgehead"><h5 class="title legal" id="id-1.6.47"><span class="name"> 9. TERMINATION </span><a title="Permalink" class="permalink" href="index.html#id-1.6.47">#</a><a class="report-bug" target="_blank" href="https://github.com/SUSE/suse-best-practices/edit/main/xml/license-gfdl.xml" title="Edit the source file for this section">Edit source</a></h5></div><p>
+  You may not copy, modify, sublicense, or distribute the Document except as
+  expressly provided for under this License. Any other attempt to copy, modify,
+  sublicense or distribute the Document is void, and will automatically
+  terminate your rights under this License. However, parties who have received
+  copies, or rights, from you under this License will not have their licenses
+  terminated so long as such parties remain in full compliance.
+ </p><div xmlns:dm="urn:x-suse:ns:docmanager" class="sect4 bridgehead"><h5 class="title legal" id="id-1.6.49"><span class="name"> 10. FUTURE REVISIONS OF THIS LICENSE </span><a title="Permalink" class="permalink" href="index.html#id-1.6.49">#</a><a class="report-bug" target="_blank" href="https://github.com/SUSE/suse-best-practices/edit/main/xml/license-gfdl.xml" title="Edit the source file for this section">Edit source</a></h5></div><p>
+  The Free Software Foundation may publish new, revised versions of the GNU
+  Free Documentation License from time to time. Such new versions will be
+  similar in spirit to the present version, but may differ in detail to address
+  new problems or concerns. See
+  <a class="link" href="http://www.gnu.org/copyleft/" target="_blank">http://www.gnu.org/copyleft/</a>.
+ </p><p>
+  Each version of the License is given a distinguishing version number. If the
+  Document specifies that a particular numbered version of this License "or any
+  later version" applies to it, you have the option of following the terms and
+  conditions either of that specified version or of any later version that has
+  been published (not as a draft) by the Free Software Foundation. If the
+  Document does not specify a version number of this License, you may choose
+  any version ever published (not as a draft) by the Free Software Foundation.
+ </p><div xmlns:dm="urn:x-suse:ns:docmanager" class="sect4 bridgehead"><h5 class="title legal" id="id-1.6.52"><span class="name"> ADDENDUM: How to use this License for your
+  documents </span><a title="Permalink" class="permalink" href="index.html#id-1.6.52">#</a><a class="report-bug" target="_blank" href="https://github.com/SUSE/suse-best-practices/edit/main/xml/license-gfdl.xml" title="Edit the source file for this section">Edit source</a></h5></div><div class="verbatim-wrap"><pre class="screen">Copyright (c) YEAR YOUR NAME.
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.2
+or any later version published by the Free Software Foundation;
+with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
+A copy of the license is included in the section entitled "GNU
+ Free Documentation License".</pre></div><p>
+  If you have Invariant Sections, Front-Cover Texts and Back-Cover Texts,
+  replace the "with...Texts". line with this:
+ </p><div class="verbatim-wrap"><pre class="screen">with the Invariant Sections being LIST THEIR TITLES, with the
+Front-Cover Texts being LIST, and with the Back-Cover Texts being LIST.</pre></div><p>
+  If you have Invariant Sections without Cover Texts, or some other combination
+  of the three, merge those two alternatives to suit the situation.
+ </p><p>
+  If your document contains nontrivial examples of program code, we recommend
+  releasing these examples in parallel under your choice of free software
+  license, such as the GNU General Public License, to permit their use in free
+  software.
+ </p></div></div></div><div class="page-bottom"><div class="_share-print"><div class="online-contents share"><strong>Share this page: </strong><span class="share-buttons"><span class="_share-fb bottom-button">Facebook</span><span class="spacer"> • </span><span class="_share-in bottom-button">LinkedIn</span><span class="spacer"> • </span><span class="_share-tw bottom-button">Twitter</span><span class="spacer"> • </span><span class="_share-mail bottom-button">E-Mail</span></span></div><div class="print"><span class="_print-button bottom-button">Print this page</span></div><div class="clearme"></div></div></div></div><div id="_inward"></div></div><div id="_footer-wrap"><div id="_footer"><p>©
+        2021 
+        SUSE</p><ul><li><a href="https://jobs.suse.com/" target="_top">Careers</a></li><li><a href="https://www.suse.com/company/legal/" target="_top">Legal</a></li><li><a href="https://www.suse.com/company/about/" target="_top">About</a></li><li><a href="https://www.suse.com/contact/" target="_top">Contact Us</a></li></ul></div></div></body></html>
