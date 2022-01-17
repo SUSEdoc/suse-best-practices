@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Troubleshooting Tips</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="SUSE Manager Management Pack for Microsoft System Center Operations Manager User Manual" /><link rel="up" href="index.html" title="SUSE Manager Management Pack for Microsoft System Center Operations Manager User Manual" /><link rel="prev" href="sec-scom-user-patch-management.html" title="Patch Management" /><link rel="next" href="sec-scom-user-appendix.html" title="Appendix" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Troubleshooting Tips</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="sec-scom-user-patch-management.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="sec-scom-user-appendix.html">Next</a></td></tr></table><hr /></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-scom-user-troubleshooting"></a>Troubleshooting Tips</h2></div></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-scom-user-trouble-1"></a>Auto Installation Issues</h3></div></div></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>If you are getting any dependency problems, before rescheduling make sure
+                        the system is up to date with all relevant patches installed. Otherwise it
+                        will cause dependency problems for installing other packages or
+                        patches.</p></li><li class="listitem"><p>If you face any errors after scheduling the auto installation, check the
+                        message for the cause in the Schedule section.</p><p>In the <span class="strong"><strong>/var/log/</strong></span> path check the
+                            <code class="filename">up2date</code> file for complete information about the
+                        issue using the task <span class="quote">“<span class="quote">pick up time and date</span>”</span>.</p><p>See the sample screenshot of an <code class="filename">up2date</code> file for an
+                        issue below.</p><div class="figure"><a id="id2830"></a><p class="title"><strong>Figure 40. Screenshot <code class="filename">up2date</code> File</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/scom-user-pm-screen1.png" width="100%" alt="Screenshot up2date File" /></td></tr></table></div></div></div><br class="figure-break" /></li><li class="listitem"><p>Follow the steps given in the description to resolve the issue. Manually
+                        download the packages which have dependency problems by selecting the
+                        packages from the SUSE Manager UI or from the Internet, if they are not
+                        available from <span class="quote">“<span class="quote">SUSE Manager Installable Packages</span>”</span>. Try to
+                        install those packages manually using <span class="command"><strong>zypper install
+                            &lt;package name&gt;</strong></span>(for SUSE Linux Enterprise Server)
+                        or <span class="command"><strong>yum install &lt;package name&gt;</strong></span>(for Red Hat
+                        Enterprise Linux) commands.</p><div class="important" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">SUSE Manager Documentation</h3><p>Refer to the SUSE Manager documentation <span class="quote">“<span class="quote">Installable
+                                packages</span>”</span> in the Web interface at <a class="link" href="https://documentation.suse.com/external-tree/en-us/suma/3.2/susemanager-reference/html/book.suma.reference.manual/book.suma.reference.manual.html" target="_top">https://documentation.suse.com/external-tree/en-us/suma/3.2/susemanager-reference/html/book.suma.reference.manual/book.suma.reference.manual.html</a>.</p></div></li><li class="listitem"><p>If you do not find any description regarding that issue, check other log
+                        files in the <span class="quote">“<span class="quote">/var/log</span>”</span> path and try to find the data relating
+                        to that issue using the task <span class="quote">“<span class="quote">pickup date and time
+                        value</span>”</span>.</p></li><li class="listitem"><p>If you get a message <span class="quote">“<span class="quote">Internal server</span>”</span> problems while
+                        creating the distribution tree, free up space by deleting unnecessary files
+                        and folders from your SUSE Manager server system.</p></li><li class="listitem"><p>If you are getting an <span class="quote">“<span class="quote">initrd not found in the specified
+                            path</span>”</span> error message while creating Kickstart profiles or AutoYaST
+                        profiles, check the distribution tree path you provided and the version of
+                        architecture the distribution contains.</p></li><li class="listitem"><p>If your system could not register even after performing an auto
+                        installation using an AutoYaST profile, try manually using the following
+                        command in the target or client system:</p><p>
+                        <span class="command"><strong>curl –Sks https://Server_hostname/pub/bootstrap/bootstrap_edited.sh
+                            |/bin/bash</strong></span>
+                    </p><p>Replace <span class="quote">“<span class="quote">Server_hostname</span>”</span> with your SUSE Manager server host
+                        name.</p></li></ul></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-scom-user-trouble-2"></a>Run Remote Command Issues</h3></div></div></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Refer to the SUSE Manager documentation at <a class="link" href="https://documentation.suse.com/suma/3.2/" target="_top">https://documentation.suse.com/suma/3.2/</a>for
+                        more information on bootstrap and registering a client to a SUSE Manager
+                        server.</p></li><li class="listitem"><p>If you are getting errors while installing the <span class="package">rhncfg</span>
+                        packages check the message in the <span class="quote">“<span class="quote">Failed systems</span>”</span> tab under
+                        the <span class="quote">“<span class="quote">Schedule</span>”</span> tab.</p></li><li class="listitem"><p>If you are getting any error message regarding the
+                            <span class="quote">“<span class="quote">rhn-setup-gnome</span>”</span> dependency, check if you have installed a
+                        package version newer than the version mentioned in the error message. If
+                        the version is older, try installing the newer version. After that try
+                        installing the <span class="package">rhncfg</span> packages. If the installed version
+                        is already newer than the version mentioned in the error message, or if you
+                        still get the same message after installing the newer version, remove the
+                        package using the <span class="quote">“<span class="quote">Removable packages</span>”</span> tab under the
+                            <span class="quote">“<span class="quote">Systems</span>”</span> tab in the Operations console.</p><div class="figure"><a id="id2881"></a><p class="title"><strong>Figure 41. Screenshot Error Message</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/scom-user-pm-install-success.png" width="100%" alt="Screenshot Error Message" /></td></tr></table></div></div></div><br class="figure-break" /></li><li class="listitem"><p>If you are getting any error message regarding the
+                            <span class="package">rhn_register</span> package dependency, follow the
+                        below-mentioned procedure.</p></li><li class="listitem"><p>When a Red Hat Enterprise Linux System is subscribed to SUSE Manager,
+                        usually the Spacewalk tools override the <span class="package">rhn_register</span>
+                        package. If that is not happening and if you are still able to find
+                            <span class="package">rhn_register</span> after being subscribed to SUSE Manager,
+                        use the following procedure to ensure the system will not make use of
+                            <span class="package">rhn_register</span>.</p></li><li class="listitem"><p>Use the following command to find the <span class="package">rhn_register</span>
+                        package in Red Hat Enterprise Linux systems (this is not required for SUSE
+                        Linux Enterprise systems):</p><p>
+                        <span class="command"><strong>locate rhn_register</strong></span>
+                    </p><p>You will get the result with the files in the following folders:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>/usr/bin/</p></li><li class="listitem"><p>/usr/sbin/</p></li><li class="listitem"><p>/usr/share/firstboot/modules/</p></li></ul></div><p> Just rename the files using the <span class="command"><strong>mv</strong></span> as shown below. </p><p>
+                        <span class="command"><strong> mv rhn_register rhn_register1 </strong></span>
+                    </p><p> Use the <span class="command"><strong>mv</strong></span> to rename all the files with an
+                            <span class="package">rhn_register</span> name such as</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>
+                                <code class="filename">rhn_register</code>
+                            </p></li><li class="listitem"><p>
+                                <code class="filename">rhn_register.py</code>
+                            </p></li><li class="listitem"><p>
+                                <code class="filename">rhn_register.pyo</code>
+                            </p></li><li class="listitem"><p>
+                                <code class="filename">rhn_register.pyc</code>
+                            </p></li></ul></div></li></ul></div></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="sec-scom-user-patch-management.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="sec-scom-user-appendix.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Patch Management </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Appendix</td></tr></table></div></body></html>

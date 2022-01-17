@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Registration</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="How to Directly Connect SUSE Manager to Red Hat Content Delivery Network" /><link rel="up" href="index.html" title="How to Directly Connect SUSE Manager to Red Hat Content Delivery Network" /><link rel="prev" href="sec-createswchannel.html" title="Create Software Channel Delivery" /><link rel="next" href="sec-references.html" title="References" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Registration</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="sec-createswchannel.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="sec-references.html">Next</a></td></tr></table><hr /></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-registration"></a>Registration</h2></div></div></div><p>To register your systems, follow the steps described in the
+            sections below.</p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-bootstrap-repo-creation"></a>Bootstrap Repository Creation</h3></div></div></div><p>SUSE Manager subscriptions entitle everyone to the tools
+                channels for Red Hat Expanded Support (RES) distributions.
+                Any Red Hat Enterprise Linux or CentOS 6 or 7 system should
+                use these to create the proper bootstrap repository for
+                either traditional or salt-minion connectivity.</p><div class="procedure"><ol class="procedure" type="1"><li class="step"><p>Add the corresponding SUSE Manager RES tools
+                        channel and allow it to synchronize from SUSE
+                        Customer Center. You will need the 0-package parent
+                        channel and the tools. Here is an example command
+                        to add it for RES6 on AMD64/Intel 64:</p><pre class="screen">mgr-sync add channels rhel-x86_64-server-6 res6-suse-manager-tools-x86_64</pre></li><li class="step"><p>Follow the instructions to synchronize your base
+                        media as a child repository for your distribution
+                        based on Red Hat Enterprise Linux, as explained in
+                        the SUSE Manager Wiki:</p><p>
+                        <a class="link" href="https://wiki.microfocus.com/index.php/SUSE_Manager/Sync_RHEL_media" target="_top">https://wiki.microfocus.com/index.php/SUSE_Manager/Sync_RHEL_media</a>
+                    </p></li><li class="step"><p>Create a bootstrap repository for your Red Hat
+                        Enterprise Linux clients with</p><pre class="screen">mgr-create-bootstrap-repo --with-custom-channels</pre></li></ol></div><p>This will use the base media channel to capture needed
+                dependencies. Ensure that it completes without
+                error.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-minion-registration"></a>Minion Registration</h3></div></div></div><p>On the client machine(s), perform the following steps to
+                register the minion using a bootstrap script
+                (recommended):</p><div class="procedure"><ol class="procedure" type="1"><li class="step"><p>If needed, regenerate the bootstrap script with
+                        the <code class="option">Salt</code> option enabled:</p><pre class="screen">mgr-bootstrap --salt --script=bootstrap-salt.sh</pre></li><li class="step"><p>Download and run the appropriately edited
+                        bootstrap script after adding the correct
+                        activation key and other parameters. This will
+                        install the necessary Salt packages, set the proper
+                        activation key, and start the salt-minion
+                        service:</p><pre class="screen">curl -Sks http://&lt;server&gt;/pub/bootstrap/bootstrap-salt.sh | /bin/bash</pre></li><li class="step"><p>In the SUSE Manager Web UI, go to <span class="strong"><strong>Salt</strong></span>, click <span class="strong"><strong>Onboarding</strong></span> and accept
+                        the minion's key.</p></li></ol></div><p>After a few minutes, the new minion will appear in your
+                list of systems with the channels assigned in the
+                activation key you specified in the bootstrap
+                process.</p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="sec-createswchannel.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="sec-references.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Create Software Channel Delivery </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> References</td></tr></table></div></body></html>

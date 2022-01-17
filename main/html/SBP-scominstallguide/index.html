@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>SUSE Manager Management Pack for Microsoft System Center Operations Manager Installation Guide</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><meta name="description" content="Using separate tools to maintain and patch systems, monitor health compliance and deploy required updates to the Windows and Linux servers can be costly and time–consuming. With SUSE Manager Management Pack for Microsoft System Center Operations Manager, Windows systems administrators can view server health information and perform both Windows and Linux patching duties, all through the same familiar console. This document leads you through the initial installation of SUSE Manager Management Pack for Microsoft System Center Operations Manager." /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="SUSE Manager Management Pack for Microsoft System Center Operations Manager Installation Guide" /><link rel="next" href="sec-manpacks.html" title="Management Packs Required to Subscribe Clients to Microsoft System Center Operations Manager" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">SUSE Manager Management Pack for Microsoft System Center
+            Operations Manager Installation Guide</th></tr><tr><td width="20%" align="left"> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="sec-manpacks.html">Next</a></td></tr></table><hr /></div><div xml:lang="en" class="article" lang="en"><div class="titlepage"><div><div><h1 class="title"><a id="art-sbp-scominstallguide"></a>SUSE Manager Management Pack for Microsoft System Center
+            Operations Manager Installation Guide</h1></div><div><div class="abstract"><p class="title"><strong>Abstract</strong></p><p>Using separate tools to maintain and patch systems,
+                monitor health compliance and deploy required updates to
+                the Windows and Linux servers can be costly and
+                time–consuming. With SUSE Manager Management Pack for
+                Microsoft System Center Operations Manager, Windows systems
+                administrators can view server health information and
+                perform both Windows and Linux patching duties, all through
+                the same familiar console. This document leads you through
+                the initial installation of SUSE Manager Management Pack
+                for Microsoft System Center Operations Manager.</p></div></div></div><hr /></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="sect1"><a href="index.html#sec-prerequisites">Prerequisites</a></span></dt><dt><span class="sect1"><a href="sec-manpacks.html">Management Packs Required to Subscribe Clients to Microsoft
+            System Center Operations Manager</a></span></dt><dt><span class="sect1"><a href="sec-manpackinstall.html">SUSE Manager Management Pack Installation</a></span></dt><dt><span class="sect1"><a href="sec-manualinstall.html">SUSE Manager Management Pack Manual Installation
+            Process</a></span></dt><dt><span class="sect1"><a href="sec-manpackuninstall.html">Uninstalling the SUSE Manager Management Pack</a></span></dt><dt><span class="sect1"><a href="sec-manualuninstall.html">SUSE Manager Management Pack Manual Uninstallation
+            Process</a></span></dt><dt><span class="sect1"><a href="sec-manpackrepair.html">Repairing SUSE Manager Management Pack</a></span></dt><dt><span class="sect1"><a href="sec-updatesumadetails.html">Updating SUSE Manager Details</a></span></dt><dt><span class="sect1"><a href="sec-troubleshooting.html">Troubleshooting</a></span></dt><dt><span class="sect1"><a href="ar01s10.html">GNU Free Documentation License</a></span></dt></dl></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-prerequisites"></a>Prerequisites</h2></div></div></div><p>SUSE Manager Management Pack for Microsoft System Center
+            Operations Manager requires a working environment with
+            Microsoft System Center Operations Manager (SCOM) and SUSE
+            Manager. The following list outlines the environment and
+            software that should be prepared prior to the installation of
+            the SUSE Manager Management Pack. </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Supported Operating Systems:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>Windows Server 2008/2008 R2</p></li></ul></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>Windows Server 2012/2012 R2</p></li></ul></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>Windows Server 2016</p></li></ul></div></li><li class="listitem"><p>Typical environment required for SUSE Manager
+                    Management Pack:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>Windows Domain Controller (recommended for
+                            domain accounts that are used for the
+                            installation of Microsoft System Center
+                            Operations Manager)</p></li><li class="listitem"><p>SQL Server 2008/R2 and above (required for
+                            the installation of Microsoft System Center
+                            Operations Manager)</p></li><li class="listitem"><p>One of the following Microsoft System Center
+                            Operations Manager versions:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: square; "><li class="listitem"><p>Microsoft System Center Operations
+                                    Manager 2007 R2 (preferably with
+                                    Cumulative Update 6 or later)</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Microsoft System Center
+                                     Operations Manager 2007 R2
+                                     Documentation and Deployment Guide -
+                                     http://technet.microsoft.com/en-us/library/bb310604.aspx</p></li></ul></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Microsoft System Center
+                                     Operations Manager 2007 R2 Cumulative
+                                     Update 6 Download -
+                                     http://www.microsoft.com/en-us/download/details.aspx?id=29850</p></li></ul></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Microsoft System Center
+                                     Operations Manager 2007 R2 Cumulative
+                                     Update 6 Instructions -
+                                     http://support.microsoft.com/kb/2626076</p></li></ul></div></li><li class="listitem"><p>Microsoft System Center Operations
+                                    Manager 2012/R2 (preferably with the
+                                    latest Update Rollup)</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Microsoft System Center
+                                     Operations Manager 2012/R2
+                                     Documentation and Deployment Guide -
+                                     http://technet.microsoft.com/en-us/library/hh205987.aspx</p></li></ul></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Microsoft System Center
+                                     Operations Manager 2012/R2 Update
+                                     Rollup 2 Download -
+                                     http://www.microsoft.com/en-us/download/details.aspx?id=30421</p></li></ul></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Microsoft System Center
+                                     Operations Manager 2012 Update Rollup
+                                     2 Installation Instructions -
+                                     http://support.microsoft.com/kb/2706783</p></li></ul></div></li></ul></div></li><li class="listitem"><p>Microsoft System Center 2016</p></li><li class="listitem"><p>SUSE Manager 2.1, 3 and 3.1</p></li><li class="listitem"><p>Linux virtual machines with distribution
+                            versions supported by both the Microsoft System
+                            Center Operations Manager Cross Platform
+                            Management Packs and SUSE Manager</p></li></ul></div></li><li class="listitem"><p>Microsoft System Center Operations Manager
+                    Requirements</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>The cross platform management packs which add
+                            support for monitoring Unix/Linux systems must
+                            be installed. They are available for download
+                            from the following links: </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: square; "><li class="listitem"><p>Microsoft System Center Operations
+                                    Manager 2007 R2 Cross Platform
+                                    Management Packs -
+                                    http://www.microsoft.com/en-us/download/details.aspx?id=18891</p></li><li class="listitem"><p>Microsoft System Center Operations
+                                    Manager 2012 Cross Platform Management
+                                    Packs -
+                                    http://www.microsoft.com/en-us/download/details.aspx?id=29696</p></li></ul></div></li><li class="listitem"><p>At minimum, the following management packs
+                            should be installed:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: square; "><li class="listitem"><p>Microsoft.Linux.Library.mp</p></li><li class="listitem"><p>Microsoft.Unix.Library.mp</p></li><li class="listitem"><p>Microsoft.SystemCenter.WSManagement.Library.mp</p></li></ul></div></li></ul></div></li><li class="listitem"><p>SUSE Manager Management Pack Installation
+                    Requirements</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>.NET 4.0 Framework must be installed prior to
+                            running the SUSE Manager Management Pack
+                            installer. The Web installer is available from
+                            the following URL:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: square; "><li class="listitem"><p>http://www.microsoft.com/en-us/download/details.aspx?id=17851</p></li></ul></div></li></ul></div></li></ul></div></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="sec-manpacks.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top"> </td><td width="20%" align="center"> </td><td width="40%" align="right" valign="top"> Management Packs Required to Subscribe Clients to Microsoft
+            System Center Operations Manager</td></tr></table></div></body></html>

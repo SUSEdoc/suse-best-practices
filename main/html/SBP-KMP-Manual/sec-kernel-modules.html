@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Kernel Modules</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="Kernel Module Packages Manual for SUSE-based Distributions" /><link rel="up" href="index.html" title="Kernel Module Packages Manual for SUSE-based Distributions" /><link rel="prev" href="sec-kernel-packages.html" title="Kernel Packages" /><link rel="next" href="sec-kernel-module-packages.html" title="Kernel Module Packages" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Kernel Modules</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="sec-kernel-packages.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="sec-kernel-module-packages.html">Next</a></td></tr></table><hr /></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-kernel-modules"></a>Kernel Modules</h2></div></div></div><p>Documentation on general kernel module building can be found
+            in abundance on the Internet. Two good lectures are: </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Peter Jay Salzman, Michael Burian, Ori Pomerantz: The
+                    Linux Kernel Module Programming Guide, <a class="link" href="http://www.tldp.org/LDP/lkmpg/2.6/html/index.html" target="_top">http://www.tldp.org/LDP/lkmpg/2.6/html/index.html
+                    </a></p></li><li class="listitem"><p>Jonathan Corbet, Alessandro Rubini, Greg
+                    Kroah-Hartman: Linux Device Drivers, Third Edition,
+                    February 2005, <a class="link" href="http://www.oreilly.com/catalog/linuxdrive3/" target="_top">http://www.oreilly.com/catalog/linuxdrive3/</a>
+                    (also available online at <a class="link" href="http://lwn.net/Kernel/LDD3/" target="_top">http://lwn.net/Kernel/LDD3/</a>)</p></li></ul></div><p>SUSE-specific information is found in README.SUSE in the
+            kernel-source package.</p><p>When built, kernel module binaries are installed below
+                <code class="filename">/lib/modules/VERSION-RELEASE-FLAVOR</code> on
+            the file system (example:
+                <code class="filename">/lib/modules/3.0.101-63-default</code> for
+            the <code class="filename">kernel-default-3.0.101-63</code> package).
+            Different kernels have different module directories, and will
+            usually not see each others modules.</p><p>Update modules are modules intended to replace or augment the
+            modules that are provided in the kernel packages. Update
+            modules must be stored below the
+                <code class="filename">/lib/modules/VERSION-RELEASE-FLAVOR/updates/</code>
+            directory. Modules in the updates/ directory have precedence
+            over other modules with the same name. Never replace modules
+            from the kernel package by overwriting files: this would lead
+            to inconsistencies between the file system and the RPM
+            database.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Where to Store Modules</h3><p>Modules intended to take precedence over in-kernel
+                modules of the same name should be stored below
+                    <code class="filename">/lib/modules/VERSION-RELEASE-FLAVOR/updates/</code>.
+                Other add-on modules can be stored below
+                    <code class="filename">/lib/modules/VERSION-RELEASE-FLAVOR/extra/</code>.</p></div><p>Modules usually remain compatible with a range of
+                <span class="package">kernel-FLAVOR</span> packages. To make such
+            modules visible to other <span class="package">kernel-FLAVOR</span>
+            packages, symbolic links to compatible modules are put in
+                <code class="filename">/lib/modules/VERSION-RELEASE-FLAVOR/weak-updates/</code>
+            directories. Modules in the weak-updates/ directory have lower
+            priority than modules in the updates/ directory, but higher
+            priority than all other modules in
+                <code class="filename">/lib/modules/VERSION-RELEASE-FLAVOR</code>.
+            If more than one compatible module is available for a kernel,
+            the module with the highest kernel release is chosen. Kernel
+            Module Packages must never install modules into weak-updates or
+            directories.</p><p>Kernel modules must never be installed as individual files on
+            a production system, but always as part of a Kernel Module
+            Package.</p></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="sec-kernel-packages.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="sec-kernel-module-packages.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Kernel Packages </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Kernel Module Packages</td></tr></table></div></body></html>

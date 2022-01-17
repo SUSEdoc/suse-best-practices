@@ -1,0 +1,508 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>How to Set Up a Multi-PXE Installation Server</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><meta name="description" content="This SUSE Best Practices document explains how to set up a multi-architecture PXE environment for the installation of the SUSE Linux Enterprise Server operating system on x86_64 and ARMv8 platforms with both BIOS and EFI. Components that usually should be hosted on the installation server are also included. This helps improving deployment times in multi-architecture environments. Disclaimer: Documents published as part of the SUSE Best Practices series have been contributed voluntarily by SUSE employees and third parties. They are meant to serve as examples of how particular actions can be performed. They have been compiled with utmost attention to detail. However, this does not guarantee complete accuracy. SUSE cannot verify that actions described in these documents do what is claimed or whether actions described have unintended consequences. SUSE LLC, its affiliates, the authors, and the translators may not be held liable for possible errors or the consequences thereof." /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div xml:lang="en" class="article" lang="en"><div class="titlepage"><div><div><h1 class="title"><a id="art-sbp-rpm-packaging"></a>How to Set Up a Multi-PXE Installation Server</h1></div><div><h3 class="subtitle"><em></em></h3></div><div><div class="author"><h3 class="author"><span class="firstname">David</span> <span class="surname">Byte, Senior Technology Strategist, SUSE</span></h3></div></div><div><div class="abstract"><p class="title"><strong>Abstract</strong></p><p>This SUSE Best Practices document explains how to set up a multi-architecture PXE
+                environment for the installation of the SUSE Linux Enterprise Server operating
+                system on x86_64 and ARMv8 platforms with both BIOS and EFI. </p><p>Components that usually should be hosted on the installation server are also
+                included. This helps improving deployment times in multi-architecture
+                environments.</p><p>
+                <span class="strong"><strong>Disclaimer: </strong></span>
+                Documents published as part of the SUSE Best Practices series have been contributed voluntarily
+                by SUSE employees and third parties. They are meant to serve as examples of how particular
+                actions can be performed. They have been compiled with utmost attention to detail. However,
+                this does not guarantee complete accuracy. SUSE cannot verify that actions described in these
+                documents do what is claimed or whether actions described have unintended consequences.
+                SUSE LLC, its affiliates, the authors, and the translators may not be held liable for possible errors
+                or the consequences thereof.
+            </p></div></div></div><hr /></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="sect1"><a href="#sec-sys-requirements">System Requirements</a></span></dt><dt><span class="sect1"><a href="#sec-os-installation">Installing the Operating System</a></span></dt><dt><span class="sect1"><a href="#sec-setup-ntp">Setting Up NTP Server</a></span></dt><dt><span class="sect1"><a href="#sec-setup-dhcp">Setting Up DHCP Services</a></span></dt><dt><span class="sect1"><a href="#sec-setup-repositories">Setting Up Repositories</a></span></dt><dt><span class="sect1"><a href="#sec-setup-tftp">Setting Up TFTP</a></span></dt><dt><span class="sect1"><a href="#sec-setup-pxe">Setting Up PXE Boot</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec-setup-x86-bios">Setting Up the x86 BIOS Boot Environment</a></span></dt><dt><span class="sect2"><a href="#sec-setup-x86-efi">Setting Up the x86 EFI Boot Environment</a></span></dt><dt><span class="sect2"><a href="#sec-setup-armv8-efi">Setting Up the ARMv8 EFI Boot Environment</a></span></dt></dl></dd><dt><span class="sect1"><a href="#sec-setup-smt">Setting Up SMT</a></span></dt><dt><span class="sect1"><a href="#sec-install-server-completed">Installation Server Completed</a></span></dt><dt><span class="sect1"><a href="#id1337">Legal notice</a></span></dt><dt><span class="sect1"><a href="#id1338">GNU Free Documentation License</a></span></dt></dl></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-sys-requirements"></a>System Requirements</h2></div></div></div><p>For a reasonable install server, you need:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>200 GB drive space</p></li><li class="listitem"><p>5 GB RAM</p></li><li class="listitem"><p>Two network connections</p></li></ul></div><p>The relatively huge drive space is needed if your installation server should also
+            serve as your Subscription Management (SMT) server. Your deployment will use the SMT
+            server in an ongoing manner for mirroring updates for the architectures in question in
+            addition to hosting the installation repositories.</p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-os-installation"></a>Installing the Operating System</h2></div></div></div><p>First, install SUSE Linux Enterprise Server 12 SP2 on a virtual or a physical
+            system.</p><p>On the registration screen, click the <span class="quote">“<span class="quote">Network Configuration</span>”</span> button at
+            the upper right and configure the network. You can use two different interfaces: one for
+            the public network with access to the Internet, and one for the cluster network.
+            Deploying using the cluster network has several advantages:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>It is a private network for the storage systems only and thus there will be no
+                    conflict with other DHCP servers or PXE servers</p></li><li class="listitem"><p>Generally it is faster than the public network</p></li></ul></div><p>Use the <span class="strong"><strong>Installation Settings</strong></span> screen to review and
+            change several proposed installation settings. Clicking <span class="strong"><strong>Software</strong></span> opens the <span class="strong"><strong>Software Selection and System
+                Tasks</strong></span> screen, where you can change the software selection by selecting or
+            deselecting patterns.</p><p>The default scope of software includes the base system and X Window with the GNOME
+            desktop. Deselect <span class="quote">“<span class="quote">X Window with the GNOME desktop</span>”</span>. For this, you are also
+            safe deselecting 32-bit compatibility libraries. </p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-setup-ntp"></a>Setting Up NTP Server</h2></div></div></div><p>The NTP server is used to act as an authoritative time source. Start YaST, select
+                <span class="strong"><strong>NTP Server</strong></span> and configure it to start at boot
+            time. Under security settings, select <span class="strong"><strong>Open Port in
+                Firewall</strong></span> and click <span class="strong"><strong>OK</strong></span>. When you use
+            the install server, you can point the systems being deployed back to it for time
+            synchronization.</p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-setup-dhcp"></a>Setting Up DHCP Services</h2></div></div></div><p>Go into YaST and select <span class="strong"><strong>DHCP Server</strong></span> from network
+            services. Configure the IP range you want to use. After that, it is your choice on
+            whether you use YaST or edit the configuration file
+                (<code class="filename">/etc/dhcpd.conf</code>) manually. As with the other services, be sure
+            to open the ports in the firewall. The end result needs to be a file that looks like the
+            below:</p><pre class="screen">option domain-name "my.lab";
+option domain-name-servers 172.16.253.5;
+option routers 192.168.124.1;
+option ntp-servers 192.168.124.3;
+option arch code 93 = unsigned integer 16; # RFC4578
+default-lease-time 3600;
+ddns-update-style none;
+subnet 192.168.124.0 netmask 255.255.255.0 {
+  range 192.168.124.100 192.168.124.199;
+  next-server 192.168.124.3;
+  default-lease-time 3600;
+  max-lease-time 3600;
+  if option arch = 00:07 or option arch = 00:09 {
+   filename "/EFI/x86/bootx64.efi";
+    } else if option arch = 00:0b {
+   filename "/EFI/armv8/bootaa64.efi";
+    } else {
+   filename "/bios/x86/pxelinux.0";
+    }
+}</pre><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">
+                <code class="code">if option arch</code>
+            </h3><p>The <code class="code">if option arch</code> sections allow the DHCP server to make the correct
+                decision on which file to use for booting.</p></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-setup-repositories"></a>Setting Up Repositories</h2></div></div></div><p>The next step is to create the installation source directories. Use a structure
+            similar to <code class="filename">/srv/install/arch/product/version</code>.</p><pre class="screen">/srv/install/x86/sles12/sp2/cd1
+/srv/install/armv8/sles12/sp2/cd1</pre><p>Now mount the install media into the appropriate location. Be sure to add it to
+                <code class="filename">/etc/fstab</code> for persistence between reboots.</p><pre class="screen">mount -o loop, crossmnt /root/sles12sp2.iso /srv/install/x86/sles12/sp2/cd1/</pre><p>Do the same for each architecture’s boot media.</p><p>The final part of setting up the repositories is to export them. Although there are
+            other supported methods such as HTTP, FTP, etc., use NFS for this scenario.  First,
+            enable the NFS server through YaST and select <span class="strong"><strong>Open Port in
+                Firewall</strong></span>.  In this instance, export the entire
+                <code class="filename">/srv/install</code> structure as seen in the sample
+                <code class="filename">/etc/exports</code> entry below.</p><pre class="screen">/srv/install  *(ro,root_squash,sync,no_subtree_check)</pre></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-setup-tftp"></a>Setting Up TFTP</h2></div></div></div><p>Now you need to enable the TFTP server. To do so, start YaST and select <span class="strong"><strong>TFTP Server</strong></span> from <span class="strong"><strong>Network
+                Services</strong></span>. The system then prompts to <span class="quote">“<span class="quote">install tftp</span>”</span>. Select
+                <span class="strong"><strong>Enable</strong></span>, leave the image directory at
+                <code class="filename">/srv/tftpboot</code>, select <span class="strong"><strong>Open Port in
+                Firewall</strong></span>, and click <span class="strong"><strong>OK</strong></span>.</p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-setup-pxe"></a>Setting Up PXE Boot</h2></div></div></div><p>To ensure you set up your install server correctly, read carefully through the
+            following sections. Proceed as described and double check your entries to avoid typos.
+            Getting all the right files in the right places allows you to add more architectures,
+            operating system install options, etc.  </p><p>Create a structure in <code class="filename">/srv/tftpboot</code> to support the various
+            options:</p><pre class="screen">mkdir /srv/tftpboot/bios
+mkdir /srv/tftpboot/bios/x86
+mkdir /srv/tftpboot/EFI
+mkdir /srv/tftpboot/EFI/x86
+mkdir /srv/tftpboot/EFI/x86/boot
+mkdir /srv/tftpboot/EFI/armv8
+mkdir /srv/tftpboot/EFI/armv8/boot</pre><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-setup-x86-bios"></a>Setting Up the x86 BIOS Boot Environment</h3></div></div></div><p>At this point, you need to copy the necessary boot files for the x86 BIOS
+                environment to the appropriate boot location. To do so, navigate to the appropriate
+                directory as shown below:</p><pre class="screen">cd /srv/install/x86/sles12/sp2/cd1/boot/x86_64/loader/
+cp -a linux initrd message /srv/tftpboot/bios/x86/</pre><p>While still in the loader directory, create the directory for the configuration
+                file and copy it in:</p><pre class="screen">mkdir /srv/tftpboot/bios/x86/pxelinux.cfg
+cp -a isolinux.cfg /srv/tftpboot/bios/x86/pxelinux.cfg/default</pre><p>Copy <code class="filename">pxelinux.0</code> to the same structure:</p><pre class="screen">cp /usr/share/syslinux/pxelinux.0 /srv/tftpboot/bios/x86/</pre><p>Now that the files are all in place, edit the configuration to ensure all the
+                correct boot options are also in place.  Start with
+                    editing <code class="filename">/srv/tftpboot/bios/x86/pxelinux.cfg/default</code>. See
+                the example below:</p><pre class="screen">default harddisk
+
+# hard disk
+label harddisk
+  localboot -2
+  # install
+label install
+  kernel linux
+  append initrd=initrd showopts install=nfs://192.168.124.3/srv/install/x86/sles12/sp2/cd1
+
+display message
+implicit 0
+prompt 1
+timeout 600</pre><p>Now edit <code class="filename">/srv/tftpboot/bios/x86/message</code> to reflect the
+                default file you edited before. See the example below:</p><pre class="screen">              Welcome to the Installer Environment!
+
+To start the installation enter 'install' and press &lt;return&gt;.
+
+Available boot options:
+  harddisk   - Boot from Hard Disk (this is default)
+  install     - Installation
+
+Have a lot of fun...</pre></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-setup-x86-efi"></a>Setting Up the x86 EFI Boot Environment</h3></div></div></div><p>Start by copying the files required for UEFI booting of a <span class="strong"><strong>grub2-efi</strong></span> environment.</p><pre class="screen">cd /srv/install/x86/sles12/sp2/cd1/EFI/BOOT
+cp -a bootx64.efi grub.efi MokManager.efi /srv/tftpboot/EFI/x86/</pre><p>Copy the kernel and initrd to the directory structure.</p><pre class="screen">cd /srv/install/x86/sles12/sp2/cd1/boot/x86_64/loader/
+cp -a linux initrd /srv/tftpboot/EFI/x86/boot</pre><p>Now you need to create a <code class="filename">grub.cfg</code> file. This file goes in
+                    <code class="filename">/srv/tftpboot/EFI/x86</code> and should have contents similar to
+                the below example:</p><pre class="screen">set timeout=5
+menuentry 'Install SLES12 SP2 for x86_64' {
+ linuxefi /EFI/x86/boot/linux install=nfs://192.168.124.3/srv/install/x86/sles12/sp2/cd1
+ initrdefi /EFI/x86/boot/initrd
+ }</pre></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-setup-armv8-efi"></a>Setting Up the ARMv8 EFI Boot Environment</h3></div></div></div><p>Setting up the ARMv8 EFI boot environment is done in a way very similar to the
+                x86_64 EFI environment. Start by copying the files required for UEFI booting of a
+                    <span class="strong"><strong>grub2-efi</strong></span> environment:</p><pre class="screen">cd /srv/install/armv8/sles12/sp2/cd1/EFI/BOOT
+cp -a bootaa64.efi /srv/tftpboot/EFI/armv8/</pre><p>Copy the kernel and initrd to the directory structure:</p><pre class="screen">cd /srv/install/armv8/sles12/sp2/cd1/boot/aarch64
+cp -a linux initrd /srv/tftpboot/EFI/armv8/boot</pre><p>Next you need to edit the  <code class="filename">grub.cfg</code> file and add a new
+                section.  This file is located in the directory
+                    <code class="filename">/srv/tftpboot/EFI/armv8</code>.  You should add contents similar
+                to the example below.</p><pre class="screen">menuentry 'Install SLES12 SP2 for SoftIron OverDrive' {
+ linux /EFI/armv8/boot/linux network=1 usessh=1 sshpassword="suse" \
+   install=nfs://192.168.124.3/srv/install/armv8/sles12/sp2/cd1 \
+   console=ttyAMA0,115200n8
+ initrd /EFI/armv8/boot/initrd
+}</pre><p>This addition to the configuration file contains a few other options to enable the
+                serial console and to allow installation via <span class="command"><strong>ssh</strong></span>. This is helpful
+                for systems that do not have a standard KVM console interface.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">ARM Platforms</h3><p>Be aware that this configuration is specifically set up only for a specific
+                    ARM platform.</p></div></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-setup-smt"></a>Setting Up SMT</h2></div></div></div><p>The SMT service provides a local repository mirror for updates to your software.
+             Follow the instructions in the Subscription Management Tool Guide at <a class="link" href="https://documentation.suse.com/sles/12-SP4/html/SLES-all/smt-installation.html" target="_top">https://documentation.suse.com/sles/12-SP4/html/SLES-all/smt-installation.html</a>
+            to install and configure SMT. Be sure to select both the pool and update repositories
+            for each product you are supporting with this server.</p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-install-server-completed"></a>Installation Server Completed</h2></div></div></div><p>At this point, you are ready to use the installation server for BIOS and EFI on x86
+            and EFI on ARMv8. Be sure to select the SMT server as the registration server during
+            installation. You can gain further value by building custom AutoYaST files as well.
+            These files can enable a streamlined installation process and even an unattended process
+            if everything is well defined.</p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id1337"></a>Legal notice</h2></div></div></div><p> Copyright ©2006-2021 SUSE LLC and contributors. All rights reserved. </p><p> Permission is granted to copy, distribute and/or modify this document under the terms of the
+  GNU Free Documentation License, Version 1.2 or (at your option) version 1.3; with the Invariant
+  Section being this copyright notice and license. A copy of the license version 1.2 is included in
+  the section entitled <span class="quote">“<span class="quote">GNU Free Documentation License</span>”</span>. </p><p> SUSE, the SUSE logo and YaST are registered trademarks of SUSE LLC in the United States and
+  other countries. For SUSE trademarks, see <a class="link" href="http://www.suse.com/company/legal/" target="_top">http://www.suse.com/company/legal/</a>. Linux is a registered trademark of Linus Torvalds.
+  All other names or trademarks mentioned in this document may be trademarks or registered
+  trademarks of their respective owners. </p><p> Documents published as part of the <span class="strong"><strong>SUSE Best Practices</strong></span>
+  series have been contributed voluntarily by SUSE employees and third parties. They are meant to
+  serve as examples of how particular actions can be performed. They have been compiled with utmost
+  attention to detail. However, this does not guarantee complete accuracy. SUSE cannot verify that
+  actions described in these documents do what is claimed or whether actions described have
+  unintended consequences. SUSE LLC, its affiliates, the authors, and the translators may not be held
+  liable for possible errors or the consequences thereof.</p><p> Below we draw your attention to the license under which the articles are published.</p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id1338"></a>GNU Free Documentation License</h2></div></div></div><p>
+  Copyright (C) 2000, 2001, 2002 Free Software Foundation, Inc. 51 Franklin St,
+  Fifth Floor, Boston, MA 02110-1301 USA. Everyone is permitted to copy and
+  distribute verbatim copies of this license document, but changing it is not
+  allowed.
+ </p><h5><a id="id1339"></a> 0. PREAMBLE </h5><p>
+  The purpose of this License is to make a manual, textbook, or other
+  functional and useful document "free" in the sense of freedom: to assure
+  everyone the effective freedom to copy and redistribute it, with or without
+  modifying it, either commercially or non-commercially. Secondarily, this
+  License preserves for the author and publisher a way to get credit for their
+  work, while not being considered responsible for modifications made by
+  others.
+ </p><p>
+  This License is a kind of "copyleft", which means that derivative works of
+  the document must themselves be free in the same sense. It complements the
+  GNU General Public License, which is a copyleft license designed for free
+  software.
+ </p><p>
+  We have designed this License to use it for manuals for free software,
+  because free software needs free documentation: a free program should come
+  with manuals providing the same freedoms that the software does. But this
+  License is not limited to software manuals; it can be used for any textual
+  work, regardless of subject matter or whether it is published as a printed
+  book. We recommend this License principally for works whose purpose is
+  instruction or reference.
+ </p><h5><a id="id1340"></a> 1. APPLICABILITY AND DEFINITIONS </h5><p>
+  This License applies to any manual or other work, in any medium, that
+  contains a notice placed by the copyright holder saying it can be distributed
+  under the terms of this License. Such a notice grants a world-wide,
+  royalty-free license, unlimited in duration, to use that work under the
+  conditions stated herein. The "Document", below, refers to any such manual or
+  work. Any member of the public is a licensee, and is addressed as "you". You
+  accept the license if you copy, modify or distribute the work in a way
+  requiring permission under copyright law.
+ </p><p>
+  A "Modified Version" of the Document means any work containing the Document
+  or a portion of it, either copied verbatim, or with modifications and/or
+  translated into another language.
+ </p><p>
+  A "Secondary Section" is a named appendix or a front-matter section of the
+  Document that deals exclusively with the relationship of the publishers or
+  authors of the Document to the Document's overall subject (or to related
+  matters) and contains nothing that could fall directly within that overall
+  subject. (Thus, if the Document is in part a textbook of mathematics, a
+  Secondary Section may not explain any mathematics.) The relationship could be
+  a matter of historical connection with the subject or with related matters,
+  or of legal, commercial, philosophical, ethical or political position
+  regarding them.
+ </p><p>
+  The "Invariant Sections" are certain Secondary Sections whose titles are
+  designated, as being those of Invariant Sections, in the notice that says
+  that the Document is released under this License. If a section does not fit
+  the above definition of Secondary then it is not allowed to be designated as
+  Invariant. The Document may contain zero Invariant Sections. If the Document
+  does not identify any Invariant Sections then there are none.
+ </p><p>
+  The "Cover Texts" are certain short passages of text that are listed, as
+  Front-Cover Texts or Back-Cover Texts, in the notice that says that the
+  Document is released under this License. A Front-Cover Text may be at most 5
+  words, and a Back-Cover Text may be at most 25 words.
+ </p><p>
+  A "Transparent" copy of the Document means a machine-readable copy,
+  represented in a format whose specification is available to the general
+  public, that is suitable for revising the document straightforwardly with
+  generic text editors or (for images composed of pixels) generic paint
+  programs or (for drawings) some widely available drawing editor, and that is
+  suitable for input to text formatters or for automatic translation to a
+  variety of formats suitable for input to text formatters. A copy made in an
+  otherwise Transparent file format whose markup, or absence of markup, has
+  been arranged to thwart or discourage subsequent modification by readers is
+  not Transparent. An image format is not Transparent if used for any
+  substantial amount of text. A copy that is not "Transparent" is called
+  "Opaque".
+ </p><p>
+  Examples of suitable formats for Transparent copies include plain ASCII
+  without markup, Texinfo input format, LaTeX input format, SGML or XML using a
+  publicly available DTD, and standard-conforming simple HTML, PostScript or
+  PDF designed for human modification. Examples of transparent image formats
+  include PNG, XCF and JPG. Opaque formats include proprietary formats that can
+  be read and edited only by proprietary word processors, SGML or XML for which
+  the DTD and/or processing tools are not generally available, and the
+  machine-generated HTML, PostScript or PDF produced by some word processors
+  for output purposes only.
+ </p><p>
+  The "Title Page" means, for a printed book, the title page itself, plus such
+  following pages as are needed to hold, legibly, the material this License
+  requires to appear in the title page. For works in formats which do not have
+  any title page as such, "Title Page" means the text near the most prominent
+  appearance of the work's title, preceding the beginning of the body of the
+  text.
+ </p><p>
+  A section "Entitled XYZ" means a named subunit of the Document whose title
+  either is precisely XYZ or contains XYZ in parentheses following text that
+  translates XYZ in another language. (Here XYZ stands for a specific section
+  name mentioned below, such as "Acknowledgements", "Dedications",
+  "Endorsements", or "History".) To "Preserve the Title" of such a section when
+  you modify the Document means that it remains a section "Entitled XYZ"
+  according to this definition.
+ </p><p>
+  The Document may include Warranty Disclaimers next to the notice which states
+  that this License applies to the Document. These Warranty Disclaimers are
+  considered to be included by reference in this License, but only as regards
+  disclaiming warranties: any other implication that these Warranty Disclaimers
+  may have is void and has no effect on the meaning of this License.
+ </p><h5><a id="id1341"></a> 2. VERBATIM COPYING </h5><p>
+  You may copy and distribute the Document in any medium, either commercially
+  or noncommercially, provided that this License, the copyright notices, and
+  the license notice saying this License applies to the Document are reproduced
+  in all copies, and that you add no other conditions whatsoever to those of
+  this License. You may not use technical measures to obstruct or control the
+  reading or further copying of the copies you make or distribute. However, you
+  may accept compensation in exchange for copies. If you distribute a large
+  enough number of copies you must also follow the conditions in section 3.
+ </p><p>
+  You may also lend copies, under the same conditions stated above, and you may
+  publicly display copies.
+ </p><h5><a id="id1342"></a> 3. COPYING IN QUANTITY </h5><p>
+  If you publish printed copies (or copies in media that commonly have printed
+  covers) of the Document, numbering more than 100, and the Document's license
+  notice requires Cover Texts, you must enclose the copies in covers that
+  carry, clearly and legibly, all these Cover Texts: Front-Cover Texts on the
+  front cover, and Back-Cover Texts on the back cover. Both covers must also
+  clearly and legibly identify you as the publisher of these copies. The front
+  cover must present the full title with all words of the title equally
+  prominent and visible. You may add other material on the covers in addition.
+  Copying with changes limited to the covers, as long as they preserve the
+  title of the Document and satisfy these conditions, can be treated as
+  verbatim copying in other respects.
+ </p><p>
+  If the required texts for either cover are too voluminous to fit legibly, you
+  should put the first ones listed (as many as fit reasonably) on the actual
+  cover, and continue the rest onto adjacent pages.
+ </p><p>
+  If you publish or distribute Opaque copies of the Document numbering more
+  than 100, you must either include a machine-readable Transparent copy along
+  with each Opaque copy, or state in or with each Opaque copy a
+  computer-network location from which the general network-using public has
+  access to download using public-standard network protocols a complete
+  Transparent copy of the Document, free of added material. If you use the
+  latter option, you must take reasonably prudent steps, when you begin
+  distribution of Opaque copies in quantity, to ensure that this Transparent
+  copy will remain thus accessible at the stated location until at least one
+  year after the last time you distribute an Opaque copy (directly or through
+  your agents or retailers) of that edition to the public.
+ </p><p>
+  It is requested, but not required, that you contact the authors of the
+  Document well before redistributing any large number of copies, to give them
+  a chance to provide you with an updated version of the Document.
+ </p><h5><a id="id1343"></a> 4. MODIFICATIONS </h5><p>
+  You may copy and distribute a Modified Version of the Document under the
+  conditions of sections 2 and 3 above, provided that you release the Modified
+  Version under precisely this License, with the Modified Version filling the
+  role of the Document, thus licensing distribution and modification of the
+  Modified Version to whoever possesses a copy of it. In addition, you must do
+  these things in the Modified Version:
+ </p><div class="orderedlist"><ol class="orderedlist" type="A"><li class="listitem"><p>
+    Use in the Title Page (and on the covers, if any) a title distinct from
+    that of the Document, and from those of previous versions (which should, if
+    there were any, be listed in the History section of the Document). You may
+    use the same title as a previous version if the original publisher of that
+    version gives permission.
+   </p></li><li class="listitem"><p>
+    List on the Title Page, as authors, one or more persons or entities
+    responsible for authorship of the modifications in the Modified Version,
+    together with at least five of the principal authors of the Document (all
+    of its principal authors, if it has fewer than five), unless they release
+    you from this requirement.
+   </p></li><li class="listitem"><p>
+    State on the Title page the name of the publisher of the Modified Version,
+    as the publisher.
+   </p></li><li class="listitem"><p>
+    Preserve all the copyright notices of the Document.
+   </p></li><li class="listitem"><p>
+    Add an appropriate copyright notice for your modifications adjacent to the
+    other copyright notices.
+   </p></li><li class="listitem"><p>
+    Include, immediately after the copyright notices, a license notice giving
+    the public permission to use the Modified Version under the terms of this
+    License, in the form shown in the Addendum below.
+   </p></li><li class="listitem"><p>
+    Preserve in that license notice the full lists of Invariant Sections and
+    required Cover Texts given in the Document's license notice.
+   </p></li><li class="listitem"><p>
+    Include an unaltered copy of this License.
+   </p></li><li class="listitem"><p>
+    Preserve the section Entitled "History", Preserve its Title, and add to it
+    an item stating at least the title, year, new authors, and publisher of the
+    Modified Version as given on the Title Page. If there is no section
+    Entitled "History" in the Document, create one stating the title, year,
+    authors, and publisher of the Document as given on its Title Page, then add
+    an item describing the Modified Version as stated in the previous sentence.
+   </p></li><li class="listitem"><p>
+    Preserve the network location, if any, given in the Document for public
+    access to a Transparent copy of the Document, and likewise the network
+    locations given in the Document for previous versions it was based on.
+    These may be placed in the "History" section. You may omit a network
+    location for a work that was published at least four years before the
+    Document itself, or if the original publisher of the version it refers to
+    gives permission.
+   </p></li><li class="listitem"><p>
+    For any section Entitled "Acknowledgements" or "Dedications", Preserve the
+    Title of the section, and preserve in the section all the substance and
+    tone of each of the contributor acknowledgements and/or dedications given
+    therein.
+   </p></li><li class="listitem"><p>
+    Preserve all the Invariant Sections of the Document, unaltered in their
+    text and in their titles. Section numbers or the equivalent are not
+    considered part of the section titles.
+   </p></li><li class="listitem"><p>
+    Delete any section Entitled "Endorsements". Such a section may not be
+    included in the Modified Version.
+   </p></li><li class="listitem"><p>
+    Do not retitle any existing section to be Entitled "Endorsements" or to
+    conflict in title with any Invariant Section.
+   </p></li><li class="listitem"><p>
+    Preserve any Warranty Disclaimers.
+   </p></li></ol></div><p>
+  If the Modified Version includes new front-matter sections or appendices that
+  qualify as Secondary Sections and contain no material copied from the
+  Document, you may at your option designate some or all of these sections as
+  invariant. To do this, add their titles to the list of Invariant Sections in
+  the Modified Version's license notice. These titles must be distinct from any
+  other section titles.
+ </p><p>
+  You may add a section Entitled "Endorsements", provided it contains nothing
+  but endorsements of your Modified Version by various parties--for example,
+  statements of peer review or that the text has been approved by an
+  organization as the authoritative definition of a standard.
+ </p><p>
+  You may add a passage of up to five words as a Front-Cover Text, and a
+  passage of up to 25 words as a Back-Cover Text, to the end of the list of
+  Cover Texts in the Modified Version. Only one passage of Front-Cover Text and
+  one of Back-Cover Text may be added by (or through arrangements made by) any
+  one entity. If the Document already includes a cover text for the same cover,
+  previously added by you or by arrangement made by the same entity you are
+  acting on behalf of, you may not add another; but you may replace the old
+  one, on explicit permission from the previous publisher that added the old
+  one.
+ </p><p>
+  The author(s) and publisher(s) of the Document do not by this License give
+  permission to use their names for publicity for or to assert or imply
+  endorsement of any Modified Version.
+ </p><h5><a id="id1344"></a> 5. COMBINING DOCUMENTS </h5><p>
+  You may combine the Document with other documents released under this
+  License, under the terms defined in section 4 above for modified versions,
+  provided that you include in the combination all of the Invariant Sections of
+  all of the original documents, unmodified, and list them all as Invariant
+  Sections of your combined work in its license notice, and that you preserve
+  all their Warranty Disclaimers.
+ </p><p>
+  The combined work need only contain one copy of this License, and multiple
+  identical Invariant Sections may be replaced with a single copy. If there are
+  multiple Invariant Sections with the same name but different contents, make
+  the title of each such section unique by adding at the end of it, in
+  parentheses, the name of the original author or publisher of that section if
+  known, or else a unique number. Make the same adjustment to the section
+  titles in the list of Invariant Sections in the license notice of the
+  combined work.
+ </p><p>
+  In the combination, you must combine any sections Entitled "History" in the
+  various original documents, forming one section Entitled "History"; likewise
+  combine any sections Entitled "Acknowledgements", and any sections Entitled
+  "Dedications". You must delete all sections Entitled "Endorsements".
+ </p><h5><a id="id1345"></a> 6. COLLECTIONS OF DOCUMENTS </h5><p>
+  You may make a collection consisting of the Document and other documents
+  released under this License, and replace the individual copies of this
+  License in the various documents with a single copy that is included in the
+  collection, provided that you follow the rules of this License for verbatim
+  copying of each of the documents in all other respects.
+ </p><p>
+  You may extract a single document from such a collection, and distribute it
+  individually under this License, provided you insert a copy of this License
+  into the extracted document, and follow this License in all other respects
+  regarding verbatim copying of that document.
+ </p><h5><a id="id1346"></a> 7. AGGREGATION WITH INDEPENDENT WORKS </h5><p>
+  A compilation of the Document or its derivatives with other separate and
+  independent documents or works, in or on a volume of a storage or
+  distribution medium, is called an "aggregate" if the copyright resulting from
+  the compilation is not used to limit the legal rights of the compilation's
+  users beyond what the individual works permit. When the Document is included
+  in an aggregate, this License does not apply to the other works in the
+  aggregate which are not themselves derivative works of the Document.
+ </p><p>
+  If the Cover Text requirement of section 3 is applicable to these copies of
+  the Document, then if the Document is less than one half of the entire
+  aggregate, the Document's Cover Texts may be placed on covers that bracket
+  the Document within the aggregate, or the electronic equivalent of covers if
+  the Document is in electronic form. Otherwise they must appear on printed
+  covers that bracket the whole aggregate.
+ </p><h5><a id="id1347"></a> 8. TRANSLATION </h5><p>
+  Translation is considered a kind of modification, so you may distribute
+  translations of the Document under the terms of section 4. Replacing
+  Invariant Sections with translations requires special permission from their
+  copyright holders, but you may include translations of some or all Invariant
+  Sections in addition to the original versions of these Invariant Sections.
+  You may include a translation of this License, and all the license notices in
+  the Document, and any Warranty Disclaimers, provided that you also include
+  the original English version of this License and the original versions of
+  those notices and disclaimers. In case of a disagreement between the
+  translation and the original version of this License or a notice or
+  disclaimer, the original version will prevail.
+ </p><p>
+  If a section in the Document is Entitled "Acknowledgements", "Dedications",
+  or "History", the requirement (section 4) to Preserve its Title (section 1)
+  will typically require changing the actual title.
+ </p><h5><a id="id1348"></a> 9. TERMINATION </h5><p>
+  You may not copy, modify, sublicense, or distribute the Document except as
+  expressly provided for under this License. Any other attempt to copy, modify,
+  sublicense or distribute the Document is void, and will automatically
+  terminate your rights under this License. However, parties who have received
+  copies, or rights, from you under this License will not have their licenses
+  terminated so long as such parties remain in full compliance.
+ </p><h5><a id="id1349"></a> 10. FUTURE REVISIONS OF THIS LICENSE </h5><p>
+  The Free Software Foundation may publish new, revised versions of the GNU
+  Free Documentation License from time to time. Such new versions will be
+  similar in spirit to the present version, but may differ in detail to address
+  new problems or concerns. See
+  <a class="link" href="http://www.gnu.org/copyleft/" target="_top">http://www.gnu.org/copyleft/</a>.
+ </p><p>
+  Each version of the License is given a distinguishing version number. If the
+  Document specifies that a particular numbered version of this License "or any
+  later version" applies to it, you have the option of following the terms and
+  conditions either of that specified version or of any later version that has
+  been published (not as a draft) by the Free Software Foundation. If the
+  Document does not specify a version number of this License, you may choose
+  any version ever published (not as a draft) by the Free Software Foundation.
+ </p><h5><a id="id1350"></a> ADDENDUM: How to use this License for your
+  documents </h5><pre class="screen">Copyright (c) YEAR YOUR NAME.
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.2
+or any later version published by the Free Software Foundation;
+with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
+A copy of the license is included in the section entitled "GNU
+ Free Documentation License".</pre><p>
+  If you have Invariant Sections, Front-Cover Texts and Back-Cover Texts,
+  replace the "with...Texts". line with this:
+ </p><pre class="screen">with the Invariant Sections being LIST THEIR TITLES, with the
+Front-Cover Texts being LIST, and with the Back-Cover Texts being LIST.</pre><p>
+  If you have Invariant Sections without Cover Texts, or some other combination
+  of the three, merge those two alternatives to suit the situation.
+ </p><p>
+  If your document contains nontrivial examples of program code, we recommend
+  releasing these examples in parallel under your choice of free software
+  license, such as the GNU General Public License, to permit their use in free
+  software.
+ </p></div></div></body></html>

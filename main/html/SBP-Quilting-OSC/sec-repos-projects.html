@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Repositories and Projects</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="How to Modify a Package in the Open Build Service" /><link rel="up" href="index.html" title="How to Modify a Package in the Open Build Service" /><link rel="prev" href="index.html" title="How to Modify a Package in the Open Build Service" /><link rel="next" href="sec-package.html" title="Package" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Repositories and Projects</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="index.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="sec-package.html">Next</a></td></tr></table><hr /></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-repos-projects"></a>Repositories and Projects</h2></div></div></div><p>This chapter focuses on <span class="italic">repositories</span>. You will have to upload packages
+            to <span class="italic">repositories</span> and move
+            packages from one <span class="italic">repository</span>
+            to another. The term <span class="italic">repository</span> is often used as a synonym for
+                <span class="italic">project</span>. But strictly
+            speaking a <span class="italic">project</span> is a set
+            of packages and a <span class="italic">repository</span>
+            is the location where the files for these packages are stored. </p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Colons</h3><p>When you see colons (<span class="quote">“<span class="quote">:</span>”</span>) in a repository
+                (or project) name, notionally replace them by slashes
+                    (<span class="quote">“<span class="quote">/</span>”</span>), to make the file name look more
+                familiar. </p></div><p>A project can be</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>a software project (for example <span class="strong"><strong>Apache</strong></span>, <span class="strong"><strong>Base:System</strong></span>, or <span class="strong"><strong>Linux-PAM</strong></span>)</p></li><li class="listitem"><p>a home project (for example <span class="strong"><strong>home:jmoellers</strong></span>) </p></li><li class="listitem"><p>a branch (for example <span class="strong"><strong>home:jmoellers:branches:Linux-PAM</strong></span>)</p></li><li class="listitem"><p>a product project (for example <span class="strong"><strong>SUSE:SLE-12-SP3:GA)</strong></span>
+                </p><div class="important" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Important</h3><p><span class="italic">Product
+                            project</span> is not an official
+                        term!</p></div></li></ul></div><p>You can list all projects with the command <span class="command"><strong>osc ls
+                /</strong></span>. For the external build service, this command
+            returns a rather long list of available projects (at the time
+            of writing, almost 45,000 projects were available).</p><p>Each package included in a product usually goes through at
+            least three repositories:</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>the <span class="italic">development
+                        repository</span>, or in short <span class="italic">devel repo</span></p></li><li class="listitem"><p>
+                    <span class="italic">Factory</span>
+                </p></li><li class="listitem"><p>the <span class="italic">product
+                        repository</span></p></li></ol></div><p>Often a fourth repository is needed, which is the <span class="italic">branch</span> that you create to work on
+            the product. In these cases a package passes through the
+            following repositories:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>the <span class="italic">development
+                        repository</span>, or in short <span class="italic">devel repo</span></p></li><li class="listitem"><p>your <span class="italic">branch</span></p></li><li class="listitem"><p>once again the <span class="italic">devel
+                        repo</span></p></li><li class="listitem"><p>
+                    <span class="italic">Factory</span>
+                </p></li><li class="listitem"><p>the <span class="italic">product
+                        repository</span></p></li></ul></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-upstream"></a>Upstream</h3></div></div></div><p><span class="italic">Upstream</span> is not a
+                    <span class="italic">repository</span> in the
+                classical meaning, but usually it is the very basic source
+                of a package. It could be a Git repository that you clone,
+                or a Web site from where you download a TAR archive. </p><p>When you fix a bug, you should submit the patch to
+                    <span class="emphasis">upstream</span> to ensure it can
+                be included into future versions of the package. This has
+                the advantage that next time you upgrade the package from
+                    <span class="italic">upstream</span>, you might
+                be able to drop one or more local patches. In addition, you
+                contribute your efforts to the community. However, getting
+                the patch accepted might require some patience and
+                persistence, because some upstream maintainers have very
+                special requirements regarding how to fix a bug. But
+                usually most <span class="italic">upstream</span>
+                maintainers are grateful for any fixes.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-dev-repo"></a>Development Repository</h3></div></div></div><p>The <span class="italic">development
+                    repository</span>, or in short <span class="italic">devel repo</span>, is where you keep
+                a package locally, after it has been downloaded or cloned
+                from <span class="italic">upstream</span>. Most
+                    <span class="italic">development
+                    repositories</span> are located on the external
+                build service. Each <span class="italic">development
+                    repository</span> has one or more maintainers and
+                one or more bugowners. </p><p>Only the maintainer(s) and the bugowner(s) can submit to
+                this repository. Other contributors must branch the
+                repository and then request the patch to be accepted by the
+                maintainer(s) and/or bugowner(s). You can, however, check
+                out from the <span class="italic">development
+                    repo</span>, for example, if you only want to have
+                a look at the source code or if you need to analyze a
+                problem without first creating a branch (which takes up
+                some space on the build servers).</p><p>You can find the <span class="italic">devel
+                    repo</span> of a package by typing</p><pre class="screen">osc develproject &lt;PRJ&gt; &lt;PKG&gt;</pre><p>The command:</p><pre class="screen">osc develproject openSUSE:Factory cvs</pre><p>will display the following output</p><pre class="screen">devel:tools:scm</pre><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Short Version</h3><p>You can abbreviate <span class="strong"><strong>develproject</strong></span> with the short version
+                        <span class="strong"><strong>dp</strong></span>.</p></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-factory"></a>Factory</h3></div></div></div><p>The <span class="italic">Factory</span> project is
+                the rolling development code base for the openSUSE
+                distribution Tumbleweed. <span class="italic">Factory</span> is mainly used as an internal term
+                for openSUSE's distribution developers, and the target
+                project for all contributions to openSUSE's main code base.
+                There is a constant flow of packages going into <span class="italic">Factory</span>. There is no package
+                or feature freeze; therefore, the <span class="italic">Factory</span> repository is not guaranteed to be
+                fully stable and is not intended to be used as a
+                distribution itself.</p><p>The core system packages receive automated testing via
+                openQA, the automated test tool for Linux operating systems
+                (for more information, see <a class="link" href="http://open.qa/" target="_top">http://open.qa/</a>).
+                When automated testing is completed and the repository is
+                in a consistent state, it is synchronized to the download
+                mirrors. Then it is published as the openSUSE Tumbleweed
+                distribution, the rolling release version of the openSUSE
+                project, featuring the newest technology (see <a class="link" href="https://www.opensuse.org/#Tumbleweed" target="_top">https://www.opensuse.org/#Tumbleweed</a>). It is of
+                course also the basis for openSUSE Leap, the regular annual
+                release from the openSUSE project, with security and
+                stability being the main focus. </p><p>In addition, <span class="italic">Factory</span>
+                is used as the base repository containing the code stream
+                for the development of the next major version of SUSE Linux
+                Enterprise and all related enterprise-class products.
+                Therefore it is all the more important to keep this
+                repository up to date. </p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Community Project</h3><p><span class="strong"><strong>openSUSE:Factory</strong></span>
+                    is part of the openSUSE community project. This means
+                    it resides outside of the official SUSE product
+                    projects, and is not regulated or controlled by SUSE.
+                    Package maintainers are usually members of the openSUSE
+                    community.</p></div><p>A major rule has been established which is called
+                    <span class="strong"><strong>
+                    <span class="quote">“<span class="quote">Factory First</span>”</span>
+                </strong></span>. In theory, this means that you need to submit
+                any package that you want to see included in any version of
+                openSUSE or SUSE Linux Enterprise to <span class="italic">Factory</span>. In practice, you will
+                submit your package or patch to the <span class="italic">devel repo</span> first and then you will submit
+                to <span class="italic">Factory</span> from there.
+                As you branch and check out from the <span class="italic">devel repo</span>,
+                    <span class="command"><strong>osc</strong></span> will automatically submit
+                changes to the <span class="italic">devel
+                    repo</span> master. Once you have submitted or
+                updated a package in its <span class="italic">devel
+                    repo</span>, you (or the maintainer of the
+                    <span class="italic">devel repo</span>) must
+                submit the package to <span class="strong"><strong>openSUSE:Factory</strong></span>. </p><div class="important" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Factory First Policy</h3><p> After you have submitted or updated a package in the
+                        <span class="italic">devel repo</span>, you
+                    always need to submit it to the next step! As long as
+                    the package is updated or patched only in its <span class="italic">devel repo</span>, the new
+                    version of the package will not be included with any
+                    new release. Only when it is submitted to <span class="strong"><strong>openSUSE:Factory</strong></span>, it is
+                    available for incorporation into future product
+                    releases. This policy is called <span class="strong"><strong>
+                        <span class="quote">“<span class="quote">Factory First</span>”</span>
+                    </strong></span>!</p></div><p>From <span class="strong"><strong>openSUSE:Factory</strong></span>,
+                the package will later be submitted to a <span class="italic">distribution repository</span>, for
+                example to <span class="strong"><strong>SUSE:SLE-15:GA</strong></span>. Usually this is done by the
+                package maintainers, but occasionally you might be asked to
+                submit your new or updated package there.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-home-project"></a>Home Project</h3></div></div></div><p>The <span class="italic">Home Project</span> is
+                your private repository. It is called <span class="strong"><strong>home:&lt;username&gt;</strong></span> (for
+                example <span class="strong"><strong>home:jmoellers</strong></span>).
+                In this repository, you store your own projects, and you
+                create your <span class="italic">branches</span>.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-branch"></a>Branch</h3></div></div></div><p>When you create a <span class="italic">branch</span> from an existing project, for
+                example from a <span class="italic">devel
+                    repo</span> of which you are not the maintainer or
+                bugowner, this is stored under <span class="strong"><strong>home:&lt;username&gt;:branches</strong></span>. In the
+                following example:</p><pre class="screen">home:jmoellers:branches:network:utilities/wget</pre><p><span class="strong"><strong>home:jmoellers:branches:</strong></span> stands for the
+                branch, <span class="strong"><strong>network:utilities</strong></span> stands for the <span class="strong"><strong>devel project</strong></span>, and <span class="strong"><strong>wget</strong></span> is the product.</p><p>Some maintainers or bugowners branch from their own devel
+                repos, to ensure clean development processes, and to allow
+                for proper documentation. </p><p>The <span class="command"><strong>osc</strong></span> command records from which
+                repository the branch was created. When you submit changes
+                back to your branch, it also makes a request to the
+                maintainers of the package to accept and submit the changes
+                into the original repository.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-product-projects"></a>Product Projects</h3></div></div></div><p>For the purpose of this document, the term <span class="italic">Product Projects</span> refers to the
+                repositories containing the packages that are bundled into
+                a SUSE product. When a new product is built, its repository
+                usually is named <span class="strong"><strong>SUSE:&lt;productname&gt;:GA</strong></span> (for example
+                    <span class="strong"><strong>SUSE:SLE-15:GA</strong></span>). At
+                a later stage of the lifecycle, after the General
+                Availability (GA) of the product, when the service packs
+                for a product need to be created, a repository <span class="strong"><strong>SUSE:&lt;productname&gt;:Update</strong></span> is set up.
+                This is the repository to which you now should submit your
+                patches. The next service pack of a product will be built
+                from this repository.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">GA Production Repository</h3><p>You cannot directly submit to the GA production
+                    repository. As the <span class="strong"><strong>Factory
+                        First</strong></span> rule applies, you submit to
+                        <span class="italic">Factory</span>. Then
+                    the product release team will fetch the package from
+                    there. You can, however, submit to the <span class="strong"><strong>Update</strong></span> repositories when
+                    you fix a bug in an older release.</p></div><p>Each distribution and each service pack has its own
+                repository (for example <span class="strong"><strong>SLE-xx-SPyy</strong></span>). If you fix a bug in a
+                package’s <span class="italic">devel repo</span>
+                (after which you submit the patch to <span class="strong"><strong>openSUSE:Factory</strong></span>), you may
+                need to also fix it in the <span class="italic">distribution repos</span>.</p><p>This requires the following steps:</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>Creating branches for all versions which are
+                        currently in <span class="italic">maintenance
+                            mode</span>:</p><pre class="screen">osc mbranch</pre></li><li class="listitem"><p>Checking the branches out to your local disk. The
+                        previous step and this step can be combined into
+                        one step:</p><pre class="screen">osc  mbranch -c</pre></li><li class="listitem"><p>Creating one or more patches and modifying the
+                        associated files (for example the <span class="strong"><strong>spec</strong></span> file)</p></li><li class="listitem"><p>Submitting the changes back to the <span class="italic">product repo</span></p></li></ol></div><p>The last step will not automatically update the package
+                in the <span class="italic">product repo</span>. The
+                package maintainer will do that after some necessary
+                tests.</p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="index.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="sec-package.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">How to Modify a Package in the Open Build Service </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Package</td></tr></table></div></body></html>

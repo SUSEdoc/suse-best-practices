@@ -1,0 +1,479 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Introduction to SUSE Linux Enterprise Server for the Raspberry Pi</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><meta name="description" content="This guide contains an overview of SUSE Linux Enterprise Server on the Raspberry Pi platform and will guide you through the setup procedure. Disclaimer: Documents published as part of the SUSE Best Practices series have been contributed voluntarily by SUSE employees and third parties. They are meant to serve as examples of how particular actions can be performed. They have been compiled with utmost attention to detail. However, this does not guarantee complete accuracy. SUSE cannot verify that actions described in these documents do what is claimed or whether actions described have unintended consequences. SUSE LLC, its affiliates, the authors, and the translators may not be held liable for possible errors or the consequences thereof." /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div xml:lang="en" class="article" lang="en"><div class="titlepage"><div><div><h1 class="title"><a id="art-sbp-rpiquick"></a>Introduction to SUSE Linux Enterprise Server for the Raspberry Pi</h1></div><div><div class="author"><h3 class="author"><span class="firstname">Fabian</span> <span class="surname">Vogt, Engineer, SUSE</span></h3></div></div><div><div class="abstract"><p class="title"><strong>Abstract</strong></p><p> This guide contains an overview of SUSE Linux Enterprise Server on the Raspberry Pi platform and will
+      guide you through the setup procedure. </p><p>
+        <span class="strong"><strong>Disclaimer: </strong></span>
+        Documents published as part of the SUSE Best Practices series have been contributed voluntarily
+        by SUSE employees and third parties. They are meant to serve as examples of how particular
+        actions can be performed. They have been compiled with utmost attention to detail. However,
+        this does not guarantee complete accuracy. SUSE cannot verify that actions described in these
+        documents do what is claimed or whether actions described have unintended consequences.
+        SUSE LLC, its affiliates, the authors, and the translators may not be held liable for possible errors
+        or the consequences thereof.
+      </p></div></div></div><hr /></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="sect1"><a href="#sec-rpi-platform">Platform Overview</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec-rpi-platform-system">Technical Details of the Raspberry Pi 3 Model B</a></span></dt><dt><span class="sect2"><a href="#sec-rpi-platform-software">SUSE Linux Enterprise Server 12 SP2</a></span></dt></dl></dd><dt><span class="sect1"><a href="#sec-rpi-installation">Installation</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec-rpi-installation-linux">Preparing the Card on Linux</a></span></dt><dt><span class="sect2"><a href="#sec-rpi-installation-windows">Preparing the Card on Windows*</a></span></dt><dt><span class="sect2"><a href="#sec-rpi-installation-macos">Preparing the Card on macOS*</a></span></dt></dl></dd><dt><span class="sect1"><a href="#sec-rpi-firstboot">Booting for the First Time</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec-rpi-firstboot-yast">Initial System Setup with YaST</a></span></dt><dt><span class="sect2"><a href="#sec-rpi-firstboot-icewm">The Desktop Environment</a></span></dt></dl></dd><dt><span class="sect1"><a href="#sec-rpi-usage">General System Usage</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec-rpi-bt">Bluetooth*</a></span></dt><dt><span class="sect2"><a href="#sec-rpi-gcc">Compiler</a></span></dt></dl></dd><dt><span class="sect1"><a href="#sec-rpi-documentation">Product Documentation</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec-rpi-documentation-sle">Product Documentation</a></span></dt><dt><span class="sect2"><a href="#sec-rpi-documentation-forum">Self-Help Forum</a></span></dt></dl></dd><dt><span class="sect1"><a href="#id1337">Legal notice</a></span></dt><dt><span class="sect1"><a href="#id1338">GNU Free Documentation License</a></span></dt></dl></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-rpi-platform"></a>Platform Overview</h2></div></div></div><p> To be able to use SUSE Linux Enterprise Server on Raspberry Pi, an ARM AArch64 compatible Raspberry Pi is
+      required. SUSE Linux Enterprise Server is tested to work on a Raspberry Pi 3 Model B board. </p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-rpi-platform-system"></a>Technical Details of the Raspberry Pi 3 Model B</h3></div></div></div><p> The Raspberry Pi is a series of small single-board computers based on a System on a Chip
+        (SoC) by Broadcom*, featuring various peripherals on the board. </p><div class="figure"><a id="fig-rpi-platform-system-board"></a><p class="title"><strong>Figure 1. Overview of the Raspberry Pi 3 Model B Connectors, © Efa / English Wikipedia / CC BY-SA 3.0</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/rpi-3b-overview-2.png" width="100%" alt="Overview of the Raspberry Pi 3 Model B connectors © Efa / English Wikipedia / CC BY-SA 3.0" /></td></tr></table></div></div></div><br class="figure-break" /><div class="figure"><a id="fig-rpi-platform-system-photo"></a><p class="title"><strong>Figure 2. Photo of the Raspberry Pi 3 Model B Connectors, © Evan-Amos / Own work / Public Domain</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/rpi-3b-photo.png" width="100%" alt="Photo of the Raspberry Pi 3 Model B connectors © Evan-Amos / Own work / Public Domain" /></td></tr></table></div></div></div><br class="figure-break" /><div class="variablelist"><p class="title"><strong>Selected Features of the Raspberry Pi 3 Model B</strong></p><dl class="variablelist"><dt><span class="term">CPU</span></dt><dd><p> The Broadcom SoC includes a quad-core ARM* Cortex*-A53 cores supporting the ARMv8
+              32-bit and 64-bit instruction sets. With the default configuration, it is clocked up
+              to 1.2 GHz. </p></dd><dt><span class="term">RAM</span></dt><dd><p> 1024 MiB DDR2 memory mounted on the back of the board. </p></dd><dt><span class="term">Graphics</span></dt><dd><p> Broadcom* VideoCore* IV providing OpenGL ES 2.0 support. Displays can be
+              connected over HDMI or composite (TRRS jack). </p></dd><dt><span class="term">Ethernet</span></dt><dd><p> A USB Ethernet adapter on the board provides 10/100MBit/s Ethernet. </p></dd><dt><span class="term">WLAN</span></dt><dd><p> The BCM43438 chip supports IEEE-802.11g, IEEE-802.11b and IEEE-802.11n in the 2,4
+              GHz band. It also provides Bluetooth 2.0-4.1 (Low Energy). </p></dd><dt><span class="term">Storage</span></dt><dd><p>MicroSDHC card slot</p></dd><dt><span class="term">Power</span></dt><dd><p> The Raspberry Pi's main power source is the Micro USB connector. It is recommended
+              to use the bundled power supply only. </p></dd><dt><span class="term">USB</span></dt><dd><p> A total of four USB 2.0 ports is available. </p></dd><dt><span class="term">Connectors</span></dt><dd><p> A 0.1 inch multi-function pin header is also available. Note that not all
+              functionality of this header is exposed in SUSE Linux Enterprise Server for the Raspberry Pi. </p></dd></dl></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-rpi-platform-software"></a>SUSE Linux Enterprise Server 12 SP2</h3></div></div></div><p> SUSE Linux Enterprise Server 12 SP2 is the first enterprise-class Linux operating
+        system available free-of-charge for the Raspberry Pi. During its lifetime, customers running a
+        registered SUSE Linux Enterprise Server for the Raspberry Pi system, will receive all released bug and security fixes, as well
+        as feature updates. 
+      </p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">No commercial support available</h3><p> SUSE will not provide commercial support offers via SUSE Technical
+          Support for SUSE Linux Enterprise Server for the Raspberry Pi. </p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-rpi-platform-software-raspbian"></a>Differences Compared to Raspbian</h4></div></div></div><p> Raspbian is the de-facto default distribution for the Raspberry Pi. The following
+          paragraphs provide a short overview of differences between SUSE Linux Enterprise Server for the Raspberry Pi and Raspbian. </p><div class="variablelist"><dl class="variablelist"><dt><span class="term">Based on Upstream Kernel</span></dt><dd><p> While Raspbian uses a kernel with modifications especially for the Raspberry Pi,
+                SUSE Linux Enterprise Server for the Raspberry Pi uses the default SUSE Linux Enterprise kernel for AArch64. </p></dd><dt><span class="term">AArch64 Instruction Set</span></dt><dd><p> SUSE Linux Enterprise Server for the Raspberry Pi is the first distribution for the Raspberry Pi using the
+                AArch64 instruction set. </p></dd><dt><span class="term">Boot Process</span></dt><dd><p> In Raspbian, the kernel is loaded directly. This is not supported by
+                SUSE Linux Enterprise Server for the Raspberry Pi, where the U-Boot boot loader is used to provide an EFI boot
+                environment. A GRUB2 EFI binary is chainloaded to provide a graphical boot screen.
+              </p></dd><dt><span class="term">Root File System</span></dt><dd><p> SUSE Linux Enterprise Server for the Raspberry Pi uses Btrfs as file system for the root partition. compression is
+                enabled by default for better SD-Card performance. </p></dd></dl></div></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-rpi-platform-software-yast"></a>YaST</h4></div></div></div><p> YaST is the installation and configuration framework for SUSE Linux Enterprise. It is
+          popular for its easy use, flexible graphical interfaces and the capability to customize
+          your system quickly during and after the installation. YaST can be used to configure
+          your entire system: you can configure hardware, set up networking, manage system services
+          and tune your security settings. All these tasks can be reached from the YaST
+          Control Center. To start it, choose YaST in the menu or run the command
+            <span class="command"><strong>xdg-su -c yast2</strong></span>. You will be prompted to enter the password of the
+          <code class="systemitem">root</code> user. </p><div class="figure"><a id="fig-rpi-yast2"></a><p class="title"><strong>Figure 3. The YaST Control Center</strong></p><div class="figure-contents"><div class="mediaobject"><img src="images/rpi_yast2.png" alt="The YaST control center" /></div></div></div><br class="figure-break" /><p> When started, YaST shows an overview of available modules (<a class="xref" href="#fig-rpi-yast2" title="Figure 3. The YaST Control Center">Figure 3, “The YaST Control Center”</a>). Simply click an icon to open a module. </p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-rpi-platform-software-zypper"></a>Zypper</h4></div></div></div><p> Zypper is the package manager for SUSE Linux Enterprise. It is the tool for installing, updating
+          and removing packages as well as managing repositories. </p><p> The general syntax for Zypper invocations is: </p><pre class="screen">zypper <code class="option">[global-options]</code><em class="replaceable"><code>command</code></em><code class="option">[command-options]</code><code class="option">[arguments]</code> ...</pre><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Short Command Form</h3><p> For most commands, there is both a short and a long form. An overview is available
+            with <span class="command"><strong>zypper --help</strong></span>. </p></div><div class="variablelist"><dl class="variablelist"><dt><span class="term">Installing a package</span></dt><dd><pre class="screen">zypper install mplayer</pre></dd><dt><span class="term">Removing a package</span></dt><dd><pre class="screen">zypper remove mplayer</pre></dd><dt><span class="term">List available patches</span></dt><dd><pre class="screen">zypper list-patches</pre></dd><dt><span class="term">Install available patches</span></dt><dd><pre class="screen">zypper patch</pre></dd></dl></div><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Installing Software Updates</h3><p> The recommended way to install available software updates is using the YaST
+            Online Updater. To start it, choose <span class="quote">“<span class="quote">Online Update</span>”</span> in
+              <span class="quote">“<span class="quote">Settings</span>”</span> under <span class="quote">“<span class="quote">Desktop Apps</span>”</span> in the IceWM menu. </p></div></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-rpi-platform-software-limitations"></a>Limitations</h4></div></div></div><div class="variablelist"><dl class="variablelist"><dt><span class="term">Graphics not hardware-accelerated</span></dt><dd><p>X.Org hardware acceleration is disabled to improve system stability and
+                reliability.</p><p>To enable it, comment out the following line in
+                  <code class="filename">/etc/X11/xorg.conf.d/20-kms.conf</code>: <code class="literal">Option
+                  "AccelMethod" "none"</code> by prefixing it with <span class="quote">“<span class="quote">#</span>”</span>.</p></dd></dl></div></div></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-rpi-installation"></a>Installation</h2></div></div></div><p> SUSE Linux Enterprise Server for Raspberry Pi is distributed as XZ-compressed image file for MicroSD
+      cards. This section will guide you through the process of preparing the card to the first
+      boot. If you already have a MicroSD card containing the image, you can skip this section and
+      go straight to <a class="xref" href="#sec-rpi-firstboot" title="Booting for the First Time">the section called “Booting for the First Time”</a>. </p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">SD Card Space Requirements</h3><p> It is recommended to use a card with a capacity of at least 8 GB. </p></div><div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">All Data on the Card will be Lost!</h3><p> By following the procedure below, all data on the SD card will be overwritten and
+        therefore irrevocably lost! Be very careful when choosing the destination device of the
+        image writing process! </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-rpi-installation-linux"></a>Preparing the Card on Linux</h3></div></div></div><p> Before and after you plug in the SD card, run the <span class="command"><strong>lsblk</strong></span> command.
+        Between the two runs of <span class="command"><strong>lsblk</strong></span>, there should be a difference of one or
+        more lines. The first column and first row is the name of the node representing the SD card
+        in your system. To write the image to the card, use the <span class="command"><strong>dd</strong></span> command: </p><pre class="screen">xz -cd <em class="replaceable"><code>IMAGE</code></em> | dd of=/dev/<em class="replaceable"><code>SDCARDDEV</code></em> bs=4096</pre><div class="example"><a id="ex-rpi-installation-dd"></a><p class="title"><strong>Example 1.  Writing the Image to the Card using <span class="command">dd</span>
+        </strong></p><div class="example-contents"><p>This command decompresses the image
+            <code class="literal">SLES-12-SP2-ARM-JeOS-raspberrypi3_aarch64-Build2.62.raw.xz</code> to the SD
+          card <code class="literal">mmcblk0</code>. </p><pre class="screen">
+xz -cd SLES-12-SP2-ARM-JeOS-raspberrypi3_aarch64-Build2.62.raw.xz | sudo dd of=/dev/mmcblk0 bs=4096</pre></div></div><br class="example-break" /></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-rpi-installation-windows"></a>Preparing the Card on Windows*</h3></div></div></div><p> The following steps will guide you through the installation of the image onto the SD
+        card on Windows. You need to meet these prerequisites: </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Latest available Image of SUSE Linux Enterprise Server for the Raspberry Pi</p></li><li class="listitem"><p>Easy 7-Zip from <a class="link" href="http://www.e7z.org/" target="_top">http://www.e7z.org/</a></p></li><li class="listitem"><p>Win32 Disk Imager from <a class="link" href="http://sourceforge.net/projects/win32diskimager/" target="_top">http://sourceforge.net/projects/win32diskimager/</a></p></li></ul></div><div class="procedure"><a id="pro-rpi-installation-windows"></a><ol class="procedure" type="1"><li class="step"><p> Open the downloaded image using Easy-7-Zip. Extract the file content into a folder
+            with sufficient free space. </p><div class="informalfigure"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/rpi_image_7z.png" width="100%" alt="7zip extraction dialog" /></td></tr></table></div></div></li><li class="step"><p> Run Win32 Disk Imager and select the extracted file as <span class="guimenu">Image
+            File</span>. Then, choose the correct drive letter as <span class="guimenu">Device</span>.
+            Click on <span class="guimenu">Write</span> to start the procedure. </p><div class="informalfigure"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/rpi_image_win32.png" width="100%" alt="Win32 Disk Imager Writing Process" /></td></tr></table></div></div><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Finding the correct device</h3><p> If you are unsure which drive letter to choose from in the list, just remove the
+              SD card and run Win32 Disk Imager again. The option that disappeared is the right
+              target device. </p></div></li></ol></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-rpi-installation-macos"></a>Preparing the Card on macOS*</h3></div></div></div><p> The following steps will guide you through the installation of the image onto the SD
+        card on macOS. You need to meet these prerequisites: </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Latest available Image of SUSE Linux Enterprise Server for the Raspberry Pi</p></li><li class="listitem"><p>The Unarchiver from <a class="link" href="http://unarchiver.c3.cx/unarchiver" target="_top">http://unarchiver.c3.cx/unarchiver</a></p></li></ul></div><div class="procedure"><a id="pro-rpi-installation-macos"></a><ol class="procedure" type="1"><li class="step"><p> Open Finder at the location where the downloaded image is stored. Use the
+              <span class="guimenu">Open With</span> selection to choose The Unarchiver instead of the default
+            Archive utility and extract the content into a folder with sufficient free space. </p><div class="informalfigure"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/rpi_image_macos.png" width="100%" alt="Open the Image with The Unarchiver" /></td></tr></table></div></div></li><li class="step"><p> Open a Terminal window and change into the destination directory of the
+            uncompressed image. Enter <span class="command"><strong>diskutil list</strong></span> before and after the SD card
+            is inserted to find out which device to use. </p></li><li class="step"><p> Run <span class="command"><strong>diskutil unmountDisk <em class="replaceable"><code>/dev/diskX</code></em></strong></span>,
+            where X is the disk number from the previous step. </p></li><li class="step"><p> Run <span class="command"><strong>sudo dd bs=4096 if=<em class="replaceable"><code>imageFile.raw</code></em>
+                of=<em class="replaceable"><code>/dev/diskX</code></em></strong></span>, where X is the disk number and
+            imageFile.raw is the name of the uncompressed image. </p><pre class="screen"><code class="prompt">tux &gt; </code>sudo dd bs=4096 if=SLES-12-SP2-ARM-JeOS-raspberrypi3_aarch64-Build2.62.raw of=/dev/disk4
+Password:
+5550+0 records in
+5550+0 records out
+5819596800 bytes transferred in 1131.796649 secs (5141910 bytes/sec)
+          </pre></li><li class="step"><p> Now unmount the disk (which is now labelled <span class="guimenu">EFI</span>) as usual.
+          </p></li></ol></div></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-rpi-firstboot"></a>Booting for the First Time</h2></div></div></div><p> After insertion of the prepared MicroSD card, connect a display, Ethernet and USB
+      keyboard and mouse first, then provide power over Micro USB. After a few seconds you should be
+      able to see a few lines of text on the screen. If that is not the case, recheck the connection
+      to the display. </p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Operation Without Mouse</h3><p> YaST can be used without a mouse by only using the keyboard. Every GUI element
+        has an accelerator configured, visible as underlined letter. To activate such an
+        accelerator, press the letter together with <span class="keycap"><strong>Alt</strong></span>. </p></div><p> On the first boot, the system will expand to fill the entire SD card, so be patient. </p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-rpi-firstboot-yast"></a>Initial System Setup with YaST</h3></div></div></div><p> After a few minutes, YaST will lead you through the initial system setup. </p><div class="procedure"><a id="pro-rpi-firstboot-yast"></a><ol class="procedure" type="1"><li class="step"><p> First, the system language and keyboard layout needs to be configured. Use the
+            drop-down boxes and click <span class="guimenu">Next</span>. </p><div class="informalfigure"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/rpi_first_lang.png" width="100%" alt="YaST showing keyboard and language configuration on first boot" /></td></tr></table></div></div></li><li class="step"><p> Select <span class="guimenu">Next</span> on this screen. </p><div class="informalfigure"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/rpi_first_welcome.png" width="100%" alt="YaST showing a Welcome message" /></td></tr></table></div></div></li><li class="step"><p> Read the License Agreement. You need to accept the license by selecting <span class="guimenu">I
+              Agree to the License Terms</span> and choosing <span class="guimenu">Next</span>. </p><div class="informalfigure"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/rpi_first_eula.png" width="100%" alt="YaST displaying the license text" /></td></tr></table></div></div></li><li class="step"><p> Select the time zone either by clicking the area in the map or selecting region and
+            zone in the drop-down boxes. </p><div class="informalfigure"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/rpi_first_timezone.png" width="100%" alt="YaST asking for the time zone" /></td></tr></table></div></div><p> If the time and date shown at the bottom on the screen are incorrect, setup the
+            Network Time Protocol client by following these steps: </p><ol type="a" class="substeps"><li class="step"><p>Click <span class="guimenu">Other Settings</span> to open the NTPD configuration.</p></li><li class="step"><p>Click <span class="guimenu">Other Settings</span> to synchronize date and time with
+                NTPD.</p></li><li class="step"><p>After the synchronization completed, click <span class="guimenu">Accept</span> to return
+                to the Time and Date overview.</p></li></ol></li><li class="step"><p> Click <span class="guimenu">Next</span> to proceed. </p></li><li class="step"><p> On this page, you can configure a default user account. </p><div class="informalfigure"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/rpi_first_user.png" width="100%" alt="YaST showing basic user configuration" /></td></tr></table></div></div><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Automatic Login not supported</h3><p> Automatic Login is not supported by <span class="package">xdm</span>, the default display
+              manager. Install <span class="package">gdm</span> after the installation to make it work.
+            </p></div></li><li class="step"><p> If you chose to skip the previous step or not to set a root password, you will be
+            asked to provide one now. Do not forget what you enter here, you will need it for
+            administration! </p><div class="informalfigure"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/rpi_first_root.png" width="100%" alt="YaST asking you to set a password for the root user" /></td></tr></table></div></div></li><li class="step"><p> On this screen you need to enter your E-mail address and the registration code you
+            received. You can also choose to <span class="guimenu">Skip Registration</span>. </p><div class="informalfigure"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/rpi_first_registration.png" width="100%" alt="YaST asking for registration information" /></td></tr></table></div></div><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Skipping the Registration</h3><p> If you choose to skip the registration here, you will not receive updates or
+              patches until you registered manually using YaST </p></div></li><li class="step"><p> Click <span class="guimenu">Finish</span> to exit the setup wizard and continue the system
+            startup. </p><div class="informalfigure"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/rpi_first_finish.png" width="100%" alt="YaST congratulating you for finishing the initial configuration" /></td></tr></table></div></div></li></ol></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-rpi-firstboot-icewm"></a>The Desktop Environment</h3></div></div></div><p> When the system finished booting, you will see the following login screen: </p><div class="figure"><a id="fig-rpi-installation-xdm"></a><p class="title"><strong>Figure 4. XDM Login Screen</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/rpi_xdm.png" width="100%" alt="XDM login screen after the system has booted" /></td></tr></table></div></div></div><br class="figure-break" /><p> Type in the user name and password you chose during the initial configuration. The
+        default IceWM desktop starts. By using the menu, you can start an <span class="command"><strong>XTerm</strong></span>
+        terminal: </p><div class="figure"><a id="fig-rpi-installation-icewm"></a><p class="title"><strong>Figure 5. IceWM desktop</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/rpi_icewm.png" width="100%" alt="IceWM desktop after login" /></td></tr></table></div></div></div><br class="figure-break" /></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-rpi-usage"></a>General System Usage</h2></div></div></div><p> After the initial configuration procedure and the first boot of the system, you can now
+      use various components of the system. </p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-rpi-bt"></a>Bluetooth*</h3></div></div></div><p> The Raspberry Pi has a Bluetooth* controller on-board that can be used for various
+        purposes, like wireless keyboards, mice or audio devices. </p><p> To enable the Bluetooth* controller for use with <span class="command"><strong>bluetoothctl</strong></span> and
+        related applications, run: </p><pre class="screen"><code class="prompt">root # </code>hciattach /dev/ttyAMA0 bcm43xx 921600
+bcm43xx_init
+Flash firmware /lib/firmware/BCM43430A1.hcd
+Set Controller UART speed to 921600 bit/s
+Device setup complete</pre><p> You can then use <span class="command"><strong>hciconfig hci0 up</strong></span> to bring the device up and use
+          <span class="command"><strong>hcitool scan</strong></span> to scan the environment for discoverable devices. </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-rpi-gcc"></a>Compiler</h3></div></div></div><p> It is strongly advised to use the version 6 of the GNU Compiler Collection for
+        compiling software. It is already installed as part of the Software Development Kit. To use
+        it, <span class="command"><strong>gcc-6</strong></span> has to be invoked instead of <span class="command"><strong>gcc</strong></span>. </p></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-rpi-documentation"></a>Product Documentation</h2></div></div></div><p> This introduction only covered the most basic tasks. </p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-rpi-documentation-sle"></a>Product Documentation</h3></div></div></div><p> You can find the complete documentation for SUSE Linux Enterprise Server 12 SP2 on
+        <a class="link" href="https://documentation.suse.com/sles-12" target="_top">https://documentation.suse.com/sles-12</a>. </p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Applicability of Product Documentation</h3><p>
+           Due to the Raspberry Pi being a vastly different
+          hardware platform, not all content in the product documentation applies also to
+          SUSE Linux Enterprise Server for the Raspberry Pi. </p></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-rpi-documentation-forum"></a>Self-Help Forum</h3></div></div></div><p> SUSE has provided a self help forum where you can get answers to questions. Go to <a class="link" href="https://forums.suse.com/" target="_top">https://forums.suse.com/</a> and select the SLES
+        for the Raspberry Pi forum. </p></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id1337"></a>Legal notice</h2></div></div></div><p> Copyright ©2006-2021 SUSE LLC and contributors. All rights reserved. </p><p> Permission is granted to copy, distribute and/or modify this document under the terms of the
+  GNU Free Documentation License, Version 1.2 or (at your option) version 1.3; with the Invariant
+  Section being this copyright notice and license. A copy of the license version 1.2 is included in
+  the section entitled <span class="quote">“<span class="quote">GNU Free Documentation License</span>”</span>. </p><p> SUSE, the SUSE logo and YaST are registered trademarks of SUSE LLC in the United States and
+  other countries. For SUSE trademarks, see <a class="link" href="http://www.suse.com/company/legal/" target="_top">http://www.suse.com/company/legal/</a>. Linux is a registered trademark of Linus Torvalds.
+  All other names or trademarks mentioned in this document may be trademarks or registered
+  trademarks of their respective owners. </p><p> Documents published as part of the <span class="strong"><strong>SUSE Best Practices</strong></span>
+  series have been contributed voluntarily by SUSE employees and third parties. They are meant to
+  serve as examples of how particular actions can be performed. They have been compiled with utmost
+  attention to detail. However, this does not guarantee complete accuracy. SUSE cannot verify that
+  actions described in these documents do what is claimed or whether actions described have
+  unintended consequences. SUSE LLC, its affiliates, the authors, and the translators may not be held
+  liable for possible errors or the consequences thereof.</p><p> Below we draw your attention to the license under which the articles are published.</p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id1338"></a>GNU Free Documentation License</h2></div></div></div><p>
+  Copyright (C) 2000, 2001, 2002 Free Software Foundation, Inc. 51 Franklin St,
+  Fifth Floor, Boston, MA 02110-1301 USA. Everyone is permitted to copy and
+  distribute verbatim copies of this license document, but changing it is not
+  allowed.
+ </p><h5><a id="id1776"></a> 0. PREAMBLE </h5><p>
+  The purpose of this License is to make a manual, textbook, or other
+  functional and useful document "free" in the sense of freedom: to assure
+  everyone the effective freedom to copy and redistribute it, with or without
+  modifying it, either commercially or non-commercially. Secondarily, this
+  License preserves for the author and publisher a way to get credit for their
+  work, while not being considered responsible for modifications made by
+  others.
+ </p><p>
+  This License is a kind of "copyleft", which means that derivative works of
+  the document must themselves be free in the same sense. It complements the
+  GNU General Public License, which is a copyleft license designed for free
+  software.
+ </p><p>
+  We have designed this License to use it for manuals for free software,
+  because free software needs free documentation: a free program should come
+  with manuals providing the same freedoms that the software does. But this
+  License is not limited to software manuals; it can be used for any textual
+  work, regardless of subject matter or whether it is published as a printed
+  book. We recommend this License principally for works whose purpose is
+  instruction or reference.
+ </p><h5><a id="id1780"></a> 1. APPLICABILITY AND DEFINITIONS </h5><p>
+  This License applies to any manual or other work, in any medium, that
+  contains a notice placed by the copyright holder saying it can be distributed
+  under the terms of this License. Such a notice grants a world-wide,
+  royalty-free license, unlimited in duration, to use that work under the
+  conditions stated herein. The "Document", below, refers to any such manual or
+  work. Any member of the public is a licensee, and is addressed as "you". You
+  accept the license if you copy, modify or distribute the work in a way
+  requiring permission under copyright law.
+ </p><p>
+  A "Modified Version" of the Document means any work containing the Document
+  or a portion of it, either copied verbatim, or with modifications and/or
+  translated into another language.
+ </p><p>
+  A "Secondary Section" is a named appendix or a front-matter section of the
+  Document that deals exclusively with the relationship of the publishers or
+  authors of the Document to the Document's overall subject (or to related
+  matters) and contains nothing that could fall directly within that overall
+  subject. (Thus, if the Document is in part a textbook of mathematics, a
+  Secondary Section may not explain any mathematics.) The relationship could be
+  a matter of historical connection with the subject or with related matters,
+  or of legal, commercial, philosophical, ethical or political position
+  regarding them.
+ </p><p>
+  The "Invariant Sections" are certain Secondary Sections whose titles are
+  designated, as being those of Invariant Sections, in the notice that says
+  that the Document is released under this License. If a section does not fit
+  the above definition of Secondary then it is not allowed to be designated as
+  Invariant. The Document may contain zero Invariant Sections. If the Document
+  does not identify any Invariant Sections then there are none.
+ </p><p>
+  The "Cover Texts" are certain short passages of text that are listed, as
+  Front-Cover Texts or Back-Cover Texts, in the notice that says that the
+  Document is released under this License. A Front-Cover Text may be at most 5
+  words, and a Back-Cover Text may be at most 25 words.
+ </p><p>
+  A "Transparent" copy of the Document means a machine-readable copy,
+  represented in a format whose specification is available to the general
+  public, that is suitable for revising the document straightforwardly with
+  generic text editors or (for images composed of pixels) generic paint
+  programs or (for drawings) some widely available drawing editor, and that is
+  suitable for input to text formatters or for automatic translation to a
+  variety of formats suitable for input to text formatters. A copy made in an
+  otherwise Transparent file format whose markup, or absence of markup, has
+  been arranged to thwart or discourage subsequent modification by readers is
+  not Transparent. An image format is not Transparent if used for any
+  substantial amount of text. A copy that is not "Transparent" is called
+  "Opaque".
+ </p><p>
+  Examples of suitable formats for Transparent copies include plain ASCII
+  without markup, Texinfo input format, LaTeX input format, SGML or XML using a
+  publicly available DTD, and standard-conforming simple HTML, PostScript or
+  PDF designed for human modification. Examples of transparent image formats
+  include PNG, XCF and JPG. Opaque formats include proprietary formats that can
+  be read and edited only by proprietary word processors, SGML or XML for which
+  the DTD and/or processing tools are not generally available, and the
+  machine-generated HTML, PostScript or PDF produced by some word processors
+  for output purposes only.
+ </p><p>
+  The "Title Page" means, for a printed book, the title page itself, plus such
+  following pages as are needed to hold, legibly, the material this License
+  requires to appear in the title page. For works in formats which do not have
+  any title page as such, "Title Page" means the text near the most prominent
+  appearance of the work's title, preceding the beginning of the body of the
+  text.
+ </p><p>
+  A section "Entitled XYZ" means a named subunit of the Document whose title
+  either is precisely XYZ or contains XYZ in parentheses following text that
+  translates XYZ in another language. (Here XYZ stands for a specific section
+  name mentioned below, such as "Acknowledgements", "Dedications",
+  "Endorsements", or "History".) To "Preserve the Title" of such a section when
+  you modify the Document means that it remains a section "Entitled XYZ"
+  according to this definition.
+ </p><p>
+  The Document may include Warranty Disclaimers next to the notice which states
+  that this License applies to the Document. These Warranty Disclaimers are
+  considered to be included by reference in this License, but only as regards
+  disclaiming warranties: any other implication that these Warranty Disclaimers
+  may have is void and has no effect on the meaning of this License.
+ </p><h5><a id="id1791"></a> 2. VERBATIM COPYING </h5><p>
+  You may copy and distribute the Document in any medium, either commercially
+  or noncommercially, provided that this License, the copyright notices, and
+  the license notice saying this License applies to the Document are reproduced
+  in all copies, and that you add no other conditions whatsoever to those of
+  this License. You may not use technical measures to obstruct or control the
+  reading or further copying of the copies you make or distribute. However, you
+  may accept compensation in exchange for copies. If you distribute a large
+  enough number of copies you must also follow the conditions in section 3.
+ </p><p>
+  You may also lend copies, under the same conditions stated above, and you may
+  publicly display copies.
+ </p><h5><a id="id1794"></a> 3. COPYING IN QUANTITY </h5><p>
+  If you publish printed copies (or copies in media that commonly have printed
+  covers) of the Document, numbering more than 100, and the Document's license
+  notice requires Cover Texts, you must enclose the copies in covers that
+  carry, clearly and legibly, all these Cover Texts: Front-Cover Texts on the
+  front cover, and Back-Cover Texts on the back cover. Both covers must also
+  clearly and legibly identify you as the publisher of these copies. The front
+  cover must present the full title with all words of the title equally
+  prominent and visible. You may add other material on the covers in addition.
+  Copying with changes limited to the covers, as long as they preserve the
+  title of the Document and satisfy these conditions, can be treated as
+  verbatim copying in other respects.
+ </p><p>
+  If the required texts for either cover are too voluminous to fit legibly, you
+  should put the first ones listed (as many as fit reasonably) on the actual
+  cover, and continue the rest onto adjacent pages.
+ </p><p>
+  If you publish or distribute Opaque copies of the Document numbering more
+  than 100, you must either include a machine-readable Transparent copy along
+  with each Opaque copy, or state in or with each Opaque copy a
+  computer-network location from which the general network-using public has
+  access to download using public-standard network protocols a complete
+  Transparent copy of the Document, free of added material. If you use the
+  latter option, you must take reasonably prudent steps, when you begin
+  distribution of Opaque copies in quantity, to ensure that this Transparent
+  copy will remain thus accessible at the stated location until at least one
+  year after the last time you distribute an Opaque copy (directly or through
+  your agents or retailers) of that edition to the public.
+ </p><p>
+  It is requested, but not required, that you contact the authors of the
+  Document well before redistributing any large number of copies, to give them
+  a chance to provide you with an updated version of the Document.
+ </p><h5><a id="id1799"></a> 4. MODIFICATIONS </h5><p>
+  You may copy and distribute a Modified Version of the Document under the
+  conditions of sections 2 and 3 above, provided that you release the Modified
+  Version under precisely this License, with the Modified Version filling the
+  role of the Document, thus licensing distribution and modification of the
+  Modified Version to whoever possesses a copy of it. In addition, you must do
+  these things in the Modified Version:
+ </p><div class="orderedlist"><ol class="orderedlist" type="A"><li class="listitem"><p>
+    Use in the Title Page (and on the covers, if any) a title distinct from
+    that of the Document, and from those of previous versions (which should, if
+    there were any, be listed in the History section of the Document). You may
+    use the same title as a previous version if the original publisher of that
+    version gives permission.
+   </p></li><li class="listitem"><p>
+    List on the Title Page, as authors, one or more persons or entities
+    responsible for authorship of the modifications in the Modified Version,
+    together with at least five of the principal authors of the Document (all
+    of its principal authors, if it has fewer than five), unless they release
+    you from this requirement.
+   </p></li><li class="listitem"><p>
+    State on the Title page the name of the publisher of the Modified Version,
+    as the publisher.
+   </p></li><li class="listitem"><p>
+    Preserve all the copyright notices of the Document.
+   </p></li><li class="listitem"><p>
+    Add an appropriate copyright notice for your modifications adjacent to the
+    other copyright notices.
+   </p></li><li class="listitem"><p>
+    Include, immediately after the copyright notices, a license notice giving
+    the public permission to use the Modified Version under the terms of this
+    License, in the form shown in the Addendum below.
+   </p></li><li class="listitem"><p>
+    Preserve in that license notice the full lists of Invariant Sections and
+    required Cover Texts given in the Document's license notice.
+   </p></li><li class="listitem"><p>
+    Include an unaltered copy of this License.
+   </p></li><li class="listitem"><p>
+    Preserve the section Entitled "History", Preserve its Title, and add to it
+    an item stating at least the title, year, new authors, and publisher of the
+    Modified Version as given on the Title Page. If there is no section
+    Entitled "History" in the Document, create one stating the title, year,
+    authors, and publisher of the Document as given on its Title Page, then add
+    an item describing the Modified Version as stated in the previous sentence.
+   </p></li><li class="listitem"><p>
+    Preserve the network location, if any, given in the Document for public
+    access to a Transparent copy of the Document, and likewise the network
+    locations given in the Document for previous versions it was based on.
+    These may be placed in the "History" section. You may omit a network
+    location for a work that was published at least four years before the
+    Document itself, or if the original publisher of the version it refers to
+    gives permission.
+   </p></li><li class="listitem"><p>
+    For any section Entitled "Acknowledgements" or "Dedications", Preserve the
+    Title of the section, and preserve in the section all the substance and
+    tone of each of the contributor acknowledgements and/or dedications given
+    therein.
+   </p></li><li class="listitem"><p>
+    Preserve all the Invariant Sections of the Document, unaltered in their
+    text and in their titles. Section numbers or the equivalent are not
+    considered part of the section titles.
+   </p></li><li class="listitem"><p>
+    Delete any section Entitled "Endorsements". Such a section may not be
+    included in the Modified Version.
+   </p></li><li class="listitem"><p>
+    Do not retitle any existing section to be Entitled "Endorsements" or to
+    conflict in title with any Invariant Section.
+   </p></li><li class="listitem"><p>
+    Preserve any Warranty Disclaimers.
+   </p></li></ol></div><p>
+  If the Modified Version includes new front-matter sections or appendices that
+  qualify as Secondary Sections and contain no material copied from the
+  Document, you may at your option designate some or all of these sections as
+  invariant. To do this, add their titles to the list of Invariant Sections in
+  the Modified Version's license notice. These titles must be distinct from any
+  other section titles.
+ </p><p>
+  You may add a section Entitled "Endorsements", provided it contains nothing
+  but endorsements of your Modified Version by various parties--for example,
+  statements of peer review or that the text has been approved by an
+  organization as the authoritative definition of a standard.
+ </p><p>
+  You may add a passage of up to five words as a Front-Cover Text, and a
+  passage of up to 25 words as a Back-Cover Text, to the end of the list of
+  Cover Texts in the Modified Version. Only one passage of Front-Cover Text and
+  one of Back-Cover Text may be added by (or through arrangements made by) any
+  one entity. If the Document already includes a cover text for the same cover,
+  previously added by you or by arrangement made by the same entity you are
+  acting on behalf of, you may not add another; but you may replace the old
+  one, on explicit permission from the previous publisher that added the old
+  one.
+ </p><p>
+  The author(s) and publisher(s) of the Document do not by this License give
+  permission to use their names for publicity for or to assert or imply
+  endorsement of any Modified Version.
+ </p><h5><a id="id1836"></a> 5. COMBINING DOCUMENTS </h5><p>
+  You may combine the Document with other documents released under this
+  License, under the terms defined in section 4 above for modified versions,
+  provided that you include in the combination all of the Invariant Sections of
+  all of the original documents, unmodified, and list them all as Invariant
+  Sections of your combined work in its license notice, and that you preserve
+  all their Warranty Disclaimers.
+ </p><p>
+  The combined work need only contain one copy of this License, and multiple
+  identical Invariant Sections may be replaced with a single copy. If there are
+  multiple Invariant Sections with the same name but different contents, make
+  the title of each such section unique by adding at the end of it, in
+  parentheses, the name of the original author or publisher of that section if
+  known, or else a unique number. Make the same adjustment to the section
+  titles in the list of Invariant Sections in the license notice of the
+  combined work.
+ </p><p>
+  In the combination, you must combine any sections Entitled "History" in the
+  various original documents, forming one section Entitled "History"; likewise
+  combine any sections Entitled "Acknowledgements", and any sections Entitled
+  "Dedications". You must delete all sections Entitled "Endorsements".
+ </p><h5><a id="id1840"></a> 6. COLLECTIONS OF DOCUMENTS </h5><p>
+  You may make a collection consisting of the Document and other documents
+  released under this License, and replace the individual copies of this
+  License in the various documents with a single copy that is included in the
+  collection, provided that you follow the rules of this License for verbatim
+  copying of each of the documents in all other respects.
+ </p><p>
+  You may extract a single document from such a collection, and distribute it
+  individually under this License, provided you insert a copy of this License
+  into the extracted document, and follow this License in all other respects
+  regarding verbatim copying of that document.
+ </p><h5><a id="id1843"></a> 7. AGGREGATION WITH INDEPENDENT WORKS </h5><p>
+  A compilation of the Document or its derivatives with other separate and
+  independent documents or works, in or on a volume of a storage or
+  distribution medium, is called an "aggregate" if the copyright resulting from
+  the compilation is not used to limit the legal rights of the compilation's
+  users beyond what the individual works permit. When the Document is included
+  in an aggregate, this License does not apply to the other works in the
+  aggregate which are not themselves derivative works of the Document.
+ </p><p>
+  If the Cover Text requirement of section 3 is applicable to these copies of
+  the Document, then if the Document is less than one half of the entire
+  aggregate, the Document's Cover Texts may be placed on covers that bracket
+  the Document within the aggregate, or the electronic equivalent of covers if
+  the Document is in electronic form. Otherwise they must appear on printed
+  covers that bracket the whole aggregate.
+ </p><h5><a id="id1846"></a> 8. TRANSLATION </h5><p>
+  Translation is considered a kind of modification, so you may distribute
+  translations of the Document under the terms of section 4. Replacing
+  Invariant Sections with translations requires special permission from their
+  copyright holders, but you may include translations of some or all Invariant
+  Sections in addition to the original versions of these Invariant Sections.
+  You may include a translation of this License, and all the license notices in
+  the Document, and any Warranty Disclaimers, provided that you also include
+  the original English version of this License and the original versions of
+  those notices and disclaimers. In case of a disagreement between the
+  translation and the original version of this License or a notice or
+  disclaimer, the original version will prevail.
+ </p><p>
+  If a section in the Document is Entitled "Acknowledgements", "Dedications",
+  or "History", the requirement (section 4) to Preserve its Title (section 1)
+  will typically require changing the actual title.
+ </p><h5><a id="id1849"></a> 9. TERMINATION </h5><p>
+  You may not copy, modify, sublicense, or distribute the Document except as
+  expressly provided for under this License. Any other attempt to copy, modify,
+  sublicense or distribute the Document is void, and will automatically
+  terminate your rights under this License. However, parties who have received
+  copies, or rights, from you under this License will not have their licenses
+  terminated so long as such parties remain in full compliance.
+ </p><h5><a id="id1851"></a> 10. FUTURE REVISIONS OF THIS LICENSE </h5><p>
+  The Free Software Foundation may publish new, revised versions of the GNU
+  Free Documentation License from time to time. Such new versions will be
+  similar in spirit to the present version, but may differ in detail to address
+  new problems or concerns. See
+  <a class="link" href="http://www.gnu.org/copyleft/" target="_top">http://www.gnu.org/copyleft/</a>.
+ </p><p>
+  Each version of the License is given a distinguishing version number. If the
+  Document specifies that a particular numbered version of this License "or any
+  later version" applies to it, you have the option of following the terms and
+  conditions either of that specified version or of any later version that has
+  been published (not as a draft) by the Free Software Foundation. If the
+  Document does not specify a version number of this License, you may choose
+  any version ever published (not as a draft) by the Free Software Foundation.
+ </p><h5><a id="id1855"></a> ADDENDUM: How to use this License for your
+  documents </h5><pre class="screen">Copyright (c) YEAR YOUR NAME.
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.2
+or any later version published by the Free Software Foundation;
+with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
+A copy of the license is included in the section entitled "GNU
+ Free Documentation License".</pre><p>
+  If you have Invariant Sections, Front-Cover Texts and Back-Cover Texts,
+  replace the "with...Texts". line with this:
+ </p><pre class="screen">with the Invariant Sections being LIST THEIR TITLES, with the
+Front-Cover Texts being LIST, and with the Back-Cover Texts being LIST.</pre><p>
+  If you have Invariant Sections without Cover Texts, or some other combination
+  of the three, merge those two alternatives to suit the situation.
+ </p><p>
+  If your document contains nontrivial examples of program code, we recommend
+  releasing these examples in parallel under your choice of free software
+  license, such as the GNU General Public License, to permit their use in free
+  software.
+ </p></div></div></body></html>

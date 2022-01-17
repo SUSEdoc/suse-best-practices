@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Troubleshooting</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="SUSE Manager Management Pack for Microsoft System Center Operations Manager Installation Guide" /><link rel="up" href="index.html" title="SUSE Manager Management Pack for Microsoft System Center Operations Manager Installation Guide" /><link rel="prev" href="sec-updatesumadetails.html" title="Updating SUSE Manager Details" /><link rel="next" href="ar01s10.html" title="GNU Free Documentation License" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Troubleshooting</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="sec-updatesumadetails.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="ar01s10.html">Next</a></td></tr></table><hr /></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-troubleshooting"></a>Troubleshooting</h2></div></div></div><p>The below list contains troubleshooting tips and
+            hints:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Check the error details in the log file (LogInfo.txt
+                    in the SUSE Manager Management Pack installation
+                    location) and resolve them accordingly.</p></li><li class="listitem"><p>The SUSE Manager Management Pack installation may
+                    fail because following keys have not been found, or
+                    there is an invalid entry, in the Microsoft System
+                    Center Operations Manager registry location.</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>For Microsoft System Center Operations
+                            Manager 2012: <code class="filename">Computer\HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\System Centre Operations Manager\SetUp\Console\InstallDirectory</code>
+                        </p><p>or: <code class="filename">Computer\HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\System Centre Operations Manager\SetUp\Server\InstallDirectory</code>
+                        </p></li><li class="listitem"><p>For Microsoft System Center Operations
+                            Manager 2007R2:
+                            <code class="filename">Computer\HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\
+                                Microsoft Operations Manager\3.0\SetUp\InstallDirectory</code>
+                        </p></li></ul></div></li><li class="listitem"><p>Make sure to give proper credentials to the SUSE
+                    Manager server while installing the Management
+                    Pack.</p></li><li class="listitem"><p>If you have any trouble while uninstalling the SUSE
+                    Manager Management Pack, follow the steps below:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>Check if the SUSE Manager Management Pack
+                            uninstallation fails because there are binaries
+                            used by another process, or because SUSE
+                            Manager Management Pack has a dependency with
+                            another Management Pack in Microsoft System
+                            Center Operations Manager. </p></li><li class="listitem"><p>If this is the case resolve the dependency
+                            manually and repeat the uninstallation
+                            process.</p></li><li class="listitem"><p>Check whether the Operations Console is
+                            closed.</p></li><li class="listitem"><p>Check that the below registry path contains
+                            valid SUSE Manager credentials:
+                                <code class="filename">Computer\HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\SUSEManagementPack</code></p></li></ul></div></li></ul></div><div class="important" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Important</h3><p>Keep in mind the following points:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>After the installation, it takes up to four
+                        minutes to display a list of systems subscribed to
+                        Microsoft System Center Operations Manager and SUSE
+                        Manager in the Systems tab under Patch management.
+                        The SUSE Manager probe refreshes every four minutes
+                        in the background.</p></li><li class="listitem"><p>To access Patch Management, you need to be added
+                        as a user to the Microsoft System Center Operations
+                        Manager administrator account group.</p></li><li class="listitem"><p>As a new user performing a first time
+                        installation, you need to set the Operations Manager
+                        URL (the Microsoft System Center Operations Manager
+                        Server URL). Access the Operations Console and then
+                        proceed with the installation setup.</p></li><li class="listitem"><p>If you have difficulties uninstalling the SUSE
+                        Manager Management Pack (because of deletion of the
+                        Management Pack, deletion of the binaries, or
+                        corruption of the installation file, etc.), use the
+                        repair option and try to perform the uninstallation
+                        process again.</p></li><li class="listitem"><p>The SUSE Manager Management Pack installer works
+                        for Microsoft System Center Operations Manager
+                        2007, 2012 and 2016.</p></li><li class="listitem"><p>If you want to upgrade Microsoft System Center
+                        Operations Manager from version 2007 to 2012, first
+                        uninstall the SUSE Manager Management Pack and then
+                        upgrade Microsoft System Center Operations Manager.
+                        After the successful upgrade, re-install the SUSE
+                        Manager Management Pack.</p></li></ul></div></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="sec-updatesumadetails.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="ar01s10.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Updating SUSE Manager Details </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> GNU Free Documentation License</td></tr></table></div></body></html>

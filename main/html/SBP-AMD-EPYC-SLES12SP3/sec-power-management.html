@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Power Management</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="Optimizing Linux for AMD EPYC with SUSE Linux Enterprise 12 SP3" /><link rel="up" href="index.html" title="Optimizing Linux for AMD EPYC with SUSE Linux Enterprise 12 SP3" /><link rel="prev" href="sec-evaluating-workloads.html" title="Evaluating Workloads" /><link rel="next" href="sec-security-mitigations.html" title="Security Mitigations" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Power Management</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="sec-evaluating-workloads.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="sec-security-mitigations.html">Next</a></td></tr></table><hr /></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-power-management"></a>Power Management</h2></div></div></div><p>Modern CPUs balance power consumption and performance through
+        <span class="italic">Performance States (P-States)</span>.
+      Low utilization workloads may use lower P-States to conserve power
+      while still achieving acceptable performance. When a CPU is idle,
+      lower power idle states <span class="italic">(C-States)</span>
+      can be selected to further conserve power. However this comes with
+      higher exit latencies when lower power states are selected. It is
+      further complicated by the fact that if individual cores are idle and
+      running at low power then the additional power can be used to boost
+      the performance of active cores. This means this scenario is not a
+      straight-forward balance between power consumption and performance.
+      More complexity is added on EPYC whereby spare power may be used to
+      boost either cores or the Infinity links.</p><p>EPYC provides <span class="italic">SenseMI</span> which,
+      among other capabilities, enables CPUs to make adjustments to voltage
+      and frequency depending on the historical state of the CPU. There is
+      a latency penalty when switching P-States but EPYC is capable of
+      fine-grained in the adjustments that can be made to reduce likelihood
+      that the latency is a bottleneck. On SUSE Linux Enterprise Server,
+      EPYC uses the <span class="command"><strong>acpi_cpufreq</strong></span> driver which allows
+      P-states to be configured to match requested performance. However,
+      this is limited in terms of the full capabilities of the hardware. It
+      cannot boost the frequency beyond the maximum stated frequencies and
+      if a target is specified then the highest frequency below the target
+      will be used. A special case is if the governor is set to
+      performance. In this situation the hardware will quickly use the
+      highest available frequency in an attempt to work quickly and then
+      return to idle.</p><p>What should be determined is whether power management is likely
+      to be a factor for a workload. One that is limited to a subset of
+      active CPUs and nodes will have high enough utilization so that power
+      management will not be active on those cores and no action is
+      required. Hence, with CPU binding, the issue of power management may
+      be side-stepped.</p><p>Secondly, a workload that does not communicate heavily with other
+      processes and is mostly CPU-bound will also not experience any side
+      effects because of power management.</p><p>The workloads that are most likely to be affected are those that
+      synchronously communicate between multiple threads or those that idle
+      frequently and have low CPU utilization overall. It will be further
+      compounded if the threads are sensitive to wakeup latency but there
+      are secondary effects if a workload must complete quickly but the CPU
+      is running at a low frequency.</p><p>The P-State and C-State of each CPU can be examined using the
+        <span class="command"><strong>turbostat</strong></span> utility. The computer output below
+      shows an example where one workload is busy on CPU 0 and other
+      workloads are idle. A useful exercise is to start a workload and
+      monitor the output of <span class="command"><strong>turbostat</strong></span> paying close
+      attention to CPUs that have moderate utilization and running at a
+      lower frequency. If the workload is latency-sensitive then it is
+      grounds for either minimizing the number of CPUs available to the
+      workload or configuring power management. </p><pre class="screen">
+Package Core  CPU   Avg_MHz Busy%   Bzy_MHz TSC_MHz IRQ     C1      C2      C1%     C2%
+-       -     -     26      0.85    3029    2196    5623    1251    3439    0.64    98.53
+0       0     0     3192    100.00  3192    2196    1268    0       0       0.00    0.00
+0       0     64    1       0.02    2936    2196    10      0       9       0.00    99.99
+0       1     1     1       0.08    1337    2196    20      0       14      0.00    99.94
+0       1     65    1       0.04    1263    2196    13      0       12      0.00    99.97
+0       2     2     1       0.04    1236    2196    14      0       12      0.00    99.98
+0       2     66    1       0.04    1226    2196    14      0       13      0.00    99.97
+0       3     3     1       0.05    1237    2196    16      0       14      0.00    99.97
+0       3     67    1       0.05    1238    2196    16      0       15      0.00    99.97
+</pre><p>In the event it is determined that tuning CPU frequency
+      management is appropriate. Then the following actions can be taken to
+      set the management policy to performance using the
+        <span class="command"><strong>cpupower</strong></span> utility:</p><pre class="screen">epyc:~# cpupower frequency-set -g performance
+Setting cpu: 0
+Setting cpu: 1
+Setting cpu: 2
+...</pre><p>Persisting it across reboots can be done via a local
+        <span class="command"><strong>init</strong></span> script, via <span class="command"><strong>udev</strong></span> or via
+      one-shot <span class="command"><strong>systemd</strong></span> service file if it is deemed to
+      be necessary. Note that <span class="command"><strong>turbostat</strong></span> will still show
+      that idling CPUs use a low frequency. The impact of the policy is
+      that the highest P-State will be used as soon as possible when the
+      CPU is active. In some cases, a latency bottleneck will occur because
+      of a CPU exiting idle. If this is identified on EPYC, restrict the
+      C-state by specifying <span class="command"><strong>processor.max_cstate=2</strong></span> on
+      the kernel command line which will prevent CPUs from entering lower
+      C-states. It is expected on EPYC that the exit latency from C1 is
+      very low. But by allowing C2, it reduces interference from the idle
+      loop injecting micro-operations into the pipeline and should be the
+      best state overall. It is also possible to set the max idle state on
+      individual cores using <span class="command"><strong>cpupower idle-set</strong></span>. If SMT
+      is enabled, the idle state should be set on both siblings.</p></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="sec-evaluating-workloads.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="sec-security-mitigations.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Evaluating Workloads </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Security Mitigations</td></tr></table></div></body></html>

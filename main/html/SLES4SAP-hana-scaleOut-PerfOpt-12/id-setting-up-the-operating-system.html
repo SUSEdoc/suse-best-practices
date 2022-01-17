@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Setting up the operating system</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="SAP HANA System Replication Scale-Out - Performance Optimized Scenario" /><link rel="up" href="index.html" title="SAP HANA System Replication Scale-Out - Performance Optimized Scenario" /><link rel="prev" href="id-planning-the-installation.html" title="Planning the installation" /><link rel="next" href="id-installing-the-sap-hana-databases-on-both-sites.html" title="Installing the SAP HANA databases on both sites" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Setting up the operating system</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="id-planning-the-installation.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="id-installing-the-sap-hana-databases-on-both-sites.html">Next</a></td></tr></table><hr /></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id-setting-up-the-operating-system"></a>Setting up the operating system</h2></div></div></div><p><a id="OsSetup"></a>This section includes information you should consider during the
+installation of the operating system.</p><div class="figure"><a id="id1743"></a><p class="title"><strong>Figure 8. <a class="xref" href="id-planning-the-installation.html#Planning">[Planning]</a> OsSetup <a class="xref" href="id-installing-the-sap-hana-databases-on-both-sites.html#SAPHanaInst">[SAPHanaInst]</a> <a class="xref" href="id-setting-up-the-sap-hana-system-replication.html#SAPHanaHsr">[SAPHanaHsr]</a> <a class="xref" href="id-integrating-sap-hana-with-the-cluster.html#Integration">[Integration]</a> <a class="xref" href="id-configuring-the-cluster-and-sap-hana-resources.html#Cluster">[Cluster]</a> <a class="xref" href="id-testing-the-cluster.html#Testing">[Testing]</a></strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td><img src="images/SAPHanaSR-ScaleOut-Plan-Phase2.svg" width="100%" alt="SAPHanaSR ScaleOut Plan Phase2" /></td></tr></table></div></div></div><br class="figure-break" /><p>In this document, first SUSE Linux Enterprise Server for SAP Applications is installed and configured. Then the SAP HANA
+database including the system replication is set up. Finally the
+automation with the cluster is set up and configured.</p><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="id-installing-suse-linux-enterprise-server-for-sap-applications"></a>Installing SUSE Linux Enterprise Server for SAP Applications</h3></div></div></div><p>Multiple installation guides are already existing, with different reasons to set up the server in a certain way.
+Below it is outlined where this information can be found.
+In addition, you will find important details you should consider to get a system which is well prepared to deliver SAP HANA.</p><div class="section"><div class="titlepage"><div><div><h4 class="title"><a id="id-installing-the-base-operating-system"></a>Installing the base operating system</h4></div></div></div><p>Depending on your infrastructure and the hardware used, you need to adapt the installation.
+All supported installation methods and minimum requirement are described in the <span class="emphasis"><em>Deployment Guide</em></span>
+(<a class="link" href="https://documentation.suse.com/sles/12-SP5/html/SLES-all/book-sle-deployment.html" target="_top">https://documentation.suse.com/sles/12-SP5/html/SLES-all/book-sle-deployment.html</a>).
+In case of automated installations you can find further information in the <span class="emphasis"><em>AutoYaST Guide</em></span>
+(<a class="link" href="https://documentation.suse.com/sles/12-SP5/html/SLES-all/book-autoyast.html" target="_top">https://documentation.suse.com/sles/12-SP5/html/SLES-all/book-autoyast.html</a>).
+The major installation guide for SUSE Linux Enterprise Server for SAP Applications to fit all requirements for SAP HANA is described in the
+SAP notes:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>1984787 SUSE LINUX Enterprise Server 12: Installation notes and</p></li><li class="listitem"><p>2205917 SAP HANA DB: Recommended OS settings for SLES 12 / SLES for SAP Applications 12.</p></li></ul></div></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a id="id-installing-additional-software"></a>Installing additional software</h4></div></div></div><p>SUSE delivers with SUSE Linux Enterprise Server for SAP Applications special resource agents for SAP HANA. With the pattern <span class="emphasis"><em>sap-hana</em></span> the resource
+agent for SAP HANA <span class="strong"><strong>ScaleUP</strong></span> is installed. For the <span class="strong"><strong>ScaleOut</strong></span> scenario you need a special resource agent.
+Follow the instructions below on each node if you have installed the systems based on SAP note 1984787.
+The pattern <span class="emphasis"><em>High Availability</em></span> summarizes all tools recommended to be installed on <span class="strong"><strong>all</strong></span> nodes, including the
+<span class="emphasis"><em>majority maker</em></span>.</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>remove package: patterns-sap-hana, SAPHanaSR, yast2-sap-ha</p></li><li class="listitem"><p>install package: SAPHanaSR-ScaleOut, SAPHanaSR-ScaleOut-doc</p></li><li class="listitem"><p>install pattern: ha_sles</p></li></ul></div><p>To do so, for example, use Zypper:</p><div class="example"><a id="id1789"></a><p class="title"><strong>Example 1. Uninstall the SAPHanaSR agent for ScaleUP</strong></p><div class="example-contents"><p>As user root, type:</p><pre class="screen">zypper remove SAPHanaSR</pre><p>If the package is installed, you will get an output like this:</p><pre class="screen">Loading repository data...
+Reading installed packages...
+Resolving package dependencies...
+
+The following 3 packages are going to be REMOVED:
+  patterns-sap-hana SAPHanaSR yast2-sap-ha
+
+The following pattern is going to be REMOVED:
+  sap-hana
+
+3 packages to remove.
+After the operation, 494.2 KiB will be freed.
+Continue? [y/n/...? shows all options] (y): y
+(1/3) Removing patterns-sap-hana-12.3-6.8.2.x86_64 ..............................[done]
+(2/3) Removing yast2-sap-ha-1.0.0-2.5.12.noarch .................................[done]
+(3/3) Removing SAPHanaSR-0.152.21-1.1.noarch ....................................[done]</pre></div></div><br class="example-break" /><div class="example"><a id="id1795"></a><p class="title"><strong>Example 2. Installation of the SAPHanaSR agent for ScaleOut</strong></p><div class="example-contents"><p>As user root, type:</p><pre class="screen">zypper in SAPHanaSR-ScaleOut SAPHanaSR-ScaleOut-doc</pre><p>If the package is not installed yet, you should get an output like the below:</p><pre class="screen">Refreshing service 'Advanced_Systems_Management_Module_12_x86_64'.
+Refreshing service 'SUSE_Linux_Enterprise_Server_for_SAP_Applications_12_SP3_x86_64'.
+Loading repository data...
+Reading installed packages...
+Resolving package dependencies...
+
+The following 2 NEW packages are going to be installed:
+  SAPHanaSR-ScaleOut SAPHanaSR-ScaleOut-doc
+
+2 new packages to install.
+Overall download size: 539.1 KiB. Already cached: 0 B. After the operation, additional 763.1 KiB will be used.
+Continue? [y/n/...? shows all options] (y): y
+Retrieving package SAPHanaSR-ScaleOut-0.161.1-1.1.noarch                                                                            (1/2),  48.7 KiB (211.8 KiB unpacked)
+Retrieving: SAPHanaSR-ScaleOut-0.161.1-1.1.noarch.rpm ....................................[done]
+Retrieving package SAPHanaSR-ScaleOut-doc-0.161.1-1.1.noarch                                                                        (2/2), 490.4 KiB (551.3 KiB unpacked)
+Retrieving: SAPHanaSR-ScaleOut-doc-0.161.1-1.1.noarch.rpm ................................[done (48.0 KiB/s)]
+Checking for file conflicts: .............................................................[done]
+(1/2) Installing: SAPHanaSR-ScaleOut-0.161.1-1.1.noarch ..................................[done]
+(2/2) Installing: SAPHanaSR-ScaleOut-doc-0.161.1-1.1.noarch ..............................[done]</pre><p>Install the tools for High Availability on all nodes.</p><pre class="screen">zypper in --type pattern ha_sles</pre></div></div><br class="example-break" /></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a id="id-getting-the-latest-updates"></a>Getting the latest updates</h4></div></div></div><p>If you have installed the packages before, make sure to deploy the newest updates on <span class="strong"><strong>all</strong></span> machines
+to have the latest versions of the resource agents and other packages. A prerequisite is a valid
+subscription for SUSE Linux Enterprise Server for SAP Applications. There are multiple ways to get updates via SUSE Manager, the
+Subscription Management Tool (SMT), or via a direct connection to the SUSE Customer Center (SCC).</p><p>Depending on your company or customer rules, use <code class="literal">zypper update</code> or <code class="literal">zypper patch</code>.</p><div class="example"><a id="id1810"></a><p class="title"><strong>Example 3. Software update must be triggered from each node</strong></p><div class="example-contents"><p>The command <code class="literal">zypper patch</code> will install all available needed patches.
+As user root, type:</p><pre class="screen">zypper patch</pre><p>The command <code class="literal">zypper update</code> will update all or specified installed packages with newer versions, if possible.
+As user root, type:</p><pre class="screen">zypper update</pre></div></div><br class="example-break" /></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="id-configuring-suse-linux-enterprise-server-for-sap-applications-to-run-sap-hana"></a>Configuring SUSE Linux Enterprise Server for SAP Applications to run SAP HANA</h3></div></div></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a id="id-tuning-or-modifying"></a>Tuning or modifying</h4></div></div></div><p>Operating system tuning are described in SAP note 1275776 and 2205917.
+The SAP note 1275776 explains three ways to implementing the settings.</p><div class="example"><a id="id1823"></a><p class="title"><strong>Example 4. Using saptune (preferred)</strong></p><div class="example-contents"><pre class="screen">saptune solution apply HANA</pre></div></div><br class="example-break" /><p>The SAP note 2205917 covers the following modifications:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>SUSE Linux Enterprise Server 12 GA (no SP) and SUSE Linux Enterprise Server 12 SP1 Linux kernel upgrade</p></li><li class="listitem"><p>SUSE Linux Enterprise Server 12 SP2 Linux kernel upgrade</p></li><li class="listitem"><p>SUSE Linux Enterprise Server 12 SP3 Linux kernel upgrade</p></li><li class="listitem"><p>SUSE Linux Enterprise Server 12 SP4 Linux kernel upgrade</p></li><li class="listitem"><p>Additional 3rd-party kernel modules</p></li><li class="listitem"><p>Configure tuned to use profile "sap-hana" (applies to Intel-based systems only)</p></li><li class="listitem"><p>Increase UserTasksMax</p></li><li class="listitem"><p>Turn off NUMA balancing</p></li><li class="listitem"><p>Disable transparent hugepages</p></li><li class="listitem"><p>Configure C-States for lower latency in Linux (applies to Intel-based systems only)</p></li><li class="listitem"><p>CPU Frequency/Voltage scaling (applies to Intel-based systems only)</p></li><li class="listitem"><p>Energy Performance Bias (EPB, applies to Intel-based systems only)</p></li><li class="listitem"><p>Turn off kernel samepage merging (KSM)</p></li><li class="listitem"><p>IBM EnergyScale for POWER8 Processor-Based Systems (applies to IBM Power systems only)</p></li><li class="listitem"><p>Linux page cache limit</p></li><li class="listitem"><p>Network settings</p></li><li class="listitem"><p>Intel Cluster-On-Die (COD) / sub-NUMA clustering technology</p></li></ul></div></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a id="id-enabling-ssh-access-via-public-key-optional"></a>Enabling SSH access via public key (optional)</h4></div></div></div><p>Public key authentication provides SSH users access to their servers without entering their passwords.
+SSH keys are also more secure than passwords, because the private key used to secure the connection
+is never shared. Private keys can also be encrypted. Their encrypted contents cannot easily be read.
+For the document at hand, a very simple but useful setup is used. This setup is based on
+only one ssh-key pair which enables SSH access to all cluster nodes.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>Follow your company security policy to set up access to the systems.</p></div><div class="example"><a id="id1867"></a><p class="title"><strong>Example 5. SSH key creation and exchange</strong></p><div class="example-contents"><p>As user root create an SSH key on one node.</p><pre class="screen">ssh-keygen -t rsa</pre><p>The ssh-key generation asks for missing parameters.</p><pre class="screen">Generating public/private rsa key pair.
+Enter file in which to save the key (/root/.ssh/id_rsa):
+Enter passphrase (empty for no passphrase):
+Enter same passphrase again:
+Your identification has been saved in /root/.ssh/id_rsa.
+Your public key has been saved in /root/.ssh/id_rsa.pub.
+The key fingerprint is:
+SHA256:ip/8kdTbYZNuuEUAdsaYOAErkwnkAPBR7d2SQIpIZCU root@&lt;host1&gt;
+The key's randomart image is:
++---[RSA 2048]----+
+|XEooo+ooo+o      |
+|=+.= o=.o+.      |
+|..B o. + o.      |
+|   o  . +... .   |
+|        S.. *    |
+|     . o . B o   |
+|    . . o o =    |
+|     o . . +     |
+|      +.. .      |
++----[SHA256]-----+</pre><p>After the <code class="literal">ssh-keygen</code> is set up, you will have two new files under <code class="literal">/root/.ssh/</code> .</p><pre class="screen">ls /root/.ssh/
+id_rsa  id_rsa.pub</pre><p>Collect the public host keys from all other node. For the document at hand, the <span class="emphasis"><em>ssh-keyscan</em></span> command is used.</p><pre class="screen">ssh-keyscan</pre><p>The SSH host key is automatically collected and stored in the file <code class="literal">/root/.ssh/known_host</code> during the first SSH
+connection. To avoid to confirm the first login with "yes", which accepts the host key, collect and store
+them beforehand.</p><pre class="screen">ssh-keyscan -t ecdsa-sha2-nistp256 &lt;host1&gt;,&lt;host1 ip&gt; &gt;&gt;.ssh/known_hosts
+ssh-keyscan -t ecdsa-sha2-nistp256 &lt;host2&gt;,&lt;host2 ip&gt; &gt;&gt;.ssh/known_hosts
+ssh-keyscan -t ecdsa-sha2-nistp256 &lt;host3&gt;,&lt;host3 ip&gt; &gt;&gt;.ssh/known_hosts
+...</pre><p>After collecting all host keys store them in a file named <code class="literal">authorized_keys</code>. Push the entire
+directory <code class="literal">/root/.ssh/</code> from the first node to all further cluster members.</p><pre class="screen">rsync -ay /root/.ssh/ &lt;host2&gt;:/root/.ssh/
+rsync -ay /root/.ssh/ &lt;host3&gt;:/root/.ssh/
+rsync -ay /root/.ssh/ &lt;host4&gt;:/root/.ssh/
+....</pre></div></div><br class="example-break" /></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a id="id-setting-up-disk-layout-for-sap-hana"></a>Setting up disk layout for SAP HANA</h4></div></div></div><p>An SAP certified storage system with a validated storage
+API is generally recommended. This is a prerequisite of a stable and reliable scale-out installation.</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>/hana/shared/&lt;SID&gt;</p></li><li class="listitem"><p>/hana/data/&lt;SID&gt;</p></li><li class="listitem"><p>/hana/log/&lt;SID&gt;</p></li></ul></div><p>Create the mount directories on all SAP HANA nodes.</p><pre class="screen">mkdir -p /hana/shared/&lt;SID&gt;
+mkdir -p /hana/data/&lt;SID&gt;
+mkdir -p /hana/log/&lt;SID&gt;
+mkdir -p /usr/sap</pre><p>The SAP HANA installation needs a special storage setup. The NFS setup used for this guide must be
+reboot-persistent. You can achieve this with entries in the <code class="literal">/etc/fstab</code>.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>NFS version 4 is required in the setup at hand.</p></div><div class="example"><a id="id1903"></a><p class="title"><strong>Example 6. Create permanent mount entries for all NFS pools</strong></p><div class="example-contents"><p>Create <span class="emphasis"><em>/etc/fstab</em></span> entries for the three NFS pools.</p><pre class="screen">&lt;nfs1&gt;  /hana/data/&lt;SID&gt;      nfs4  defaults  0 0
+&lt;nfs2&gt;  /hana/shared/&lt;SID&gt;    nfs4  defaults  0 0
+&lt;nfs3&gt; /hana/log/&lt;SID&gt;        nfs4  defaults  0 0</pre><p>In the sample environment those lines are as follows:</p><pre class="screen">/exports/HA1_WDF1/shared  /hana/data/HA1      nfs4  defaults  0 0
+/exports/HA1_WDF1/data  /hana/shared/HA1    nfs4  defaults  0 0
+/exports/HA1_WDF1/log /hana/log/HA1        nfs4  defaults  0 0</pre></div></div><br class="example-break" /><p>Mount all NFS shares.</p><pre class="screen">mount -a</pre><p>Create other directories (optional).</p><pre class="screen">mkdir -p /sapsoftware</pre><p>File systems</p><div class="variablelist"><dl class="variablelist"><dt><span class="term">/hana/shared/&lt;SID&gt;</span></dt><dd><p>The mount directory is used for shared files between all hosts in an SAP HANA
+system. This directory needs to be accessible to each of the servers in the
+SAP HANA cluster.</p></dd><dt><span class="term">/hana/log/&lt;SID&gt;</span></dt><dd><p>The default path to the log directory depends on the system ID of the SAP HANA
+host.</p></dd><dt><span class="term">/hana/data/&lt;SID&gt;</span></dt><dd><p>The default path to the data directory depends on the system ID of the SAP HANA
+host.</p></dd><dt><span class="term">/usr/sap</span></dt><dd><p>This is the path to the local SAP system instance directories. It is possible
+to join this location with the Linux installation.</p></dd><dt><span class="term">/sapsoftware</span></dt><dd><p>(optional)
+Space for copying the SAP install software media. This NFS pool is mounted on both sites and contains
+the SAP HANA installation media and installation parameter files.</p></dd></dl></div><p>Set up host name resolution for all machines.</p><p>You can either use a DNS server or modify the <span class="emphasis"><em>/etc/hosts</em></span> on <span class="strong"><strong>all</strong></span> nodes.</p><p>With maintaining the <code class="literal">/etc/hosts</code> file, you minimize the impact of a failing
+DNS service. Replace the IP address and the host name in the following commands.</p><pre class="screen">vi /etc/hosts</pre><p>Insert the following lines to <code class="literal">/etc/hosts</code>. Change the IP address and host name
+to match your environment.</p><pre class="screen"><span class="strong"><strong><span class="emphasis"><em>192.168.201.151</em></span></strong></span> <span class="emphasis"><em><span class="strong"><strong>suse01</strong></span></em></span>
+<span class="strong"><strong><span class="emphasis"><em>192.168.201.152</em></span></strong></span> <span class="emphasis"><em><span class="strong"><strong>suse02</strong></span></em></span>
+...</pre><p>Enable NTP service on all nodes.</p><p>Simply enable an <span class="strong"><strong>ntp service</strong></span> on all node in the cluster to have proper time
+synchronization.</p><pre class="screen">yast2 ntp-client</pre></div></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="id-planning-the-installation.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="id-installing-the-sap-hana-databases-on-both-sites.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Planning the installation </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Installing the SAP HANA databases on both sites</td></tr></table></div></body></html>

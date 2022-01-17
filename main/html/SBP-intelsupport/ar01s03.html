@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Full System Validation Counts</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="SUSE Linux Enterprise Server - Support for Intel Server Platforms" /><link rel="up" href="index.html" title="SUSE Linux Enterprise Server - Support for Intel Server Platforms" /><link rel="prev" href="ar01s02.html" title="The Question About Platform Support" /><link rel="next" href="sec-intel-support-cpufeatures.html" title="New CPU Features" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Full System Validation Counts</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ar01s02.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="sec-intel-support-cpufeatures.html">Next</a></td></tr></table><hr /></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id1339"></a>Full System Validation Counts</h2></div></div></div><p>Systems are made up of CPUs, basic I/O <span class="quote">“<span class="quote">chipsets</span>”</span>, Network and storage
+            controllers and Firmware. To determine if a system is supported requires that the
+            complete system is tested for compatibility. The components that typically affect
+            supportability in SUSE Linux Enterprise Server releases are briefly described in the
+            following sections.</p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-intel-support-cpus"></a>CPUs</h3></div></div></div><p>Intel CPUs are basically compatible with all versions of SUSE Linux
+                Enterprise Server. They will execute x86 or x86_64 based code in a compatible way
+                and therefore run our software. This is a theoretical statement. In practice the
+                other components that make up the complete system utilizing a CPU are usually the
+                determining factors that dictate which version of the operating system is required
+                for support and that make the use of older operating system versions with newer CPUs
+                challenging.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-intel-support-chipset"></a>Basic I/O Chipset</h3></div></div></div><p>Most people refer to the basic I/O chipset or Platform Controller Hub (PCH) for
+                Intel based systems as the <span class="quote">“<span class="quote">chipset</span>”</span>, or in our case for the document
+                at hand the <span class="quote">“<span class="quote">Haswell chipset</span>”</span>. These chipsets may require updates to the
+                kernel or other operating system subsystems for proper support. In the HP and IBM
+                examples given, these are two different chipsets: HP x240 utilizing Intel C610, IBM
+                x3250 utilizing Intel C226. Because the two systems make use of two different
+                chipsets, knowing that the HP system is supported does not allow for any statement
+                about the support status of the IBM system. </p><p>In addition, the E7-4800 v3 CPUs from the example above and referenced in the
+                query most likely use yet a different chipset. Again, knowing the status of the HP
+                and IBM systems does not help to determine if the systems the customer is interested
+                in (and which are not specified) are also supported.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-intel-support-adapters"></a>Network and Storage Adapters</h3></div></div></div><p>Looking at the network and storage adapters, here is where real divergence begins.
+                Regardless of the CPU microarchitecture used, each system vendor is free to pick and
+                choose different network and storage adapters for their systems. Even individual
+                systems within a microarchitecture family will have different controller options.
+                Support for these controllers is dependent on service pack levels and/or driver
+                updates.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-intel-support-firmware"></a>System Firmware</h3></div></div></div><p>Last but not least, the system firmware plays an important role in the
+                compatibility of SUSE Linux Enterprise Server with hardware. It can make a
+                difference between a system booting or not. </p><p>Firmware implementation is often required for certain CPU or platform features to
+                function. Vendors can choose to disable or otherwise <span class="quote">“<span class="quote">control</span>”</span> platform
+                features via system firmware. Therefore it is not possible to make a statement about
+                supportability of any platform or its features without testing and validating that
+                platform with its particular firmware implementation.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-intel-support-summary"></a>Summary</h3></div></div></div><p>To claim supportability of a product (for example a particular vendors server
+                model) that the customer will use requires testing and validating all parts of the
+                product - not just the CPU. Support statements around particular CPUs or CPU
+                microarchitectures do not help to determine if any specific server product is
+                supported. </p><p> Therefore SUSE only makes support statements around individual, validated
+                systems. We do that via YES certifications.</p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ar01s02.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="sec-intel-support-cpufeatures.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">The Question About Platform Support </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">  New CPU Features</td></tr></table></div></body></html>

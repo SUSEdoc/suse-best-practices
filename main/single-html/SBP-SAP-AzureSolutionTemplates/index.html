@@ -1,0 +1,990 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>SUSE and Microsoft Solution Templates for SAP Applications</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><meta name="description" content="This document describes several predefined solution templates for SAP Applications from SUSE and Microsoft for simplified deployment on Microsoft Azure. Disclaimer: Documents published as part of the SUSE Best Practices series have been contributed voluntarily by SUSE employees and third parties. They are meant to serve as examples of how particular actions can be performed. They have been compiled with utmost attention to detail. However, this does not guarantee complete accuracy. SUSE cannot verify that actions described in these documents do what is claimed or whether actions described have unintended consequences. SUSE LLC, its affiliates, the authors, and the translators may not be held liable for possible errors or the consequences thereof." /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div xml:lang="en" class="article" lang="en"><div class="titlepage"><div><div><h1 class="title"><a id="art-sbp-hanaonkvm-sles12sp2"></a>SUSE and Microsoft Solution Templates for SAP
+      Applications</h1></div><div><h3 class="subtitle"><em>Simplified Deployment on Microsoft Azure</em></h3></div><div><div class="author"><h3 class="author"><span class="firstname">Peter</span> <span class="surname">Schinagl, Technical Architect SAP, SUSE</span></h3></div></div><div><div class="abstract"><p class="title"><strong>Abstract</strong></p><p>This document describes several predefined solution templates
+        for SAP Applications from SUSE and Microsoft for simplified
+        deployment on Microsoft Azure.</p><p>
+        <span class="strong"><strong>Disclaimer: </strong></span>
+        Documents published as part of the SUSE Best Practices series have been contributed voluntarily
+        by SUSE employees and third parties. They are meant to serve as examples of how particular
+        actions can be performed. They have been compiled with utmost attention to detail. However,
+        this does not guarantee complete accuracy. SUSE cannot verify that actions described in these
+        documents do what is claimed or whether actions described have unintended consequences.
+        SUSE LLC, its affiliates, the authors, and the translators may not be held liable for possible errors
+        or the consequences thereof.
+      </p></div></div></div><hr /></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="sect1"><a href="#sec-overview">Overview</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec-os-updates">Operating System Updates</a></span></dt></dl></dd><dt><span class="sect1"><a href="#sec-sap-hana-2-tier-db-tier-template">SAP HANA 2-tier (DB-tier) Template</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec-os-configuration-for-sap-hana">OS Configuration for SAP HANA</a></span></dt><dt><span class="sect2"><a href="#sec-disk-overview">Disk Overview</a></span></dt></dl></dd><dt><span class="sect1"><a href="#sec-sap-netweaver-3-tier-template">SAP Netweaver 3-tier Template</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec-os-configuration-for-the-sap-netweaver-vm">OS Configuration for the SAP Netweaver VM</a></span></dt><dt><span class="sect2"><a href="#sec-os-configuration-for-the-sap-hana-vm">OS Configuration for the SAP HANA VM</a></span></dt><dt><span class="sect2"><a href="#sec-disk-overview-2">Disk Overview</a></span></dt><dt><span class="sect2"><a href="#sec-other-settings-and-machines">Other Settings and Machines</a></span></dt></dl></dd><dt><span class="sect1"><a href="#sec-sap-netweaver-3-tier-ha-template">SAP Netweaver 3-tier HA Template</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec-os-configuration-for-the-sap-netweaver-vm-2">OS Configuration for the SAP Netweaver VM</a></span></dt><dt><span class="sect2"><a href="#sec-os-configuration-for-the-sap-hana-vm-2">OS Configuration for the SAP HANA VM</a></span></dt><dt><span class="sect2"><a href="#sec-other-settings">Other Settings</a></span></dt><dt><span class="sect2"><a href="#sec-disk-overview-3">Disk Overview</a></span></dt><dt><span class="sect2"><a href="#sec-other-settings-and-machines-2">Other Settings and Machines</a></span></dt><dt><span class="sect2"><a href="#sec-internal-load-balancer-and-ports">Internal Load Balancer and Ports</a></span></dt></dl></dd><dt><span class="sect1"><a href="#sec-quick-guide-to-install-sap-hana-on-a-suse-linux-enterprise-server-for-sap-applications">Quick Guide to Install SAP HANA on a SUSE Linux Enterprise
+      Server for SAP Applications</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec-file-share-for-sap-media">File Share for SAP Media</a></span></dt><dt><span class="sect2"><a href="#sec-sap-media">SAP Media</a></span></dt><dt><span class="sect2"><a href="#sec-hana-install">HANA Install</a></span></dt><dt><span class="sect2"><a href="#sec-for-3-tier-templates-how-to-connect-to-the-other-systems">For 3-tier Templates: How to Connect to the Other
+        Systems</a></span></dt></dl></dd><dt><span class="sect1"><a href="#id1337">Legal notice</a></span></dt><dt><span class="sect1"><a href="#id1338">GNU Free Documentation License</a></span></dt></dl></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-overview"></a>Overview</h2></div></div></div><p>For every template there are four possible sizes available with
+      the following naming convention:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p> Demo </p></li><li class="listitem"><p> Small </p></li><li class="listitem"><p> Medium </p></li><li class="listitem"><p> Large </p></li></ul></div><p>The <span class="strong"><strong>Demo</strong></span> and <span class="strong"><strong>Small</strong></span> sizes are targeted at non-production
+      SAP HANA workloads. The <span class="strong"><strong>Medium</strong></span> and
+        <span class="strong"><strong>Large</strong></span> sizes can be used for
+      production systems, as they are built on M-SERIES/VM which are
+      certified.</p><p>One of the presumptions of this document is that you are familiar
+      with SAP Netweaver and SAP HANA.</p><p>Microsoft provides a good overview page about SAP deployments in
+      Azure at <a class="link" href="https://docs.microsoft.com/en-us/azure/virtual-machines/workloads/sap/get-started" target="_top">https://docs.microsoft.com/en-us/azure/virtual-machines/workloads/sap/get-started</a></p><p>For the High Availability (HA) scenario you should have in
+      addition good knowledge of</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p> High availability for SAP NetWeaver (ASCS/SCS/ERS) </p></li><li class="listitem"><p> the SUSE High Availability Extension </p></li><li class="listitem"><p> the best practice documents at <a class="link" href="https://www.suse.com/products/sles-for-sap/resource-library/sap-best-practices" target="_top">https://www.suse.com/products/sles-for-sap/resource-library/sap-best-practices</a>
+        </p></li></ul></div><p>For production systems you need to take care of the monitoring
+      requirements of SAP:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+          <a class="link" href="https://launchpad.support.sap.com/#/notes/2191498/E" target="_top"> https://launchpad.support.sap.com/#/notes/2191498/E</a>
+          [SAP Note 2191498]. This note discusses SAP <span class="quote">“<span class="quote">enhanced
+            monitoring</span>”</span> with Linux Virtual Machines (VMs) on
+          Azure.</p></li><li class="listitem"><p><a class="link" href="https://launchpad.support.sap.com/#/notes/1102124/E" target="_top">https://launchpad.support.sap.com/#/notes/1102124/E</a>
+          [SAP Note 1102124]. This note discusses information about
+          SAPOSCOL on Linux.</p></li><li class="listitem"><p><a class="link" href="https://launchpad.support.sap.com/#/notes/2178632/E" target="_top">https://launchpad.support.sap.com/#/notes/2178632/E</a>
+          [SAP Note 2178632]. This note discusses key monitoring metrics
+          for SAP on Microsoft Azure.</p></li></ul></div><p>You need to provide the SAP software and license by yourself. You
+      can download SAP software from the SAP Service Marketplace (<a class="link" href="https://service.sap.com" target="_top">https://service.sap.com</a>)</p><p>To prepare the Azure VM for the SAP Netweaver and HANA
+      installation, follow the steps outlined in the section below.</p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-os-updates"></a>Operating System Updates</h3></div></div></div><p>Check for SUSE Linux Enterprise Server operating system updates
+        and fixes before installing additional software. By installing a
+        patch, you might be able to avoid calling the support desk.</p><p>Here is an example of how to check for available patches for
+        SUSE Linux Enterprise Server by using the <span class="command"><strong>zypper</strong></span>
+        command:</p><pre class="screen">sudo zypper list-patches</pre><p>Depending on the kind of issue, patches are classified by
+          <span class="italic">category</span> and <span class="italic">severity</span>.</p><p>Commonly used values for <span class="italic">category</span> are: <span class="strong"><strong>security</strong></span>, <span class="strong"><strong>recommended</strong></span>, <span class="strong"><strong>optional</strong></span>, <span class="strong"><strong>feature</strong></span>,
+        or <span class="strong"><strong>yast</strong></span>.</p><p>Commonly used values for <span class="italic">severity</span> are: <span class="strong"><strong>critical</strong></span>, <span class="strong"><strong>important</strong></span>, <span class="strong"><strong>moderate</strong></span>, <span class="strong"><strong>low</strong></span>, or
+          <span class="strong"><strong>unspecified</strong></span>.</p><p>The <span class="command"><strong>zypper</strong></span> command searches only for the
+        updates that your installed packages need. As an example, you could
+        use the command:</p><pre class="screen">sudo zypper patch --category=security,recommended --severity=critical,important</pre><p>You can add the parameter <em class="parameter"><code>--dry-run</code></em> to
+        test the update without actually updating the system.</p></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-sap-hana-2-tier-db-tier-template"></a>SAP HANA 2-tier (DB-tier) Template</h2></div></div></div><p>The template provides and deploys a VM that is customized for use
+      with SAP HANA, using the latest pay-as-you-go (PAYG) version of the
+      SUSE Linux Enterprise Server for SAP Applications (SLES4SAP).</p><p>It deploys one server on Premium Storage (Premium_LRS) and uses
+      Managed Disks.</p><div class="figure"><a id="id1339"></a><p class="title"><strong>Figure 1. SAP HANA 2-tier (DB-tier) Template Overview</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td><img src="images/azure_2tier.png" width="100%" alt="SAP HANA 2-tier (DB-tier) Template Overview" /></td></tr></table></div></div></div><br class="figure-break" /><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-os-configuration-for-sap-hana"></a>OS Configuration for SAP HANA</h3></div></div></div><p>SAP HANA requires specific Linux kernel settings, which are not
+        part of the standard Azure images and must be set manually.</p><pre class="screen">sudo saptune solution apply HANA</pre></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-disk-overview"></a>Disk Overview</h3></div></div></div><p>The template uses the following disks and mount points for the
+        HANA machine:</p><p>Demo</p><div class="informaltable"><table class="informaltable" border="1"><colgroup><col class="col_1" /><col class="col_2" /><col class="col_3" /></colgroup><thead><tr><th align="left" valign="top">Mount Point </th><th align="left" valign="top"> Disk </th><th align="left" valign="top"> Size</th></tr></thead><tbody><tr><td align="left" valign="top">
+                <p>/hana/data</p>
+              </td><td align="left" valign="top">
+                <p>0,1</p>
+              </td><td align="left" valign="top">
+                <p>128 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/hana/log</p>
+              </td><td align="left" valign="top">
+                <p>2,3</p>
+              </td><td align="left" valign="top">
+                <p>128 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/hana/shared</p>
+              </td><td align="left" valign="top">
+                <p>4</p>
+              </td><td align="left" valign="top">
+                <p>128 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/usr/sap</p>
+              </td><td align="left" valign="top">
+                <p>5</p>
+              </td><td align="left" valign="top">
+                <p>128 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/hana/backup</p>
+              </td><td align="left" valign="top">
+                <p>6</p>
+              </td><td align="left" valign="top">
+                <p>128 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/sapmnt</p>
+              </td><td align="left" valign="top">
+                <p>7</p>
+              </td><td align="left" valign="top">
+                <p>128 GB</p>
+              </td></tr></tbody></table></div><p>Small</p><div class="informaltable"><table class="informaltable" border="1"><colgroup><col class="col_1" /><col class="col_2" /><col class="col_3" /></colgroup><thead><tr><th align="left" valign="top">Mount Point </th><th align="left" valign="top"> Disk </th><th align="left" valign="top"> Size</th></tr></thead><tbody><tr><td align="left" valign="top">
+                <p>/hana/data</p>
+              </td><td align="left" valign="top">
+                <p>0,1,2</p>
+              </td><td align="left" valign="top">
+                <p>512 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/hana/log</p>
+              </td><td align="left" valign="top">
+                <p>same disks as data</p>
+              </td><td align="left" valign="top">
+                <p></p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/hana/shared</p>
+              </td><td align="left" valign="top">
+                <p>3</p>
+              </td><td align="left" valign="top">
+                <p>512 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/usr/sap</p>
+              </td><td align="left" valign="top">
+                <p>4</p>
+              </td><td align="left" valign="top">
+                <p>64 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/hana/backup</p>
+              </td><td align="left" valign="top">
+                <p>5</p>
+              </td><td align="left" valign="top">
+                <p>1024 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/sapmnt</p>
+              </td><td align="left" valign="top">
+                <p>6</p>
+              </td><td align="left" valign="top">
+                <p>64 GB</p>
+              </td></tr></tbody></table></div><p>Medium</p><div class="informaltable"><table class="informaltable" border="1"><colgroup><col class="col_1" /><col class="col_2" /><col class="col_3" /></colgroup><thead><tr><th align="left" valign="top">Mount Point </th><th align="left" valign="top"> Disk </th><th align="left" valign="top"> Size</th></tr></thead><tbody><tr><td align="left" valign="top">
+                <p>/hana/data</p>
+              </td><td align="left" valign="top">
+                <p>0,1,2,3</p>
+              </td><td align="left" valign="top">
+                <p>512 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/hana/log</p>
+              </td><td align="left" valign="top">
+                <p>4,5</p>
+              </td><td align="left" valign="top">
+                <p>512 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/hana/shared</p>
+              </td><td align="left" valign="top">
+                <p>6</p>
+              </td><td align="left" valign="top">
+                <p>1024 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/usr/sap</p>
+              </td><td align="left" valign="top">
+                <p>7</p>
+              </td><td align="left" valign="top">
+                <p>64 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/hana/backup</p>
+              </td><td align="left" valign="top">
+                <p>8,9</p>
+              </td><td align="left" valign="top">
+                <p>1024 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/sapmnt</p>
+              </td><td align="left" valign="top">
+                <p>10</p>
+              </td><td align="left" valign="top">
+                <p>64 GB</p>
+              </td></tr></tbody></table></div><p>Large</p><div class="informaltable"><table class="informaltable" border="1"><colgroup><col class="col_1" /><col class="col_2" /><col class="col_3" /></colgroup><thead><tr><th align="left" valign="top">Mount Point </th><th align="left" valign="top"> Disk </th><th align="left" valign="top"> Size</th></tr></thead><tbody><tr><td align="left" valign="top">
+                <p>/hana/data</p>
+              </td><td align="left" valign="top">
+                <p>0,1,2</p>
+              </td><td align="left" valign="top">
+                <p>1024 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/hana/log</p>
+              </td><td align="left" valign="top">
+                <p>3,4</p>
+              </td><td align="left" valign="top">
+                <p>512 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/hana/shared</p>
+              </td><td align="left" valign="top">
+                <p>5</p>
+              </td><td align="left" valign="top">
+                <p>1024 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/usr/sap</p>
+              </td><td align="left" valign="top">
+                <p>6</p>
+              </td><td align="left" valign="top">
+                <p>64 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/hana/backup</p>
+              </td><td align="left" valign="top">
+                <p>7,8</p>
+              </td><td align="left" valign="top">
+                <p>2048 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/sapmnt</p>
+              </td><td align="left" valign="top">
+                <p>9</p>
+              </td><td align="left" valign="top">
+                <p>64 GB</p>
+              </td></tr></tbody></table></div><p>For the installation of SAP HANA there are different ways
+        available. You can use the native SAP mechanism of using the SAP
+        Software Provisioning Manager (SWPM) or the HANA database lifecycle
+        manager (HDBLCM).</p><p>For details, have a look at the SAP documentation at <a class="link" href="https://help.sap.com/viewer/p/SAP_HANA_PLATFORM" target="_top">https://help.sap.com/viewer/p/SAP_HANA_PLATFORM</a>.</p><p>A very short description is in addition available at <a class="link" href="https://docs.microsoft.com/en-us/azure/virtual-machines/workloads/sap/hana-get-started" target="_top">https://docs.microsoft.com/en-us/azure/virtual-machines/workloads/sap/hana-get-started</a>
+        .</p><p>Another way would be to use the SUSE YaST based HANA install
+        wizard, which simplifies the setup. It is discussed in a later
+        section below.</p></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-sap-netweaver-3-tier-template"></a>SAP Netweaver 3-tier Template</h2></div></div></div><p>The template provides and deploys several VMs which are
+      customized for use with SAP Netweaver and SAP HANA as database, using
+      the latest pay-as-you-go (PAYG) version of the SUSE Linux Enterprise
+      Server for SAP Applications (SLES4SAP).</p><p>It deploys all server on Premium Storage (Premium_LRS) and using
+      Managed Disks.</p><div class="figure"><a id="id1340"></a><p class="title"><strong>Figure 2. SAP Netweaver 3-tier Template Overview</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td><img src="images/azure_3tier.png" width="100%" alt="SAP Netweaver 3-tier Template Overview" /></td></tr></table></div></div></div><br class="figure-break" /><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-os-configuration-for-the-sap-netweaver-vm"></a>OS Configuration for the SAP Netweaver VM</h3></div></div></div><p>SAP Netweaver requires specific Linux kernel settings, which
+        are not part of the standard Azure images and must be set
+        manually.</p><pre class="screen">sudo saptune solution apply NETWEAVER</pre></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-os-configuration-for-the-sap-hana-vm"></a>OS Configuration for the SAP HANA VM</h3></div></div></div><p>SAP HANA requires specific Linux kernel settings, which are not
+        part of the standard Azure images and must be set manually.</p><pre class="screen">sudo saptune solution apply HANA</pre><p>For more details see the documentation at <a class="link" href="https://documentation.suse.com/sles-sap/12-SP4/html/SLES4SAP-guide/cha-s4s-tune.html#sec-saptune" target="_top">https://documentation.suse.com/sles-sap/12-SP4/html/SLES4SAP-guide/cha-s4s-tune.html#sec-saptune</a></p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-disk-overview-2"></a>Disk Overview</h3></div></div></div><p>The template uses the following disks and mount points for the
+        HANA machine:</p><p>Demo</p><div class="informaltable"><table class="informaltable" border="1"><colgroup><col class="col_1" /><col class="col_2" /><col class="col_3" /></colgroup><thead><tr><th align="left" valign="top">Mount Point </th><th align="left" valign="top"> Disk </th><th align="left" valign="top"> Size</th></tr></thead><tbody><tr><td align="left" valign="top">
+                <p>/hana/data</p>
+              </td><td align="left" valign="top">
+                <p>0,1</p>
+              </td><td align="left" valign="top">
+                <p>128 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/hana/log</p>
+              </td><td align="left" valign="top">
+                <p>2,3</p>
+              </td><td align="left" valign="top">
+                <p>128 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/hana/shared</p>
+              </td><td align="left" valign="top">
+                <p>4</p>
+              </td><td align="left" valign="top">
+                <p>128 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/usr/sap</p>
+              </td><td align="left" valign="top">
+                <p>5</p>
+              </td><td align="left" valign="top">
+                <p>128 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/hana/backup</p>
+              </td><td align="left" valign="top">
+                <p>6</p>
+              </td><td align="left" valign="top">
+                <p>128 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/sapmnt</p>
+              </td><td align="left" valign="top">
+                <p>7</p>
+              </td><td align="left" valign="top">
+                <p>128 GB</p>
+              </td></tr></tbody></table></div><p>The XSCS machine uses only the base OS disk.</p><p>The APP server machines use an additional 128 GB disk for
+        /usr/sap/&lt;SID&gt;.</p><p>Small</p><div class="informaltable"><table class="informaltable" border="1"><colgroup><col class="col_1" /><col class="col_2" /><col class="col_3" /></colgroup><thead><tr><th align="left" valign="top">Mount Point </th><th align="left" valign="top"> Disk </th><th align="left" valign="top"> Size</th></tr></thead><tbody><tr><td align="left" valign="top">
+                <p>/hana/data</p>
+              </td><td align="left" valign="top">
+                <p>0,1,2</p>
+              </td><td align="left" valign="top">
+                <p>512 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/hana/log</p>
+              </td><td align="left" valign="top">
+                <p>same disks as data</p>
+              </td><td align="left" valign="top">
+                <p></p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/hana/shared</p>
+              </td><td align="left" valign="top">
+                <p>3</p>
+              </td><td align="left" valign="top">
+                <p>512 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/usr/sap</p>
+              </td><td align="left" valign="top">
+                <p>4</p>
+              </td><td align="left" valign="top">
+                <p>64 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/hana/backup</p>
+              </td><td align="left" valign="top">
+                <p>5</p>
+              </td><td align="left" valign="top">
+                <p>1024 GB</p>
+              </td></tr></tbody></table></div><p>The XSCS machine uses only the base OS disk.</p><p>The APP server machines use an additional 128 GB disk for
+        /usr/sap/&lt;SID&gt;</p><p>Medium</p><div class="informaltable"><table class="informaltable" border="1"><colgroup><col class="col_1" /><col class="col_2" /><col class="col_3" /></colgroup><thead><tr><th align="left" valign="top">Mount Point </th><th align="left" valign="top"> Disk </th><th align="left" valign="top"> Size</th></tr></thead><tbody><tr><td align="left" valign="top">
+                <p>/hana/data</p>
+              </td><td align="left" valign="top">
+                <p>0,1,2,3</p>
+              </td><td align="left" valign="top">
+                <p>512 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/hana/log</p>
+              </td><td align="left" valign="top">
+                <p>4,5</p>
+              </td><td align="left" valign="top">
+                <p>512 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/hana/shared</p>
+              </td><td align="left" valign="top">
+                <p>6</p>
+              </td><td align="left" valign="top">
+                <p>1024 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/usr/sap</p>
+              </td><td align="left" valign="top">
+                <p>7</p>
+              </td><td align="left" valign="top">
+                <p>64 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/hana/backup</p>
+              </td><td align="left" valign="top">
+                <p>8,9</p>
+              </td><td align="left" valign="top">
+                <p>1024 GB</p>
+              </td></tr></tbody></table></div><p>Large</p><div class="informaltable"><table class="informaltable" border="1"><colgroup><col class="col_1" /><col class="col_2" /><col class="col_3" /></colgroup><thead><tr><th align="left" valign="top">Mount Point </th><th align="left" valign="top"> Disk </th><th align="left" valign="top"> Size</th></tr></thead><tbody><tr><td align="left" valign="top">
+                <p>/hana/data</p>
+              </td><td align="left" valign="top">
+                <p>0,1,2</p>
+              </td><td align="left" valign="top">
+                <p>1024 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/hana/log</p>
+              </td><td align="left" valign="top">
+                <p>3,4</p>
+              </td><td align="left" valign="top">
+                <p>512 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/hana/shared</p>
+              </td><td align="left" valign="top">
+                <p>5</p>
+              </td><td align="left" valign="top">
+                <p>1024 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/usr/sap</p>
+              </td><td align="left" valign="top">
+                <p>6</p>
+              </td><td align="left" valign="top">
+                <p>64 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/hana/backup</p>
+              </td><td align="left" valign="top">
+                <p>7,8</p>
+              </td><td align="left" valign="top">
+                <p>2048 GB</p>
+              </td></tr></tbody></table></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-other-settings-and-machines"></a>Other Settings and Machines</h3></div></div></div><p>All machines created with the template use the Azure feature
+          <span class="quote">“<span class="quote">Accelerated Network (AN)</span>”</span> (only if the VM size
+        supports AN).</p><p>The XSCS machine gets a dynamic public IP address to be able to
+        access all other machines in the private network and only uses the
+        base OS disk. There is no additional disk.</p><p>The APP server machines use an additional 128 GB disk for
+        /usr/sap/&lt;SID&gt; and the machines are placed in an
+          <span class="strong"><strong>Availability Set</strong></span> with a
+          <span class="strong"><strong>FaultDomainCount</strong></span> of 2 and an
+          <span class="strong"><strong>UpdateDomainCount</strong></span> of
+        20.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Availability Set</h3><p>An <span class="strong"><strong>Availability Set</strong></span> is a
+          logical group in Azure to ensure that the VM resources are
+          isolated from each other when they are deployed within an Azure
+          data center. It ensures that the VMs you place within such an
+            <span class="strong"><strong>Availability Set</strong></span> run across
+          multiple physical servers, compute racks, storage units and
+          network switches. The Virtual Machines are placed then into an
+            <span class="strong"><strong>Availability Set</strong></span> to minimize
+          the chances that two of them fail or are updated at the same
+          time. This is essential when you want to build reliable cloud
+          solutions and clusters.</p></div></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-sap-netweaver-3-tier-ha-template"></a>SAP Netweaver 3-tier HA Template</h2></div></div></div><p>The template provides and deploys several VMs <span class="strong"><strong>twice</strong></span> to be used in an HA configuration.
+      They are customized for use with SAP Netweaver and SAP HANA as
+      database, using the latest pay-as-you-go (PAYG) version of the SUSE
+      Linux Enterprise Server for SAP Applications (SLES4SAP).</p><p>It deploys all servers on Premium Storage (Premium_LRS) and using
+      Managed Disks.</p><div class="figure"><a id="id1341"></a><p class="title"><strong>Figure 3. SAP Netweaver 3-tier HA Template Overview</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td><img src="images/azure_3tierha.png" width="100%" alt="SAP Netweaver 3-tier HA Template Overview" /></td></tr></table></div></div></div><br class="figure-break" /><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-os-configuration-for-the-sap-netweaver-vm-2"></a>OS Configuration for the SAP Netweaver VM</h3></div></div></div><p>SAP Netweaver requires specific Linux kernel settings, which
+        are not part of the standard Azure images and must be set
+        manually.</p><pre class="screen">sudo saptune solution apply NETWEAVER</pre></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-os-configuration-for-the-sap-hana-vm-2"></a>OS Configuration for the SAP HANA VM</h3></div></div></div><p>SAP HANA requires specific Linux kernel settings, which are not
+        part of the standard Azure images and must be set manually.</p><pre class="screen">sudo saptune solution apply HANA</pre><p>For more details see the documentation at <a class="link" href="https://documentation.suse.com/sles-sap/12-SP4/html/SLES4SAP-guide/cha-s4s-tune.html#sec-saptune" target="_top">https://documentation.suse.com/sles-sap/12-SP4/html/SLES4SAP-guide/cha-s4s-tune.html#sec-saptune</a></p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-other-settings"></a>Other Settings</h3></div></div></div><p>The XSCS machine gets a dynamic public IP address to be able to
+        access all other machines in the private network.</p><p>All machines use the Azure feature <span class="quote">“<span class="quote">Accelerated Network
+          (AN)</span>”</span> (only if the VM size supports AN).</p><p>All AVSets for the APP machines use a <span class="strong"><strong>FaultDomainCount</strong></span> of 2 and an <span class="strong"><strong>UpdateDomainCount</strong></span> of 20.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-disk-overview-3"></a>Disk Overview</h3></div></div></div><p>The template uses the following disks and mount points:</p><p>Demo</p><div class="informaltable"><table class="informaltable" border="1"><colgroup><col class="col_1" /><col class="col_2" /><col class="col_3" /></colgroup><thead><tr><th align="left" valign="top">Mount Point </th><th align="left" valign="top"> Disk </th><th align="left" valign="top"> Size</th></tr></thead><tbody><tr><td align="left" valign="top">
+                <p>/hana/data</p>
+              </td><td align="left" valign="top">
+                <p>0,1</p>
+              </td><td align="left" valign="top">
+                <p>128 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/hana/log</p>
+              </td><td align="left" valign="top">
+                <p>2,3</p>
+              </td><td align="left" valign="top">
+                <p>128 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/hana/shared</p>
+              </td><td align="left" valign="top">
+                <p>4</p>
+              </td><td align="left" valign="top">
+                <p>128 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/usr/sap</p>
+              </td><td align="left" valign="top">
+                <p>5</p>
+              </td><td align="left" valign="top">
+                <p>128 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/hana/backup</p>
+              </td><td align="left" valign="top">
+                <p>6</p>
+              </td><td align="left" valign="top">
+                <p>128 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/sapmnt</p>
+              </td><td align="left" valign="top">
+                <p>7</p>
+              </td><td align="left" valign="top">
+                <p>128 GB</p>
+              </td></tr></tbody></table></div><p>Small</p><div class="informaltable"><table class="informaltable" border="1"><colgroup><col class="col_1" /><col class="col_2" /><col class="col_3" /></colgroup><thead><tr><th align="left" valign="top">Mount Point </th><th align="left" valign="top"> Disk </th><th align="left" valign="top"> Size</th></tr></thead><tbody><tr><td align="left" valign="top">
+                <p>/hana/data</p>
+              </td><td align="left" valign="top">
+                <p>0,1,2</p>
+              </td><td align="left" valign="top">
+                <p>512 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/hana/log</p>
+              </td><td align="left" valign="top">
+                <p>same disks as data</p>
+              </td><td align="left" valign="top">
+                <p></p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/hana/shared</p>
+              </td><td align="left" valign="top">
+                <p>3</p>
+              </td><td align="left" valign="top">
+                <p>512 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/usr/sap</p>
+              </td><td align="left" valign="top">
+                <p>4</p>
+              </td><td align="left" valign="top">
+                <p>64 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/hana/backup</p>
+              </td><td align="left" valign="top">
+                <p>5</p>
+              </td><td align="left" valign="top">
+                <p>1024 GB</p>
+              </td></tr></tbody></table></div><p>Medium</p><div class="informaltable"><table class="informaltable" border="1"><colgroup><col class="col_1" /><col class="col_2" /><col class="col_3" /></colgroup><thead><tr><th align="left" valign="top">Mount Point </th><th align="left" valign="top"> Disk </th><th align="left" valign="top"> Size</th></tr></thead><tbody><tr><td align="left" valign="top">
+                <p>/hana/data</p>
+              </td><td align="left" valign="top">
+                <p>0,1,2,3</p>
+              </td><td align="left" valign="top">
+                <p>512 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/hana/log</p>
+              </td><td align="left" valign="top">
+                <p>4,5</p>
+              </td><td align="left" valign="top">
+                <p>512 GB (W)</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/hana/shared</p>
+              </td><td align="left" valign="top">
+                <p>6</p>
+              </td><td align="left" valign="top">
+                <p>1024 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/usr/sap</p>
+              </td><td align="left" valign="top">
+                <p>7</p>
+              </td><td align="left" valign="top">
+                <p>64 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/hana/backup</p>
+              </td><td align="left" valign="top">
+                <p>8,9</p>
+              </td><td align="left" valign="top">
+                <p>1024 GB</p>
+              </td></tr></tbody></table></div><p>(w) uses Azure feature "writeAccelerator"</p><p>Large</p><div class="informaltable"><table class="informaltable" border="1"><colgroup><col class="col_1" /><col class="col_2" /><col class="col_3" /></colgroup><thead><tr><th align="left" valign="top">Mount Point </th><th align="left" valign="top"> Disk </th><th align="left" valign="top"> Size</th></tr></thead><tbody><tr><td align="left" valign="top">
+                <p>/hana/data</p>
+              </td><td align="left" valign="top">
+                <p>0,1,2</p>
+              </td><td align="left" valign="top">
+                <p>1024 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/hana/log</p>
+              </td><td align="left" valign="top">
+                <p>3,4</p>
+              </td><td align="left" valign="top">
+                <p>512 GB (W)</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/hana/shared</p>
+              </td><td align="left" valign="top">
+                <p>5</p>
+              </td><td align="left" valign="top">
+                <p>1024 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/usr/sap</p>
+              </td><td align="left" valign="top">
+                <p>6</p>
+              </td><td align="left" valign="top">
+                <p>64 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/hana/backup</p>
+              </td><td align="left" valign="top">
+                <p>7,8</p>
+              </td><td align="left" valign="top">
+                <p>2048 GB</p>
+              </td></tr></tbody></table></div><p>(w) uses Azure feature "writeAccelerator"</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-other-settings-and-machines-2"></a>Other Settings and Machines</h3></div></div></div><p>All machines created with the template use the Azure feature
+          <span class="quote">“<span class="quote">Accelerated Network (AN)</span>”</span> (only if the VM size
+        supports AN).</p><p>The XSCS machine gets a dynamic public IP address to be able to
+        access all other machines in the private network and only use the
+        base OS disk. There is no additional disk.</p><p>The APP server machines use an additional 128 GB disk for
+        /usr/sap/&lt;SID&gt; and the machines are placed in an
+          <span class="strong"><strong>Availability Set</strong></span> with a
+          <span class="strong"><strong>FaultDomainCount</strong></span> of 2 and an
+          <span class="strong"><strong>UpdateDomainCount</strong></span> of
+        20.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Availability Set</h3><p>An <span class="emphasis"><em>Availability Set</em></span> is a logical group
+          in Azure to ensure that the VM resources are isolated from each
+          other when they are deployed within an Azure data center. It
+          ensures that the VMs you place within such an <span class="strong"><strong>Availability Set</strong></span> run across multiple
+          physical servers, compute racks, storage units and network
+          switches. The Virtual Machines are placed then into an <span class="strong"><strong>Availability Set</strong></span> to minimize the
+          chances that two of them fail or are updated at the same time.
+          This is essential when you want to build reliable cloud solutions
+          and clusters.</p></div><p>The HA template provides two additional instances for an HA NFS
+        server which has an additional disk as share of 32GB.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-internal-load-balancer-and-ports"></a>Internal Load Balancer and Ports</h3></div></div></div><p>Special for the HA setup is the use of the Azure <span class="italic">Internal Load Balancer</span> (ILB) which is
+        necessary to use virtual IP addresses in Azure. As such, the ILB
+        allows the use of virtual host names and IPs for the xSCS, HA-NFS
+        and SAP HANA pacemaker clusters. Additionally the ILB is providing
+        Layer 4: TCP and HTTP health probes.</p><p>
+        <a class="link" href="https://docs.microsoft.com/en-us/azure/load-balancer/" target="_top">https://docs.microsoft.com/en-us/azure/load-balancer/</a>
+      </p><p>The selection <span class="italic">ABAP</span> uses the
+        relevant <span class="italic">ASCS ports</span>, <span class="italic">JAVA</span> uses the relevant <span class="italic">SCS ports</span> and <span class="italic">ABAP+JAVA</span> both of the ports.</p><p>ASCS/SCS Internal Load Balancer ports (examples all with
+        instance <span class="strong"><strong>00</strong></span> in bold):</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p> ASCS ERS ports : 33<span class="strong"><strong>00</strong></span>,
+              5<span class="strong"><strong>00</strong></span>13, 5<span class="strong"><strong>00</strong></span>14, 5<span class="strong"><strong>00</strong></span>16 </p></li><li class="listitem"><p> SCS ERS ports : 33<span class="strong"><strong>00</strong></span>,
+              5<span class="strong"><strong>00</strong></span>13, 5<span class="strong"><strong>00</strong></span>14, 5<span class="strong"><strong>00</strong></span>16 </p></li><li class="listitem"><p> ASCS Ports : 32<span class="strong"><strong>00</strong></span>,
+              36<span class="strong"><strong>00</strong></span>, 39<span class="strong"><strong>00</strong></span>, 81<span class="strong"><strong>00</strong></span>, 5<span class="strong"><strong>00</strong></span>13,
+              5<span class="strong"><strong>00</strong></span>14, 5<span class="strong"><strong>00</strong></span>16 </p></li><li class="listitem"><p> SCS Ports : 32<span class="strong"><strong>00</strong></span>,
+              33<span class="strong"><strong>00</strong></span>, 39<span class="strong"><strong>00</strong></span>, 81<span class="strong"><strong>00</strong></span>, 5<span class="strong"><strong>00</strong></span>13,
+              5<span class="strong"><strong>00</strong></span>14, 5<span class="strong"><strong>00</strong></span>16 </p></li><li class="listitem"><p> HANA Ports : 3<span class="strong"><strong>00</strong></span>15,3<span class="strong"><strong>00</strong></span>17
+          </p></li><li class="listitem"><p> NFS Ports : 2049 </p></li></ul></div><p>Probe Ports:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p> xSCS: 62000 </p></li><li class="listitem"><p> ERS : 61000 </p></li><li class="listitem"><p> HANA: 62500 </p></li><li class="listitem"><p> NFS : 61000 </p></li></ul></div></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-quick-guide-to-install-sap-hana-on-a-suse-linux-enterprise-server-for-sap-applications"></a>Quick Guide to Install SAP HANA on a SUSE Linux Enterprise
+      Server for SAP Applications</h2></div></div></div><p>This section leads you through the installation of a default SAP
+      HANA on SUSE Linux Enterprise Server.</p><p>It does not replace the SAP documentation - <span class="strong"><strong>PLEASE</strong></span> read the SAP HANA installation
+      documentation.</p><div class="important" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Transfer</h3><p>You need to transfer the SAP media for SAP HANA to the Azure
+        cloud environment.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-file-share-for-sap-media"></a>File Share for SAP Media</h3></div></div></div><p>Azure Files offers shared storage for applications using the
+        Server Message Block (SMB) protocol which is very useful to upload
+        the SAP HANA Media to it and use it from both machines.</p><p>
+        <a class="link" href="https://docs.microsoft.com/en-us/azure/storage/files/storage-files-introduction" target="_top">https://docs.microsoft.com/en-us/azure/storage/files/storage-files-introduction</a>
+      </p><p>To use Azure Storage, you need to create first a storage
+        account.</p><p>In the example below, the Azure CLI v2 command line installed
+        on our local machine is used. It is also possible to install it on
+        the virtual machine you have created in Azure.</p><p>For more details see <a class="link" href="https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-zypper?view=azure-cli-latest" target="_top">https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-zypper?view=azure-cli-latest</a>.</p><p>Another way would be to follow the more general steps from
+          <a class="link" href="https://docs.microsoft.com/en-us/azure/virtual-machines/linux/mount-azure-file-storage-on-linux-using-smb" target="_top">https://docs.microsoft.com/en-us/azure/virtual-machines/linux/mount-azure-file-storage-on-linux-using-smb</a></p><p>or using the portal</p><p>
+        <a class="link" href="https://github.com/AzureCAT-GSI/SAP-HANA-ARM/blob/master/UploadToAzure.md" target="_top">https://github.com/AzureCAT-GSI/SAP-HANA-ARM/blob/master/UploadToAzure.md</a>
+      </p><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-steps-to-create-a-file-share-in-azure"></a>Steps to Create a File Share in Azure</h4></div></div></div><p>First you need a resource group where the storage should be
+          placed in.</p><p>Substitute the <span class="italic">--location</span>
+          parameter with the azure region you have chosen:</p><pre class="screen">az group create --name mytestRG <span class="italic">--location westeurope</span></pre><p>Now you can create the storage account in your resource
+          group:</p><pre class="screen">az storage account create \
+    --name hsrsa4sapmedia \
+    --resource-group mytestRG \
+    --sku Standard_LRS \
+    --location westeurope</pre><p>A good practice is to share the connection string using
+          variables, as you need to add it to every following storage
+          commands:</p><pre class="screen">az storage account show-connection-string \
+    --name hsrsa4sapmedia \
+    --resource-group mytestRG</pre><p>Set the AZURE_STORAGE_CONNECTION_STRING environment variable
+          with the output value of the command. You should enclose the
+          connection string in quotes.</p><pre class="screen">export AZURE_STORAGE_CONNECTION_STRING="YOUR_connection_string"</pre></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-sap-media"></a>SAP Media</h3></div></div></div><p>Installation media for SAP HANA should be downloaded and placed
+        in the Azure file share created in the step before. For this we
+        create an own directory called "SapBits".</p><p>You need to download the SAP package 51052325, which should
+        consist of four files:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>51052325_part1.exe</p></li><li class="listitem"><p>51052325_part2.rar</p></li><li class="listitem"><p>51052325_part3.rar</p></li><li class="listitem"><p>51052325_part4.rar</p></li></ul></div><p>If you have the files in your download directory on your
+        machine, the command looks as follows:</p><pre class="screen">az storage share create --name mediashare
+az storage directory create --name SapBits --share-name mediashare
+
+az storage file upload --share-name mediashare/SapBits --source ~/Download/51052325_part1.exe
+az storage file upload --share-name mediashare/SapBits --source ~/Download/51052325_part2.rar
+az storage file upload --share-name mediashare/SapBits --source ~/Download/51052325_part3.rar
+az storage file upload --share-name mediashare/SapBits --source /Download/51052325_part4.rar</pre><p>The next steps need to be done on your virtual machine you
+        created for HANA in Azure. Log in to this machine.nius.</p><p>Mount it on the SUSE Linux Enterprise Server system in Azure
+        with the command:</p><pre class="screen">sudo zypper in cifs-utils unrar
+
+mkdir -p /hana/shared/SapBits
+
+sudo mount -t cifs //hsrsa4sapmedia.file.core.windows.net/mediashare/SapBits /mnt -o vers=3.0,username=storage-account-name,password=storage-account-key,dir_mode=0777,file_mode=0777,serverino
+
+sudo cp -v /mnt/51052325* /hana/shared/SapBits
+
+sudo umount /mnt</pre><p>Extract the HANA software</p><pre class="screen">cd /hana/shared/SapBits
+unrar x 51052325_part1.exe</pre><p>If you need the hana software later again, you do not need this
+        step as it is extracted</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-hana-install"></a>HANA Install</h3></div></div></div><p>Hana requires a few packages installed within SUSE Linux
+        Enterprise Server.</p><pre class="screen">zypper in -t pattern sap-hana</pre><p>and configuration settings</p><pre class="screen">saptune daemon start
+saptune solution apply HANA</pre><p>There are several possibilities to install SAP HANA, which are
+        detailed in the following sections.</p><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-with-use-of-the-suse-installation-wizard"></a>Installation Using the SUSE Installation Wizard</h4></div></div></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p> Start YaST. </p></li><li class="listitem"><p>Under <span class="quote">“<span class="quote">Software</span>”</span> choose the <span class="quote">“<span class="quote">SAP
+                Installation Wizard</span>”</span>:</p></li></ul></div><div class="figure"><a id="id1342"></a><p class="title"><strong>Figure 4. YaST Control Center - SAP Installation Wizard</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/azure_hana_wizard1.png" width="100%" alt="YaST Control Center - SAP Installation Wizard" /></td></tr></table></div></div></div><br class="figure-break" /><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Point the Installer to the directory with the SAP Media
+              from the step above (for example
+              /hana/shared/SapBits/51052325):</p></li></ul></div><div class="figure"><a id="id1343"></a><p class="title"><strong>Figure 5. SAP Installation Wizard - Directory</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/azure_hana_wizard3.png" width="100%" alt="SAP Installation Wizard - Directory" /></td></tr></table></div></div></div><br class="figure-break" /><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>The sap media get copied to the local machine:</p></li></ul></div><div class="figure"><a id="id1344"></a><p class="title"><strong>Figure 6. SAP Installation Wizard - Copying Media</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/azure_hana_wizard4.png" width="100%" alt="SAP Installation Wizard - Copying Media" /></td></tr></table></div></div></div><br class="figure-break" /><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Say <span class="quote">“<span class="quote">No</span>”</span> if you asked for
+              Supplement/3rd-party media share:</p></li></ul></div><div class="figure"><a id="id1345"></a><p class="title"><strong>Figure 7. SAP Installation Wizard - Medium</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/azure_hana_wizard5.png" width="100%" alt="SAP Installation Wizard - Medium" /></td></tr></table></div></div></div><br class="figure-break" /><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Click <span class="quote">“<span class="quote">Next</span>”</span> at the screen asking for SAP
+              add-ons:</p></li></ul></div><div class="figure"><a id="id1346"></a><p class="title"><strong>Figure 8. SAP Installation Wizard - SAP Add-ons</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/azure_hana_wizard6.png" width="100%" alt="SAP Installation Wizard - SAP Add-ons" /></td></tr></table></div></div></div><br class="figure-break" /><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p> Fill out the four fields for HANA:</p></li></ul></div><div class="figure"><a id="id1347"></a><p class="title"><strong>Figure 9. SAP Installation Wizard - System Parameters</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/azure_hana_wizard7.png" width="100%" alt="SAP Installation Wizard - System Parameters" /></td></tr></table></div></div></div><br class="figure-break" /><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Say <span class="quote">“<span class="quote">No</span>”</span> if you are asked for more products:
+            </p></li></ul></div><div class="figure"><a id="id1348"></a><p class="title"><strong>Figure 10. SAP Installation Wizard - More SAP Products</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/azure_hana_wizard8.png" width="100%" alt="SAP Installation Wizard - More SAP Products" /></td></tr></table></div></div></div><br class="figure-break" /><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p> Agree with the question to continue the installation:
+            </p></li></ul></div><div class="figure"><a id="id1349"></a><p class="title"><strong>Figure 11. SAP Installation Wizard - Continue Installation</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/azure_hana_wizard9.png" width="100%" alt="SAP Installation Wizard - Continue Installation" /></td></tr></table></div></div></div><br class="figure-break" /><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>HANA gets installed and started. </p></li></ul></div><p>This installation process will take some time - be patient.
+          You will see the log output in the window.</p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-using-the-command-line"></a>Installation Using the Command Line</h4></div></div></div><p>The HANA installer will ask for some values.</p><p>Answer the questions according to your well prepared sheet
+          with all needed parameters. Do <span class="strong"><strong>NOT</strong></span> install HANA with a virtual host name,
+            <span class="strong"><strong>use</strong></span> the physical host name.
+          Double-check before you type!</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p> Install the SAP HANA Database as described in the SAP
+              HANA Server Installation Guide on <span class="strong"><strong>both</strong></span> machines. </p><div class="orderedlist"><ol class="orderedlist" type="a"><li class="listitem"><p> Change to the directory where you have downloaded
+                    <span class="strong"><strong>and unpacked</strong></span> the
+                  installation medium ( in our example it should be
+                  /hana/shared/SapBits ): </p><pre class="screen">   cd /hana/shared/SapBits/51052325/DATA_UNITS/HDB_LCM_LINUX_X86_64</pre></li><li class="listitem"><p> Start the SAP HANA database lifecycle manager
+                  interactively at the command line: </p><pre class="screen">   sudo ./hdblcm</pre></li></ol></div></li></ol></div></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-for-3-tier-templates-how-to-connect-to-the-other-systems"></a>For 3-tier Templates: How to Connect to the Other
+        Systems</h3></div></div></div><p>Only the XSCS machine has a public IP address and needs to be
+        used as intermediate hop (jumphost) between your actual SSH target
+        and yourself.</p><p>Instead of using something like <span class="quote">“<span class="quote">insecure</span>”</span> SSH
+        agent forwarding, where the data gets exposed at every jump, you
+        can use ProxyCommand to proxy all your commands through your
+        jumphost.</p><p>Consider the following scenario:</p><pre class="screen">+--------+    +---------+    /------ | Host A |
+| Laptop |--P-| XSCS    |---+
++--------+    +---------+    \-------| Host B |
+                              ...
+                              \------| Host X |</pre><p>A configuration like this will allow you to proxy through the
+        jumphost within the admin subnet to HOST A and B,
+        …</p><pre class="screen">on YOUR local system create a ssh config file:
+
+$ cat .ssh/config
+Host XSCS
+   User <span class="strong"><strong>adminuser used here as example</strong></span>
+   Hostname <span class="strong"><strong>public-ip-of-xscs</strong></span>
+   Port 22 # a non-standard port would be a good idea
+
+Host hosta
+   User adminuser
+   Hostname <span class="strong"><strong>private-ip of host a</strong></span>
+   Port 22
+   ProxyCommand ssh -q -W %h:%p XSCS
+
+Host hostb
+   User adminuser
+   Hostname <span class="strong"><strong>private-ip of host b</strong></span>
+   Port 22
+   ProxyCommand ssh -q -W %h:%p XSCS
+
+etc...</pre><pre class="screen">ssh adminuser@hosta</pre><p>or</p><pre class="screen">ssh adminuser@<span class="strong"><strong>private-ip-hosta</strong></span></pre></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id1337"></a>Legal notice</h2></div></div></div><p> Copyright ©2006-2021 SUSE LLC and contributors. All rights reserved. </p><p> Permission is granted to copy, distribute and/or modify this document under the terms of the
+  GNU Free Documentation License, Version 1.2 or (at your option) version 1.3; with the Invariant
+  Section being this copyright notice and license. A copy of the license version 1.2 is included in
+  the section entitled <span class="quote">“<span class="quote">GNU Free Documentation License</span>”</span>. </p><p> SUSE, the SUSE logo and YaST are registered trademarks of SUSE LLC in the United States and
+  other countries. For SUSE trademarks, see <a class="link" href="http://www.suse.com/company/legal/" target="_top">http://www.suse.com/company/legal/</a>. Linux is a registered trademark of Linus Torvalds.
+  All other names or trademarks mentioned in this document may be trademarks or registered
+  trademarks of their respective owners. </p><p> Documents published as part of the <span class="strong"><strong>SUSE Best Practices</strong></span>
+  series have been contributed voluntarily by SUSE employees and third parties. They are meant to
+  serve as examples of how particular actions can be performed. They have been compiled with utmost
+  attention to detail. However, this does not guarantee complete accuracy. SUSE cannot verify that
+  actions described in these documents do what is claimed or whether actions described have
+  unintended consequences. SUSE LLC, its affiliates, the authors, and the translators may not be held
+  liable for possible errors or the consequences thereof.</p><p> Below we draw your attention to the license under which the articles are published.</p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id1338"></a>GNU Free Documentation License</h2></div></div></div><p>
+  Copyright (C) 2000, 2001, 2002 Free Software Foundation, Inc. 51 Franklin St,
+  Fifth Floor, Boston, MA 02110-1301 USA. Everyone is permitted to copy and
+  distribute verbatim copies of this license document, but changing it is not
+  allowed.
+ </p><h5><a id="id1350"></a> 0. PREAMBLE </h5><p>
+  The purpose of this License is to make a manual, textbook, or other
+  functional and useful document "free" in the sense of freedom: to assure
+  everyone the effective freedom to copy and redistribute it, with or without
+  modifying it, either commercially or non-commercially. Secondarily, this
+  License preserves for the author and publisher a way to get credit for their
+  work, while not being considered responsible for modifications made by
+  others.
+ </p><p>
+  This License is a kind of "copyleft", which means that derivative works of
+  the document must themselves be free in the same sense. It complements the
+  GNU General Public License, which is a copyleft license designed for free
+  software.
+ </p><p>
+  We have designed this License to use it for manuals for free software,
+  because free software needs free documentation: a free program should come
+  with manuals providing the same freedoms that the software does. But this
+  License is not limited to software manuals; it can be used for any textual
+  work, regardless of subject matter or whether it is published as a printed
+  book. We recommend this License principally for works whose purpose is
+  instruction or reference.
+ </p><h5><a id="id1351"></a> 1. APPLICABILITY AND DEFINITIONS </h5><p>
+  This License applies to any manual or other work, in any medium, that
+  contains a notice placed by the copyright holder saying it can be distributed
+  under the terms of this License. Such a notice grants a world-wide,
+  royalty-free license, unlimited in duration, to use that work under the
+  conditions stated herein. The "Document", below, refers to any such manual or
+  work. Any member of the public is a licensee, and is addressed as "you". You
+  accept the license if you copy, modify or distribute the work in a way
+  requiring permission under copyright law.
+ </p><p>
+  A "Modified Version" of the Document means any work containing the Document
+  or a portion of it, either copied verbatim, or with modifications and/or
+  translated into another language.
+ </p><p>
+  A "Secondary Section" is a named appendix or a front-matter section of the
+  Document that deals exclusively with the relationship of the publishers or
+  authors of the Document to the Document's overall subject (or to related
+  matters) and contains nothing that could fall directly within that overall
+  subject. (Thus, if the Document is in part a textbook of mathematics, a
+  Secondary Section may not explain any mathematics.) The relationship could be
+  a matter of historical connection with the subject or with related matters,
+  or of legal, commercial, philosophical, ethical or political position
+  regarding them.
+ </p><p>
+  The "Invariant Sections" are certain Secondary Sections whose titles are
+  designated, as being those of Invariant Sections, in the notice that says
+  that the Document is released under this License. If a section does not fit
+  the above definition of Secondary then it is not allowed to be designated as
+  Invariant. The Document may contain zero Invariant Sections. If the Document
+  does not identify any Invariant Sections then there are none.
+ </p><p>
+  The "Cover Texts" are certain short passages of text that are listed, as
+  Front-Cover Texts or Back-Cover Texts, in the notice that says that the
+  Document is released under this License. A Front-Cover Text may be at most 5
+  words, and a Back-Cover Text may be at most 25 words.
+ </p><p>
+  A "Transparent" copy of the Document means a machine-readable copy,
+  represented in a format whose specification is available to the general
+  public, that is suitable for revising the document straightforwardly with
+  generic text editors or (for images composed of pixels) generic paint
+  programs or (for drawings) some widely available drawing editor, and that is
+  suitable for input to text formatters or for automatic translation to a
+  variety of formats suitable for input to text formatters. A copy made in an
+  otherwise Transparent file format whose markup, or absence of markup, has
+  been arranged to thwart or discourage subsequent modification by readers is
+  not Transparent. An image format is not Transparent if used for any
+  substantial amount of text. A copy that is not "Transparent" is called
+  "Opaque".
+ </p><p>
+  Examples of suitable formats for Transparent copies include plain ASCII
+  without markup, Texinfo input format, LaTeX input format, SGML or XML using a
+  publicly available DTD, and standard-conforming simple HTML, PostScript or
+  PDF designed for human modification. Examples of transparent image formats
+  include PNG, XCF and JPG. Opaque formats include proprietary formats that can
+  be read and edited only by proprietary word processors, SGML or XML for which
+  the DTD and/or processing tools are not generally available, and the
+  machine-generated HTML, PostScript or PDF produced by some word processors
+  for output purposes only.
+ </p><p>
+  The "Title Page" means, for a printed book, the title page itself, plus such
+  following pages as are needed to hold, legibly, the material this License
+  requires to appear in the title page. For works in formats which do not have
+  any title page as such, "Title Page" means the text near the most prominent
+  appearance of the work's title, preceding the beginning of the body of the
+  text.
+ </p><p>
+  A section "Entitled XYZ" means a named subunit of the Document whose title
+  either is precisely XYZ or contains XYZ in parentheses following text that
+  translates XYZ in another language. (Here XYZ stands for a specific section
+  name mentioned below, such as "Acknowledgements", "Dedications",
+  "Endorsements", or "History".) To "Preserve the Title" of such a section when
+  you modify the Document means that it remains a section "Entitled XYZ"
+  according to this definition.
+ </p><p>
+  The Document may include Warranty Disclaimers next to the notice which states
+  that this License applies to the Document. These Warranty Disclaimers are
+  considered to be included by reference in this License, but only as regards
+  disclaiming warranties: any other implication that these Warranty Disclaimers
+  may have is void and has no effect on the meaning of this License.
+ </p><h5><a id="id1352"></a> 2. VERBATIM COPYING </h5><p>
+  You may copy and distribute the Document in any medium, either commercially
+  or noncommercially, provided that this License, the copyright notices, and
+  the license notice saying this License applies to the Document are reproduced
+  in all copies, and that you add no other conditions whatsoever to those of
+  this License. You may not use technical measures to obstruct or control the
+  reading or further copying of the copies you make or distribute. However, you
+  may accept compensation in exchange for copies. If you distribute a large
+  enough number of copies you must also follow the conditions in section 3.
+ </p><p>
+  You may also lend copies, under the same conditions stated above, and you may
+  publicly display copies.
+ </p><h5><a id="id1353"></a> 3. COPYING IN QUANTITY </h5><p>
+  If you publish printed copies (or copies in media that commonly have printed
+  covers) of the Document, numbering more than 100, and the Document's license
+  notice requires Cover Texts, you must enclose the copies in covers that
+  carry, clearly and legibly, all these Cover Texts: Front-Cover Texts on the
+  front cover, and Back-Cover Texts on the back cover. Both covers must also
+  clearly and legibly identify you as the publisher of these copies. The front
+  cover must present the full title with all words of the title equally
+  prominent and visible. You may add other material on the covers in addition.
+  Copying with changes limited to the covers, as long as they preserve the
+  title of the Document and satisfy these conditions, can be treated as
+  verbatim copying in other respects.
+ </p><p>
+  If the required texts for either cover are too voluminous to fit legibly, you
+  should put the first ones listed (as many as fit reasonably) on the actual
+  cover, and continue the rest onto adjacent pages.
+ </p><p>
+  If you publish or distribute Opaque copies of the Document numbering more
+  than 100, you must either include a machine-readable Transparent copy along
+  with each Opaque copy, or state in or with each Opaque copy a
+  computer-network location from which the general network-using public has
+  access to download using public-standard network protocols a complete
+  Transparent copy of the Document, free of added material. If you use the
+  latter option, you must take reasonably prudent steps, when you begin
+  distribution of Opaque copies in quantity, to ensure that this Transparent
+  copy will remain thus accessible at the stated location until at least one
+  year after the last time you distribute an Opaque copy (directly or through
+  your agents or retailers) of that edition to the public.
+ </p><p>
+  It is requested, but not required, that you contact the authors of the
+  Document well before redistributing any large number of copies, to give them
+  a chance to provide you with an updated version of the Document.
+ </p><h5><a id="id1354"></a> 4. MODIFICATIONS </h5><p>
+  You may copy and distribute a Modified Version of the Document under the
+  conditions of sections 2 and 3 above, provided that you release the Modified
+  Version under precisely this License, with the Modified Version filling the
+  role of the Document, thus licensing distribution and modification of the
+  Modified Version to whoever possesses a copy of it. In addition, you must do
+  these things in the Modified Version:
+ </p><div class="orderedlist"><ol class="orderedlist" type="A"><li class="listitem"><p>
+    Use in the Title Page (and on the covers, if any) a title distinct from
+    that of the Document, and from those of previous versions (which should, if
+    there were any, be listed in the History section of the Document). You may
+    use the same title as a previous version if the original publisher of that
+    version gives permission.
+   </p></li><li class="listitem"><p>
+    List on the Title Page, as authors, one or more persons or entities
+    responsible for authorship of the modifications in the Modified Version,
+    together with at least five of the principal authors of the Document (all
+    of its principal authors, if it has fewer than five), unless they release
+    you from this requirement.
+   </p></li><li class="listitem"><p>
+    State on the Title page the name of the publisher of the Modified Version,
+    as the publisher.
+   </p></li><li class="listitem"><p>
+    Preserve all the copyright notices of the Document.
+   </p></li><li class="listitem"><p>
+    Add an appropriate copyright notice for your modifications adjacent to the
+    other copyright notices.
+   </p></li><li class="listitem"><p>
+    Include, immediately after the copyright notices, a license notice giving
+    the public permission to use the Modified Version under the terms of this
+    License, in the form shown in the Addendum below.
+   </p></li><li class="listitem"><p>
+    Preserve in that license notice the full lists of Invariant Sections and
+    required Cover Texts given in the Document's license notice.
+   </p></li><li class="listitem"><p>
+    Include an unaltered copy of this License.
+   </p></li><li class="listitem"><p>
+    Preserve the section Entitled "History", Preserve its Title, and add to it
+    an item stating at least the title, year, new authors, and publisher of the
+    Modified Version as given on the Title Page. If there is no section
+    Entitled "History" in the Document, create one stating the title, year,
+    authors, and publisher of the Document as given on its Title Page, then add
+    an item describing the Modified Version as stated in the previous sentence.
+   </p></li><li class="listitem"><p>
+    Preserve the network location, if any, given in the Document for public
+    access to a Transparent copy of the Document, and likewise the network
+    locations given in the Document for previous versions it was based on.
+    These may be placed in the "History" section. You may omit a network
+    location for a work that was published at least four years before the
+    Document itself, or if the original publisher of the version it refers to
+    gives permission.
+   </p></li><li class="listitem"><p>
+    For any section Entitled "Acknowledgements" or "Dedications", Preserve the
+    Title of the section, and preserve in the section all the substance and
+    tone of each of the contributor acknowledgements and/or dedications given
+    therein.
+   </p></li><li class="listitem"><p>
+    Preserve all the Invariant Sections of the Document, unaltered in their
+    text and in their titles. Section numbers or the equivalent are not
+    considered part of the section titles.
+   </p></li><li class="listitem"><p>
+    Delete any section Entitled "Endorsements". Such a section may not be
+    included in the Modified Version.
+   </p></li><li class="listitem"><p>
+    Do not retitle any existing section to be Entitled "Endorsements" or to
+    conflict in title with any Invariant Section.
+   </p></li><li class="listitem"><p>
+    Preserve any Warranty Disclaimers.
+   </p></li></ol></div><p>
+  If the Modified Version includes new front-matter sections or appendices that
+  qualify as Secondary Sections and contain no material copied from the
+  Document, you may at your option designate some or all of these sections as
+  invariant. To do this, add their titles to the list of Invariant Sections in
+  the Modified Version's license notice. These titles must be distinct from any
+  other section titles.
+ </p><p>
+  You may add a section Entitled "Endorsements", provided it contains nothing
+  but endorsements of your Modified Version by various parties--for example,
+  statements of peer review or that the text has been approved by an
+  organization as the authoritative definition of a standard.
+ </p><p>
+  You may add a passage of up to five words as a Front-Cover Text, and a
+  passage of up to 25 words as a Back-Cover Text, to the end of the list of
+  Cover Texts in the Modified Version. Only one passage of Front-Cover Text and
+  one of Back-Cover Text may be added by (or through arrangements made by) any
+  one entity. If the Document already includes a cover text for the same cover,
+  previously added by you or by arrangement made by the same entity you are
+  acting on behalf of, you may not add another; but you may replace the old
+  one, on explicit permission from the previous publisher that added the old
+  one.
+ </p><p>
+  The author(s) and publisher(s) of the Document do not by this License give
+  permission to use their names for publicity for or to assert or imply
+  endorsement of any Modified Version.
+ </p><h5><a id="id1355"></a> 5. COMBINING DOCUMENTS </h5><p>
+  You may combine the Document with other documents released under this
+  License, under the terms defined in section 4 above for modified versions,
+  provided that you include in the combination all of the Invariant Sections of
+  all of the original documents, unmodified, and list them all as Invariant
+  Sections of your combined work in its license notice, and that you preserve
+  all their Warranty Disclaimers.
+ </p><p>
+  The combined work need only contain one copy of this License, and multiple
+  identical Invariant Sections may be replaced with a single copy. If there are
+  multiple Invariant Sections with the same name but different contents, make
+  the title of each such section unique by adding at the end of it, in
+  parentheses, the name of the original author or publisher of that section if
+  known, or else a unique number. Make the same adjustment to the section
+  titles in the list of Invariant Sections in the license notice of the
+  combined work.
+ </p><p>
+  In the combination, you must combine any sections Entitled "History" in the
+  various original documents, forming one section Entitled "History"; likewise
+  combine any sections Entitled "Acknowledgements", and any sections Entitled
+  "Dedications". You must delete all sections Entitled "Endorsements".
+ </p><h5><a id="id1356"></a> 6. COLLECTIONS OF DOCUMENTS </h5><p>
+  You may make a collection consisting of the Document and other documents
+  released under this License, and replace the individual copies of this
+  License in the various documents with a single copy that is included in the
+  collection, provided that you follow the rules of this License for verbatim
+  copying of each of the documents in all other respects.
+ </p><p>
+  You may extract a single document from such a collection, and distribute it
+  individually under this License, provided you insert a copy of this License
+  into the extracted document, and follow this License in all other respects
+  regarding verbatim copying of that document.
+ </p><h5><a id="id1357"></a> 7. AGGREGATION WITH INDEPENDENT WORKS </h5><p>
+  A compilation of the Document or its derivatives with other separate and
+  independent documents or works, in or on a volume of a storage or
+  distribution medium, is called an "aggregate" if the copyright resulting from
+  the compilation is not used to limit the legal rights of the compilation's
+  users beyond what the individual works permit. When the Document is included
+  in an aggregate, this License does not apply to the other works in the
+  aggregate which are not themselves derivative works of the Document.
+ </p><p>
+  If the Cover Text requirement of section 3 is applicable to these copies of
+  the Document, then if the Document is less than one half of the entire
+  aggregate, the Document's Cover Texts may be placed on covers that bracket
+  the Document within the aggregate, or the electronic equivalent of covers if
+  the Document is in electronic form. Otherwise they must appear on printed
+  covers that bracket the whole aggregate.
+ </p><h5><a id="id1358"></a> 8. TRANSLATION </h5><p>
+  Translation is considered a kind of modification, so you may distribute
+  translations of the Document under the terms of section 4. Replacing
+  Invariant Sections with translations requires special permission from their
+  copyright holders, but you may include translations of some or all Invariant
+  Sections in addition to the original versions of these Invariant Sections.
+  You may include a translation of this License, and all the license notices in
+  the Document, and any Warranty Disclaimers, provided that you also include
+  the original English version of this License and the original versions of
+  those notices and disclaimers. In case of a disagreement between the
+  translation and the original version of this License or a notice or
+  disclaimer, the original version will prevail.
+ </p><p>
+  If a section in the Document is Entitled "Acknowledgements", "Dedications",
+  or "History", the requirement (section 4) to Preserve its Title (section 1)
+  will typically require changing the actual title.
+ </p><h5><a id="id1359"></a> 9. TERMINATION </h5><p>
+  You may not copy, modify, sublicense, or distribute the Document except as
+  expressly provided for under this License. Any other attempt to copy, modify,
+  sublicense or distribute the Document is void, and will automatically
+  terminate your rights under this License. However, parties who have received
+  copies, or rights, from you under this License will not have their licenses
+  terminated so long as such parties remain in full compliance.
+ </p><h5><a id="id1360"></a> 10. FUTURE REVISIONS OF THIS LICENSE </h5><p>
+  The Free Software Foundation may publish new, revised versions of the GNU
+  Free Documentation License from time to time. Such new versions will be
+  similar in spirit to the present version, but may differ in detail to address
+  new problems or concerns. See
+  <a class="link" href="http://www.gnu.org/copyleft/" target="_top">http://www.gnu.org/copyleft/</a>.
+ </p><p>
+  Each version of the License is given a distinguishing version number. If the
+  Document specifies that a particular numbered version of this License "or any
+  later version" applies to it, you have the option of following the terms and
+  conditions either of that specified version or of any later version that has
+  been published (not as a draft) by the Free Software Foundation. If the
+  Document does not specify a version number of this License, you may choose
+  any version ever published (not as a draft) by the Free Software Foundation.
+ </p><h5><a id="id1361"></a> ADDENDUM: How to use this License for your
+  documents </h5><pre class="screen">Copyright (c) YEAR YOUR NAME.
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.2
+or any later version published by the Free Software Foundation;
+with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
+A copy of the license is included in the section entitled "GNU
+ Free Documentation License".</pre><p>
+  If you have Invariant Sections, Front-Cover Texts and Back-Cover Texts,
+  replace the "with...Texts". line with this:
+ </p><pre class="screen">with the Invariant Sections being LIST THEIR TITLES, with the
+Front-Cover Texts being LIST, and with the Back-Cover Texts being LIST.</pre><p>
+  If you have Invariant Sections without Cover Texts, or some other combination
+  of the three, merge those two alternatives to suit the situation.
+ </p><p>
+  If your document contains nontrivial examples of program code, we recommend
+  releasing these examples in parallel under your choice of free software
+  license, such as the GNU General Public License, to permit their use in free
+  software.
+ </p></div></div></body></html>

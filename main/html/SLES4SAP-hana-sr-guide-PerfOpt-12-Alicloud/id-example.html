@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Example</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="SAP HANA High Availability Cross-Zone Solution on Alibaba Cloud" /><link rel="up" href="index.html" title="SAP HANA High Availability Cross-Zone Solution on Alibaba Cloud" /><link rel="prev" href="id-configuring-high-availability-extension-for-sap-hana.html" title="Configuring High Availability Extension for SAP HANA" /><link rel="next" href="id-reference.html" title="Reference" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Example</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="id-configuring-high-availability-extension-for-sap-hana.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="id-reference.html">Next</a></td></tr></table><hr /></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id-example"></a>Example</h2></div></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="id-example-of-cluster-configuration"></a>Example of Cluster Configuration</h3></div></div></div><p>You can check the cluster configuration via the command <code class="literal">crm configure show</code>.
+For the example at hand, the cluster configuration should display the following content:</p><pre class="screen">node 1: hana0 \
+	attributes hana_jl0_vhost=hana0 hana_jl0_srmode=sync hana_jl0_remoteHost=hana1 hana_jl0_site=hana0 lpa_jl0_lpt=10 hana_jl0_op_mode=logreplay
+node 2: hana1 \
+	attributes lpa_jl0_lpt=1529509236 hana_jl0_op_mode=logreplay hana_jl0_vhost=hana1 hana_jl0_site=hana1 hana_jl0_srmode=sync hana_jl0_remoteHost=hana0
+primitive res_ALIYUN_STONITH_0 stonith:fence_aliyun \
+	op monitor interval=120 timeout=60 \
+	params pcmk_host_list=hana0 port=i-gw8byf3m4f9a8os6rke8 access_key=&lt;access key&gt; secret_key=&lt;secret key&gt; region=eu-central-1 \
+	meta target-role=Started
+primitive res_ALIYUN_STONITH_1 stonith:fence_aliyun \
+	op monitor interval=120 timeout=60 \
+	params pcmk_host_list=hana1 port=i-gw8byf3m4f9a8os6rke9 access_key=&lt;access key&gt; secret_key=&lt;secret key&gt; region=eu-central-1 \
+	meta target-role=Started
+primitive rsc_SAPHanaTopology_JL0_HDB00 ocf:suse:SAPHanaTopology \
+	operations $id=rsc_SAPHanaTopology_JL0_HDB00-operations \
+	op monitor interval=10 timeout=600 \
+	op start interval=0 timeout=600 \
+	op stop interval=0 timeout=300 \
+	params SID=JL0 InstanceNumber=00
+primitive rsc_SAPHana_JL0_HDB00 ocf:suse:SAPHana \
+	operations $id=rsc_SAPHana_JL0_HDB00-operations \
+	op start interval=0 timeout=3600 \
+	op stop interval=0 timeout=3600 \
+	op promote interval=0 timeout=3600 \
+	op monitor interval=60 role=Master timeout=700 \
+	op monitor interval=61 role=Slave timeout=700 \
+	params SID=JL0 InstanceNumber=00 PREFER_SITE_TAKEOVER=true DUPLICATE_PRIMARY_TIMEOUT=7200 AUTOMATED_REGISTER=false
+primitive rsc_vip_JL0_HDB00 ocf:aliyun:vpc-move-ip \
+	op monitor interval=60 \
+	meta target-role=Started \
+	params address=192.168.4.1 routing_table=vtb-gw8fii1g1d8cp14tzynub interface=eth0
+ms msl_SAPHana_JL0_HDB00 rsc_SAPHana_JL0_HDB00 \
+	meta clone-max=2 clone-node-max=1 interleave=true target-role=Started
+clone cln_SAPHanaTopology_JL0_HDB00 rsc_SAPHanaTopology_JL0_HDB00 \
+	meta clone-node-max=1 interleave=true
+colocation col_SAPHana_vip_JL0_HDB00 2000: rsc_vip_JL0_HDB00:Started msl_SAPHana_JL0_HDB00:Master
+location loc_hana0_stonith_not_on_hana0 res_ALIYUN_STONITH_0 -inf: hana0
+location loc_hana1_stonith_not_on_hana1 res_ALIYUN_STONITH_1 -inf: hana1
+order ord_SAPHana_JL0_HDB00 Optional: cln_SAPHanaTopology_JL0_HDB00 msl_SAPHana_JL0_HDB00
+property cib-bootstrap-options: \
+	have-watchdog=false \
+	dc-version=1.1.15-21.1-e174ec8 \
+	cluster-infrastructure=corosync \
+	stonith-action=off \
+	stonith-enabled=true \
+	stonith-timeout=150s \
+	last-lrm-refresh=1529503606 \
+	maintenance-mode=false
+rsc_defaults rsc-options: \
+	resource-stickness=1000 \
+	migration-threshold=5000
+op_defaults op-options: \
+	timeout=600</pre></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="id-example-of-etccorosynccorosync-conf"></a>Example of /etc/corosync/corosync.conf</h3></div></div></div><p>For the example at hand, the <span class="emphasis"><em>corosync.conf</em></span> on <span class="emphasis"><em>hana1</em></span> should display the following content:</p><pre class="screen">totem{
+version: 2
+token: 5000
+token_retransmits_before_loss_const: 6
+secauth: on
+crypto_hash: sha1
+crypto_cipher: aes256
+clear_node_high_bit: yes
+interface {
+ringnumber: 0
+bindnetaddr: 192.168.0.83
+mcastport: 5405
+ttl: 1
+}
+# On Alibaba Cloud, transport should be set to udpu, means: unicast
+transport: udpu
+}
+logging {
+fileline: off
+to_logfile: yes
+to_syslog: yes
+logfile: /var/log/cluster/corosync.log
+debug: off
+timestamp: on
+logger_subsys {
+subsys: QUORUM
+debug: off
+}
+}
+nodelist {
+node {
+ring0_addr: 192.168.0.83
+nodeid: 1
+}
+node {
+ring0_addr: 192.168.1.246
+nodeid: 2
+}
+}
+quorum {
+# Enable and configure quorum subsystem (default: off)
+# see also corosync.conf.5 and votequorum.5
+provider: corosync_votequorum
+expected_votes: 2
+two_node: 1
+}</pre></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="id-configuring-high-availability-extension-for-sap-hana.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="id-reference.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Configuring High Availability Extension for SAP HANA </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Reference</td></tr></table></div></body></html>

@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Usage Workflows</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="Advanced Patch Lifecycle Management with SUSE Manager" /><link rel="up" href="index.html" title="Advanced Patch Lifecycle Management with SUSE Manager" /><link rel="prev" href="sec-implement.html" title="Implementation" /><link rel="next" href="sec-appendix.html" title="Appendix" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Usage Workflows</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="sec-implement.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="sec-appendix.html">Next</a></td></tr></table><hr /></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-usage"></a>Usage Workflows</h2></div></div></div><p>This guide describes an approach to patch lifecycle
+            management that leverages SUSE Manager to deliver the following
+            benefits:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Automated creation of Patch Archive Channels:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>These channels can be created on a
+                                quarterly (or more frequent) basis and
+                                allow an organization to create test
+                                environments based on a historical set of
+                                patches (for example, the creation of a lab
+                                using available patches from two calendar
+                                quarters ago).</p></li></ul></div></li><li class="listitem"><p>Leverage a static set of <span class="quote">“<span class="quote">current</span>”</span>
+                    update channels so host subscriptions do not need to
+                    change:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>Using the API/scripts, updates can be merged
+                            from a patch <span class="quote">“<span class="quote">archive</span>”</span> into a
+                            subscribed host channel removing the need to
+                            constantly clone and re-clone channels and
+                            modify host subscriptions.</p></li><li class="listitem"><p>Multi-landscape environments can use a
+                            promotion process to merge updates through each
+                            phase during testing/validation of patch
+                            sets.</p></li></ul></div></li><li class="listitem"><p>Exception handling for patches that need to be
+                excluded from a patch roll out:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>The creation of a <span class="quote">“<span class="quote">patch
+                                    exceptions</span>”</span> channel and a
+                                process for copying patches/packages into
+                                that channel (and then removing them from
+                                an updates channel) allows for tracking of
+                                patch exceptions. This channel should be
+                                    <span class="emphasis"><em>excluded</em></span> from any
+                                hosts channel subscriptions, thereby
+                                keeping all patch/package content from
+                                being visible or available for
+                                installation.</p></li><li class="listitem"><p>Patch exceptions <span class="quote">“<span class="quote">processes</span>”</span>
+                                must be developed to track
+                                remediation of all exceptions to
+                                avoid future complications from managing an
+                                ever-growing bucket of patches.</p></li></ul></div></li><li class="listitem"><p>Security ASAP Exceptions handling for patches that
+                need to roll out with a higher priority:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>The security ASAP exception channel
+                                should always be subscribed to (unlike the
+                                    <span class="quote">“<span class="quote">patch exceptions</span>”</span>
+                                channel). Subscription to this channel
+                                allows a host to obtain patches/packages
+                                added in an ad hoc manner, for example a
+                                security patch deemed important enough to
+                                deploy outside of a normal patch schedule.
+                                This could be copied from a new archive or
+                                directly from one of the SUSE (vendor)
+                                updates channels.</p></li></ul></div></li></ul></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-exprocesswf"></a>Example Process Workflows</h3></div></div></div><p>Here are some suggested workflows for the patch promotion
+                and exception processes. Keep in mind that these can be
+                modified to fit more closely to a particular operational
+                group’s existing set of processes.</p><h4><a id="id1996"></a>Workflow 1: Patch Promotion Process</h4><p>The patch promotion process follows the following sample
+                steps.</p><div class="table"><a id="id1998"></a><p class="title"><strong>Table 1. Patch Promotion Process</strong></p><div class="table-contents"><table class="table" summary="Patch Promotion Process" border="1"><colgroup><col /><col /><col /></colgroup><thead><tr><th>Action</th><th>Process</th><th>Notes</th></tr></thead><tbody><tr><td>Review</td><td>Refer to the existing calendar to
+                                determine the start date for a patch
+                                roll out.</td><td>Start dates typically happen when a new
+                                quarter begins, but this depends on your
+                                frequency and established periods for
+                                roll outs.</td></tr><tr><td>Select</td><td>Identify the SUSE Manager Organization
+                                and the environment targets for the patch
+                                roll out.</td><td>In the scenario here, this could be CORP
+                                or STORE or NPE, and depending on the use
+                                of SUSE Manager Organizations an
+                                administrator would need to log in to the
+                                Organization to see the hosts.</td></tr><tr><td>Select</td><td>Choose the SUSE Linux Enterprise Server
+                                version(s) that will be patched.</td><td>Patch promotions are done for each SUSE
+                                Linux Enterprise Server version. Each
+                                version has its own set of landscape
+                                channels that patches get promoted through
+                                (DEV, TEST, QA, PROD, etc.).</td></tr><tr><td>Merge</td><td>Merge the current archive into the
+                                initial landscape (or landscape of
+                                choice).</td><td>Using the <span class="quote">“<span class="quote">Merge Script</span>”</span>
+                                utility: select the <span class="strong"><strong>source</strong></span> channel (<span class="strong"><strong>archive</strong></span> in
+                                this case) and <span class="strong"><strong>target</strong></span> channel (DEV -
+                                Current to begin a series).</td></tr><tr><td>Deploy</td><td>Deploy patches from the current
+                                landscape to the subscribed hosts.</td><td>When patches have been merged, the
+                                status of hosts subscribed to the
+                                    <span class="quote">“<span class="quote">current</span>”</span> channel will
+                                show which patches are now available. Issue
+                                the appropriate patch commands to deploy
+                                these patches.</td></tr><tr><td>Test</td><td>Coordinate testing for the hosts that
+                                have received the latest deployed patches,
+                                or notify the appropriate teams/LOB to
+                                start their evaluation.</td><td>After the patches have been deployed, a
+                                period of testing or review should start–in
+                                order to validate the success of the patch
+                                deployment. Coordination should occur with
+                                business partners to establish success of
+                                deployment.</td></tr><tr><td>Evaluate</td><td>Evaluate the results of the previous
+                                merge/deploy and proceed with the next
+                                landscape. If final landscape, report
+                                completion.</td><td>Continue to merge and deploy patch sets
+                                into each landscape until the final one.
+                                Report completion–all hosts should show
+                                    <span class="quote">“<span class="quote">green</span>”</span> status.</td></tr></tbody></table></div></div><br class="table-break" /><h4><a id="id2044"></a>Workflow 2: Patch Exception Process</h4><p>The patch exception process follows the following sample
+                steps. Again, keep in mind that these can be modified to
+                fit more closely to a particular operational group’s
+                existing set of processes.</p><p>Consider the following table:</p><div class="table"><a id="id2047"></a><p class="title"><strong>Table 2. Patch Exception Process</strong></p><div class="table-contents"><table class="table" summary="Patch Exception Process" border="1"><colgroup><col /><col /><col /></colgroup><thead><tr><th>Action</th><th>Process</th><th>Notes</th></tr></thead><tbody><tr><td>Identify</td><td>Locate the patch you want to identify as
+                                an <span class="quote">“<span class="quote">exception</span>”</span> for potential
+                                removal from patch set.</td><td>Find the patch using the search tools in
+                                SUSE Manager, or locate the patch in a
+                                specific Archive or Landscape
+                                Channel.</td></tr><tr><td>Copy</td><td>Using the <span class="quote">“<span class="quote">Manage Channels</span>”</span>
+                                function of SUSE Manager: select the
+                                    <span class="strong"><strong>exception</strong></span> channel for a
+                                specific version of SUSE Linux Enterprise
+                                Server and add the identified patch into it
+                                from the source (from previous
+                                step).</td><td>
+                                <p>The source of the patch (channel) and
+                                    the target of the patch (exceptions
+                                    channel) are important. This step may
+                                    be repeated for different
+                                    versions of SUSE Linux Enterprise
+                                    Server. Potential sources for the patch
+                                    can be an:</p>
+                                <div class="orderedlist"><ol class="orderedlist" type="a"><li class="listitem"><p>Archive Channel</p></li><li class="listitem"><p>Landscape Channel</p></li><li class="listitem"><p>SUSE Updates Channel</p></li></ol></div>
+                            </td></tr><tr><td>Remove</td><td>Using the <span class="quote">“<span class="quote">Manage Channels</span>”</span>
+                                function of SUSE Manager:
+                                    <span class="emphasis"><em>list</em></span> the patches
+                                to find the patch that was
+                                    <span class="quote">“<span class="quote">added</span>”</span> in the previous
+                                step. Find it and then <span class="strong"><strong>remove</strong></span> it from
+                                the current phase (or phases).</td><td>Finding the patch and then removing it
+                                from a Landscape Channel keeps the
+                                subscribed hosts from seeing the patch–and
+                                reporting its applicability.</td></tr><tr><td>Track</td><td>Submit any tickets or commence any
+                                established process to track this patch
+                                exception.</td><td>The goal of tracking is to remain aware
+                                that there is an exception and attempt to
+                                re-mediate, allowing the patch to be
+                                reintroduced into a patch deployment
+                                cycle.</td></tr><tr><td>Remediate</td><td>Work to re-mediate the exception.</td><td>When a fix has been identified/created
+                                for a given exception, the patch can be
+                                reintroduced into a deployment
+                                workflow.</td></tr><tr><td>Note</td><td>Exceptions should only last for a
+                                    <span class="strong"><strong>single</strong></span> deployment cycle.
+                                Keep in mind the next archive will also
+                                contain this same patch–which is a
+                                    <span class="strong"><strong>good
+                                    thing</strong></span>.</td><td>Exceptions should always be a temporary
+                                condition. Work should always be done to
+                                fix the reasons a patch cannot roll out–
+                                compliance can be at risk while an
+                                exception exists.</td></tr></tbody></table></div></div><br class="table-break" /><h4><a id="id2100"></a>Workflow 3: Security Patch ASAP
+                Process</h4><p>The security exception process differs from the previous
+                patch exception process in that a patch is now being
+                    <span class="strong"><strong>added</strong></span> to a patch
+                roll out cycle–likely in the middle of a current
+                (inprogress) roll out. Another process table and some screenshots from the SUSE Manager
+                interface are included here to provide further clarity.</p><p>Review the following table:</p><div class="table"><a id="id2104"></a><p class="title"><strong>Table 3. Security Patch ASAP Process</strong></p><div class="table-contents"><table class="table" summary="Security Patch ASAP Process" border="1"><colgroup><col /><col /><col /></colgroup><thead><tr><th>Action</th><th>Process</th><th>Notes</th></tr></thead><tbody><tr><td>Identify</td><td>Locate the patch you want to identify as
+                                a <span class="quote">“<span class="quote">security exception</span>”</span>–for
+                                potential <span class="strong"><strong>addition
+                                    to</strong></span> a particular landscape or
+                                patch set. </td><td>Find the patch using the search tools in
+                                SUSE Manager, or locate the patch in a
+                                specific Updates Channel for a specific
+                                version of SUSE Linux Enterprise
+                                Server.</td></tr><tr><td>Copy</td><td>Using the <span class="quote">“<span class="quote">Manage Channels</span>”</span>
+                                function of SUSE Manager, select the
+                                Security ASAP Exception Channel for a
+                                specific version of SUSE Linux Enterprise
+                                Server and <span class="emphasis"><em>add</em></span> the
+                                identified patch to it from the source
+                                (likely the SUSE Updates Channel from the
+                                previous step).</td><td>
+                                <p>The source of the security patch
+                                    (SUSE Updates Channel) and the target
+                                    of the patch (Security Exceptions ASAP
+                                    Channel) is key. This step may be
+                                    repeated for different versions
+                                    of SLES. Potential source for the patch
+                                    will likely be an:</p>
+                                <div class="orderedlist"><ol class="orderedlist" type="a"><li class="listitem"><p>Archive Channel</p></li><li class="listitem"><p>Landscape Channel</p></li><li class="listitem"><p>SUSE Updates Channel</p></li></ol></div>
+                            </td></tr><tr><td>Deploy</td><td>Deploy the Security Exception patch(es)
+                                into the selected landscape to the
+                                subscribed hosts.</td><td>When the Security patches have been
+                                added to a Landscape Channel, the status of
+                                hosts subscribed to the “current” channel
+                                will show patches are now available. Issue
+                                the appropriate patch commands to deploy
+                                these patches.</td></tr><tr><td>Track</td><td>Submit any tickets or commence any
+                                established process to track this Security
+                                Patch exception.</td><td>The goal of tracking is to remain aware
+                                that a Security Patch exception has been
+                                deployed. This patch will become part of a
+                                normal archive during the next quarterly
+                                automation creation.</td></tr><tr><td>Report</td><td>Security Exceptions normally occur to
+                                handle a compliance concern. When deployed,
+                                a compliance (Audit) report can be
+                                generated.</td><td>Security Exceptions are handled as an
+                                escalation to the normal schedule. They
+                                will, as a matter of normal operation, be
+                                part of the next Archive and would be
+                                deployed as part of the default schedule–
+                                and as a corollary, the next normal roll out
+                                would not need to include this patch (as it
+                                will already be deployed).</td></tr></tbody></table></div></div><br class="table-break" /><p>This screenshot shows the function of adding a patch to
+                the Security ASAP Exceptions Channel–specifically the SLES
+                11 SP1 x86_64 version:</p><div class="figure"><a id="id2149"></a><p class="title"><strong>Figure 9. Adding a patch to the Security ASAP Exceptions
+                    Channel</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="90%"><tr><td><img src="images/screen-security-exceptions.png" width="100%" alt="Adding a patch to the Security ASAP Exceptions Channel" /></td></tr></table></div></div></div><br class="figure-break" /><p>This screenshot provides a view of the <span class="strong"><strong>List/Remove</strong></span> function of a
+                specific channel (in this case, <span class="quote">“<span class="quote">DEV - Current -
+                    SLES11-SP1-LTSS-Updates for x86_64</span>”</span>), and would
+                be the interface where a patch would be removed from a
+                channel and keep it from being visible and potentially
+                deployed as part of an exception process.</p><div class="figure"><a id="id2159"></a><p class="title"><strong>Figure 10. Adding a patch to the Security ASAP Exceptions
+                    Channel</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="90%"><tr><td><img src="images/screen-suma-patches.png" width="100%" alt="Adding a patch to the Security ASAP Exceptions Channel" /></td></tr></table></div></div></div><br class="figure-break" /></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="sec-implement.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="sec-appendix.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Implementation </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Appendix</td></tr></table></div></body></html>

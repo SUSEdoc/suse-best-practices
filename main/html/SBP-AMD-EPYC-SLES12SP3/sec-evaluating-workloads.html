@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Evaluating Workloads</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="Optimizing Linux for AMD EPYC with SUSE Linux Enterprise 12 SP3" /><link rel="up" href="index.html" title="Optimizing Linux for AMD EPYC with SUSE Linux Enterprise 12 SP3" /><link rel="prev" href="sec-hp-storage-interrupt-affinity.html" title="High-performance Storage Devices and Interrupt Affinity" /><link rel="next" href="sec-power-management.html" title="Power Management" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Evaluating Workloads</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="sec-hp-storage-interrupt-affinity.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="sec-power-management.html">Next</a></td></tr></table><hr /></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-evaluating-workloads"></a>Evaluating Workloads</h2></div></div></div><p>The first and foremost step when evaluating how a workload should
+      be tuned is to establish a primary metric such as latency, throughput
+      or elapsed time. When each tuning step is considered or applied, it
+      is critical that the primary metric be examined before conducting any
+      further analysis to avoid intensive focus on the wrong bottleneck.
+      Make sure that the metric is measured multiple times to ensure that
+      the result is reproducible and reliable within reasonable boundaries.
+      When that is established, analyse how the workload is using different
+      system resources to determine what area should be the focus. The
+      focus in this paper is on how CPU and memory is used. But other
+      evaluations may need to consider the IO subsystem, network subsystem,
+      system call interfaces, external libraries etc. The methodologies
+      that can be employed to conduct this are outside the scope of the
+      paper but the book <span class="quote">“<span class="quote">Systems Performance: Enterprise and the
+        Cloud</span>”</span> by Brendan Gregg (see <a class="link" href="http://www.brendangregg.com/sysperfbook.html" target="_top">http://www.brendangregg.com/sysperfbook.html</a>) is a
+      recommended primer on the subject.</p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-cpu-utilization-saturation"></a>CPU Utilization and Saturation</h3></div></div></div><p>Decisions on whether to bind a workload to a subset of CPUs
+        require that the CPU utilization and any saturation risk is known.
+        Both the <span class="command"><strong>ps</strong></span> and <span class="command"><strong>pidstat</strong></span>
+        commands can be used to sample the number of threads in a system.
+        Typically <span class="command"><strong>pidstat</strong></span> yields more useful information
+        with the important exception of the run state. A system may have
+        many threads but if they are idle then they are not contributing to
+        utilization. The <span class="command"><strong>mpstat</strong></span> command can report the
+        utilization of each CPU in the system. </p><p>High utilization of a small subset of CPUs may be indicative of
+        a single-threaded workload that is pushing the CPU to the limits
+        and may indicate a bottleneck. Conversely, low utilization may
+        indicate a task that is not CPU-bound, is idling frequently or is
+        migrating excessively. While each workload is different, load
+        utilization of CPUs may show a workload that can run on a subset of
+        CPUs to reduce latencies because of either migrations or remote
+        accesses. When utilization is high, it is important to determine if
+        the system could be saturated. The <span class="package">vmstat</span> tool
+        reports the number of runnable tasks waiting for CPU in the
+          <span class="quote">“<span class="quote">r</span>”</span> column where any value over 1 indicates that
+        wakeup latencies may be incurred. While the exact wakeup latency
+        can be calculated using trace points, knowing that there are tasks
+        queued is an important step. If a system is saturated, it may be
+        possible to tune the workload to use fewer threads.</p><p>Overall, the initial intent should be to use CPUs from as few
+        NUMA nodes as possible to reduce access latency but there are
+        exceptions. EPYC has an exceptional number of high-speed memory
+        channels to main memory, thus consider the workload thread
+        activity. If they are co-operating threads or sharing data then
+        isolate them on as few nodes as possible to minimize cross-node
+        memory accesses. If the threads are completely independent with no
+        shared data, it may be best to isolate them on a subset of CPUs
+        from each node to maximize the number of available memory channels
+        and throughput to main memory. For some computational workloads, it
+        may be possible to use hybrid models such as MPI for
+        parallelization across nodes and using openMP for threads within
+        nodes.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-transparent-huge-pages"></a>Transparent Huge Pages</h3></div></div></div><p>Huge pages are a mechanism by which performance can be
+        improved. This happens by reducing the number of page faults, the
+        cost of translating virtual addresses to physical addresses because
+        of fewer layers in the page table and by being able to cache
+        translations for a larger portion of memory. <span class="italic">Transparent Huge Pages (THP)</span> is
+        supported for private anonymous memory that automatically backs
+        mappings with huge pages where anonymous memory could be allocated
+        as <span class="command"><strong>heap</strong></span>, <span class="command"><strong>malloc()</strong></span>,
+          <span class="command"><strong>mmap(MAP_ANONYMOUS)</strong></span>, etc. While the feature
+        has existed for a long time, it has evolved significantly.</p><p>Many tuning guides recommend disabling THP because of problems
+        with early implementations. Specifically, when the machine was
+        running for long enough, the use of THP could incur severe
+        latencies and could aggressively reclaim memory in certain
+        circumstances. These problems have been resolved by the time SUSE
+        Linux Enterprise Server 12 SP3 was released. This means there are
+        no good grounds for automatically disabling THP because of severe
+        latency issues without measuring the impact. However, there are
+        exceptions that may be considered for specific workloads.</p><p>Some high-end in-memory databases and other applications
+        aggressively use <span class="command"><strong>mprotect()</strong></span> to ensure that
+        unprivileged data is never leaked. If these protections are at the
+        base page granularity then there may be many THP splits and
+        rebuilds that incur overhead. It can be identified if this is a
+        potential problem by using <span class="command"><strong>strace</strong></span> to detect the
+        frequency and granularity of the system call. If they are high
+        frequency then consider disabling THP. It can also be sometimes
+        inferred from observing the <span class="command"><strong>thp_split</strong></span> and
+          <span class="command"><strong>thp_collapse_alloc counters</strong></span> in
+          <code class="filename">/proc/vmstat</code>. </p><p>Workloads that sparsely address large mappings may have a
+        higher memory footprint when using THP. This could result in
+        premature reclaim or fallback to remote nodes. An example would be
+        HPC workloads operating on large sparse matrices. If memory usage
+        is much higher than expected then compare memory usage with and
+        without THP to decide if the trade-off is not worthwhile. This may
+        be critical on EPYC given that any spillover will congest the
+        Infinity links and potentially cause cores to run at a lower
+        frequency. </p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Sparsely Addressed Memory</h3><p>This is specific to sparsely addressed memory. A secondary
+          hint for this case may be that the application primarily uses
+          large mappings with a much higher Virtual Size (VSZ, see <a class="xref" href="sec-evaluating-workloads.html#sec-cpu-utilization-saturation" title="CPU Utilization and Saturation">the section called “CPU Utilization and Saturation”</a>) than Resident Set
+          Size (RSS). Applications which densely address memory benefit
+          from the use of THP by achieving greater bandwidth to
+          memory.</p></div><p>Parallelized workloads that operate on shared buffers with
+        threads using more CPUs that are on a single node may experience a
+        slowdown with THP if the granularity of partitioning is not aligned
+        to the huge page. The problem is that if a large shared buffer is
+        partitioned on a 4K boundary then false sharing may occur whereby
+        one thread accesses a huge page locally and other threads access it
+        remotely. If this situation is encountered, it is preferable that
+        the granularity of sharing is increased to the THP size. But if
+        that is not possible then disabling THP is an option.</p><p>Applications that are extremely latency sensitive or must
+        always perform in a deterministic fashion can be hindered by THP.
+        While there are fewer faults, the time for each fault is higher as
+        memory must be allocated and cleared before being visible. The
+        increase in fault times may be in the microsecond granularity.
+        Ensure this is a relevant problem as it typically only applies to
+        hard real-time applications. The secondary problem is that a kernel
+        daemon periodically scans a process looking for contiguous regions
+        that can be backed by huge pages. When creating a huge page, there
+        is a window during which that memory cannot be accessed by the
+        application and new mappings cannot be created until the operation
+        is complete. This can be identified as a problem with
+        thread-intensive applications that frequently allocate memory. In
+        this case consider effectively disabling
+          <span class="package">khugepaged</span> by setting a large value in
+          <code class="filename">/sys/kernel/mm/transparent_hugepage/khugepaged/alloc_sleep_millisecs</code>.
+        This will still allow THP to be used opportunistically while
+        avoiding stalls when calling <span class="command"><strong>malloc()</strong></span> or
+          <span class="command"><strong>mmap()</strong></span>.</p><p>THP can be disabled. To do so, specify
+          <span class="command"><strong>transparent_hugepage=disable</strong></span> on the kernel
+        command line, at runtime via
+          <code class="filename">/sys/kernel/mm/transparent_hugepage/enabled</code>
+        or on a per process basis by using a wrapper to execute the
+        workload that calls
+        <span class="command"><strong>prctl(PR_SET_THP_DISABLE)</strong></span>.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-user-kernel-footprint"></a>User/Kernel Footprint</h3></div></div></div><p>Assuming an application is mostly CPU or memory bound, it is
+        useful to determine if the footprint is primarily in user space or
+        kernel space. The reason for this is that it gives a hint where
+        tuning should be focused. The percentage of CPU time can be
+        measured on a coarse-grained fashion using
+          <span class="command"><strong>vmstat</strong></span> or a fine-grained fashion using
+          <span class="command"><strong>mpstat</strong></span>. If an application is mostly spending
+        time in user space then the focus should be on tuning the
+        application itself. If the application is spending time in the
+        kernel then it should be determined which subsystem dominates. The
+          <span class="command"><strong>strace</strong></span> or <span class="command"><strong>perf trace</strong></span>
+        commands can measure the type, frequency and duration of system
+        calls as they are the primary reasons an application spends time
+        within the kernel. In some cases, an application may be tuned or
+        modified to reduce the frequency and duration of system calls. In
+        other cases, a profile is required to identify which portions of
+        the kernel are most relevant as a target for tuning.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-memory-utilization-saturation"></a>Memory Utilization and Saturation</h3></div></div></div><p>The traditional means of measuring memory utilization of a
+        workload is to examine the <span class="italic">Virtual Size
+          (VSZ)</span> and <span class="italic">Resident Set Size
+          (RSS)</span> using either the <span class="command"><strong>ps</strong></span> or
+          <span class="command"><strong>pidstat</strong></span> tool. This is a reasonable first step
+        but is potentially misleading when shared memory is used and
+        multiple processes are examined. VSZ is simply a measure of memory
+        space reservation and is not necessarily used. RSS may be double
+        accounted if it is a shared segment between multiple processes. The
+        file <code class="filename">/proc/pid/maps</code> can be used to identify
+        all segments used and whether they are private or shared. The file
+          <code class="filename">/proc/pid/smaps</code> yields more detailed
+        information including the <span class="italic">Proportional Set
+          Size (PSS)</span>. PSS is an estimate of RSS except it is
+        divided between the number of processes mapping that segment which
+        can give a more accurate estimate of utilization. Note that the
+          <code class="filename">smaps</code> file is very expensive to read and
+        should not be monitored at a high frequency. Finally, the <span class="italic">Working Set Size (WSS)</span> is the amount of
+        memory active required to complete computations during an arbitrary
+        phase of a programs execution. It is not a value that can be
+        trivially measured. But conceptually it is useful as the
+        interaction between WSS relative to available memory affects memory
+        residency and page fault rates.</p><p>On NUMA systems, the first saturation point is a node overflow
+        when the <span class="quote">“<span class="quote">local</span>”</span> policy is in effect. Given no binding
+        of memory, when a node is filled, a remote node’s memory will be
+        used transparently and background reclaim will take place on the
+        local node. Two consequences of this are that remote access
+        penalties will be used and old memory from the local node will be
+        reclaimed. If the WSS of the application exceeds the size of a
+        local node then paging and refaults may be incurred.</p><p>The first thing to identify is that a remote node overflow
+        occurred which is accounted for in
+          <code class="filename">/proc/vmstat</code> as the
+          <span class="command"><strong>numa_hit</strong></span>, <span class="command"><strong>numa_miss</strong></span>,
+          <span class="command"><strong>numa_foreign</strong></span>,
+          <span class="command"><strong>numa_interleave</strong></span>, <span class="command"><strong>numa_local</strong></span>
+        and <span class="command"><strong>numa_other counters</strong></span>:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><span class="command"><strong>numa_hit</strong></span> is incremented when an
+            allocation uses the preferred node where preferred may be
+            either a local node or one specified by a memory policy.</p></li><li class="listitem"><p><span class="command"><strong>numa_miss</strong></span> is incremented when an
+            alternative node is used to satisfy an allocation.</p></li><li class="listitem"><p><span class="command"><strong>numa_foreign</strong></span> is rarely useful but is
+            accounted against a node that was preferred. It is a subtle
+            distinction from numa_miss that is rarely useful.</p></li><li class="listitem"><p><span class="command"><strong>numa_interleave</strong></span> is incremented when an
+            interleave policy was used to select allowed nodes in a
+            round-robin fashion.</p></li><li class="listitem"><p><span class="command"><strong>numa_local</strong></span> increments when a local node
+            is used for an allocation regardless of policy.</p></li><li class="listitem"><p><span class="command"><strong>numa_other</strong></span> is used when a remote node is
+            used for an allocation regardless of policy.</p></li></ul></div><p>For the local memory policy, the <span class="command"><strong>numa_hit</strong></span>
+        and <span class="command"><strong>numa_miss</strong></span> counters are the most important to
+        pay attention to. An application that is allocating memory that
+        starts incrementing the <span class="command"><strong>numa_miss</strong></span> implies that
+        the first level of saturation has been reached. If this is observed
+        on EPYC, it may be valuable to bind the application to nodes that
+        represent dies on a single socket. If the ratio of hits to misses
+        is close to 1, consider an evaluation of the interleave policy to
+        avoid unnecessary reclaim.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">NUMA Statistics</h3><p>These NUMA statistics only apply at the time a physical page
+          was allocated and it is not related to the reference behaviour of
+          the workload. For example, if a task running on node 0 allocates
+          memory local to node 0 then it will be accounted for as a
+            <span class="command"><strong>node_hit</strong></span> in the statistics. However, if the
+          memory is shared with a task running on node 1, all the accesses
+          may be remote, which is a miss from the perspective of the
+          hardware but not accounted for in
+            <code class="filename">/proc/vmstat</code>. Detecting remote and local
+          accesses at a hardware level requires using the hardware's
+            <span class="italic">Performance Management
+          Unit</span>.</p></div><p>When the first saturation point is reached then reclaim will be
+        active. This can be observed by monitoring the
+          <span class="command"><strong>pgscan_kswapd</strong></span> and
+          <span class="command"><strong>pgsteal_kswapd</strong></span>
+        <code class="filename">/proc/vmstat counters</code>. If this is matched with
+        an increase in major faults or minor faults then it may be
+        indicative of severe thrashing. In this case the interleave policy
+        should be considered. An ideal tuning option is to identify if
+        shared memory is the source of the usage. If this is the case, then
+        interleave the shared memory segments. This can be done in some
+        circumstances using <span class="command"><strong>numactl</strong></span> or by modifying the
+        application directly.</p><p>More severe saturation is observed if the
+          <span class="command"><strong>pgscan_direct</strong></span> and
+          <span class="command"><strong>pgsteal_direct</strong></span> counters are also increasing as
+        these indicate that the application is stalling while memory is
+        being reclaimed. If the application was bound to individual nodes,
+        increasing the number of available nodes will alleviate the
+        pressure. If the application is unbound, it indicates that the WSS
+        of the workload exceeds all available memory. It can only be
+        alleviated by tuning the application to use less memory or
+        increasing the amount of RAM available.</p><p>As before, whether to use memory nodes from one socket or two
+        sockets depends on the application. If the individual processes are
+        independent then either socket can be used. But where possible,
+        keep communicating processes on the same socket to maximize memory
+        throughput while minimizing the socket interconnect traffic.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-other-resources"></a>Other Resources</h3></div></div></div><p>The analysis of other resources is outside the scope of this
+        paper. However, a common scenario is that an application is
+        IO-bound. A superficial check can be made using the
+          <span class="command"><strong>vmstat</strong></span> tool and checking what percentage of
+        CPU time is spent idle combined with the number of processes that
+        are blocked and the values in the <span class="strong"><strong>bi</strong></span> and <span class="strong"><strong>bo</strong></span> columns.
+        Further analysis is required to determine if an application is IO
+        rather than CPU or memory bound. But this is a sufficient check to
+        start with. </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="sec-hp-storage-interrupt-affinity.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="sec-power-management.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">High-performance Storage Devices and Interrupt Affinity </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Power Management</td></tr></table></div></body></html>

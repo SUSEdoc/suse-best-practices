@@ -1,0 +1,605 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Data Replication across Geo Clusters via DRBD</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><meta name="description" content="This technical guide describes the setup of a geo cluster using DRBD as delivered with the SUSE Linux Enterprise High Availability Extension. Disclaimer: Documents published as part of the SUSE Best Practices series have been contributed voluntarily by SUSE employees and third parties. They are meant to serve as examples of how particular actions can be performed. They have been compiled with utmost attention to detail. However, this does not guarantee complete accuracy. SUSE cannot verify that actions described in these documents do what is claimed or whether actions described have unintended consequences. SUSE LLC, its affiliates, the authors, and the translators may not be held liable for possible errors or the consequences thereof." /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div xml:lang="en" class="article" lang="en"><div class="titlepage"><div><div><h1 class="title"><a id="art-sbp-geo-drbd"></a>Data Replication across Geo Clusters via DRBD </h1></div><div><h3 class="subtitle"><em>Included with SUSE Linux Enterprise High Availability Extension</em></h3></div><div><div class="author"><h3 class="author"><span class="firstname">Matt</span> <span class="surname">Kereczman, Cluster Engineer, LINBIT</span></h3></div></div><div><div class="author"><h3 class="author"><span class="firstname">Philipp</span> <span class="surname">Marek, Senior Software Developer, LINBIT</span></h3></div></div><div><div class="author"><h3 class="author"><span class="firstname">Kristoffer</span> <span class="surname">Grönlund, Architect High Availability, SUSE</span></h3></div></div><div><div class="abstract"><p class="title"><strong>Abstract</strong></p><p>This technical guide describes the setup of a geo cluster using DRBD as delivered
+            with the SUSE Linux Enterprise High Availability Extension.</p><p>
+                <span class="strong"><strong>Disclaimer: </strong></span>
+                Documents published as part of the SUSE Best Practices series have been contributed voluntarily
+                by SUSE employees and third parties. They are meant to serve as examples of how particular
+                actions can be performed. They have been compiled with utmost attention to detail. However,
+                this does not guarantee complete accuracy. SUSE cannot verify that actions described in these
+                documents do what is claimed or whether actions described have unintended consequences.
+                SUSE LLC, its affiliates, the authors, and the translators may not be held liable for possible errors
+                or the consequences thereof.
+            </p></div></div></div><hr /></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="sect1"><a href="#sec-background">Background</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec-drbd">About DRBD</a></span></dt><dt><span class="sect2"><a href="#sec-sleshae">About SUSE Linux Enterprise High Availability Extension</a></span></dt></dl></dd><dt><span class="sect1"><a href="#sec-introduction">Introduction</a></span></dt><dt><span class="sect1"><a href="#sec-installation">Installation Requirements</a></span></dt><dt><span class="sect1"><a href="#sec-architecture">Cluster Architecture Overview</a></span></dt><dt><span class="sect1"><a href="#sec-example-config">Example Configurations for a Single Service</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec-drbd-config">DRBD Configuration</a></span></dt><dt><span class="sect2"><a href="#sec-pacemaker-resources">Pacemaker Resources (in crm-shell syntax)</a></span></dt></dl></dd><dt><span class="sect1"><a href="#sec-interop-booth">Interoperability with Booth</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec-booth-config">Booth Configuration</a></span></dt><dt><span class="sect2"><a href="#sec-pacemaker-integration">Pacemaker Integration</a></span></dt></dl></dd><dt><span class="sect1"><a href="#sec-testing">Testing Failovers and Recovery</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec-failover">Failover</a></span></dt><dt><span class="sect2"><a href="#sec-failback">Failback</a></span></dt></dl></dd><dt><span class="sect1"><a href="#sec-further-documentation">Further Documentation</a></span></dt><dt><span class="sect1"><a href="#id1337">Legal notice</a></span></dt><dt><span class="sect1"><a href="#id1338">GNU Free Documentation License</a></span></dt></dl></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-background"></a>Background</h2></div></div></div><p>The following sections provide you with important background information about DRBD
+            and the SUSE Linux Enterprise High Availability Extension.</p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-drbd"></a>About DRBD</h3></div></div></div><p>DRBD is a Linux-kernel block-level replication facility that is widely used as a
+                shared-nothing cluster building block. It is included in vanilla kernels since
+                2.6.33, and most distributions ship the necessary userspace utilities. Furthermore,
+                many distributions have newer DRBD versions than the one included in the kernel in
+                extra packages.</p><p>DRBD can replicate across multiple network protocols, and in (currently) three
+                modes, from synchronous for local HA clusters, to asynchronous for pushing data to a
+                disaster recovery site.</p><p>DRBD is developed and supported worldwide by <a class="link" href="http://www.linbit.com" target="_top">LINBIT</a>. That includes most
+                distributions and architectures, with Service Level Agreement (SLA) levels up to
+                24/7 e-mail and phone availability.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-sleshae"></a>About SUSE Linux Enterprise High Availability Extension</h3></div></div></div><p>SUSE Linux Enterprise High Availability Extension is an integrated suite of open
+                source clustering technologies that enables you to implement highly available
+                physical and virtual Linux clusters, and to eliminate single points of failure. It
+                ensures the availability and manageability of critical networked resources including
+                data, applications, and services. Thus, it helps you maintain business continuity,
+                protect data integrity, and reduce unplanned downtime for your mission-critical
+                Linux workloads.</p><p>SUSE Linux Enterprise High Availability Extension ships with essential monitoring,
+                messaging, and cluster resource management functionality (supporting failover,
+                failback, and migration (load balancing) of individually managed cluster
+                resources).</p><p>SUSE Linux Enterprise High Availability Extension includes DRBD.</p></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-introduction"></a>Introduction</h2></div></div></div><p>This technical guide describes a setup consisting of two highly available Pacemaker
+            clusters in two sites, with a routed IPv4 or IPv6 connection in between. The connection
+            can range from a few Mbit/sec up to 10 GBit/sec, depending on the IO load imposed on the
+            cluster nodes.</p><p>Various services can be distributed across the clusters. Because of latency between
+            the data centers you cannot drive a cluster file system across them. But simply
+            replicating the data to have a quick failover in case one site goes down is
+            possible.</p><p>Failover between the two sites is managed using the <span class="italic">Booth
+                Cluster Ticket Manager</span>, which is included in the Geo Clustering for SUSE
+            Linux Enterprise High Availability Extension and the LINBIT HA Cluster Stack. In
+            addition to the two cluster sites, a third site is needed to run a booth Arbitrator.
+            Arbitrators are single machines that run a booth instance in a special mode. As all
+            booth instances communicate with each other, arbitrators help to make more reliable
+            decisions about granting or revoking tickets.</p><p>Lots of details will be skimmed. For example, for this technical guide it does not
+            matter whether the application driving IO is SAP, an NFS server, a PostgreSQL instance,
+            VMs via KVM, Apache, MySQL, or whatever else you may have in use.</p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-installation"></a>Installation Requirements</h2></div></div></div><p>You need to have the Geo Clustering for SUSE Linux Enterprise High Availability
+            Extension installed on both pairs of nodes, and on the Arbitrator node. For a detailed
+            description on how to configure the geo cluster nodes, see the Geo Clustering Quick
+            Start document included in the Geo Clustering for SUSE Linux Enterprise High
+            Availability Extension documentation at <a class="link" href="https://documentation.suse.com/sle-ha-geo/12-SP4/single-html/SLE-HA-geo-quick/#art-ha-geo-quick" target="_top">https://documentation.suse.com/sle-ha-geo/12-SP4/single-html/SLE-HA-geo-quick/#art-ha-geo-quick</a>.</p><p>It is good practice and recommended to use LVM as storage layer below DRBD. This
+            allows for quick and easy creation and online enlarging of DRBD devices.</p><p>You also need to install all the software including dependencies for the services you
+            want to run on all four nodes. In case you replicate Virtual Machines (VMs), these are
+            typically self-contained, so you will just need the KVM environment <span class="italic">libvirt</span> with <span class="italic">virsh</span> on
+            the cluster nodes.</p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-architecture"></a>Cluster Architecture Overview</h2></div></div></div><p>The following image depicts a two-site, four-node cluster with arrows showing the
+            direction of replication, and blocks in orange showing that a DRBD device is Primary.
+            There are two nodes in the local site, <span class="italic">alice</span> and
+                <span class="italic">bob</span>, and two nodes in the remote site, <span class="italic">charlie</span> and <span class="italic">daisy</span>.</p><p>Each site will have its own DRBD resource stack and service IP to allow independent
+            migration across the cluster nodes.</p><div class="figure"><a id="id1339"></a><p class="title"><strong>Figure 1. Stacked Four-Node Cluster</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="70%"><tr><td><img src="images/drbd-resource-stacking-4nodes.png" width="100%" alt="Stacked Four-Node Cluster" /></td></tr></table></div></div></div><br class="figure-break" /><p>The most important details of the cluster architecture are the following:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>The local high availability setup: DRBD running in Protocol C, using IP
+                    addresses in a LAN respective a cross-over connection.</p></li><li class="listitem"><p>Just after activating the lower DRBD devices on one node, the dedicated
+                    service IP address is started.</p><p>This is not only used for the service as such, but also as a fixed point that
+                    can be accessed by the upper DRBD device (in Secondary state) for
+                    replication.</p></li><li class="listitem"><p>The upper layer DRBD runs on one node per site, and is responsible for
+                    replicating the data to the other replication site. This connection runs in
+                    protocol A, and might have a DRBD Proxy setup in between.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Data Compression</h3><p>The DRBD Proxy buffers and optionally compresses data, from one or
+                        multiple DRBD resources. Compression helps if the site interconnect is
+                        slower than the summed average I/O rate of the resources. The ratio is about
+                        1:4 for <span class="strong"><strong>zlib</strong></span>, and up to 1:50 for
+                            <span class="strong"><strong>lzma</strong></span> compression. See the <span class="quote">“<span class="quote">DRBD
+                            Proxy 3 Compression Considerations</span>”</span> whitepaper on <a class="link" href="https://links.linbit.com/tech_guides" target="_top">https://links.linbit.com/tech_guides</a> for more
+                        details.</p></div></li><li class="listitem"><p>On the site that should actually run the service, the upper layer DRBD gets
+                    set as Primary, so that the file system therein can be mounted and used by the
+                    application.</p></li></ul></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-example-config"></a>Example Configurations for a Single Service</h2></div></div></div><p>The example configurations below are using the following premises:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Two sites, called <span class="strong"><strong>RZ1</strong></span> and <span class="strong"><strong>RZ2</strong></span>, with two private networks <span class="strong"><strong>192.168.201.x</strong></span> and <span class="strong"><strong>192.168.202.x</strong></span>, routed to the other site</p></li><li class="listitem"><p>Four nodes, called <span class="strong"><strong>geo_rzN-M</strong></span> in four
+                    combinations: <span class="strong"><strong>geo-rz1-a</strong></span> to <span class="strong"><strong>geo-rz2-b</strong></span></p></li><li class="listitem"><p>NFS is to be served; but there’s not much difference for other services</p></li><li class="listitem"><p>Nodes are using LVM, VG name is <span class="strong"><strong>volgroup</strong></span></p></li><li class="listitem"><p>The lower DRBD layer (for the HA-clusters) uses minor 0; minor 10 is used for
+                    DR replication</p></li></ul></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-drbd-config"></a>DRBD Configuration</h3></div></div></div><p>The following snippets show a basic DRBD configuration. These are bare-bones;
+                performance-tuning options are not included here.</p><p>All three snippets can be contained in a single resource file, for example in
+                    <code class="filename">/etc/drbd.d/nfs.res</code>. This is the recommended configuration,
+                because keeping a single file synchronized across the four cluster nodes is easier.
+                You can also consult <span class="strong"><strong>csync2</strong></span> at <a class="link" href="http://oss.linbit.com/csync2/" target="_top">http://oss.linbit.com/csync2/</a>.</p><p>If you have used the Geo Clustering Quick Start Guide at <a class="link" href="https://documentation.suse.com/sle-ha-geo/12-SP4/single-html/SLE-HA-geo-quick/#art-ha-geo-quick" target="_top">https://documentation.suse.com/sle-ha-geo/12-SP4/single-html/SLE-HA-geo-quick/#art-ha-geo-quick</a>
+                to perform the basic configuration of the cluster nodes, the DRBD configuration
+                files are already included in the list of files to be synchronized.</p><p>To synchronize any changes to the configuration files across both cluster nodes,
+                use the following command:</p><p>
+                <span class="command"><strong>root # csync2 -xv /etc/drbd.d/</strong></span>
+            </p><p>If you do not have csync2, or if you do not want to use it, you will need to copy
+                the DRBD configuration files manually to all the other nodes.</p><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-drbd-site-1"></a>DRBD on Site 1</h4></div></div></div><p>To configure DRBD on Site 1, you should be aware of the following
+                    details:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>The resource-name has the site in it, so that the complete
+                            configuration can be kept in synchronization across both clusters
+                            without naming conflicts</p></li><li class="listitem"><p>The nodes' <span class="strong"><strong>local</strong></span> per-node IP
+                            addresses are used</p></li><li class="listitem"><p>A <span class="italic">shared-secret</span> is used to avoid
+                            inadvertent wrong connections</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">uuid Program</h3><p>The <span class="package">uuid</span> program is an easy way to get unique
+                                values.</p></div></li></ul></div><pre class="screen">resource nfs-lower-rz1 {
+        disk            /dev/volgroup/lv-nfs;
+        meta-disk       internal;
+        device          /dev/drbd0;
+        protocol        C;
+
+        net {
+                shared-secret   "2a9702a6-8747-11e3-9ebb-782bcbd0c11c";
+        }
+
+        on geo-rz1-a {
+                address          192.168.201.111:7900;
+        }
+        on geo-rz1-b {
+                address          192.168.201.112:7900;
+        }
+}</pre></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-drbd-site-2"></a>DRBD on Site 2</h4></div></div></div><p>Even if Site 2 is nearly identical to Site 1, you should notice the following
+                    differences:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>The resource name has changed</p></li><li class="listitem"><p>The node names and IP addresses are different</p></li><li class="listitem"><p>Another <span class="italic">shared-secret</span> has been
+                            generated</p></li><li class="listitem"><p>The volume group and LV name can be kept in the <span class="italic">resource</span> section if identical on both
+                            nodes</p></li></ul></div><pre class="screen">resource nfs-lower-rz2 {
+        disk            /dev/volgroup/lv-nfs;
+        meta-disk       internal;
+        device          /dev/drbd0;
+        protocol        C;
+
+        net {
+                shared-secret   "cd9d857d-72ef-4d10-a1de-6450d1797a2c";
+        }
+
+        on geo-rz2-a {
+                address          192.168.202.111:7900;
+        }
+        on geo-rz2-b {
+                address          192.168.202.112:7900;
+        }
+}</pre></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-drbd-across-sites"></a>DRBD Connection across Sites</h4></div></div></div><p>To configure a DRBD connection across sites, you should be aware of the
+                    following:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>The storage disk is the HA-cluster DRBD device <span class="italic">/dev/drbd0</span></p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>You could also use <span class="italic">/dev/drbd/by-
+                                        res/nfs-lower-rzN/0</span>, but that would be
+                                    site-specific, and so would need to be moved into the per-site
+                                    configuration (stacked on top of <span class="italic">nfs-lower-rzN</span>)</p></li></ul></div></li><li class="listitem"><p>The DRBD device drbd10 says to use minor number 10</p></li><li class="listitem"><p>Protocol A, and a higher ping-timeout are needed because of the higher
+                            latency</p></li><li class="listitem"><p>A different shared-secret is used</p></li><li class="listitem"><p>Do not pass any host names, but tell DRBD to stack upon its lower
+                            device; that implies that this must be Primary</p></li><li class="listitem"><p>To allow TCP/IP connections to the other site without knowing which
+                            cluster node has the lower DRBD device Primary, we are using a (the)
+                            service IP address</p></li></ul></div><pre class="screen">resource nfs-upper {
+        disk             /dev/drbd0;
+        meta-disk        internal;
+        device           /dev/drbd10;
+        protocol         A;
+
+        net {
+                shared-secret    "e0fbd1fe-6b0b-47db-829a-2c4ba638bf1e";
+                ping-timeout     20;
+        }
+
+        stacked-on-top-of nfs-lower-rz1 {
+                address          192.168.201.151:7910;
+        }
+        stacked-on-top-of nfs-lower-rz2 {
+                address          192.168.202.151:7910;
+        }
+}</pre><p>Using a DRBD Proxy would involve inserting <span class="italic">proxy on
+                        ...</span> sections into <span class="italic">stacked-on-top-of</span> above, and a <span class="italic">proxy {
+                        ... }</span> section inside of <span class="italic">resource</span>. See LINBIT's DRBD Proxy guide at <a class="link" href="https://downloads.linbit.com/" target="_top">https://downloads.linbit.com/</a> for more details
+                    regarding configuring DRBD Proxy.</p></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-pacemaker-resources"></a>Pacemaker Resources (in crm-shell syntax)</h3></div></div></div><p>For a more in-depth look at how to configure the NFS server, see the Highly
+                Available NFS Storage with DRBD and Pacemaker document included in the SUSE Linux
+                Enterprise High Availability Extension documentation. To configure the necessary
+                resources, use the <span class="strong"><strong>crm</strong></span> shell commands as outlined
+                in the following chapters. </p><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-basic-primitives"></a>Basic Primitives</h4></div></div></div><p>Setting up the basic primitives is fairly straightforward. You need a service
+                    IP, the file system, and the NFS server.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">exportfs</h3><p>It is also possible to use the <span class="italic">exportfs</span>
+                        resource agents instead, and keep the NFS server running all the time. This
+                        is necessary if there are multiple NFS exports that must migrate
+                        independently.</p></div><pre class="screen">crm configure
+primitive p-ip-nfs IPaddr2 ip=192.168.202.151 iflabel=nfs nic=eth1 cidr_netmask=24
+primitive p-nfs-fs Filesystem device=/dev/drbd/by-res/nfs/0 directory=/mnt/nfs fstype=ext4
+primitive p-nfs-service systemd:nfs-server</pre></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-multi-state-resources"></a>DRBD Pacemaker Resources, Multi-State Resources</h4></div></div></div><p>To configure the cluster resources for DRBD, it is possible to use the drbd
+                    cluster script. This script will create a base resource for DRBD, as well as a
+                    multi-state resource that ensures that DRBD only runs in Primary mode on a
+                    single node. Multi-state resources, previously called <span class="italic">Master-Slave</span> resources, allow the instances to be in one of two
+                    operating modes (called roles). The roles are called <span class="italic">master</span> and <span class="italic">slave</span>.</p><pre class="screen">crm script run drbd id=drbd-nfs drbd_resource=nfs-upper
+crm script run drbd id=drbd-nfs-lower drbd_resource=nfs-lower-rz2</pre></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-group-primitives"></a>Group and Basic Primitives</h4></div></div></div><p>This is mostly what you would expect from the earlier picture: the multi-state
+                    equivalent of having a group consisting of <span class="italic">ms-drbd-nfs-lower:Master</span>, <span class="italic">p-ip-nfs</span>, and <span class="italic">ms-drbd-nfs:Master</span>.</p><pre class="screen">crm configure
+
+group g-nfs p-nfs-fs p-nfs-service
+
+colocation co-nfs-ip-with-lower inf: p-ip-nfs:Started ms-drbd-nfs-lower:Master
+colocation co-nfs-g-with-upper inf: g-nfs:Started ms-drbd-nfs:Master
+colocation co-nfs-upper-with-ip inf: ms-drbd-nfs:Master p-ip-nfs:Started
+
+order o-lower-drbd-before-ip-nfs inf: ms-drbd-nfs-lower:promote p-ip-nfs:start
+order o-ip-nfs-before-drbd inf: p-ip-nfs:start ms-drbd-nfs:promote
+order o-drbd-nfs-before-svc inf: ms-drbd-nfs:promote g-nfs:start</pre></div></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-interop-booth"></a>Interoperability with Booth</h2></div></div></div><p>In the following sections, you can find the example configurations for the booth
+            cluster ticket manager. Use <span class="italic">csync2</span> to synchronize the
+            configurations for booth across all cluster nodes.</p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-booth-config"></a>Booth Configuration</h3></div></div></div><p>In the booth configuration, you need to specify the following components:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>A UDP port to use</p></li><li class="listitem"><p>Three IP addresses</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>You need one distinct service IP for each site, and a third one for
+                            the arbitrator. Separate addresses are preferred, so that booth can be
+                            managed independently.</p></div></li><li class="listitem"><p>The Pacemaker ticket name (here <span class="italic">ticket-nfs</span>)</p></li></ul></div><p>The configuration file might be stored as
+                <code class="filename">/etc/booth/nfs.conf</code>.</p><pre class="screen">transport = udp
+port      = "9929"
+
+site       = "192.168.201.100"
+site       = "192.168.202.100"
+arbitrator = "192.168.203.100"
+
+ticket = "ticket-nfs"
+        expire  = 600
+        timeout =   5
+        acquire-after = 60</pre></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-pacemaker-integration"></a>Pacemaker Integration</h3></div></div></div><p>Follow the recommendations below to integrate booth into Pacemaker:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>This example is again valid for site 2 (service IP address subnet).</p></li><li class="listitem"><p><span class="italic">booth</span> automatically uses the default
+                        directory and suffix if the configuration name does not specify any.</p></li><li class="listitem"><p>As the DRBD replication should be running even if a site does not have the
+                        ticket, the correct <span class="italic">loss-policy</span> is
+                            <span class="italic">demote</span>. This will put DRBD into
+                        Secondary mode.</p></li><li class="listitem"><p>As described in the <span class="strong"><strong>SUSE Multi-Site Cluster
+                            Documentation</strong></span> at <a class="link" href="https://documentation.suse.com/sle-ha-geo/12-SP4/" target="_top">https://documentation.suse.com/sle-ha-geo/12-SP4/</a>, there
+                        should be an order constraint that makes sure that Booth can fetch the
+                        ticket before trying to start the service.</p></li></ul></div><pre class="screen">crm configure
+
+primitive p-booth ocf:pacemaker:booth-site config=nfs
+primitive p-ip-booth IPaddr2 ip=192.168.202.100 iflabel=ha nic=eth1 cidr-netmask=24
+
+group g-booth p-ip-booth p-booth
+
+rsc-ticket nfs-req-ticket ticket-nfs: ms-drbd-nfs:Master loss-policy=demote
+
+order o-booth-before-nfs inf: g-booth ms-drbd-nfs:promote</pre></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-testing"></a>Testing Failovers and Recovery</h2></div></div></div><p>After you have configured everything as described, you should check that your setup is
+            working as expected.</p><p>The following command from any node running the booth daemon will tell you which
+            tickets it knows about, which site currently holds the ticket, and when that ticket will
+            expire if it is not renewed:</p><pre class="screen"># booth list
+ticket: ticket-nfs, leader: 192.168.201.100, expires: 2016-04-14 07:50:48</pre><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-failover"></a>Failover</h3></div></div></div><p>There are many ways to test that failovers will work as expected. An easy way to
+                test is to sever network communications between sites using IPtables. You only need
+                to cut communication on the Booth ports to see a ticket expire and services
+                failover.</p><p>On the node currently running the booth daemon, issue the following IPtables
+                commands to sever Booth’s communications with its peers:</p><pre class="screen">/usr/sbin/iptables -I INPUT -p udp --dport 9929 -j DROP
+/usr/sbin/iptables -I OUTPUT -p udp --dport 9929 -j DROP</pre><p>After the ticket's <span class="italic">expire</span> time has lapsed, you
+                should see services begin to demote at the current Primary site. After the <span class="italic">expire</span> plus <span class="italic">acquire-after</span> time lapses, you should see services begin to start at
+                the Secondary site.</p><p>Remove the IPtables rules you inserted before continuing:</p><pre class="screen"># /usr/sbin/iptables -D INPUT -p udp --dport 9929 -j DROP
+# /usr/sbin/iptables -D OUTPUT -p udp --dport 9929 -j DROP</pre></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-failback"></a>Failback</h3></div></div></div><p>To failback to the original Primary site you need to manually revoke the ticket
+                from the site currently running services, and grant the ticket to the original
+                Primary site.</p><p>You can issue the following commands from any of the nodes currently running the
+                Booth daemon:</p><pre class="screen"># booth revoke -s 192.168.202.100 ticket-nfs
+  booth[30268]: 2016/04/14_08:21:05 info: revoke request sent, waiting for the result ...
+  booth[30268]: 2016/04/14_08:21:09 info: revoke succeeded!
+# booth grant -s 192.168.201.100 ticket-nfs
+  booth[30269]: 2016/04/14_08:21:17 info: grant request sent, waiting for the result ...
+  booth[30269]: 2016/04/14_08:21:28 info: grant succeeded</pre></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-further-documentation"></a>Further Documentation</h2></div></div></div><p><span class="strong"><strong>SUSE Linux Enterprise High Availability Extension
+                Guide</strong></span>: A comprehensive documentation about nearly every part of the Linux
+            Cluster stack. See <a class="link" href="https://documentation.suse.com/sle-ha/11-SP4/html/SLE-ha-all/book-sleha.html" target="_top">https://documentation.suse.com/sle-ha/11-SP4/html/SLE-ha-all/book-sleha.html</a>
+            .</p><p><span class="strong"><strong>DRBD Community Page</strong></span>: Located at <a class="link" href="https://www.linbit.com/en/drbd-community/" target="_top">https://www.linbit.com/en/drbd-community/</a>, it provides lots of
+            information.</p><p>Detailed DRBD User Guides: <a class="link" href="https://docs.linbit.com/" target="_top">
+                https://docs.linbit.com/</a>. With that, one of the most extensive project
+            documentations in the Open Source world is made available.</p><p><span class="strong"><strong>LINBIT Home Page</strong></span>: At <a class="link" href="https://www.linbit.com" target="_top">https://www.linbit.com</a>, you can find answers to all questions about
+            paid support from the developers. An overview about supported platforms, SLAs, and price
+            quotes is available at <a class="link" href="https://www.linbit.com/en/support/" target="_top">https://www.linbit.com/en/support/</a>.</p><p><span class="strong"><strong>SUSE Geo Clustering Documentation</strong></span>: This describes
+            the general challenges for Geo-clustering, and typical solutions. The HTML version is
+            hosted at <a class="link" href="https://documentation.suse.com/sle-ha/12-SP4/html/SLE-HA-geo-guide/cha-ha-geo-challenges.html" target="_top">https://documentation.suse.com/sle-ha/12-SP4/html/SLE-HA-geo-guide/cha-ha-geo-challenges.html</a>.</p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id1337"></a>Legal notice</h2></div></div></div><p> Copyright ©2006-2021 SUSE LLC and contributors. All rights reserved. </p><p> Permission is granted to copy, distribute and/or modify this document under the terms of the
+  GNU Free Documentation License, Version 1.2 or (at your option) version 1.3; with the Invariant
+  Section being this copyright notice and license. A copy of the license version 1.2 is included in
+  the section entitled <span class="quote">“<span class="quote">GNU Free Documentation License</span>”</span>. </p><p> SUSE, the SUSE logo and YaST are registered trademarks of SUSE LLC in the United States and
+  other countries. For SUSE trademarks, see <a class="link" href="http://www.suse.com/company/legal/" target="_top">http://www.suse.com/company/legal/</a>. Linux is a registered trademark of Linus Torvalds.
+  All other names or trademarks mentioned in this document may be trademarks or registered
+  trademarks of their respective owners. </p><p> Documents published as part of the <span class="strong"><strong>SUSE Best Practices</strong></span>
+  series have been contributed voluntarily by SUSE employees and third parties. They are meant to
+  serve as examples of how particular actions can be performed. They have been compiled with utmost
+  attention to detail. However, this does not guarantee complete accuracy. SUSE cannot verify that
+  actions described in these documents do what is claimed or whether actions described have
+  unintended consequences. SUSE LLC, its affiliates, the authors, and the translators may not be held
+  liable for possible errors or the consequences thereof.</p><p> Below we draw your attention to the license under which the articles are published.</p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id1338"></a>GNU Free Documentation License</h2></div></div></div><p>
+  Copyright (C) 2000, 2001, 2002 Free Software Foundation, Inc. 51 Franklin St,
+  Fifth Floor, Boston, MA 02110-1301 USA. Everyone is permitted to copy and
+  distribute verbatim copies of this license document, but changing it is not
+  allowed.
+ </p><h5><a id="id1340"></a> 0. PREAMBLE </h5><p>
+  The purpose of this License is to make a manual, textbook, or other
+  functional and useful document "free" in the sense of freedom: to assure
+  everyone the effective freedom to copy and redistribute it, with or without
+  modifying it, either commercially or non-commercially. Secondarily, this
+  License preserves for the author and publisher a way to get credit for their
+  work, while not being considered responsible for modifications made by
+  others.
+ </p><p>
+  This License is a kind of "copyleft", which means that derivative works of
+  the document must themselves be free in the same sense. It complements the
+  GNU General Public License, which is a copyleft license designed for free
+  software.
+ </p><p>
+  We have designed this License to use it for manuals for free software,
+  because free software needs free documentation: a free program should come
+  with manuals providing the same freedoms that the software does. But this
+  License is not limited to software manuals; it can be used for any textual
+  work, regardless of subject matter or whether it is published as a printed
+  book. We recommend this License principally for works whose purpose is
+  instruction or reference.
+ </p><h5><a id="id1341"></a> 1. APPLICABILITY AND DEFINITIONS </h5><p>
+  This License applies to any manual or other work, in any medium, that
+  contains a notice placed by the copyright holder saying it can be distributed
+  under the terms of this License. Such a notice grants a world-wide,
+  royalty-free license, unlimited in duration, to use that work under the
+  conditions stated herein. The "Document", below, refers to any such manual or
+  work. Any member of the public is a licensee, and is addressed as "you". You
+  accept the license if you copy, modify or distribute the work in a way
+  requiring permission under copyright law.
+ </p><p>
+  A "Modified Version" of the Document means any work containing the Document
+  or a portion of it, either copied verbatim, or with modifications and/or
+  translated into another language.
+ </p><p>
+  A "Secondary Section" is a named appendix or a front-matter section of the
+  Document that deals exclusively with the relationship of the publishers or
+  authors of the Document to the Document's overall subject (or to related
+  matters) and contains nothing that could fall directly within that overall
+  subject. (Thus, if the Document is in part a textbook of mathematics, a
+  Secondary Section may not explain any mathematics.) The relationship could be
+  a matter of historical connection with the subject or with related matters,
+  or of legal, commercial, philosophical, ethical or political position
+  regarding them.
+ </p><p>
+  The "Invariant Sections" are certain Secondary Sections whose titles are
+  designated, as being those of Invariant Sections, in the notice that says
+  that the Document is released under this License. If a section does not fit
+  the above definition of Secondary then it is not allowed to be designated as
+  Invariant. The Document may contain zero Invariant Sections. If the Document
+  does not identify any Invariant Sections then there are none.
+ </p><p>
+  The "Cover Texts" are certain short passages of text that are listed, as
+  Front-Cover Texts or Back-Cover Texts, in the notice that says that the
+  Document is released under this License. A Front-Cover Text may be at most 5
+  words, and a Back-Cover Text may be at most 25 words.
+ </p><p>
+  A "Transparent" copy of the Document means a machine-readable copy,
+  represented in a format whose specification is available to the general
+  public, that is suitable for revising the document straightforwardly with
+  generic text editors or (for images composed of pixels) generic paint
+  programs or (for drawings) some widely available drawing editor, and that is
+  suitable for input to text formatters or for automatic translation to a
+  variety of formats suitable for input to text formatters. A copy made in an
+  otherwise Transparent file format whose markup, or absence of markup, has
+  been arranged to thwart or discourage subsequent modification by readers is
+  not Transparent. An image format is not Transparent if used for any
+  substantial amount of text. A copy that is not "Transparent" is called
+  "Opaque".
+ </p><p>
+  Examples of suitable formats for Transparent copies include plain ASCII
+  without markup, Texinfo input format, LaTeX input format, SGML or XML using a
+  publicly available DTD, and standard-conforming simple HTML, PostScript or
+  PDF designed for human modification. Examples of transparent image formats
+  include PNG, XCF and JPG. Opaque formats include proprietary formats that can
+  be read and edited only by proprietary word processors, SGML or XML for which
+  the DTD and/or processing tools are not generally available, and the
+  machine-generated HTML, PostScript or PDF produced by some word processors
+  for output purposes only.
+ </p><p>
+  The "Title Page" means, for a printed book, the title page itself, plus such
+  following pages as are needed to hold, legibly, the material this License
+  requires to appear in the title page. For works in formats which do not have
+  any title page as such, "Title Page" means the text near the most prominent
+  appearance of the work's title, preceding the beginning of the body of the
+  text.
+ </p><p>
+  A section "Entitled XYZ" means a named subunit of the Document whose title
+  either is precisely XYZ or contains XYZ in parentheses following text that
+  translates XYZ in another language. (Here XYZ stands for a specific section
+  name mentioned below, such as "Acknowledgements", "Dedications",
+  "Endorsements", or "History".) To "Preserve the Title" of such a section when
+  you modify the Document means that it remains a section "Entitled XYZ"
+  according to this definition.
+ </p><p>
+  The Document may include Warranty Disclaimers next to the notice which states
+  that this License applies to the Document. These Warranty Disclaimers are
+  considered to be included by reference in this License, but only as regards
+  disclaiming warranties: any other implication that these Warranty Disclaimers
+  may have is void and has no effect on the meaning of this License.
+ </p><h5><a id="id1342"></a> 2. VERBATIM COPYING </h5><p>
+  You may copy and distribute the Document in any medium, either commercially
+  or noncommercially, provided that this License, the copyright notices, and
+  the license notice saying this License applies to the Document are reproduced
+  in all copies, and that you add no other conditions whatsoever to those of
+  this License. You may not use technical measures to obstruct or control the
+  reading or further copying of the copies you make or distribute. However, you
+  may accept compensation in exchange for copies. If you distribute a large
+  enough number of copies you must also follow the conditions in section 3.
+ </p><p>
+  You may also lend copies, under the same conditions stated above, and you may
+  publicly display copies.
+ </p><h5><a id="id1343"></a> 3. COPYING IN QUANTITY </h5><p>
+  If you publish printed copies (or copies in media that commonly have printed
+  covers) of the Document, numbering more than 100, and the Document's license
+  notice requires Cover Texts, you must enclose the copies in covers that
+  carry, clearly and legibly, all these Cover Texts: Front-Cover Texts on the
+  front cover, and Back-Cover Texts on the back cover. Both covers must also
+  clearly and legibly identify you as the publisher of these copies. The front
+  cover must present the full title with all words of the title equally
+  prominent and visible. You may add other material on the covers in addition.
+  Copying with changes limited to the covers, as long as they preserve the
+  title of the Document and satisfy these conditions, can be treated as
+  verbatim copying in other respects.
+ </p><p>
+  If the required texts for either cover are too voluminous to fit legibly, you
+  should put the first ones listed (as many as fit reasonably) on the actual
+  cover, and continue the rest onto adjacent pages.
+ </p><p>
+  If you publish or distribute Opaque copies of the Document numbering more
+  than 100, you must either include a machine-readable Transparent copy along
+  with each Opaque copy, or state in or with each Opaque copy a
+  computer-network location from which the general network-using public has
+  access to download using public-standard network protocols a complete
+  Transparent copy of the Document, free of added material. If you use the
+  latter option, you must take reasonably prudent steps, when you begin
+  distribution of Opaque copies in quantity, to ensure that this Transparent
+  copy will remain thus accessible at the stated location until at least one
+  year after the last time you distribute an Opaque copy (directly or through
+  your agents or retailers) of that edition to the public.
+ </p><p>
+  It is requested, but not required, that you contact the authors of the
+  Document well before redistributing any large number of copies, to give them
+  a chance to provide you with an updated version of the Document.
+ </p><h5><a id="id1344"></a> 4. MODIFICATIONS </h5><p>
+  You may copy and distribute a Modified Version of the Document under the
+  conditions of sections 2 and 3 above, provided that you release the Modified
+  Version under precisely this License, with the Modified Version filling the
+  role of the Document, thus licensing distribution and modification of the
+  Modified Version to whoever possesses a copy of it. In addition, you must do
+  these things in the Modified Version:
+ </p><div class="orderedlist"><ol class="orderedlist" type="A"><li class="listitem"><p>
+    Use in the Title Page (and on the covers, if any) a title distinct from
+    that of the Document, and from those of previous versions (which should, if
+    there were any, be listed in the History section of the Document). You may
+    use the same title as a previous version if the original publisher of that
+    version gives permission.
+   </p></li><li class="listitem"><p>
+    List on the Title Page, as authors, one or more persons or entities
+    responsible for authorship of the modifications in the Modified Version,
+    together with at least five of the principal authors of the Document (all
+    of its principal authors, if it has fewer than five), unless they release
+    you from this requirement.
+   </p></li><li class="listitem"><p>
+    State on the Title page the name of the publisher of the Modified Version,
+    as the publisher.
+   </p></li><li class="listitem"><p>
+    Preserve all the copyright notices of the Document.
+   </p></li><li class="listitem"><p>
+    Add an appropriate copyright notice for your modifications adjacent to the
+    other copyright notices.
+   </p></li><li class="listitem"><p>
+    Include, immediately after the copyright notices, a license notice giving
+    the public permission to use the Modified Version under the terms of this
+    License, in the form shown in the Addendum below.
+   </p></li><li class="listitem"><p>
+    Preserve in that license notice the full lists of Invariant Sections and
+    required Cover Texts given in the Document's license notice.
+   </p></li><li class="listitem"><p>
+    Include an unaltered copy of this License.
+   </p></li><li class="listitem"><p>
+    Preserve the section Entitled "History", Preserve its Title, and add to it
+    an item stating at least the title, year, new authors, and publisher of the
+    Modified Version as given on the Title Page. If there is no section
+    Entitled "History" in the Document, create one stating the title, year,
+    authors, and publisher of the Document as given on its Title Page, then add
+    an item describing the Modified Version as stated in the previous sentence.
+   </p></li><li class="listitem"><p>
+    Preserve the network location, if any, given in the Document for public
+    access to a Transparent copy of the Document, and likewise the network
+    locations given in the Document for previous versions it was based on.
+    These may be placed in the "History" section. You may omit a network
+    location for a work that was published at least four years before the
+    Document itself, or if the original publisher of the version it refers to
+    gives permission.
+   </p></li><li class="listitem"><p>
+    For any section Entitled "Acknowledgements" or "Dedications", Preserve the
+    Title of the section, and preserve in the section all the substance and
+    tone of each of the contributor acknowledgements and/or dedications given
+    therein.
+   </p></li><li class="listitem"><p>
+    Preserve all the Invariant Sections of the Document, unaltered in their
+    text and in their titles. Section numbers or the equivalent are not
+    considered part of the section titles.
+   </p></li><li class="listitem"><p>
+    Delete any section Entitled "Endorsements". Such a section may not be
+    included in the Modified Version.
+   </p></li><li class="listitem"><p>
+    Do not retitle any existing section to be Entitled "Endorsements" or to
+    conflict in title with any Invariant Section.
+   </p></li><li class="listitem"><p>
+    Preserve any Warranty Disclaimers.
+   </p></li></ol></div><p>
+  If the Modified Version includes new front-matter sections or appendices that
+  qualify as Secondary Sections and contain no material copied from the
+  Document, you may at your option designate some or all of these sections as
+  invariant. To do this, add their titles to the list of Invariant Sections in
+  the Modified Version's license notice. These titles must be distinct from any
+  other section titles.
+ </p><p>
+  You may add a section Entitled "Endorsements", provided it contains nothing
+  but endorsements of your Modified Version by various parties--for example,
+  statements of peer review or that the text has been approved by an
+  organization as the authoritative definition of a standard.
+ </p><p>
+  You may add a passage of up to five words as a Front-Cover Text, and a
+  passage of up to 25 words as a Back-Cover Text, to the end of the list of
+  Cover Texts in the Modified Version. Only one passage of Front-Cover Text and
+  one of Back-Cover Text may be added by (or through arrangements made by) any
+  one entity. If the Document already includes a cover text for the same cover,
+  previously added by you or by arrangement made by the same entity you are
+  acting on behalf of, you may not add another; but you may replace the old
+  one, on explicit permission from the previous publisher that added the old
+  one.
+ </p><p>
+  The author(s) and publisher(s) of the Document do not by this License give
+  permission to use their names for publicity for or to assert or imply
+  endorsement of any Modified Version.
+ </p><h5><a id="id1345"></a> 5. COMBINING DOCUMENTS </h5><p>
+  You may combine the Document with other documents released under this
+  License, under the terms defined in section 4 above for modified versions,
+  provided that you include in the combination all of the Invariant Sections of
+  all of the original documents, unmodified, and list them all as Invariant
+  Sections of your combined work in its license notice, and that you preserve
+  all their Warranty Disclaimers.
+ </p><p>
+  The combined work need only contain one copy of this License, and multiple
+  identical Invariant Sections may be replaced with a single copy. If there are
+  multiple Invariant Sections with the same name but different contents, make
+  the title of each such section unique by adding at the end of it, in
+  parentheses, the name of the original author or publisher of that section if
+  known, or else a unique number. Make the same adjustment to the section
+  titles in the list of Invariant Sections in the license notice of the
+  combined work.
+ </p><p>
+  In the combination, you must combine any sections Entitled "History" in the
+  various original documents, forming one section Entitled "History"; likewise
+  combine any sections Entitled "Acknowledgements", and any sections Entitled
+  "Dedications". You must delete all sections Entitled "Endorsements".
+ </p><h5><a id="id1346"></a> 6. COLLECTIONS OF DOCUMENTS </h5><p>
+  You may make a collection consisting of the Document and other documents
+  released under this License, and replace the individual copies of this
+  License in the various documents with a single copy that is included in the
+  collection, provided that you follow the rules of this License for verbatim
+  copying of each of the documents in all other respects.
+ </p><p>
+  You may extract a single document from such a collection, and distribute it
+  individually under this License, provided you insert a copy of this License
+  into the extracted document, and follow this License in all other respects
+  regarding verbatim copying of that document.
+ </p><h5><a id="id1347"></a> 7. AGGREGATION WITH INDEPENDENT WORKS </h5><p>
+  A compilation of the Document or its derivatives with other separate and
+  independent documents or works, in or on a volume of a storage or
+  distribution medium, is called an "aggregate" if the copyright resulting from
+  the compilation is not used to limit the legal rights of the compilation's
+  users beyond what the individual works permit. When the Document is included
+  in an aggregate, this License does not apply to the other works in the
+  aggregate which are not themselves derivative works of the Document.
+ </p><p>
+  If the Cover Text requirement of section 3 is applicable to these copies of
+  the Document, then if the Document is less than one half of the entire
+  aggregate, the Document's Cover Texts may be placed on covers that bracket
+  the Document within the aggregate, or the electronic equivalent of covers if
+  the Document is in electronic form. Otherwise they must appear on printed
+  covers that bracket the whole aggregate.
+ </p><h5><a id="id1348"></a> 8. TRANSLATION </h5><p>
+  Translation is considered a kind of modification, so you may distribute
+  translations of the Document under the terms of section 4. Replacing
+  Invariant Sections with translations requires special permission from their
+  copyright holders, but you may include translations of some or all Invariant
+  Sections in addition to the original versions of these Invariant Sections.
+  You may include a translation of this License, and all the license notices in
+  the Document, and any Warranty Disclaimers, provided that you also include
+  the original English version of this License and the original versions of
+  those notices and disclaimers. In case of a disagreement between the
+  translation and the original version of this License or a notice or
+  disclaimer, the original version will prevail.
+ </p><p>
+  If a section in the Document is Entitled "Acknowledgements", "Dedications",
+  or "History", the requirement (section 4) to Preserve its Title (section 1)
+  will typically require changing the actual title.
+ </p><h5><a id="id1349"></a> 9. TERMINATION </h5><p>
+  You may not copy, modify, sublicense, or distribute the Document except as
+  expressly provided for under this License. Any other attempt to copy, modify,
+  sublicense or distribute the Document is void, and will automatically
+  terminate your rights under this License. However, parties who have received
+  copies, or rights, from you under this License will not have their licenses
+  terminated so long as such parties remain in full compliance.
+ </p><h5><a id="id1350"></a> 10. FUTURE REVISIONS OF THIS LICENSE </h5><p>
+  The Free Software Foundation may publish new, revised versions of the GNU
+  Free Documentation License from time to time. Such new versions will be
+  similar in spirit to the present version, but may differ in detail to address
+  new problems or concerns. See
+  <a class="link" href="http://www.gnu.org/copyleft/" target="_top">http://www.gnu.org/copyleft/</a>.
+ </p><p>
+  Each version of the License is given a distinguishing version number. If the
+  Document specifies that a particular numbered version of this License "or any
+  later version" applies to it, you have the option of following the terms and
+  conditions either of that specified version or of any later version that has
+  been published (not as a draft) by the Free Software Foundation. If the
+  Document does not specify a version number of this License, you may choose
+  any version ever published (not as a draft) by the Free Software Foundation.
+ </p><h5><a id="id1351"></a> ADDENDUM: How to use this License for your
+  documents </h5><pre class="screen">Copyright (c) YEAR YOUR NAME.
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.2
+or any later version published by the Free Software Foundation;
+with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
+A copy of the license is included in the section entitled "GNU
+ Free Documentation License".</pre><p>
+  If you have Invariant Sections, Front-Cover Texts and Back-Cover Texts,
+  replace the "with...Texts". line with this:
+ </p><pre class="screen">with the Invariant Sections being LIST THEIR TITLES, with the
+Front-Cover Texts being LIST, and with the Back-Cover Texts being LIST.</pre><p>
+  If you have Invariant Sections without Cover Texts, or some other combination
+  of the three, merge those two alternatives to suit the situation.
+ </p><p>
+  If your document contains nontrivial examples of program code, we recommend
+  releasing these examples in parallel under your choice of free software
+  license, such as the GNU General Public License, to permit their use in free
+  software.
+ </p></div></div></body></html>

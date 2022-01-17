@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>EPYC Architecture</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="Optimizing Linux for AMD EPYC with SUSE Linux Enterprise 12 SP3" /><link rel="up" href="index.html" title="Optimizing Linux for AMD EPYC with SUSE Linux Enterprise 12 SP3" /><link rel="prev" href="index.html" title="Optimizing Linux for AMD EPYC with SUSE Linux Enterprise 12 SP3" /><link rel="next" href="sec-epyc-topology.html" title="EPYC Topology" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">EPYC Architecture</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="index.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="sec-epyc-topology.html">Next</a></td></tr></table><hr /></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-epyc-architecture"></a>EPYC Architecture</h2></div></div></div><p><span class="italic">Symmetric multiprocessing
+        (SMP)</span> systems are those that contain two or more
+      physical processing cores. Each core may have two threads if
+      hyper-threading is enabled, with some resources being shared between
+      hyper-thread siblings. To minimize access latencies, multiple layers
+      of caches are used, with each level being larger but with higher
+      access costs. Cores may share different levels of cache which should
+      be considered when tuning for a workload.</p><p>Historically, a single socket contained several cores sharing a
+      hierarchy of caches and memory channels and multiple sockets were
+      connected via a memory interconnect. Modern configurations may have
+      multiple dies as a <span class="italic">Multi-Chip Module
+        (MCM)</span> with one set of interconnects within the socket
+      and a separate interconnect for each socket. This means that some
+      CPUs and memory are faster to access than others depending on the
+        <span class="quote">“<span class="quote">distance</span>”</span>. This should be considered when tuning for
+        <span class="italic">Non-Uniform Memory Architecture
+        (NUMA)</span> as all memory accesses are not necessarily to
+      local memory incurring a variable access penalty.</p><p>EPYC is an MCM design with four dies on each package regardless
+      of thread count. The number of cores on each die is always symmetric
+      so they are balanced. Each socket has eight memory channels (two
+      channels per die) with two <span class="italic">Dual Inline Memory
+        Modules (DIMMs)</span> allowed per channel for up to 16 DIMMs
+      per socket. Total capacity is expected to be 2 TB per socket with a
+      maximum bandwidth of 21.3 GB/sec per channel for a total of 171
+      GB/sec per socket depending on the DIMMs selected.</p><p>Within the package, the four dies are interconnected with a
+      fully-connected <span class="italic">Infinity Fabric</span>.
+      Fully connected means that one core accessing memory connected to
+      another die will always be one hop away. The bandwidth of the fabric
+      is 42 GB/sec per link. The link is optimized for low-power and
+      low-latency. Thus the bandwidth available means that a die accessing
+      memory local to the socket incurs a smaller access penalty than is
+      normally expected when accessing remote memory.</p><p>Sockets are also connected via Infinity Fabric with four links
+      between each socket connecting each die on one socket to the peer die
+      on the second socket. Consequently, access distance to remote memory
+      from a thread will be at most two hops away. The data bandwidth on
+      each of these links is 38 GB/sec for a total of 152 GB/sec between
+      sockets. At the time of writing, only two sockets are possible within
+      a single machine.</p><p>Power management on the links is careful to minimize the amount
+      of power required. If the links are idle then the power may be used
+      to boost the frequency of individual cores. Hence, minimizing access
+      is not only important from a memory access latency point of view, but
+      it also has an impact on the speed of individual cores.</p><p>There are two IO x16 links per die giving a total of 8 links
+      where links can be used as Infinity links, PCI EXPRESS* links or a
+      limited number of SATA* links. This allows very large IO
+      configurations and a high degree of flexibility because of having a
+      total of 128 lanes available on single socket machines. It is
+      important to note that the number of links available is equal in one
+      socket and two socket configurations. In one socket configurations,
+      all lanes are available for IO. In two socket configurations, some
+      lanes are used to connect the two sockets together with the upshot
+      that a one socket configuration does not compromise on the available
+      IO channels.</p></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="index.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="sec-epyc-topology.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Optimizing Linux for AMD EPYC with SUSE Linux Enterprise 12
+      SP3 </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> EPYC Topology</td></tr></table></div></body></html>

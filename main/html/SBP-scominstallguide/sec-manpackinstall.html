@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>SUSE Manager Management Pack Installation</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="SUSE Manager Management Pack for Microsoft System Center Operations Manager Installation Guide" /><link rel="up" href="index.html" title="SUSE Manager Management Pack for Microsoft System Center Operations Manager Installation Guide" /><link rel="prev" href="sec-manpacks.html" title="Management Packs Required to Subscribe Clients to Microsoft System Center Operations Manager" /><link rel="next" href="sec-manualinstall.html" title="SUSE Manager Management Pack Manual Installation Process" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">SUSE Manager Management Pack Installation</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="sec-manpacks.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="sec-manualinstall.html">Next</a></td></tr></table><hr /></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-manpackinstall"></a>SUSE Manager Management Pack Installation</h2></div></div></div><p>To successfully perform patch management tasks, the SUSE
+            Manager Management Pack has be to installed on the Microsoft
+            System Center Operations Manager Client (which is the system
+            containing only the Operations console) and on the Microsoft
+            System Center Operations Manager Server system (which contains
+            only the Server). One single SUSE Manager Management Pack
+            installer will work for the installation on both the Microsoft
+            System Center Operations Manager Client and Server
+            systems.</p><p>Follow the below steps to install the SUSE Manager Management
+            Pack:</p><div class="procedure"><a id="pro-mpinstall"></a><p class="title"><strong>Procedure 1. Step-by-Step Installation</strong></p><ol class="procedure" type="1"><li class="step"><a id="step-one-pro-mpinstall"></a><p>Copy the installer setup to the system where the
+                    installation is required. Follow the below steps to
+                    complete the installation process.</p><ol type="a" class="substeps"><li class="step"><p>Right-click the
+                                <code class="filename">setup.exe</code> file and
+                            select <span class="quote">“<span class="quote">Run as administrator</span>”</span> as
+                            shown below:</p><div class="figure"><a id="id1339"></a><p class="title"><strong>Figure 1. SUSE Manager Management Pack Setup </strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/scom-install-manpack-setup.png" width="100%" alt="SUSE Manager Management Pack Setup" /></td></tr></table></div></div></div><br class="figure-break" /><p>A setup wizard will open:</p><div class="figure"><a id="id1340"></a><p class="title"><strong>Figure 2. SUSE Manager Management Pack Setup
+                                Wizard</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/scom-install-welcome-wizard.png" width="100%" alt="SUSE Manager Management Pack Setup Wizard" /></td></tr></table></div></div></div><br class="figure-break" /></li><li class="step"><p>Click the <span class="quote">“<span class="quote">Next</span>”</span> button, select
+                            the installation folder path and one of the
+                            following options:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Everyone (can be used by all the
+                                    users in the system)</p></li><li class="listitem"><p>Just me (can be used only by the
+                                    installed user)</p></li></ul></div><div class="figure"><a id="id1341"></a><p class="title"><strong>Figure 3. Installation Folder Selection</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/scom-install-select-folder.png" width="100%" alt="Installation Folder Selection" /></td></tr></table></div></div></div><br class="figure-break" /></li><li class="step"><p>Click the <span class="quote">“<span class="quote">Next</span>”</span> button and
+                            enter the SUSE Manager Credentials:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>SUSE Manager Server</p><div class="important" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Host name</h3><p>Do not include
+                                     <span class="quote">“<span class="quote">http/https</span>”</span> in the host
+                                     name or IP address.</p></div></li><li class="listitem"><p>User Name</p></li><li class="listitem"><p>Password</p></li></ul></div><p>These SUSE Manager details will be stored in
+                            the registry keys (SUSEManagerUrl,
+                            SUSEManagerUserName, and
+                            SUSEManagerPassword).</p><div class="figure"><a id="id1342"></a><p class="title"><strong>Figure 4. SUSE Manager Credentials</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/scom-install-manpack-installation.png" width="100%" alt="SUSE Manager Credentials" /></td></tr></table></div></div></div><br class="figure-break" /></li><li class="step"><p>Click the <span class="quote">“<span class="quote">Next</span>”</span> button to
+                            confirm the installation.</p><div class="figure"><a id="id1343"></a><p class="title"><strong>Figure 5. Installation Confirmation</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/scom-install-confirm-installation.png" width="100%" alt="Installation Confirmation" /></td></tr></table></div></div></div><br class="figure-break" /></li><li class="step"><p>During installation the system checks whether
+                            all required management pack references are
+                            installed or not. If they are not installed it
+                            will prompt an error message with the missing
+                            management pack references. When the missing
+                            management packs are installed, the
+                            installation will continue.</p></li><li class="step"><p>After successful installation, click the
+                                <span class="quote">“<span class="quote">Close</span>”</span> button to exit the
+                            Wizard.</p><div class="figure"><a id="id1344"></a><p class="title"><strong>Figure 6. Installation Completion</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/scom-install-installation-complete.png" width="100%" alt="Installation Completion" /></td></tr></table></div></div></div><br class="figure-break" /></li><li class="step"><p>After the installation is completed, open the
+                            Microsoft System Center Operations Manager
+                            2007/2012/R2 console. On the Monitoring
+                            Overview screen, check for the new entry and
+                            click the link <span class="quote">“<span class="quote">Unix/Linux
+                                Servers</span>”</span>, then click the link
+                                <span class="quote">“<span class="quote">Linux</span>”</span>. You should now see a
+                            link called <span class="quote">“<span class="quote">Patch Management</span>”</span>.
+                            See the screenshot below:</p><div class="figure"><a id="id1345"></a><p class="title"><strong>Figure 7. Patch Management Selection</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/scom-install-patch-management.png" width="100%" alt="Patch Management Selection" /></td></tr></table></div></div></div><br class="figure-break" /></li></ol></li><li class="step"><a id="step-two-pro-mpinstall"></a><p>After successful installation of the SUSE Manager
+                    Management Pack, the following binaries and management
+                    packs are deployed in the Microsoft System Center
+                    Operations Manager root location (for example
+                    installation) and the Microsoft System Center
+                    Operations Manager database respectively.</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>If the Management Pack is installed on a
+                            system having only Microsoft System Center
+                            Operations Manager Client (that is a system
+                            having only Operations Console), the following
+                            assemblies are placed into the GAC folder
+                            (general path C; c:\Windows\assembly): </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>Microsoft.OpenSolutionsGroup.SuseManager.ViewType.dll</p></li><li class="listitem"><p>Microsoft.OpenSolutionsGroup.SuseManager.Utilities.dll</p></li><li class="listitem"><p>Microsoft.OpenSolutionsGroup.SuseManagerClient.dll</p></li><li class="listitem"><p>CookComputing.XmlRpcV2.dll</p></li></ul></div><p>The SUSE Manager credentials are updated in
+                            the registry at
+                                <span class="quote">“<span class="quote">HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\SUSEManagementPack</span>”</span>.</p></li><li class="listitem"><p>If the Management Pack is installed on a
+                            system having only the Microsoft System Center
+                            Operations Manager Server installed, the
+                            following assemblies are placed into the GAC
+                            folder (general path C;
+                            c:\Windows\assembly):</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>Microsoft.OpenSolutionsGroup.SuseManager.ScomModule.dll</p></li><li class="listitem"><p>Microsoft.OpenSolutionsGroup.SuseManager.Utilities.dll</p></li><li class="listitem"><p>Microsoft.OpenSolutionsGroup.SuseManagerClient.dll</p></li><li class="listitem"><p>CookComputing.XmlRpcV2.dll</p></li></ul></div><p>The Management Pack
+                                <span class="quote">“<span class="quote">Microsoft.OpenSolutionsGroup.SuseManager.mp</span>”</span>
+                            is deployed into the Microsoft System Center
+                            Operations Manager database. The SUSE Manager
+                            credentials are updated in the registry
+                                <span class="quote">“<span class="quote">HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\SUSEManagementPack</span>”</span>.
+                        </p></li><li class="listitem"><p>If the Management Pack is installed on a
+                            system having both the Microsoft System Center
+                            Operations Manager Client and Server installed,
+                            the following assemblies are placed into the
+                            GAC folder (general path C;
+                            c:\Windows\assembly):</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>Microsoft.OpenSolutionsGroup.SuseManager.ViewType.dll</p></li><li class="listitem"><p>Microsoft.OpenSolutionsGroup.SuseManager.ScomModule.dll</p></li><li class="listitem"><p>Microsoft.OpenSolutionsGroup.SuseManager.Utilities.dll</p></li><li class="listitem"><p>Microsoft.OpenSolutionsGroup.SuseManagerClient.dll</p></li><li class="listitem"><p>CookComputing.XmlRpcV2.dll</p></li></ul></div><p>The Management Pack
+                                <span class="quote">“<span class="quote">Microsoft.OpenSolutionsGroup.SuseManager.mp</span>”</span>
+                            is deployed into the Microsoft System Center
+                            Operations Manager database. The SUSE Manager
+                            credentials are updated in the registry
+                                <span class="quote">“<span class="quote">HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\SUSEManagementPack</span>”</span>.
+                        </p></li></ul></div></li><li class="step"><a id="step-three-pro-mpinstall"></a><p>To update the SUSE Manager details after a successful
+                    installation (for example to point the SUSE Manager
+                    Management Pack to a different SUSE Manager server
+                    after the installation is completed) use the Desktop
+                    shortcut <span class="quote">“<span class="quote">SUSE Manager MP Settings</span>”</span> or
+                        <code class="filename">SUSEManagerMPSettings.exe</code> in the
+                    Management Pack installation location.</p></li><li class="step"><a id="step-four-pro-mpinstall"></a><p>A log file <span class="quote">“<span class="quote">LogInfo.txt</span>”</span> exists in the
+                    Management Pack installation folder. This log file
+                    keeps track of all activities done by the installer in
+                    detail during the installation process. If the
+                    installation fails, the installer will notify the user
+                    with an error message, and error details will be logged
+                    in the log file.</p><div class="figure"><a id="id1346"></a><p class="title"><strong>Figure 8. Example for Log File Text</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/scom-install-loginfo-text.png" width="100%" alt="Example for Log File Text" /></td></tr></table></div></div></div><br class="figure-break" /></li></ol></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="sec-manpacks.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="sec-manualinstall.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Management Packs Required to Subscribe Clients to Microsoft
+            System Center Operations Manager </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> SUSE Manager Management Pack Manual Installation
+            Process</td></tr></table></div></body></html>

@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Candidate Workloads</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="Optimizing Linux for AMD EPYC with SUSE Linux Enterprise 12 SP3" /><link rel="up" href="index.html" title="Optimizing Linux for AMD EPYC with SUSE Linux Enterprise 12 SP3" /><link rel="prev" href="sec-hw-based-profiling.html" title="Hardware-based Profiling" /><link rel="next" href="sec-amd-epyc-virtualization.html" title="Using AMD EPYC for Virtualization" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Candidate Workloads</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="sec-hw-based-profiling.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="sec-amd-epyc-virtualization.html">Next</a></td></tr></table><hr /></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-candidate-workloads"></a>Candidate Workloads</h2></div></div></div><p>The workloads that will benefit most from the EPYC architecture
+      are those that can be parallelized and are either memory or IO-bound.
+      This is particularly true for workloads that are <span class="quote">“<span class="quote">NUMA
+        friendly</span>”</span>: they can be trivially parallelized and each
+      thread can operate independently for the majority of the workloads
+      lifetime. For memory-bound workloads, the primary benefit will be
+      taking advantage of the high bandwidth available on each channel. For
+      IO-bound workloads, the primary benefit will be realized when there
+      are multiple storage devices, each of which is connected to the node
+      local to a task issuing IO.</p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-test-setup"></a>Test Setup</h3></div></div></div><p>The following sections will demonstrate how an OpenMP and MPI
+        workload can be configured and tuned on an EPYC reference
+        platform.</p><div class="table"><a id="id1647"></a><p class="title"><strong>Table 1. Test Setup</strong></p><div class="table-contents"><table class="table" summary="Test Setup" border="1"><colgroup><col class="col_1" /><col class="col_2" /></colgroup><tbody><tr><td>
+                <p>CPU </p>
+              </td><td>
+                <p>2x AMD EPYC 7601</p>
+              </td></tr><tr><td>
+                <p>Platform</p>
+              </td><td>
+                <p>AMD Speedway Reference Platform</p>
+              </td></tr><tr><td>
+                <p>Drive</p>
+              </td><td>
+                <p>Samsung SSD 850</p>
+              </td></tr><tr><td>
+                <p>OS</p>
+              </td><td>
+                <p>SUSE Linux Enterprise Server 12 SP3</p>
+              </td></tr><tr><td>
+                <p>Memory Interleaving</p>
+              </td><td>
+                <p>Channel</p>
+              </td></tr><tr><td>
+                <p>Memory Speed</p>
+              </td><td>
+                <p>2400MHz (single rank)</p>
+              </td></tr><tr><td>
+                <p>Kernel command line</p>
+              </td><td>
+                <p>
+                  <span class="command"><strong>nospectre_v2</strong></span>
+                </p>
+              </td></tr></tbody></table></div></div><br class="table-break" /></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-workload-stream"></a>Test workload: STREAM</h3></div></div></div><p><span class="italic">STREAM</span> is a memory bandwidth
+        benchmark created by Dr. John D. McCalpin from the University of
+        Virginia (for more information, see <a class="link" href="https://www.cs.virginia.edu/stream/" target="_top">https://www.cs.virginia.edu/stream/</a>). It can be used to
+        measure bandwidth of each cache level and bandwidth to main memory
+        assuming adequate care is taken. It is not perfect as some portions
+        of the data will be stored in cache instead of being fetched from
+        main memory.</p><p>The benchmark was configured to run both single-threaded and
+        parallelized with OpenMP to take advantage of each memory channel.
+        The array elements for the benchmark was set at 100007936 elements
+        at compile time so each that array was 763MB in size for a total
+        memory footprint of 2289 MB. The size was selected to minimize the
+        possibility that cache usage would dominate the
+        measurements.</p><div class="table"><a id="id1695"></a><p class="title"><strong>Table 2. Test Workload: STREAM</strong></p><div class="table-contents"><table class="table" summary="Test Workload: STREAM" border="1"><colgroup><col class="col_1" /><col class="col_2" /></colgroup><tbody><tr><td>
+                <p>Compiler</p>
+              </td><td>
+                <p>gcc (SUSE Linux Enterprise) 4.8.5 </p>
+              </td></tr><tr><td>
+                <p>Compiler flags</p>
+              </td><td>
+                <p>
+                  <em class="parameter"><code>-m64 -lm -O3</code></em>
+                </p>
+              </td></tr><tr><td>
+                <p>OpenMP compiler flag</p>
+              </td><td>
+                <p>
+                  <em class="parameter"><code>-fopenmp</code></em>
+                </p>
+              </td></tr><tr><td>
+                <p>OpenMP environment variables</p>
+              </td><td>
+                <p>
+                  <em class="parameter"><code>OMP_PROC_BIND=SPREAD</code></em>
+                </p>
+                <p>
+                  <em class="parameter"><code>OMP_NUM_THREADS=16</code></em>
+                </p>
+              </td></tr></tbody></table></div></div><br class="table-break" /><p>The number of openMP threads was selected to have at least one
+        thread running for every memory channel. The
+          <em class="parameter"><code>OMP_PROC_BIND</code></em> parameter was to have one
+        thread running on a core with a dedicated L3 cache to maximize
+        available bandwidth. This can be verified using
+          <span class="command"><strong>trace-cmd</strong></span>, as illustrated below with slight
+        editing for formatting and clarity.</p><pre class="screen">epyc:~ # trace-cmd record -e sched:sched_migrate_task ./stream
+epyc:~ # trace-cmd report
+...
+stream-18798 [000]  x: sched_migrate_task:   comm=stream pid=18799 prio=120 orig_cpu=0 dest_cpu=4
+stream-18798 [000]  x: sched_migrate_task:   comm=trace-cmd pid=18670 prio=120 orig_cpu=4 dest_cpu=5
+stream-18798 [000]  x: sched_migrate_task:   comm=stream pid=18800 prio=120 orig_cpu=0 dest_cpu=8
+stream-18798 [000]  x: sched_migrate_task:   comm=stream pid=18801 prio=120 orig_cpu=0 dest_cpu=12
+stream-18798 [000]  x: sched_migrate_task:   comm=stream pid=18802 prio=120 orig_cpu=0 dest_cpu=16
+stream-18798 [000]  x: sched_migrate_task:   comm=stream pid=18803 prio=120 orig_cpu=0 dest_cpu=20
+stream-18798 [000]  x: sched_migrate_task:   comm=stream pid=18804 prio=120 orig_cpu=0 dest_cpu=24
+stream-18798 [000]  x: sched_migrate_task:   comm=stream pid=18805 prio=120 orig_cpu=0 dest_cpu=28
+stream-18798 [000]  x: sched_migrate_task:   comm=stream pid=18806 prio=120 orig_cpu=0 dest_cpu=32
+stream-18798 [000]  x: sched_migrate_task:   comm=stream pid=18807 prio=120 orig_cpu=0 dest_cpu=36
+stream-18798 [000]  x: sched_migrate_task:   comm=stream pid=18808 prio=120 orig_cpu=0 dest_cpu=40
+stream-18798 [000]  x: sched_migrate_task:   comm=stream pid=18809 prio=120 orig_cpu=0 dest_cpu=44
+stream-18798 [000]  x: sched_migrate_task:   comm=stream pid=18810 prio=120 orig_cpu=0 dest_cpu=48
+stream-18798 [000]  x: sched_migrate_task:   comm=stream pid=18811 prio=120 orig_cpu=0 dest_cpu=52
+stream-18798 [000]  x: sched_migrate_task:   comm=stream pid=18812 prio=120 orig_cpu=0 dest_cpu=56
+stream-18798 [000]  x: sched_migrate_task:   comm=stream pid=18813 prio=120 orig_cpu=0 dest_cpu=60
+</pre><p>Figure 2 below shows the reported bandwidth for the single and
+        parallelized case. The single-threaded bandwidth for a single core
+        was roughly 20 GB/sec which is a high percentage of the theoretical
+        max of 38.4 GB/sec (each core has access to two memory channels).
+        The channels are interleaved in this configuration as it has been
+        recommended as the best balance for a variety of workloads but
+        limits the absolute maximum of a specialized benchmark like STREAM.
+        The total throughput for each parallel operation ranged from 174
+        GB/sec to 240 GB/sec which is comparable to the theoretical maximum
+        of 307 GB/sec.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">STREAM Scores</h3><p>Higher STREAM scores can be reported by reducing the array
+          sizes so that cache is partially used with the maximum score
+          requiring that each threads memory footprint fits inside the L1
+          cache. Additionally, it is possible to achieve results closer to
+          the theoretical maximum by manual optimization of the STREAM
+          benchmark using vectored instructions and explicit scheduling of
+          loads and stores. The purpose of this configuration was to
+          illustrate the impact of properly binding a workload that can be
+          fully parallelized with data-independent threads.</p></div><div class="figure"><a id="id1734"></a><p class="title"><strong>Figure 2. STREAM Bandwidth, Single Threaded and Parallelized</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/amd-epyc-graph-stream-new-cropped.png" width="100%" alt="STREAM Bandwidth, Single Threaded and Parallelized" /></td></tr></table></div></div></div><br class="figure-break" /></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-workload-nasa"></a>Test Workload: NASA Parallel Benchmark</h3></div></div></div><p>NASA Parallel Benchmark (NPB) is a small set of programs
+        designed to evaluate the performance of supercomputers. They are
+        small kernels derived from <span class="italic">Computational
+          Fluid Dynamics (CFD)</span> applications. The problem size
+        can be adjusted for different memory sizes. Reference
+        implementations exist for both MPI and OpenMP. This setup will
+        focus on the MPI reference implementation.</p><p>While each application behaves differently, one common
+        characteristic is that the workload is very context-switch
+        intensive, barriers frequently yield the CPU to other tasks and the
+        lifetime of individual processes can be very short-lived. The
+        following paragraphs detail the tuning selected for this
+        workload.</p><p>The most important step is setting the CPU governor to
+          <span class="quote">“<span class="quote">performance</span>”</span>. This needs to be done because of the
+        short-lived nature of some tasks but also because not all of them
+        run long enough for a higher P-State to be selected even though the
+        workload is very throughput sensitive. The migration cost parameter
+        is set to reduce the frequency the load balancer will move an
+        individual task. The minimum granularity is adjusted to reduce
+        over-scheduling effects. </p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Number of MPI Processes</h3><p>Only 64 MPI processes were used for this test workload even
+          though more CPUs are available.</p></div><p>This particular workload requires a power-of-two number of
+        processes to be used but using all available CPUs means that the
+        application can contend with itself for CPU time. Furthermore, as
+        IO is being issued to shared memory backed by disk, there are
+        system threads that also need CPU time. Finally, binding to the L3
+        cache means that there were more MPI worker processes than there
+        are CPUs available that share a cache. If more threads were to be
+        used, it would be necessary to bind on a per-node basis. As NPB
+        uses shared files, an XFS partition was used for the temporary
+        files albeit it is only used for mapping shared files and is not a
+        critical path for the benchmark and no IO tuning is necessary. In
+        some cases with MPI applications, it will be possible to use a
+          <code class="filename">tmpfs</code> partition for OpenMPI. This avoids
+        unnecessary IO assuming the increased physical memory usage does
+        not cause the application to be paged out.</p><div class="table"><a id="id1753"></a><p class="title"><strong>Table 3. Test Workload: NASA Parallel Benchmark</strong></p><div class="table-contents"><table class="table" summary="Test Workload: NASA Parallel Benchmark" border="1"><colgroup><col class="col_1" /><col class="col_2" /></colgroup><tbody><tr><td>
+                <p>Compiler</p>
+              </td><td>
+                <p>gcc (SUSE Linux Enterprise) 4.8.5, mpif77,
+                  mpicc</p>
+              </td></tr><tr><td>
+                <p>OpenMPI </p>
+              </td><td>
+                <p>openmpi 1.10.6-3.3.5SDYC14159b</p>
+              </td></tr><tr><td>
+                <p>Compiler flags</p>
+              </td><td>
+                <p>
+                  <em class="parameter"><code>-m64 -O2 -mcmodel=large</code></em>
+                </p>
+              </td></tr><tr><td>
+                <p>CPU governor performance</p>
+              </td><td>
+                <p>
+                  <em class="parameter"><code>cpupower frequency-set -g
+                    performance</code></em>
+                </p>
+              </td></tr><tr><td>
+                <p>Scheduler parameters</p>
+              </td><td>
+                <p>
+                  <em class="parameter"><code>sysctl -w
+                    kernel.sched_migration_cost_ns=5000000</code></em>
+                </p>
+                <p>
+                  <em class="parameter"><code>sysctl -w
+                    kernel.sched_min_granularity_ns=10000000</code></em>
+                </p>
+              </td></tr><tr><td>
+                <p>mpirun parameters</p>
+              </td><td>
+                <p>
+                  <em class="parameter"><code>-mca btl ^openib,udapl -np 64 --bind-to
+                    l3cache</code></em>
+                </p>
+              </td></tr><tr><td>
+                <p>mpirun environment</p>
+              </td><td>
+                <p>
+                  <em class="parameter"><code>TMPDIR=/xfs-data-partition</code></em>
+                </p>
+              </td></tr></tbody></table></div></div><br class="table-break" /><p>Figure 3 shows the time, as reported by the benchmark, for each
+        of the kernels to complete. </p><div class="figure"><a id="fig-nas-mpi-results"></a><p class="title"><strong>Figure 3. NAS MPI Results</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/amd-epyc-nas.png" width="100%" alt="NAS MPI Results" /></td></tr></table></div></div></div><br class="figure-break" /><p>The baseline is <span class="quote">“<span class="quote">numab-disabled</span>”</span> which means it
+        has disabled Automatic NUMA Balancing. The second test was a
+        default SUSE Linux Enterprise Server 12 SP3 installation with no
+        tuning. It illustrates that even with the overhead of Automatic
+        NUMA Balancing there are savings overall as most of the workloads
+        complete faster. The final test run has the tuning applied and
+        shows that the workload completes 44% to 68% faster than the
+        baseline. When the workload is tuned with the bindings then
+        Automatic NUMA Balancing can be optionally disabled but the
+        difference in performance is marginal.</p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="sec-hw-based-profiling.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="sec-amd-epyc-virtualization.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Hardware-based Profiling </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Using AMD EPYC for Virtualization</td></tr></table></div></body></html>

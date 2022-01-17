@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>BIOS Setup</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="Performance Analysis, Tuning and Tools on SUSE Linux Enterprise Products" /><link rel="up" href="index.html" title="Performance Analysis, Tuning and Tools on SUSE Linux Enterprise Products" /><link rel="prev" href="index.html" title="Performance Analysis, Tuning and Tools on SUSE Linux Enterprise Products" /><link rel="next" href="sec-kernel-tuning.html" title="Kernel Tuning" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">BIOS Setup</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="index.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="sec-kernel-tuning.html">Next</a></td></tr></table><hr /></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-bios-setup"></a>BIOS Setup</h2></div></div></div><p>The BIOS is the foundation and the first level of tuning
+            which can have an impact on the performance of your overall
+            system. </p><p>The BIOS controls the voltage (and hence frequency) which
+            components like CPU and RAM run at. In addition, it allows you
+            to enable or disable specific CPU features which can have a
+            profound impact not only on system performance, but also on
+            power usage.</p><p>The first things to know are the states at which a CPU can be
+            in when performing its duties.</p><p>There are two sets of states (or modes): the C-states and
+            P-states. C-states are idle states while P-states are
+            operational states.</p><p>Aside from the C0 state, which is the only one where the CPU
+            is actually busy doing work, all other C-states are idle
+            states. The basic idea behind C-states is that when a CPU is
+            not doing any useful work it is better to <span class="quote">“<span class="quote">shut it
+                down</span>”</span>. This helps reduce power usage which for an
+            electrical component like the CPU means also extending its
+            life-time expectancy.</p><p>P-states control the operational state of the CPU when it is
+            doing some useful work. For instance, even if the CPU/core is
+            in C0 state that does not mean it needs to run at its maximum
+            speed. A very basic example is when using the laptop in battery
+            mode: the CPU will enter a higher P-state hence reducing the
+            frequency at which the CPU/core runs at to minimize power
+            consumption.</p><p>This document does not go into the details of each C/P-state.
+            The following links provide detailed references:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+                    <a class="link" href="https://www.hardwaresecrets.com/everything-you-need-to-know-about-the-cpu-c-states-power-saving-modes/" target="_top">https://www.hardwaresecrets.com/everything-you-need-to-know-about-the-cpu-c-states-power-saving-modes/</a>
+                </p></li><li class="listitem"><p>
+                    <a class="link" href="https://software.intel.com/en-us/blogs/2008/03/12/c-states-and-p-states-are-very-different" target="_top">https://software.intel.com/en-us/blogs/2008/03/12/c-states-and-p-states-are-very-different</a>
+                </p></li><li class="listitem"><p><a class="link" href="haypo.github.io/intel-cpus.html" target="_top">https://web.archive.org/web/20170825081029/https://haypo.github.io/intel-cpus.html</a></p></li><li class="listitem"><p>
+                    <a class="link" href="https://github.com/HewlettPackard/LinuxKI/wiki/Power-vs-Performance" target="_top">https://github.com/HewlettPackard/LinuxKI/wiki/Power-vs-Performance</a>
+                </p></li><li class="listitem"><p>
+                    <a class="link" href="https://people.cs.pitt.edu/~kirk/cs3150spring2010/ShiminChen.pptx" target="_top">https://people.cs.pitt.edu/~kirk/cs3150spring2010/ShiminChen.pptx</a>
+                </p></li></ul></div><p>Whether to enable or disable C/P-states for greater
+            throughput or lower latency depends a lot on the use case. For
+            instance, in some ultra-low latency applications it is
+            beneficial to disable the CPU C-states, because when the CPU is
+            always in C0 state, there is no overhead to resume
+            working.</p><p>Similarly, for certain use cases where you want to predict
+            the amount of work performed by the CPU in a given amount of
+            time, it is beneficial to set the CPU frequency to always run
+            at a certain speed (for example 3 GHz) and still allow Turbo
+            Boost.</p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-cpupower-tool"></a>Cpupower Tool</h3></div></div></div><p>Use the <span class="bold"><strong>cpupower</strong></span> tool to
+                read your supported CPU frequencies, and to set them. To
+                install the tool run the command <span class="command"><strong>zypper in
+                    cpupower</strong></span>.</p><p>As an example, if you run the command <span class="command"><strong># cpupower
+                    frequency-info</strong></span>, you can read some important
+                information from the output:</p><pre class="screen">hardware limits: 1.20 GHz - 2.20 GHz</pre><p>This represents the frequency range supported by the
+                CPU.</p><pre class="screen">available frequency steps:  2.20 GHz, 2.10 GHz, 2.00 GHz, 1.90 GHz, 1.80 GHz,
+1.70 GHz, 1.60 GHz, 1.50 GHz, 1.40 GHz, 1.30 GHz, 1.20 GHz</pre><p>This represents the values which the frequency can be set
+                to if manually set.</p><pre class="screen">available cpufreq governors: userspace ondemand performance</pre><p>This represent the available <span class="bold"><strong>governors</strong></span> supported by the kernel:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><span class="bold"><strong>userspace</strong></span> allows
+                        the frequency to be set manually,</p></li><li class="listitem"><p><span class="bold"><strong>ondemand</strong></span> allows
+                        the CPU to run at different speed depending on the
+                        workloads</p></li><li class="listitem"><p>and <span class="bold"><strong>performance</strong></span>
+                        sets the CPU frequency to the maximum
+                        allowed.</p></li></ul></div><pre class="screen">current CPU frequency: 1.70 GHz (asserted by call to hardware)</pre><p>This shows the frequency at which the CPU is currently
+                running.</p><pre class="screen">boost state support:
+       Supported: yes
+       Active: no/</pre><p>This shows whether Turbo Boost is supported by your CPU
+                and if it is enabled or disabled.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Disabled P-states</h3><p>If P-states are disabled then automatically Turbo
+                    Boost is not supported. This means the row <span class="bold"><strong>Supported:</strong></span> above will always
+                    show <span class="bold"><strong>no</strong></span> and
+                    consequently it will not be possible to enable it. </p><p>Similarly, when P-states are enabled and managed by
+                    the <span class="bold"><strong>intel_pstate</strong></span>
+                    driver (Intel CPUs), then the <span class="bold"><strong>userspace</strong></span> governor is not supported.
+                    This means it is not possible to manually set a
+                    specific frequency. Currently, the only two governors
+                    supported by the <span class="bold"><strong>intel_pstate</strong></span> driver are <span class="bold"><strong>performance</strong></span> and <span class="bold"><strong>ondemand</strong></span>.</p><p>To disable P-states on Intel platform it is
+                    sufficient to append <span class="bold"><strong>intel_pstate=disable</strong></span> to the kernel boot
+                    parameters.</p></div><p>Where Turbo Boost is supported, you can enable it by
+                running this command:</p><p>
+                <span class="command"><strong># echo 0 &gt;
+                    /sys/devices/system/cpu/intel_pstate/no_turbo</strong></span>
+            </p><p>or disable it by running this command:</p><p>
+                <span class="command"><strong># echo 1 &gt;
+                    /sys/devices/system/cpu/intel_pstate/no_turbo</strong></span>
+            </p><p>To set a specific governor run one of these
+                commands:</p><p>
+                <span class="command"><strong># cpupower frequency-set -g userspace</strong></span>
+            </p><p>(set the governor to <span class="bold"><strong>userspace</strong></span>)</p><p>
+                <span class="command"><strong># cpupower frequency-set -g ondemand</strong></span>
+            </p><p>(set the governor to <span class="bold"><strong>ondemand</strong></span>)</p><p>
+                <span class="command"><strong># cpupower frequency-set -g performance</strong></span>
+            </p><p>(set the governor to <span class="bold"><strong>performance</strong></span>)</p><p>If you want to set the CPU frequency to a particular
+                speed, run the command:</p><p>
+                <span class="command"><strong># cpupower frequency-set -f [FREQUENCY]</strong></span>
+            </p><p>Replace [FREQUENCY] with one of the values returned by
+                    <span class="bold"><strong>cpupower
+                    frequency-info</strong></span> in the row <span class="bold"><strong>available frequency
+                steps</strong></span>.</p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="index.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="sec-kernel-tuning.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Performance Analysis, Tuning and Tools on SUSE Linux
+        Enterprise Products </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Kernel Tuning</td></tr></table></div></body></html>

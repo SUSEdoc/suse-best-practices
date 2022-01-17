@@ -1,0 +1,543 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Security Module in SUSE Linux Enterprise 11</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><meta name="description" content="For some time now, governmental agencies around the world, such as the United States National Institute of Standards and Technology (NIST) (NIST SP 800-52 Rev.1) and the German Bundesamt für Sicherheit in der Informationstechnik (BSI) (BSI TR-02102-2) have issued guidance to use Version 1.2 of the Transport Layer Security (TLS) cryptographic protocol as a minimum standard for encryption. This is primarily important for HTTPS encryption of Web traffic, although other use cases, such as e-mail, are affected as well. Allowing SUSE's customers to follow this guidance without affecting the stability and usability of their systems is challenging. In this paper we provide some background to illustrate those challenges and then show how they have been addressed." /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div xml:lang="en" class="article" lang="en"><div class="titlepage"><div><div><h1 class="title"><a id="art-sbp-securitymodule"></a>Security Module in SUSE Linux Enterprise 11</h1></div><div><h3 class="subtitle"><em>Build TLS 1.2 Compliant Infrastructures</em></h3></div><div><div class="author"><h3 class="author"><span class="firstname">Mark</span> <span class="surname">Post, Software Engineer Consultant, SUSE</span></h3></div></div><div><div class="abstract"><p class="title"><strong>Abstract</strong></p><p>For some time now, governmental agencies around the world, such as the United
+                States National Institute of Standards and Technology (NIST) (<a class="link" href="http://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-52r1.pdf" target="_top">NIST SP 800-52 Rev.1</a>) and the German Bundesamt für Sicherheit in der
+                Informationstechnik (BSI) (<a class="link" href="https://www.bsi.bund.de/SharedDocs/Downloads/DE/BSI/Publikationen/TechnischeRichtlinien/TR02102/BSI-TR-02102-2.pdf" target="_top">BSI TR-02102-2</a>) have issued guidance to use Version 1.2 of the Transport
+                Layer Security (TLS) cryptographic protocol as a minimum standard for encryption. </p><p>This is primarily important for HTTPS encryption of Web traffic, although other
+                use cases, such as e-mail, are affected as well. </p><p>Allowing SUSE's customers to follow this guidance without affecting the stability
+                and usability of their systems is challenging. In this paper we provide some
+                background to illustrate those challenges and then show how they have been
+                addressed. </p></div></div></div><hr /></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="sect1"><a href="#sec-background">Background</a></span></dt><dt><span class="sect1"><a href="#sec-challenges">More Challenges</a></span></dt><dt><span class="sect1"><a href="#sec-roundtwo">Round Two</a></span></dt><dt><span class="sect1"><a href="#sec-getsoftware">Getting the Software</a></span></dt><dt><span class="sect1"><a href="#sec-usingpack">Using the Packages</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec-interactpack">The Interactive Packages</a></span></dt><dt><span class="sect2"><a href="#sec-serverpack">The Server Packages</a></span></dt><dt><span class="sect2"><a href="#sec-developmentpack">The Development Packages</a></span></dt></dl></dd><dt><span class="sect1"><a href="#sec-appendix">Appendix A</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec-checksecmodule">Checking if the Security Module Repository Is Already Defined</a></span></dt><dt><span class="sect2"><a href="#sec-register">Registering the System</a></span></dt><dt><span class="sect2"><a href="#sec-enablesecmodule">Enabling the Security Module Repository</a></span></dt><dt><span class="sect2"><a href="#sec-autorefresh">Enabling Automatic Refreshes</a></span></dt></dl></dd><dt><span class="sect1"><a href="#sec-moreinfo">More Information</a></span></dt><dt><span class="sect1"><a href="#id1337">GNU Free Documentation License</a></span></dt></dl></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-background"></a>Background</h2></div></div></div><p>As the name indicates, SUSE Linux Enterprise is intended for use by enterprises. One
+            of the main attributes valued by enterprises in software is stability. SUSE achieves
+            this in a number of ways, one of which is to not change versions of its software
+            packages unless there is no other alternative. When SUSE Linux Enterprise 11 became
+            generally available in 2009, OpenSSL 0.9.8 was the package included to provide
+            encryption for the various other software that used it. </p><p>It was when the requirement for TLS 1.2 came along that a conflict arose between that
+            need and the goal of maintaining the same software versions, and hence stability.
+            OpenSSL version 0.9.8 simply did not provide an implementation of TLS 1.1 or 1.2 and
+            never would provide it. </p><p>In order to provide TLS 1.2 with OpenSSL, SUSE would have to provide version 1.0 or
+            higher. Such an update to a more recent OpenSSL version would have been nearly
+            impossible, as OpenSSL is notoriously incompatible with itself when moving between
+            versions. An OpenSSL version upgrade would trigger a rebuild of a significant number of
+            other packages in SUSE Linux Enterprise 11. Subsequently this would require a high
+            number of updates to be installed on all our customers' production systems. Worse, a
+            version upgrade would break third party applications. This was considered unacceptable,
+            so another approach was taken.</p><p>Fortunately, there are cryptographic libraries other than OpenSSL. Amongst those it
+            was decided that Mozilla's Network Security Services (<a class="link" href="https://developer.mozilla.org/en-US/docs/Mozilla/Projects/NSS" target="_top">NSS</a>) would be the best option: </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>The library is stable and proven to work, as it provides HTTPS support
+                    (including TLS) for the Firefox Web browser. </p></li><li class="listitem"><p>An Apache module already exists, which is derived from mod_ssl and thus easy
+                    to use for administrators used to mod_ssl. </p></li><li class="listitem"><p>The NSS library is already part of SUSE Linux Enterprise 11, and support for
+                    TLS 1.2 can be provided easily with full backward compatibility.</p></li></ul></div><p>In late November of 2013, SUSE shipped updated versions of libfreebl3, libsoftokn3,
+            mozilla-nspr, and mozilla-nss, along with a new package apache2-mod_nss in the
+            maintenance channels for SUSE Linux Enterprise 11 Service Pack (SP) 2 and SP3. While
+            this took care of the Web server and Web browser cases, it did not do the same for other
+            network services such as e-mail or tools such as wget and curl.</p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-challenges"></a>More Challenges</h2></div></div></div><p>The e-mail server that is included with SUSE Linux Enterprise, Postfix, does not work
+            with NSS, only with OpenSSL. Simply shipping both OpenSSL 0.9.8 and OpenSSL 1.0 was not
+            an option because it was all too likely that customers would install both versions of
+            OpenSSL on their systems. Because of the incompatibilities discussed earlier, this would
+            almost certainly have led to all sorts of application crashes. </p><p> The lack of SUSE provided packages built against OpenSSL 1.0 lead to some customers
+            attempting to recompile them from source, with mixed success. Worse, the recompiled
+            packages were not supported by SUSE and could affect the supportability for the entire
+            system. Further, customers would need some way of rebuilding their in-house written
+            applications against OpenSSL 1.0 to be compliant. Clearly something more was
+            needed.</p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-roundtwo"></a>Round Two</h2></div></div></div><p>In August of 2014, SUSE released the <span class="quote">“<span class="quote">SUSE Linux Enterprise 11 Security
+                Module</span>”</span>, providing enhancements to SUSE Linux Enterprise 11 SP3, and later
+            SP4. Available to all customers with a SUSE Linux Enterprise Server subscription, this
+            allows customers and partners to build TLS 1.2 compliant infrastructures beyond the
+            HTTPS protocol. The packages in the Security Module will be supported in the same way
+            and for the same period of time as the other packages shipped with SUSE Linux Enterprise
+            11 (see <a class="link" href="https://www.suse.com/lifecycle/" target="_top">https://www.suse.com/lifecycle/</a>). </p><p> In this context the term <span class="quote">“<span class="quote">module</span>”</span> can be somewhat confusing but it comes
+            from the <span class="quote">“<span class="quote">optional modules</span>”</span> that were introduced with SUSE Linux Enterprise
+            12 (see <a class="link" href="https://www.suse.com/products/server/features/modules.html" target="_top">https://www.suse.com/products/server/features/modules.html</a>). Essentially the Security Module is an additional package and maintenance repository
+            for use by YaST or Zypper. There are no DVDs to order or ISO images to download. At this
+            time, there are a total of 31 packages available in the Security Module:</p><table border="0" summary="Simple list" class="simplelist"><tr><td>curl-openssl1</td></tr><tr><td>cyrus-sasl-openssl1</td></tr><tr><td>cyrus-sasl-openssl1-32bit</td></tr><tr><td>cyrus-sasl-openssl1-crammd5</td></tr><tr><td>cyrus-sasl-openssl1-digestmd5</td></tr><tr><td>cyrus-sasl-openssl1-gssapi</td></tr><tr><td>cyrus-sasl-openssl1-ntlm</td></tr><tr><td>cyrus-sasl-openssl1-otp</td></tr><tr><td>cyrus-sasl-openssl1-plain</td></tr><tr><td>libcurl4-openssl1</td></tr><tr><td>libcurl4-openssl1-32bit</td></tr><tr><td>libldap-openssl1-2_4-2</td></tr><tr><td>libldap-openssl1-2_4-2-32bit</td></tr><tr><td>libopenssl1_0_0</td></tr><tr><td>libopenssl1_0_0-32bit</td></tr><tr><td>libopenssl1-devel</td></tr><tr><td>openldap2-client-openssl1</td></tr><tr><td>openssh-openssl1</td></tr><tr><td>openssh-openssl1-helpers</td></tr><tr><td>openssl1</td></tr><tr><td>openssl1-doc</td></tr><tr><td>openvpn-openssl1</td></tr><tr><td>openvpn-openssl1-down-root-plugin</td></tr><tr><td>perl-Crypt-SSLeay-openssl1</td></tr><tr><td>perl-Net-SSLeay-openssl1</td></tr><tr><td>postfix-openssl1</td></tr><tr><td>postfix-openssl1-devel</td></tr><tr><td>postfix-openssl1-doc</td></tr><tr><td>postfix-openssl1-mysql</td></tr><tr><td>postfix-openssl1-postgresql</td></tr><tr><td>stunnel</td></tr><tr><td>wget-openssl1openssh-openssl1-helpers</td></tr></table><p>As you can see there are packages containing executables, runtime libraries, and
+            development files. They are also named to be easily distinguishable from the versions
+            built against OpenSSL 0.9.8. With a few exceptions, the OpenSSL 1.0 packages <span class="bold"><strong>may</strong></span> be installed concurrently with the versions using OpenSSL
+            0.9.8. Those exceptions that may not be installed concurrently are:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>libopenssl1-devel</p></li><li class="listitem"><p>openssh-openssl1</p></li><li class="listitem"><p>openssl1-doc</p></li><li class="listitem"><p>perl-Crypt-SSLeay-openssl1</p></li><li class="listitem"><p>perl-Net-SSLeay-openssl1</p></li><li class="listitem"><p>postfix-openssl1</p></li><li class="listitem"><p>postfix-openssl1-devel</p></li></ul></div><p>For the OpenSSH and Postfix packages, it does not make sense to have more than one
+            version installed since they provide a service for the entire system, not just for one
+            user or application. For the Perl and -devel packages a conflict is unavoidable as the
+            header and .so files are in the same locations. This means that only the OpenSSL 0.9.8
+            or the OpenSSL 1.0 version of these packages may be installed on a given system at one
+            time.</p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-getsoftware"></a>Getting the Software</h2></div></div></div><p>Since all the packages reside in a single repository or maintenance channel, there are
+            just two major steps that need to be taken first:</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>Verify or get access to the Security Module. See Appendix A for the gory
+                    details.</p></li><li class="listitem"><p>Install the packages you need using either YaST (<span class="command"><strong>yast
+                        sw_single</strong></span>) or the <span class="command"><strong>zypper install</strong></span> command, for
+                    example </p><p>
+                    <span class="command"><strong>zypper in curl-openssl1 wget-openssl1</strong></span>
+                </p><p>Both YaST and Zypper will automatically determine if any other packages are
+                    needed to satisfy dependencies. In any case you will be prompted to confirm the
+                    installation.</p></li></ol></div><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">No Automatic Change to OpenSSL 1</h3><p>Note that adding this channel or installing the SUSE provided packages does not
+                automatically change any other existing applications to use OpenSSL 1. Unless ported
+                or rebuilt by the vendor they will still use the OpenSSL 0.9.8 libraries. For C or
+                C++ applications developed in-house you will need to build OpenSSL 1 versions as
+                described in the section on how to use the development packages.</p></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-usingpack"></a>Using the Packages</h2></div></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-interactpack"></a>The Interactive Packages</h3></div></div></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-curlwget"></a>curl-openssl1 and wget-openssl1</h4></div></div></div><p>If you have chosen to install the curl-openssl1 or wget-openssl1 packages, you
+                    now have a choice as to which one should be the system-wide default when someone
+                    simply enters the <span class="command"><strong>curl</strong></span> command or <span class="command"><strong>wget</strong></span>
+                    command. Setting or changing this is accomplished through the use of the SUSE
+                    alternatives system (see <span class="quote">“<span class="quote">man 8 update-alternatives</span>”</span> for more
+                    information). We will be using the curl package for our examples, but as you
+                    would expect, the same can and should be done for the wget package.</p><p>To see which version of curl is the system default, enter the following
+                    command:</p><pre class="screen">update-alternatives --display curl</pre><p>You should see output similar to this:</p><pre class="screen"># update-alternatives --display curl
+curl - status is auto.
+ link currently points to /usr/bin/curl.openssl1
+/usr/bin/curl.openssl0 - priority 15
+/usr/bin/curl.openssl1 - priority 20
+Current 'best' version is /usr/bin/curl.openssl1.</pre><p>If this is not the state you want, you can change it using the
+                        <span class="command"><strong>update-alternatives --set</strong></span> command:</p><pre class="screen">update-alternatives --set curl /usr/bin/curl.openssl0
+Using '/usr/bin/curl.openssl0' to provide 'curl'.</pre><p>You can then reissue the command with <span class="command"><strong>--display</strong></span>:</p><pre class="screen"># update-alternatives --display curl
+curl - status is manual.
+ link currently points to /usr/bin/curl.openssl0
+/usr/bin/curl.openssl0 - priority 15
+/usr/bin/curl.openssl1 - priority 20
+Current 'best' version is /usr/bin/curl.openssl1.</pre><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Status Change</h3><p>Note that besides the link being updated, the <span class="quote">“<span class="quote">status</span>”</span> of it
+                        has been changed from <span class="quote">“<span class="quote">auto</span>”</span> to <span class="quote">“<span class="quote">manual</span>”</span>. That
+                        means that the <span class="command"><strong>curl.openssl0</strong></span> command will remain the
+                        default until someone with root user authority issues another
+                            <span class="command"><strong>update-alternatives --set curl</strong></span> or
+                            <span class="command"><strong>update-alternatives --auto curl </strong></span>command.</p></div><p>Individual users will need to use shell aliases or fully qualified paths to
+                    the appropriate command if they want something other than the system
+                    default.</p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-openssl1"></a>openssl1</h4></div></div></div><p>The openssl package contains two commands that might be of interest to users
+                    or system administrators, <span class="command"><strong>c_rehash</strong></span> and
+                        <span class="command"><strong>openssl</strong></span>. The openssl1 package has renamed those two
+                    commands to <span class="command"><strong>c_rehash1</strong></span> and <span class="command"><strong>openssl1</strong></span>. Anyone
+                    who wants to be sure they are executing the OpenSSL 1 versions must use the new
+                    names explicitly. Note that the <span class="command"><strong>c_rehash1</strong></span> command can
+                    generate signatures for both OpenSSL 0.9.8 and OpenSSL 1, but
+                        the<span class="command"><strong>c_rehash</strong></span> command cannot.</p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-libldap"></a>libldap-openssl1</h4></div></div></div><p>The libldap-openssl1 package contains commands such as
+                        <span class="command"><strong>ldapadd</strong></span>, <span class="command"><strong>ldapsearch,</strong></span> etc. They are
+                    located in <code class="filename">/opt/suse/bin</code> so they will not be used by
+                    default. If you want to execute them by default you can either specify the fully
+                    qualified path to the commands, modify your PATH environment variable to contain
+                        <code class="filename">/opt/suse/bin</code> before <code class="filename">/usr/bin</code>, or
+                    create aliases that point to the newer version. </p><p>Some consideration is being given to modifying this package to use the same
+                    update-alternatives method as the curl and wget packages. If and when that
+                    happens, the commands in <code class="filename">/opt/suse/bin</code> will be moved into a
+                    different package, most likely named openldap2-client-openssl1. This will make
+                    the contents and naming similar to what is being done now for the OpenSSL 0.9.8
+                    package, openldap2-client.</p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-openssh"></a>openssh-openssl1 and postfix-openssl1</h4></div></div></div><p>The OpenSSH and Postfix packages contain both client and server/admin
+                    components. Since only one version can be installed at a time, by definition
+                    users will not have a choice as to which version they execute.</p></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-serverpack"></a>The Server Packages</h3></div></div></div><p>For OpenSSH and Postfix, the post installation scripts that are executed by RPM
+                should set up everything needed in the configuration files and then restart the
+                services. If the services were not running at the time the packages were installed,
+                they will <span class="italic">not</span> be started automatically. To ensure
+                they are running check their status:</p><pre class="screen">service sshd status
+service postfix status</pre><p>If either or both are not running, start them:</p><pre class="screen">service sshd start
+service postfix start</pre><p>From this point on, there should be no differences from how the services were
+                managed previously.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-developmentpack"></a>The Development Packages</h3></div></div></div><p>The two development packages will only be of interest to customers that are doing
+                in-house development of C or C++ software that uses these libraries. And they are
+                relevant for customers that are installing vendor packages that require all or part
+                of their source code to be compiled and linked to these libraries. If the
+                corresponding -devel packages from OpenSSL 0.9.8 were never installed on a
+                particular system, there should be no need to install the OpenSSL 1.0 versions
+                either.</p><p>Because only one set of the development packages can be installed at any one time,
+                it is cumbersome to try to do development against both versions on the same system.
+                Switching between the two will require uninstalling one version and reinstalling the
+                other, as needed.</p><p>Depending on what libraries your OpenSSL 1 application requires, you might need to
+                also install one or all of the following packages:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>libldap-openssl1-2_4-2</p></li><li class="listitem"><p>cyrus-sasl-openssl1</p></li><li class="listitem"><p>libcurl4-openssl1</p></li><li class="listitem"><p>cyrus-sasl-openssl1-plain</p></li><li class="listitem"><p>cyrus-sasl-openssl1-gssapi</p></li><li class="listitem"><p>cyrus-sasl-openssl1-digestmd5</p></li></ul></div><p>If your application does not require them, then they will only be installed if
+                needed by other packages such postfix-openssl1, etc.</p><p>These OpenSSL 1 libraries are located in <code class="filename">/opt/suse/lib64</code> or
+                    <code class="filename">/opt/suse/lib</code> on 32-bit systems. This allows them to be
+                installed concurrently with the OpenSSL 0.9.8 versions. Because they have exactly
+                the same file names as the OpenSSL 0.9.8 libraries in
+                    <code class="filename">/usr/lib64</code> and <code class="filename">/usr/lib</code>, it is
+                important to make sure that your software build processes are referencing the
+                correct versions.</p><p>The way to accomplish this is by telling the compiler/linker where to find the
+                desired version. So, when compiling and linking software against OpenSSL 1, pass the
+                following parameters to the <span class="command"><strong>gcc</strong></span> command:</p><p>
+                <span class="command"><strong>-Wl,-rpath,/opt/suse/lib64</strong></span>
+            </p><p>or on 32-bit systems:</p><p>
+                <span class="command"><strong>-Wl,-rpath,/opt/suse/lib</strong></span>
+            </p><p>This causes both the application and libraries that are built to look for the
+                libraries in <code class="filename">/opt/suse/lib64</code> or
+                    <code class="filename">/opt/suse/lib</code> first, and in the regular system locations
+                later.</p><p>This can most reliably be done by updating whatever <span class="quote">“<span class="quote">make file</span>”</span> is
+                being used to build the software. Note that this must be done for any <span class="strong"><strong>libraries</strong></span> being built, as well as binary executables.
+                Having a library pointing to the wrong version will be just as wrong as having the
+                program being executed pointing to the wrong version.</p><p>When compiling and linking against OpenSSL 0.9.8, you have a choice; either leave
+                the <span class="command"><strong>-Wl,-rpath</strong></span> out entirely, or point to
+                    <code class="filename">/usr/lib64</code> or on 32-bit systems
+                    <code class="filename">/usr/lib</code>.</p><p>To confirm if your software has been built correctly, execute the following
+                command against it:</p><pre class="screen">readelf ­a /path/to/your/binaryorlibrary | grep RUNPATH</pre><p>You should see something similar to this example:</p><pre class="screen">readelf -a /usr/lib/postfix/smtp | grep RUNPATH
+0x000000000000001d (RUNPATH)            Library runpath: [/opt/suse/lib64]</pre><p>To confirm if your application is not referencing any of the OpenSSL 0.9.8
+                libraries, use the <span class="command"><strong>/usr/bin/ldd</strong></span> command as in this
+                example:</p><pre class="screen">ldd /usr/lib/postfix/smtp | grep /libssl.so.0
+ldd /usr/lib/postfix/smtp | grep /libcrypto.so.0</pre><p>You should not see any output from either of those commands when run against your
+                application files. If you do, it means that your application was linked against the
+                wrong version of OpenSSL and you need to re-examine your build processes.</p></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-appendix"></a>Appendix A</h2></div></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-checksecmodule"></a>Checking if the Security Module Repository Is Already Defined</h3></div></div></div><p>Issue the following command as the root user: </p><pre class="screen">zypper repos | grep Security</pre><p>If the repository is defined, you should see something similar to this:</p><pre class="screen">17 | nu_novell_com:SLE11-Security-Module | SLE11-Security-Module | No | Yes</pre><p>If it is defined, skip to the section on enabling the Security Module Repository.
+                If the repository is not defined, proceed with the following section on registering
+                your system. </p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Usage of YaST</h3><p>Note that all of this work can be done via YaST (yast repositories) as
+                    well.</p></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-register"></a>Registering the System</h3></div></div></div><p>If your initial command</p><pre class="screen">zypper repos | grep Security</pre><p>showed nothing in response, then you will need to register, or re-register, your
+                system with the Novell Customer Center or your own local Subscription Management
+                Tool (SMT) server. This can be accomplished via YaST (<span class="command"><strong>yast
+                    inst_suse_register</strong></span>) or the <span class="command"><strong>suse_register</strong></span> command.
+                System administrators that are not already familiar with
+                    <span class="command"><strong>suse_register</strong></span> should use YaST to register the system. </p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">YaST Registration</h3><p>For more information about <span class="command"><strong>suse_register</strong></span>, search the
+                    relevant documentation. If your are not yet familiar with
+                        <span class="command"><strong>suse_register</strong></span>, it is highly recommended to use
+                    YaST.</p></div><p>When the system has been registered, you should be able to see the Security Module
+                repository as already discussed. If you do not, contact the Customer Resolution Team
+                for assistance.</p><p>In EMEA: <code class="email">&lt;<a class="email" href="mailto:Customer_CenterEMEA@novell.com">Customer_CenterEMEA@novell.com</a>&gt;</code></p><p>In all other countries: <code class="email">&lt;<a class="email" href="mailto:CustomerResolution@novell.com">CustomerResolution@novell.com</a>&gt;</code></p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-enablesecmodule"></a>Enabling the Security Module Repository</h3></div></div></div><p>When the Security Module is defined, then all you need to do is enable it and
+                enable automatic refreshes. Reissue the following command as the root user:</p><pre class="screen">zypper repos | grep Security</pre><p>The fourth column is now the one of particular interest. It shows whether the
+                repository is enabled or not. That is, whether YaST or Zypper should look at this
+                repository to satisfy requests or not.</p><pre class="screen"><span class="strong"><strong>17</strong></span> | nu_novell_com:SLE11-Security-Module | SLE11-Security-Module | <span class="strong"><strong>No</strong></span> | Yes</pre><p>Our example shows that it is <span class="italic">not</span> enabled, so we
+                must change that. The easiest way is by using the <span class="command"><strong>zypper
+                    modifyrepo</strong></span> command with the repository ID shown in column 1. In our
+                example that is 17:</p><pre class="screen">zypper modifyrepo -e 17</pre><p>Substitute whatever repository ID that Zypper shows on your system for the 17 we
+                have used in our example. You should see a message like this:</p><pre class="screen">Repository 'nu_novell_com:SLE11-Security-Module' has been successfully enabled.</pre><p>To verify, reissue the <span class="command"><strong>zypper repos</strong></span> command:</p><pre class="screen">zypper repos | grep Security
+17 | nu_novell_com:SLE11-Security-Module | SLE11-Security-Module | <span class="strong"><strong>Yes</strong></span> | Yes</pre></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-autorefresh"></a>Enabling Automatic Refreshes</h3></div></div></div><p>The last column in the display shows whether Zypper will automatically refresh the
+                status of the repository or not. Ensuring that this is set to <span class="quote">“<span class="quote">Yes</span>”</span> is
+                important so that any new or updated packages in the Security Module will show up as
+                available updates.</p><pre class="screen">17 | nu_novell_com:SLE11-Security-Module | SLE11-Security-Module | Yes | <span class="strong"><strong>Yes</strong></span></pre><p>Our example shows that it is enabled. If yours is <span class="italic">not</span> then issue the following command:</p><pre class="screen">zypper modifyrepo -r 17</pre><p>Again, substitute whatever repository ID that Zypper shows on your system. If you
+                then display your repositories again you should see a <span class="quote">“<span class="quote">Yes</span>”</span> in the last
+                column, and you have completed this task.</p></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-moreinfo"></a>More Information</h2></div></div></div><p>More information about the Security Module and its background can be found here:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p> <a class="link" href="https://www.suse.com/communities/blog/tls-1-2/" target="_top">https://www.suse.com/communities/blog/tls-1-2/</a></p></li><li class="listitem"><p><a class="link" href="https://www.suse.com/communities/blog/introducing-the-suse-linux-enterprise-11-security-module/" target="_top">https://www.suse.com/communities/blog/introducing-the-suse-linux-enterprise-11-security-module/</a></p></li></ul></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id1337"></a>GNU Free Documentation License</h2></div></div></div><p>
+  Copyright (C) 2000, 2001, 2002 Free Software Foundation, Inc. 51 Franklin St,
+  Fifth Floor, Boston, MA 02110-1301 USA. Everyone is permitted to copy and
+  distribute verbatim copies of this license document, but changing it is not
+  allowed.
+ </p><h5><a id="id1338"></a> 0. PREAMBLE </h5><p>
+  The purpose of this License is to make a manual, textbook, or other
+  functional and useful document "free" in the sense of freedom: to assure
+  everyone the effective freedom to copy and redistribute it, with or without
+  modifying it, either commercially or non-commercially. Secondarily, this
+  License preserves for the author and publisher a way to get credit for their
+  work, while not being considered responsible for modifications made by
+  others.
+ </p><p>
+  This License is a kind of "copyleft", which means that derivative works of
+  the document must themselves be free in the same sense. It complements the
+  GNU General Public License, which is a copyleft license designed for free
+  software.
+ </p><p>
+  We have designed this License to use it for manuals for free software,
+  because free software needs free documentation: a free program should come
+  with manuals providing the same freedoms that the software does. But this
+  License is not limited to software manuals; it can be used for any textual
+  work, regardless of subject matter or whether it is published as a printed
+  book. We recommend this License principally for works whose purpose is
+  instruction or reference.
+ </p><h5><a id="id1339"></a> 1. APPLICABILITY AND DEFINITIONS </h5><p>
+  This License applies to any manual or other work, in any medium, that
+  contains a notice placed by the copyright holder saying it can be distributed
+  under the terms of this License. Such a notice grants a world-wide,
+  royalty-free license, unlimited in duration, to use that work under the
+  conditions stated herein. The "Document", below, refers to any such manual or
+  work. Any member of the public is a licensee, and is addressed as "you". You
+  accept the license if you copy, modify or distribute the work in a way
+  requiring permission under copyright law.
+ </p><p>
+  A "Modified Version" of the Document means any work containing the Document
+  or a portion of it, either copied verbatim, or with modifications and/or
+  translated into another language.
+ </p><p>
+  A "Secondary Section" is a named appendix or a front-matter section of the
+  Document that deals exclusively with the relationship of the publishers or
+  authors of the Document to the Document's overall subject (or to related
+  matters) and contains nothing that could fall directly within that overall
+  subject. (Thus, if the Document is in part a textbook of mathematics, a
+  Secondary Section may not explain any mathematics.) The relationship could be
+  a matter of historical connection with the subject or with related matters,
+  or of legal, commercial, philosophical, ethical or political position
+  regarding them.
+ </p><p>
+  The "Invariant Sections" are certain Secondary Sections whose titles are
+  designated, as being those of Invariant Sections, in the notice that says
+  that the Document is released under this License. If a section does not fit
+  the above definition of Secondary then it is not allowed to be designated as
+  Invariant. The Document may contain zero Invariant Sections. If the Document
+  does not identify any Invariant Sections then there are none.
+ </p><p>
+  The "Cover Texts" are certain short passages of text that are listed, as
+  Front-Cover Texts or Back-Cover Texts, in the notice that says that the
+  Document is released under this License. A Front-Cover Text may be at most 5
+  words, and a Back-Cover Text may be at most 25 words.
+ </p><p>
+  A "Transparent" copy of the Document means a machine-readable copy,
+  represented in a format whose specification is available to the general
+  public, that is suitable for revising the document straightforwardly with
+  generic text editors or (for images composed of pixels) generic paint
+  programs or (for drawings) some widely available drawing editor, and that is
+  suitable for input to text formatters or for automatic translation to a
+  variety of formats suitable for input to text formatters. A copy made in an
+  otherwise Transparent file format whose markup, or absence of markup, has
+  been arranged to thwart or discourage subsequent modification by readers is
+  not Transparent. An image format is not Transparent if used for any
+  substantial amount of text. A copy that is not "Transparent" is called
+  "Opaque".
+ </p><p>
+  Examples of suitable formats for Transparent copies include plain ASCII
+  without markup, Texinfo input format, LaTeX input format, SGML or XML using a
+  publicly available DTD, and standard-conforming simple HTML, PostScript or
+  PDF designed for human modification. Examples of transparent image formats
+  include PNG, XCF and JPG. Opaque formats include proprietary formats that can
+  be read and edited only by proprietary word processors, SGML or XML for which
+  the DTD and/or processing tools are not generally available, and the
+  machine-generated HTML, PostScript or PDF produced by some word processors
+  for output purposes only.
+ </p><p>
+  The "Title Page" means, for a printed book, the title page itself, plus such
+  following pages as are needed to hold, legibly, the material this License
+  requires to appear in the title page. For works in formats which do not have
+  any title page as such, "Title Page" means the text near the most prominent
+  appearance of the work's title, preceding the beginning of the body of the
+  text.
+ </p><p>
+  A section "Entitled XYZ" means a named subunit of the Document whose title
+  either is precisely XYZ or contains XYZ in parentheses following text that
+  translates XYZ in another language. (Here XYZ stands for a specific section
+  name mentioned below, such as "Acknowledgements", "Dedications",
+  "Endorsements", or "History".) To "Preserve the Title" of such a section when
+  you modify the Document means that it remains a section "Entitled XYZ"
+  according to this definition.
+ </p><p>
+  The Document may include Warranty Disclaimers next to the notice which states
+  that this License applies to the Document. These Warranty Disclaimers are
+  considered to be included by reference in this License, but only as regards
+  disclaiming warranties: any other implication that these Warranty Disclaimers
+  may have is void and has no effect on the meaning of this License.
+ </p><h5><a id="id1340"></a> 2. VERBATIM COPYING </h5><p>
+  You may copy and distribute the Document in any medium, either commercially
+  or noncommercially, provided that this License, the copyright notices, and
+  the license notice saying this License applies to the Document are reproduced
+  in all copies, and that you add no other conditions whatsoever to those of
+  this License. You may not use technical measures to obstruct or control the
+  reading or further copying of the copies you make or distribute. However, you
+  may accept compensation in exchange for copies. If you distribute a large
+  enough number of copies you must also follow the conditions in section 3.
+ </p><p>
+  You may also lend copies, under the same conditions stated above, and you may
+  publicly display copies.
+ </p><h5><a id="id1341"></a> 3. COPYING IN QUANTITY </h5><p>
+  If you publish printed copies (or copies in media that commonly have printed
+  covers) of the Document, numbering more than 100, and the Document's license
+  notice requires Cover Texts, you must enclose the copies in covers that
+  carry, clearly and legibly, all these Cover Texts: Front-Cover Texts on the
+  front cover, and Back-Cover Texts on the back cover. Both covers must also
+  clearly and legibly identify you as the publisher of these copies. The front
+  cover must present the full title with all words of the title equally
+  prominent and visible. You may add other material on the covers in addition.
+  Copying with changes limited to the covers, as long as they preserve the
+  title of the Document and satisfy these conditions, can be treated as
+  verbatim copying in other respects.
+ </p><p>
+  If the required texts for either cover are too voluminous to fit legibly, you
+  should put the first ones listed (as many as fit reasonably) on the actual
+  cover, and continue the rest onto adjacent pages.
+ </p><p>
+  If you publish or distribute Opaque copies of the Document numbering more
+  than 100, you must either include a machine-readable Transparent copy along
+  with each Opaque copy, or state in or with each Opaque copy a
+  computer-network location from which the general network-using public has
+  access to download using public-standard network protocols a complete
+  Transparent copy of the Document, free of added material. If you use the
+  latter option, you must take reasonably prudent steps, when you begin
+  distribution of Opaque copies in quantity, to ensure that this Transparent
+  copy will remain thus accessible at the stated location until at least one
+  year after the last time you distribute an Opaque copy (directly or through
+  your agents or retailers) of that edition to the public.
+ </p><p>
+  It is requested, but not required, that you contact the authors of the
+  Document well before redistributing any large number of copies, to give them
+  a chance to provide you with an updated version of the Document.
+ </p><h5><a id="id1342"></a> 4. MODIFICATIONS </h5><p>
+  You may copy and distribute a Modified Version of the Document under the
+  conditions of sections 2 and 3 above, provided that you release the Modified
+  Version under precisely this License, with the Modified Version filling the
+  role of the Document, thus licensing distribution and modification of the
+  Modified Version to whoever possesses a copy of it. In addition, you must do
+  these things in the Modified Version:
+ </p><div class="orderedlist"><ol class="orderedlist" type="A"><li class="listitem"><p>
+    Use in the Title Page (and on the covers, if any) a title distinct from
+    that of the Document, and from those of previous versions (which should, if
+    there were any, be listed in the History section of the Document). You may
+    use the same title as a previous version if the original publisher of that
+    version gives permission.
+   </p></li><li class="listitem"><p>
+    List on the Title Page, as authors, one or more persons or entities
+    responsible for authorship of the modifications in the Modified Version,
+    together with at least five of the principal authors of the Document (all
+    of its principal authors, if it has fewer than five), unless they release
+    you from this requirement.
+   </p></li><li class="listitem"><p>
+    State on the Title page the name of the publisher of the Modified Version,
+    as the publisher.
+   </p></li><li class="listitem"><p>
+    Preserve all the copyright notices of the Document.
+   </p></li><li class="listitem"><p>
+    Add an appropriate copyright notice for your modifications adjacent to the
+    other copyright notices.
+   </p></li><li class="listitem"><p>
+    Include, immediately after the copyright notices, a license notice giving
+    the public permission to use the Modified Version under the terms of this
+    License, in the form shown in the Addendum below.
+   </p></li><li class="listitem"><p>
+    Preserve in that license notice the full lists of Invariant Sections and
+    required Cover Texts given in the Document's license notice.
+   </p></li><li class="listitem"><p>
+    Include an unaltered copy of this License.
+   </p></li><li class="listitem"><p>
+    Preserve the section Entitled "History", Preserve its Title, and add to it
+    an item stating at least the title, year, new authors, and publisher of the
+    Modified Version as given on the Title Page. If there is no section
+    Entitled "History" in the Document, create one stating the title, year,
+    authors, and publisher of the Document as given on its Title Page, then add
+    an item describing the Modified Version as stated in the previous sentence.
+   </p></li><li class="listitem"><p>
+    Preserve the network location, if any, given in the Document for public
+    access to a Transparent copy of the Document, and likewise the network
+    locations given in the Document for previous versions it was based on.
+    These may be placed in the "History" section. You may omit a network
+    location for a work that was published at least four years before the
+    Document itself, or if the original publisher of the version it refers to
+    gives permission.
+   </p></li><li class="listitem"><p>
+    For any section Entitled "Acknowledgements" or "Dedications", Preserve the
+    Title of the section, and preserve in the section all the substance and
+    tone of each of the contributor acknowledgements and/or dedications given
+    therein.
+   </p></li><li class="listitem"><p>
+    Preserve all the Invariant Sections of the Document, unaltered in their
+    text and in their titles. Section numbers or the equivalent are not
+    considered part of the section titles.
+   </p></li><li class="listitem"><p>
+    Delete any section Entitled "Endorsements". Such a section may not be
+    included in the Modified Version.
+   </p></li><li class="listitem"><p>
+    Do not retitle any existing section to be Entitled "Endorsements" or to
+    conflict in title with any Invariant Section.
+   </p></li><li class="listitem"><p>
+    Preserve any Warranty Disclaimers.
+   </p></li></ol></div><p>
+  If the Modified Version includes new front-matter sections or appendices that
+  qualify as Secondary Sections and contain no material copied from the
+  Document, you may at your option designate some or all of these sections as
+  invariant. To do this, add their titles to the list of Invariant Sections in
+  the Modified Version's license notice. These titles must be distinct from any
+  other section titles.
+ </p><p>
+  You may add a section Entitled "Endorsements", provided it contains nothing
+  but endorsements of your Modified Version by various parties--for example,
+  statements of peer review or that the text has been approved by an
+  organization as the authoritative definition of a standard.
+ </p><p>
+  You may add a passage of up to five words as a Front-Cover Text, and a
+  passage of up to 25 words as a Back-Cover Text, to the end of the list of
+  Cover Texts in the Modified Version. Only one passage of Front-Cover Text and
+  one of Back-Cover Text may be added by (or through arrangements made by) any
+  one entity. If the Document already includes a cover text for the same cover,
+  previously added by you or by arrangement made by the same entity you are
+  acting on behalf of, you may not add another; but you may replace the old
+  one, on explicit permission from the previous publisher that added the old
+  one.
+ </p><p>
+  The author(s) and publisher(s) of the Document do not by this License give
+  permission to use their names for publicity for or to assert or imply
+  endorsement of any Modified Version.
+ </p><h5><a id="id1343"></a> 5. COMBINING DOCUMENTS </h5><p>
+  You may combine the Document with other documents released under this
+  License, under the terms defined in section 4 above for modified versions,
+  provided that you include in the combination all of the Invariant Sections of
+  all of the original documents, unmodified, and list them all as Invariant
+  Sections of your combined work in its license notice, and that you preserve
+  all their Warranty Disclaimers.
+ </p><p>
+  The combined work need only contain one copy of this License, and multiple
+  identical Invariant Sections may be replaced with a single copy. If there are
+  multiple Invariant Sections with the same name but different contents, make
+  the title of each such section unique by adding at the end of it, in
+  parentheses, the name of the original author or publisher of that section if
+  known, or else a unique number. Make the same adjustment to the section
+  titles in the list of Invariant Sections in the license notice of the
+  combined work.
+ </p><p>
+  In the combination, you must combine any sections Entitled "History" in the
+  various original documents, forming one section Entitled "History"; likewise
+  combine any sections Entitled "Acknowledgements", and any sections Entitled
+  "Dedications". You must delete all sections Entitled "Endorsements".
+ </p><h5><a id="id1344"></a> 6. COLLECTIONS OF DOCUMENTS </h5><p>
+  You may make a collection consisting of the Document and other documents
+  released under this License, and replace the individual copies of this
+  License in the various documents with a single copy that is included in the
+  collection, provided that you follow the rules of this License for verbatim
+  copying of each of the documents in all other respects.
+ </p><p>
+  You may extract a single document from such a collection, and distribute it
+  individually under this License, provided you insert a copy of this License
+  into the extracted document, and follow this License in all other respects
+  regarding verbatim copying of that document.
+ </p><h5><a id="id1345"></a> 7. AGGREGATION WITH INDEPENDENT WORKS </h5><p>
+  A compilation of the Document or its derivatives with other separate and
+  independent documents or works, in or on a volume of a storage or
+  distribution medium, is called an "aggregate" if the copyright resulting from
+  the compilation is not used to limit the legal rights of the compilation's
+  users beyond what the individual works permit. When the Document is included
+  in an aggregate, this License does not apply to the other works in the
+  aggregate which are not themselves derivative works of the Document.
+ </p><p>
+  If the Cover Text requirement of section 3 is applicable to these copies of
+  the Document, then if the Document is less than one half of the entire
+  aggregate, the Document's Cover Texts may be placed on covers that bracket
+  the Document within the aggregate, or the electronic equivalent of covers if
+  the Document is in electronic form. Otherwise they must appear on printed
+  covers that bracket the whole aggregate.
+ </p><h5><a id="id1346"></a> 8. TRANSLATION </h5><p>
+  Translation is considered a kind of modification, so you may distribute
+  translations of the Document under the terms of section 4. Replacing
+  Invariant Sections with translations requires special permission from their
+  copyright holders, but you may include translations of some or all Invariant
+  Sections in addition to the original versions of these Invariant Sections.
+  You may include a translation of this License, and all the license notices in
+  the Document, and any Warranty Disclaimers, provided that you also include
+  the original English version of this License and the original versions of
+  those notices and disclaimers. In case of a disagreement between the
+  translation and the original version of this License or a notice or
+  disclaimer, the original version will prevail.
+ </p><p>
+  If a section in the Document is Entitled "Acknowledgements", "Dedications",
+  or "History", the requirement (section 4) to Preserve its Title (section 1)
+  will typically require changing the actual title.
+ </p><h5><a id="id1347"></a> 9. TERMINATION </h5><p>
+  You may not copy, modify, sublicense, or distribute the Document except as
+  expressly provided for under this License. Any other attempt to copy, modify,
+  sublicense or distribute the Document is void, and will automatically
+  terminate your rights under this License. However, parties who have received
+  copies, or rights, from you under this License will not have their licenses
+  terminated so long as such parties remain in full compliance.
+ </p><h5><a id="id1348"></a> 10. FUTURE REVISIONS OF THIS LICENSE </h5><p>
+  The Free Software Foundation may publish new, revised versions of the GNU
+  Free Documentation License from time to time. Such new versions will be
+  similar in spirit to the present version, but may differ in detail to address
+  new problems or concerns. See
+  <a class="link" href="http://www.gnu.org/copyleft/" target="_top">http://www.gnu.org/copyleft/</a>.
+ </p><p>
+  Each version of the License is given a distinguishing version number. If the
+  Document specifies that a particular numbered version of this License "or any
+  later version" applies to it, you have the option of following the terms and
+  conditions either of that specified version or of any later version that has
+  been published (not as a draft) by the Free Software Foundation. If the
+  Document does not specify a version number of this License, you may choose
+  any version ever published (not as a draft) by the Free Software Foundation.
+ </p><h5><a id="id1349"></a> ADDENDUM: How to use this License for your
+  documents </h5><pre class="screen">Copyright (c) YEAR YOUR NAME.
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.2
+or any later version published by the Free Software Foundation;
+with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
+A copy of the license is included in the section entitled "GNU
+ Free Documentation License".</pre><p>
+  If you have Invariant Sections, Front-Cover Texts and Back-Cover Texts,
+  replace the "with...Texts". line with this:
+ </p><pre class="screen">with the Invariant Sections being LIST THEIR TITLES, with the
+Front-Cover Texts being LIST, and with the Back-Cover Texts being LIST.</pre><p>
+  If you have Invariant Sections without Cover Texts, or some other combination
+  of the three, merge those two alternatives to suit the situation.
+ </p><p>
+  If your document contains nontrivial examples of program code, we recommend
+  releasing these examples in parallel under your choice of free software
+  license, such as the GNU General Public License, to permit their use in free
+  software.
+ </p></div></div></body></html>

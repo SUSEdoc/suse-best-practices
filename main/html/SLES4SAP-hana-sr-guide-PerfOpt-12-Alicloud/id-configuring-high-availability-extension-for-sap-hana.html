@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Configuring High Availability Extension for SAP HANA</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="SAP HANA High Availability Cross-Zone Solution on Alibaba Cloud" /><link rel="up" href="index.html" title="SAP HANA High Availability Cross-Zone Solution on Alibaba Cloud" /><link rel="prev" href="id-configuring-sap-hana-system-replication.html" title="Configuring SAP HANA System Replication" /><link rel="next" href="id-example.html" title="Example" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Configuring High Availability Extension for SAP HANA</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="id-configuring-sap-hana-system-replication.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="id-example.html">Next</a></td></tr></table><hr /></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id-configuring-high-availability-extension-for-sap-hana"></a>Configuring High Availability Extension for SAP HANA</h2></div></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="id-configuration-of-corosync"></a>Configuration of Corosync</h3></div></div></div><p>It is recommended that you add more redundancy for messaging (Heartbeat) by using separate ENIs attached to the ECS instances with a separate network range.</p><p>On Alibaba Cloud, it is strongly suggested to only use Unicast for the transport setting in Corosync.</p><p>Follow the steps below to configure Corosync:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Create Keys</p></li></ul></div><p>Run <code class="literal">corosync-keygen</code> on the Primary SAP HANA node. The generated key will be located in the file: <span class="emphasis"><em>/etc/corosync/authkey</em></span>.</p><p>In the example at hand, the command is executed on <span class="emphasis"><em>hana1</em></span>:</p><div class="informalfigure"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/Alicloud_authKey1.png" width="100%" alt="authKey" /></td></tr></table></div></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Configure <span class="emphasis"><em>/etc/corosync/corosync.conf</em></span> as root on the Primary SAP HANA node with the following content:</p></li></ul></div><pre class="screen">totem {
+        version: 2
+        token: 5000
+        token_retransmits_before_loss_const: 6
+        secauth: on
+        crypto_hash: sha1
+        crypto_cipher: aes256
+        clear_node_high_bit: yes
+        interface {
+            ringnumber: 0
+            bindnetaddr: **IP-address-for-heart-beating-for-the-current-server**
+            mcastport: 5405
+            ttl: 1
+        }
+        # On Alibaba Cloud, transport should be set to udpu, means: unicast
+        transport: udpu
+}
+logging {
+      fileline: off
+      to_logfile: yes
+      to_syslog: yes
+      logfile: /var/log/cluster/corosync.log
+      debug: off
+      timestamp: on
+      logger_subsys {
+          subsys: QUORUM
+          debug: off
+      }
+}
+nodelist {
+    node {
+        ring0_addr: **ip-node-1**
+        nodeid: 1
+    }
+    node {
+        ring0_addr: **ip-node-2**
+        nodeid: 2
+    }
+}
+quorum {
+    # Enable and configure quorum subsystem (default: off)
+    # see also corosync.conf.5 and votequorum.5
+    provider: corosync_votequorum
+    expected_votes: 2
+    two_node: 1
+}</pre><p><span class="strong"><strong>IP-address-for-heart-beating-for-the-current-server</strong></span> should be replaced by the IP address of the current server, used for messaging (heartbeat) or SAP HANA System Replication. In the example at hand, the IP address of ENI of the current node (192.168.0.83 for hana0 and 192.168.1.246 for hana1) is used.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>This value will be different on Primary and Secondary node.
+The <span class="strong"><strong>nodelist</strong></span> directive is used to list all nodes in the cluster.</p></div><p><span class="strong"><strong>ip-node-1</strong></span> and <span class="strong"><strong>ip-node-2</strong></span> should be replaced by the IP addresses of the ENIs attached to ECS instances for Heartbeat purpose or HANA System Replication purpose. In the example at hand, it should be 192.168.0.83 for <span class="emphasis"><em>hana0</em></span> and 192.168.1.246 for <span class="emphasis"><em>hana1</em></span>.</p><p>After completing the editing of <span class="emphasis"><em>/etc/corosync/corosync.conf</em></span> on the Primary HANA node, copy the files <span class="emphasis"><em>/etc/corosync/authkey</em></span> and <span class="emphasis"><em>/etc/corosync/corosync.conf</em></span> to <span class="emphasis"><em>/etc/corosync</em></span> on the Secondary SAP HANA node with the following command:</p><pre class="screen">scp /etc/corosync/authkey root@**hostnameOfSecondaryNode**:/etc/corosync</pre><p>In the example at hand, the following command is executed:</p><div class="informalfigure"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/Alicloud_image069.png" width="100%" alt="scpkey1" /></td></tr></table></div></div><p>After you have copied the <span class="emphasis"><em>corosync.conf</em></span> to the Secondary node, configure the <span class="strong"><strong>bindnetaddr</strong></span> as above to the local heart beating IP address.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="id-configuration-of-pacemaker"></a>Configuration of Pacemaker</h3></div></div></div><p>For the SAP HANA High Availability solution, you need to configure seven resources and the corresponding constraints in Pacemaker.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>The following Pacemaker configuration only needs to be done on one node. It is usually done on the Primary node.</p></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a id="id-cluster-bootstrap-and-more"></a>Cluster Bootstrap and More</h4></div></div></div><p>Add the configuration of the bootstrap and default setting of the resource and operations to the cluster.  Save the following scripts in a file: <span class="emphasis"><em>crm-bs.txt</em></span>.</p><pre class="screen">property $id='cib-bootstrap-options' \
+              stonith-enabled="true" \
+              stonith-action="off" \
+              stonith-timeout="150s"
+rsc_defaults $id="rsc-options" \
+              resource-stickness="1000"    \
+              migration-threshold="5000"
+op_defaults $id="op-options" \
+              timeout="600"</pre><p>Execute the command below to add the setting to the cluster:</p><pre class="screen">crm configure load update crm-bs.txt</pre></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a id="id-stonith-device"></a>STONITH Device</h4></div></div></div><p>This part defines the Aliyun STONITH devices in the cluster.</p><p>Save the following scripts in a file for <span class="strong"><strong>SLES12 SP2 and older releases</strong></span>: <span class="emphasis"><em>crm-stonith.txt</em></span>.</p><pre class="screen">primitive res_ALIYUN_STONITH_1 stonith:fence_aliyun \
+			op monitor interval=120 timeout=60 \
+        	params pcmk_host_list=&lt;primary node hostname&gt; port=&lt;primary node instance id&gt;  \
+        	access_key=&lt;access key&gt; secret_key=&lt;secret key&gt; \
+        	region=&lt;region&gt; \
+        	meta target-role=Started
+primitive res_ALIYUN_STONITH_2 stonith:fence_aliyun \
+        	op monitor interval=120 timeout=60 \
+			params pcmk_host_list=&lt;secondary node hostname&gt; port=&lt;secondary node instance id&gt; \
+        	access_key=&lt;access key&gt; secret_key=&lt;secret key&gt; \
+        	region=&lt;region&gt; \
+        	meta target-role=Started
+			location loc_&lt;primary node hostname&gt;_stonith_not_on_&lt;primary node hostname&gt; res_ALIYUN_STONITH_1 -inf: &lt;primary node hostname&gt;
+			#Stonith 1 should not run on primary node because it is controlling primary node
+			location loc_&lt;secondary node hostname&gt;_stonith_not_on_&lt;secondary node hostname&gt; res_ALIYUN_STONITH_2 -inf: &lt;secondary node hostname&gt;
+			#Stonith 2 should not run on secondary node because it is controlling secondary node</pre><p>Save the following scripts in a file for <span class="strong"><strong>SLES12 SP3 and newer releases</strong></span>: <span class="emphasis"><em>crm-stonith.txt</em></span>.</p><pre class="screen">primitive res_ALIYUN_STONITH_1 stonith:fence_aliyun \
+			op monitor interval=120 timeout=60 \
+        	params plug=&lt;primary node instance id&gt;  \
+        	access_key=&lt;access key&gt; secret_key=&lt;secret key&gt; \
+        	region=&lt;region&gt; \
+        	meta target-role=Started
+primitive res_ALIYUN_STONITH_2 stonith:fence_aliyun \
+        		op monitor interval=120 timeout=60 \
+		params plug=&lt;secondary node instance id&gt; \
+        	access_key=&lt;access key&gt; secret_key=&lt;secret key&gt; \
+        	region=&lt;region&gt; \
+        	meta target-role=Started
+			location loc_&lt;primary node hostname&gt;_stonith_not_on_&lt;primary node hostname&gt; res_ALIYUN_STONITH_1 -inf: &lt;primary node hostname&gt;
+			#Stonith 1 should not run on primary node because it is controlling primary node
+			location loc_&lt;secondary node hostname&gt;_stonith_not_on_&lt;secondary node hostname&gt; res_ALIYUN_STONITH_2 -inf: &lt;secondary node hostname&gt;
+			#Stonith 2 should not run on secondary node because it is controlling secondary node</pre><p>Be sure to implement the following changes:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><span class="strong"><strong>[primary node hostname]</strong></span> / <span class="strong"><strong>[secondary node hostname]</strong></span> should be replaced by the real hostname of your primary and secondary hostname, in our case is hana0 and hana1.</p></li><li class="listitem"><p><span class="strong"><strong>[primary node instance id]</strong></span> / <span class="strong"><strong>[secondary node instance id]</strong></span> should be replaced by the real instance-id of your ECS instance, you can get this from the Alibaba Cloud console. For SLES 12 SP3 or newer releases, please use <span class="emphasis"><em>plug</em></span> instead of <span class="emphasis"><em>port</em></span>.</p></li><li class="listitem"><p><span class="strong"><strong>[access key]</strong></span> should be replaced with real access key.</p></li><li class="listitem"><p><span class="strong"><strong>[secret key]</strong></span> should be replaced with real secret key.</p></li><li class="listitem"><p><span class="strong"><strong>[region]</strong></span> should be replaced with real region name where the node is located.</p></li></ul></div><p>Execute the command below to add the resource to the cluster:</p><pre class="screen">crm configure load update crm-stonith.txt</pre></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a id="id-saphanatopology"></a>SAPHanaTopology</h4></div></div></div><p>This part defines an SAPHanaTopology RA, and a clone of the SAPHanaTopology on both nodes in the cluster. Save the following scripts in a file: <span class="emphasis"><em>crm-saphanatop.txt</em></span>.</p><pre class="screen">primitive rsc_SAPHanaTopology_&lt;SID&gt;_HDB&lt;instance number&gt; ocf:suse:SAPHanaTopology \
+        operations $id="rsc_SAPHanaTopology_&lt;SID&gt;_HDB&lt;instance number&gt;-operations" \
+           op monitor interval="10" timeout="600"  \
+           op start interval="0" timeout="600" \
+           op stop interval="0" timeout="300" \
+           params SID="&lt;SID&gt;" InstanceNumber="&lt;instance number&gt;"
+clone cln_SAPHanaTopology_&lt;SID&gt;_HDB&lt;instance number&gt; rsc_SAPHanaTopology_&lt;SID&gt;_HDB&lt;instance number&gt; \
+        meta clone-node-max="1" interleave="true"</pre><p>Be sure to implement the following changes:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><span class="strong"><strong>[SID]</strong></span> should be replaced by the real SAP HANA SID.</p></li><li class="listitem"><p><span class="strong"><strong>[instance number]</strong></span> should be replaced by the real SAP HANA Instance Number.</p></li></ul></div><p>Execute the command below to add the resources to the cluster:</p><pre class="screen">crm configure load update crm-saphanatop.txt</pre></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a id="id-saphana"></a>SAPHana</h4></div></div></div><p>This part defines an SAPHana RA, and a multi-state resource of SAPHana on both nodes in the cluster. Save the following scripts in a file: <span class="emphasis"><em>crm-saphana.txt</em></span>.</p><pre class="screen">primitive rsc_SAPHana_&lt;SID&gt;_HDB&lt;instance number&gt; ocf:suse:SAPHana \
+        operations $id="rsc_SAPHana_&lt;SID&gt;_HDB&lt;instance number&gt;-operations" \
+        op start interval="0" timeout="3600" \
+        op stop interval="0" timeout="3600" \
+        op promote interval="0" timeout="3600" \
+        op monitor interval="60" role="Master" timeout="700" \
+        op monitor interval="61" role="Slave" timeout="700" \
+        params SID="&lt;SID&gt;" InstanceNumber="&lt;instance number&gt;" PREFER_SITE_TAKEOVER="true" \
+        DUPLICATE_PRIMARY_TIMEOUT="7200" AUTOMATED_REGISTER="false"
+ms msl_SAPHana_&lt;SID&gt;_HDB&lt;instance number&gt; rsc_SAPHana_&lt;SID&gt;_HDB&lt;instance number&gt; \
+        meta clone-max="2" clone-node-max="1" interleave="true"</pre><p>Be sure to implement the following changes:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><span class="strong"><strong>[SID]</strong></span> should be replaced by the real SAP HANA SID.</p></li><li class="listitem"><p><span class="strong"><strong>[instance number]</strong></span> should be replaced by the real SAP HANA Instance Number.</p></li></ul></div><p>Execute the command below to add the resources to the cluster:</p><pre class="screen">crm configure load update crm-saphana.txt</pre></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a id="id-virtual-ip"></a>Virtual IP</h4></div></div></div><p>This part defines a Virtual IP RA in the cluster. Save the following scripts in a file: <span class="emphasis"><em>crm-vip.txt</em></span>.</p><pre class="screen">primitive res_vip_&lt;SID&gt;_HDB&lt;instance number&gt; ocf:aliyun:vpc-move-ip \
+			op monitor interval=60 \
+			meta target-role=Started \
+			params address=&lt;virtual_IPv4_address&gt; routing_table=&lt;route_table_ID&gt; interface=eth0</pre><p>Be sure to implement the following changes:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><span class="strong"><strong>[virtual_IP4_address]</strong></span> should be replaced by the real IP address you prefer to provide the service.</p></li><li class="listitem"><p><span class="strong"><strong>[route_table_ID]</strong></span> should be replaced by the route table ID of your VPC.</p></li><li class="listitem"><p><span class="strong"><strong>[SID]</strong></span> should be replaced by the real SAP HANA SID.</p></li><li class="listitem"><p><span class="strong"><strong>[instance number]</strong></span> should be replaced by the real SAP HANA Instance Number.</p></li></ul></div><p>Execute the command below to add the resource to the cluster:</p><pre class="screen">crm configure load update crm-vip.txt</pre></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a id="id-constraints"></a>Constraints</h4></div></div></div><p>Two constraints are organizing the correct placement of the virtual IP address for the client database access and the start order between the two resource agents SAPHana and SAPHanaTopology. Save the following scripts in a file: <span class="emphasis"><em>crm-constraint.txt</em></span>.</p><pre class="screen">colocation col_SAPHana_vip_&lt;SID&gt;_HDB&lt;instance number&gt; 2000: rsc_vip_&lt;SID&gt;_HDB&lt;instance number&gt;:started \
+        	msl_SAPHana_&lt;SID&gt;_HDB&lt;instance number&gt;:Master
+order ord_SAPHana_&lt;SID&gt;_HDB&lt;instance number&gt; Optional: cln_SAPHanaTopology_&lt;SID&gt;_HDB&lt;instance number&gt; \
+        	msl_SAPHana_&lt;SID&gt;_HDB&lt;instance number&gt;</pre><p>Be sure to implement the following changes:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><span class="strong"><strong>[SID]</strong></span> should be replaced by the real SAP HANA SID;</p></li><li class="listitem"><p><span class="strong"><strong>[instance number]</strong></span> should be replaced by the real SAP HANA Instance Number;</p></li></ul></div><p>Execute the command below to add the resource to the cluster:</p><pre class="screen">crm configure load update crm-constraint.txt</pre></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="id-check-the-cluster-status"></a>Check the Cluster Status</h3></div></div></div><p>Start the SAP HANA High Availability Cluster on both nodes:</p><pre class="screen">systemctl start Pacemaker</pre><p>Monitor the SAP HANA High Availability Cluster with the following commands:</p><pre class="screen">systemctl status pacemaker
+crm_mon –r</pre><p>In the example at hand, the result looks as follows:</p><div class="informalfigure"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="70%"><tr><td><img src="images/Alicloud_clusterStatushana0.png" width="100%" alt="clusterStatushana0" /></td></tr></table></div></div><p>Meanwhile, check if a new entry <span class="strong"><strong>[virtual_IP4_address]</strong></span> is added into the route table of the VPC.</p><p>In the example at hand, the following result is shown:</p><div class="informalfigure"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="45%"><tr><td><img src="images/Alicloud_RouteTableHana0.png" width="100%" alt="RouteTableHANA0" /></td></tr></table></div></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="id-verify-the-high-availability-takeover"></a>Verify the High Availability Takeover</h3></div></div></div><p>Shut down the primary node.</p><p>Check the status of Pacemaker as shown below:</p><div class="informalfigure"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/Alicloud_clusterStatushana2.png" width="100%" alt="clusterStatushana2" /></td></tr></table></div></div><p>Compare the entry of the route table in the VPC as shown below:</p><div class="informalfigure"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="45%"><tr><td><img src="images/Alicloud_RouteTableHana1.png" width="100%" alt="RouteTableHANA1" /></td></tr></table></div></div></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="id-configuring-sap-hana-system-replication.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="id-example.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Configuring SAP HANA System Replication </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Example</td></tr></table></div></body></html>

@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Guest VM XML Configuration</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="SUSE Best Practices for SAP HANA on KVM" /><link rel="up" href="index.html" title="SUSE Best Practices for SAP HANA on KVM" /><link rel="prev" href="sec-hypervisor.html" title="Hypervisor" /><link rel="next" href="sec-Guest-Operating-System.html" title="Guest Operating System" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Guest VM XML Configuration</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="sec-hypervisor.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="sec-Guest-Operating-System.html">Next</a></td></tr></table><hr /></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-Guest-VM-XML-Configuration"></a>Guest VM XML Configuration</h2></div></div></div><p>This section describes the modifications required to the libvirt XML definition of the
+      Guest VM. The libvirt XML may be edited using the following command:</p><pre class="screen">virsh edit &lt;Guest VM name&gt;</pre><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-create-an-initial-guest-vm-xml"></a>Create an Initial Guest VM XML</h3></div></div></div><p>Refer to section 9 <span class="quote">“<span class="quote">Guest Installation</span>”</span> of the SUSE Virtualization Guide
+          (<a class="link" href="https://documentation.suse.com/sles/12-SP4/html/SLES-all/cha-kvm-inst.html" target="_top">https://documentation.suse.com/sles/12-SP4/html/SLES-all/cha-kvm-inst.html</a>
+        ).</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-global-vcpu-configuration"></a>Global vCPU Configuration</h3></div></div></div><p>Ensure that the following XML elements are configured:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>domain XML supports <span class="quote">“<span class="quote">xmlns:qemu</span>”</span> to use qemu commands directly</p></li><li class="listitem"><p>architecture and machine type are set to match the qemu version installed on the
+            Hypervisor</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>for example <span class="quote">“<span class="quote">2.6</span>”</span> for qemu 2.6 on SUSE Linux Enterprise Server for
+                SAP Applications 12 SP2</p></li></ul></div></li><li class="listitem"><p>cpu mode is set to <span class="quote">“<span class="quote">host-passthrough</span>”</span></p></li><li class="listitem"><p>the defined qemu CPU command lines necessary for SAP HANA support are used</p></li></ul></div><p>The following XML example demonstrates how to configure this:</p><pre class="screen">&lt;domain type='kvm' xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'&gt;
+...
+    &lt;os&gt;
+       &lt;type arch='x86_64' machine='pc-i440fx-2.6'&gt;hvm&lt;/type&gt;
+    ...
+    &lt;/os&gt;
+    ...
+    &lt;cpu mode='host-passthrough'&gt;
+    ...
+    &lt;/cpu&gt;
+    ...
+    &lt;qemu:commandline&gt;
+      &lt;qemu:arg value='-cpu'/&gt;
+      &lt;qemu:arg value='host,migratable=off,+invtsc,l3-cache=on'/&gt;
+    &lt;/qemu:commandline&gt;
+&lt;/domain&gt;</pre><p><strong>Explanation of the critical <span class="quote">“<span class="quote">l3-cache</span>”</span> option: </strong>If a KVM guest has multiple vNUMA nodes it is critical that any L3 CPU cache present
+          on the host be mirrored in the KVM guest. When vCPUs share an L3 cache the Linux kernel
+          scheduler can use an optimized mechanism for enqueuing tasks on vCPUs. Without L3 cache
+          information the guest kernel will always use a more expensive mechanism that involves
+          Inter-Processor Interrupts (IPIs).</p><p><strong>Explanation of the <span class="quote">“<span class="quote">host,migratable-off,+invtsc</span>”</span> options: </strong>For best performance, SAP HANA requires the invtsc CPU feature in the KVM guest.
+          However, KVM will remove any non-migratable CPU features from the virtual CPU presented to
+          the KVM guest. This behavior can be overridden by passing the 'migratable=off' and
+          '+invtsc' values to the '-cpu' option.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-vCPU-and-vNUMA-Topology"></a>vCPU and vNUMA Topology</h3></div></div></div><p>To achieve maximum performance and be supported for use with SAP HANA the KVM
+        guest’s NUMA topology should exactly mirror the host’s NUMA topology and
+        not overcommit memory or CPU resources. This requires pinning virtual CPUs to unique
+        physical CPUs (no virtual CPUs should share the same hyperthread/ physical CPU) and
+        configuring virtual NUMA node relationships for those virtual CPUs.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Physical CPU Core</h3><p>One physical CPU core (that is 2 hyperthreads) per NUMA node should be left unused by
+          KVM guests so that IOThreads can be pinned there.</p></div><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Hypervisor Topology</h3><p>In many use cases it is advisable to map the Hyperthreading topology into the Guest VM
+          as described below since this allows SAP HANA to spread workload threads across many
+          vCPUs. However there maybe workloads which perform better without hyperthreading. In this
+          case only the first physical hyperthread from each core should be mapped into the VM. In
+          the simplified example below that would mean only mapping host processor 0-15 into the
+          VM.</p></div><p>It is important to note that KVM/QEMU uses a static hyperthread sibling CPU APIC ID
+        assignment for virtual CPUs irrespective of the actual physical CPU APIC ID values on the
+        host. For example, assuming that the first hyperthread sibling pair is CPU 0 and CPU 16 on
+        the Hypervisor host, you will need to pin that sibling pair to vCPU 0 and vCPU 1.</p><p>Below is a table of a hypothetical configuration for a <span class="quote">“<span class="quote">4-socket NUMA topology
+          with 4 cores per socket and hyperthreading</span>”</span> server to help understand the above
+        logic. In real world SAP HANA scenarios CPUs will typically have 18+ CPU cores, and will
+        therefore have far more CPUs for the Guest compared to iothreads.</p><pre class="screen">VM Guest          Physical Server    Physical Server   Physical Server
+vCPU #            Numa node #        "core id"         processor #
+emulator          0                  0                   0
+emulator          0                  0                   16
+0                 0                  1                   1
+1                 0                  1                   17
+2                 0                  2                   2
+3                 0                  2                   18
+4                 0                  3                   3
+5                 0                  3                   19
+emulpin 1         1                  0                   4
+emulpin 4         1                  0                   20
+6                 1                  1                   5
+7                 1                  1                   21
+8                 1                  2                   6
+9                 1                  2                   22
+10                1                  3                   7
+11                1                  3                   23
+iohtread 2        2                  0                   8
+iothread 5        2                  0                   24
+12                2                  1                   9
+13                2                  1                   25
+14                2                  2                   10
+15                2                  2                   26
+16                2                  3                   11
+17                2                  3                   27
+iothread 3        3                  0                   12
+iothread 6        3                  0                   28
+18                3                  1                   13
+19                3                  1                   29
+20                3                  2                   14
+21                3                  2                   30
+22                3                  3                   15
+23                3                  3                   31</pre><p>The following commands can be used to determine the CPU details on the Hypervisor host
+        (see Appendix for an <a class="xref" href="sec-examples.html#sec-lscpu-extended-example" title="Example “lscpu --extended=CPU,SOCKET,CORE” from a Lenovo x3850 x6">the section called “Example <span class="quote">“<span class="quote">lscpu --extended=CPU,SOCKET,CORE</span>”</span> from a Lenovo x3850 x6”</a> and an <a class="xref" href="sec-examples.html#sec-example-lstopo" title="Example “lstopo-no-graphics” from a Lenovo x3850 x6">the section called “Example <span class="quote">“<span class="quote">lstopo-no-graphics</span>”</span> from a Lenovo x3850 x6”</a>):</p><pre class="screen">lscpu --extended=CPU,SOCKET,CORE
+
+lstopo-no-graphics</pre><p>Using the above information the CPU and memory pinning section of the Guest VM XML can
+        be created. Below is an example based on the hypothetical example above.</p><p>Make sure to take note of the following configuration points:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>The <span class="quote">“<span class="quote">vcpu placement</span>”</span> element lists the total number of vCPUs in the
+            Guest.</p></li><li class="listitem"><p>The <span class="quote">“<span class="quote">iothreads</span>”</span> element lists the total number of iothreads (6 in this
+            example).</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>iothreads should be pinned to the Sockets where the respective storage is
+                physically attached. This mapping can be found by looking for the
+                  <span class="quote">“<span class="quote">Block(Disk)</span>”</span> entries in output from
+                  <span class="quote">“<span class="quote">lstopo-no-graphics</span>”</span>, see Appendix <a class="xref" href="sec-examples.html#sec-example-lstopo" title="Example “lstopo-no-graphics” from a Lenovo x3850 x6">the section called “Example <span class="quote">“<span class="quote">lstopo-no-graphics</span>”</span> from a Lenovo x3850 x6”</a>.</p></li></ul></div></li><li class="listitem"><p>The <span class="quote">“<span class="quote">cputune</span>”</span> element contains the attributes describing the mappings
+            of vCPU, emulator and iothreads to physical CPUs.</p></li><li class="listitem"><p>The <span class="quote">“<span class="quote">numatune</span>”</span> element contains the attributes to describe distribution
+            of RAM across the virtual NUMA nodes (CPU sockets).</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>The <span class="quote">“<span class="quote">mode</span>”</span> attribute should be set to <span class="quote">“<span class="quote">strict</span>”</span>.</p></li><li class="listitem"><p>The appropriate number of nodes should be entered in the <span class="quote">“<span class="quote">nodeset</span>”</span>
+                and <span class="quote">“<span class="quote">memnode</span>”</span> attributes. In this example there are 4 sockets,
+                therefore nodeset=0-3 and cellid 0 to 3.</p></li></ul></div></li><li class="listitem"><p>The <span class="quote">“<span class="quote">cpu</span>”</span> element lists:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p><span class="quote">“<span class="quote">mode</span>”</span> attribute which should be set to
+                  <span class="quote">“<span class="quote">host-passthrough</span>”</span> for SAP HANA.</p></li><li class="listitem"><p><span class="quote">“<span class="quote">topology</span>”</span> attributes to describe the vCPU NUMA topology of the
+                Guest. In this example, 4 sockets, each with 3 cores (see the cpu pinning table) and
+                2 hyperthreads per core. Set <span class="quote">“<span class="quote">threads=1</span>”</span> if hyperthreading is not to be
+                used.</p></li><li class="listitem"><p>The attributes of the <span class="quote">“<span class="quote">numa</span>”</span> elements to describes which vCPU
+                number ranges belong to which NUMA node/socket. Care should be taken since these
+                number ranges are not the same as on the Hypervisor host.</p></li><li class="listitem"><p>In addition, the attributes of the "numa" elements also describe how much RAM
+                should be distributed per NUMA node. In this 4-node example enter 25% (or 1/4) of
+                the entire Guest VM Memory. Also refer to <a class="xref" href="sec-Guest-VM-XML-Configuration.html#sec-memory-backing" title="Memory Backing">the section called “Memory Backing”</a> and
+                  <a class="xref" href="sec-supported-scenarios-prerequisites.html#sec-memory-sizing" title="Memory Sizing">the section called “Memory Sizing”</a> Memory section of this paper for further
+                details.</p></li></ul></div></li></ul></div><pre class="screen">&lt;vcpu placement='static'&gt;24&lt;/vcpu&gt;
+&lt;iothreads&gt;6&lt;/iothreads&gt;
+  &lt;cputune&gt;
+    &lt;vcpupin vcpu='0' cpuset='1'/&gt;
+    &lt;vcpupin vcpu='1' cpuset='17'/&gt;
+    &lt;vcpupin vcpu='2' cpuset='2'/&gt;
+    &lt;vcpupin vcpu='3' cpuset='18'/&gt;
+    &lt;vcpupin vcpu='4' cpuset='3'/&gt;
+    &lt;vcpupin vcpu='5' cpuset='19'/&gt;
+
+    &lt;vcpupin vcpu='6' cpuset='5'/&gt;
+    &lt;vcpupin vcpu='7' cpuset='21'/&gt;
+    &lt;vcpupin vcpu='8' cpuset='6'/&gt;
+    &lt;vcpupin vcpu='9' cpuset='22'/&gt;
+    &lt;vcpupin vcpu='10' cpuset='7'/&gt;
+    &lt;vcpupin vcpu='11' cpuset='23'/&gt;
+
+    &lt;vcpupin vcpu='12' cpuset='9'/&gt;
+    &lt;vcpupin vcpu='13' cpuset='25'/&gt;
+    &lt;vcpupin vcpu='14' cpuset='10'/&gt;
+    &lt;vcpupin vcpu='15' cpuset='26'/&gt;
+    &lt;vcpupin vcpu='16' cpuset='11'/&gt;
+    &lt;vcpupin vcpu='17' cpuset='27'/&gt;
+
+    &lt;vcpupin vcpu='18' cpuset='13'/&gt;
+    &lt;vcpupin vcpu='19' cpuset='29'/&gt;
+    &lt;vcpupin vcpu='20' cpuset='14'/&gt;
+    &lt;vcpupin vcpu='21' cpuset='30'/&gt;
+    &lt;vcpupin vcpu='22' cpuset='15'/&gt;
+    &lt;vcpupin vcpu='23' cpuset='31'/&gt;
+
+    &lt;emulatorpin cpuset='0,16'/&gt;
+
+    &lt;iothreadpin iothread='1' cpuset='4'/&gt;
+    &lt;iothreadpin iothread='2' cpuset='8'/&gt;
+    &lt;iothreadpin iothread='3' cpuset='12'/&gt;
+    &lt;iothreadpin iothread='4' cpuset='20'/&gt;
+    &lt;iothreadpin iothread='5' cpuset='24'/&gt;
+    &lt;iothreadpin iothread='6' cpuset='28'/&gt;
+  &lt;/cputune&gt;
+
+  &lt;numatune&gt;
+    &lt;memory mode='strict' nodeset='0-3'/&gt;
+    &lt;memnode cellid='0' mode='strict' nodeset='0'/&gt;
+    &lt;memnode cellid='1' mode='strict' nodeset='1'/&gt;
+    &lt;memnode cellid='2' mode='strict' nodeset='2'/&gt;
+    &lt;memnode cellid='3' mode='strict' nodeset='3'/&gt;
+  &lt;/numatune&gt;
+
+  &lt;cpu mode='host-passthrough'&gt;
+    &lt;topology sockets='4' cores='3' threads='2'/&gt;
+    &lt;numa&gt;
+      &lt;cell id='0' cpus='0-5' memory='&lt;Memory per NUMA node&gt;' unit='KiB'/&gt;
+      &lt;cell id='1' cpus='6-11' memory='&lt;Memory per NUMA node&gt;' unit='KiB'/&gt;
+      &lt;cell id='2' cpus='12-17' memory='&lt;Memory per NUMA node&gt;' unit='KiB'/&gt;
+      &lt;cell id='3' cpus='18-23' memory='&lt;Memory per NUMA node&gt;' unit='KiB'/&gt;
+    &lt;/numa&gt;
+  &lt;/cpu&gt;</pre><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Memory Unit</h3><p>The memory unit can be set to GiB to ease the memory computations.</p></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-storage"></a>Storage</h3></div></div></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-storage-configuration-for-operating-system-volumes"></a>Storage Configuration for Operating System Volumes</h4></div></div></div><p>The performance of storage where the Operating System is installed is not critical for
+          the performance of SAP HANA, and therefore any KVM supported storage may be used to deploy
+          the Operating system itself.</p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-storage-configuration-for-sap-hana-volumes"></a>Storage Configuration for SAP HANA Volumes</h4></div></div></div><p>The Guest VM XML configuration must be based on the underlying storage configuration
+          on the Hypervisor, see section <a class="xref" href="sec-hypervisor.html#sec-storage-hypervisor" title="Storage Configuration on Hypervisor">the section called “Storage Configuration on Hypervisor”</a> for details and
+          adhere the following recommendations:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Follow the storage layout recommendations from the appropriate hardware
+              vendors.</p></li><li class="listitem"><p>Only use the KVM virtio <span class="quote">“<span class="quote">threads</span>”</span> driver</p></li><li class="listitem"><p>Distribute block devices evenly across all available iothreads (see <a class="xref" href="sec-Guest-VM-XML-Configuration.html#sec-IOThreads" title="IOThreads">the section called “IOThreads”</a>)</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>Avoid placing devices for SAP HANA data and log on the same iothreads.</p></li><li class="listitem"><p>Pin iothreads to the CPU sockets where the storage is attached, see section
+                    <a class="xref" href="sec-Guest-VM-XML-Configuration.html#sec-vCPU-and-vNUMA-Topology" title="vCPU and vNUMA Topology">the section called “vCPU and vNUMA Topology”</a> for details.</p></li></ul></div></li><li class="listitem"><p>Set the following virtio attributes: name='qemu' type='raw' cache='none'
+              io='threads'.</p></li><li class="listitem"><p>Use persistent device names in the Guest VM XML configuration (see example in
+                <a class="xref" href="sec-Guest-VM-XML-Configuration.html#sec-IOThreads" title="IOThreads">the section called “IOThreads”</a>).</p></li></ul></div></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-IOThreads"></a>IOThreads</h4></div></div></div><p>As described in section <a class="xref" href="sec-Guest-VM-XML-Configuration.html#sec-vCPU-and-vNUMA-Topology" title="vCPU and vNUMA Topology">the section called “vCPU and vNUMA Topology”</a>, iothreads
+          should be pinned to a set of physical CPUs which are not presented to the Guest VM
+          OS.</p><p>Below is an example (device names and bus addresses are configuration dependent) of
+          how to add the iothread options to a virtio device. Note that the iothread numbers should
+          be distributed across the respective virtio devices.</p><pre class="screen"> &lt;disk type='block' device='disk'&gt;
+    &lt;driver name='qemu' type='raw' cache='none' io='threads' iothread='1'/&gt;
+    &lt;source dev='/dev/disk/by-id/&lt;source device path&gt;'/&gt;
+    &lt;target dev='vda' bus='virtio'/&gt;
+ &lt;/disk&gt;</pre><p>For further details refer to section 12 <span class="quote">“<span class="quote">Managing Storage</span>”</span> in the SUSE
+          Virtualization Guide (<a class="link" href="https://documentation.suse.com/sles/12-SP4/html/SLES-all/cha-libvirt-storage.html" target="_top">https://documentation.suse.com/sles/12-SP4/html/SLES-all/cha-libvirt-storage.html</a>)</p></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-memory-backing"></a>Memory Backing</h3></div></div></div><p>Configure the memory size of the Guest VM in KiB and in multiples of 1 GiB
+        (because of the use of 1 GiB hugepages). The max VM size is determined by the total
+        number of 1 GiB hugepages defined on the Hypervisor OS as described in section
+        4.3.</p><pre class="screen"> &lt;memory unit='KiB'&gt;&lt;enter memory size in KiB here&gt;&lt;/memory&gt;
+ &lt;currentMemory unit='KiB'&gt;&lt;enter memory size in KiB here&gt;&lt;/currentMemory&gt;</pre><p>It is important to use 1 gigabyte hugepages for the guest VM memory backing to achieve
+        optimal performance of the KVM guest. In addition, Kernel Same Page Merging (KSM) should be
+        disabled.</p><pre class="screen"> &lt;memoryBacking&gt;
+   &lt;hugepages&gt;
+      &lt;page size='1048576' unit='KiB'/&gt;
+   &lt;/hugepages&gt;
+   &lt;nosharepages/&gt;
+ &lt;/memoryBacking&gt;</pre></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-virtio-rng"></a>Virtio Random Number Generator (RNG) Device</h3></div></div></div><p>The host /dev/random file should be passed through to QEMU as a source of entropy using
+        the virtio RNG device:</p><pre class="screen"> &lt;rng model='virtio'&gt;
+    &lt;backend model='random'&gt;/dev/random&lt;/backend&gt;
+    &lt;alias name='rng0'/&gt;
+ &lt;/rng&gt;</pre></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="sec-hypervisor.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="sec-Guest-Operating-System.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Hypervisor </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Guest Operating System</td></tr></table></div></body></html>

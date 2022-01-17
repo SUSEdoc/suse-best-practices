@@ -1,0 +1,1735 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Advanced Patch Lifecycle Management with SUSE Manager</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><meta name="description" content="This document describes how to set up and configure a SUSE Manager implementation to enable companies in the delivery of often requested features. Covered are the automatic creation and archive of patch sets by a defined time period, a consistent method of patch promotion and delivery through numerous landscapes and environments, and the exception process for handling patches that need to be excluded from a patch cycle. Also explained are the creation of an environment with historical patch sets, the minimal need for host channel subscription manipulation from cradle to grave, and the support for service pack migration with custom child channels. Disclaimer: Documents published as part of the SUSE Best Practices series have been contributed voluntarily by SUSE employees and third parties. They are meant to serve as examples of how particular actions can be performed. They have been compiled with utmost attention to detail. However, this does not guarantee complete accuracy. SUSE cannot verify that actions described in these documents do what is claimed or whether actions described have unintended consequences. SUSE LLC, its affiliates, the authors, and the translators may not be held liable for possible errors or the consequences thereof." /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div xml:lang="en" class="article" lang="en"><div class="titlepage"><div><div><h1 class="title"><a id="art-sbp-suma-life"></a>Advanced Patch Lifecycle Management with SUSE
+            Manager</h1></div><div><h3 class="subtitle"><em>Methods and approaches for managing updates using SUSE
+            Manager in multi-landscape environments</em></h3></div><div><div class="author"><h3 class="author"><span class="firstname">Jeff</span> <span class="surname">Price, Principal Architect, SUSE</span></h3></div></div><div><div class="abstract"><p class="title"><strong>Abstract</strong></p><p>This document describes how to set up and configure a
+                SUSE Manager implementation to enable companies in the
+                delivery of often requested features. Covered are the
+                automatic creation and archive of patch sets by a defined
+                time period, a consistent method of patch promotion and
+                delivery through numerous landscapes and environments, and
+                the exception process for handling patches that need to be
+                excluded from a patch cycle. Also explained are the
+                creation of an environment with historical patch sets, the
+                minimal need for host channel subscription manipulation
+                from cradle to grave, and the support for service pack
+                migration with custom child channels.</p><p>
+                <span class="strong"><strong>Disclaimer: </strong></span>
+                Documents published as part of the SUSE Best Practices series have been contributed voluntarily
+                by SUSE employees and third parties. They are meant to serve as examples of how particular
+                actions can be performed. They have been compiled with utmost attention to detail. However,
+                this does not guarantee complete accuracy. SUSE cannot verify that actions described in these
+                documents do what is claimed or whether actions described have unintended consequences.
+                SUSE LLC, its affiliates, the authors, and the translators may not be held liable for possible errors
+                or the consequences thereof.
+            </p></div></div></div><hr /></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="sect1"><a href="#sec-overview">Overview</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec-susesol">A SUSE Solution</a></span></dt><dt><span class="sect2"><a href="#sec-example">Example Scenario</a></span></dt><dt><span class="sect2"><a href="#sec-features">Features</a></span></dt><dt><span class="sect2"><a href="#sec-guidance">Guidance</a></span></dt></dl></dd><dt><span class="sect1"><a href="#sec-implement">Implementation</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec-arch">Architecture</a></span></dt><dt><span class="sect2"><a href="#sec-design">Automation and Process Design</a></span></dt><dt><span class="sect2"><a href="#sec-patchpromo">Patch Promotion Cycle</a></span></dt><dt><span class="sect2"><a href="#sec-exception">Exception and Escalation Channels</a></span></dt><dt><span class="sect2"><a href="#sec-components">Components</a></span></dt><dt><span class="sect2"><a href="#sec-channels">Channels</a></span></dt><dt><span class="sect2"><a href="#sec-actkeys">Activation Keys / Bootstraps</a></span></dt><dt><span class="sect2"><a href="#sec-scripts">Scripts</a></span></dt><dt><span class="sect2"><a href="#sec-crontab">Crontab Entries / Automation</a></span></dt></dl></dd><dt><span class="sect1"><a href="#sec-usage">Usage Workflows</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec-exprocesswf">Example Process Workflows</a></span></dt></dl></dd><dt><span class="sect1"><a href="#sec-appendix">Appendix</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec-spacewalksample">Spacewalk-Clone-By-Date Configuration File
+                Sample</a></span></dt><dt><span class="sect2"><a href="#sec-samplepatch">Sample Patch/Package Merge Script Using Python</a></span></dt><dt><span class="sect2"><a href="#sec-samblecontab">Sample Crontab Entries for Automation of Archive Channel
+                Creation</a></span></dt><dt><span class="sect2"><a href="#sec-samplechancreation">Sample Archive Channel Creation Script for SUSE Manager 2.1 and 3.0</a></span></dt><dt><span class="sect2"><a href="#sec-samplechancreation-update">Sample Archive Channel Creation Script for SUSE Manager 3.1 and 3.2</a></span></dt><dt><span class="sect2"><a href="#sec-samplechansources">Sample Archive Channel Sources List File</a></span></dt><dt><span class="sect2"><a href="#sec-spacemdauthent">Spacecmd Automatic Authentication</a></span></dt></dl></dd><dt><span class="sect1"><a href="#id1337">Legal notice</a></span></dt><dt><span class="sect1"><a href="#id1338">GNU Free Documentation License</a></span></dt></dl></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-overview"></a>Overview</h2></div></div></div><p>For many organizations today, keeping systems patched and
+            secure is one of the biggest ongoing challenges that systems
+            administrators can face. Both proprietary and open source
+            software companies are constantly at work providing updates
+            that fix flaws discovered in their software products.</p><p>Adding to the pressures are the requirements imposed by
+            compliance initiatives like PCI-DSS (Payment Card Industry Data
+            Security Standard), SOX (Sarbanes-Oxley), HIPAA (Health
+            Insurance Portability and Accountability Act), FIPS 140
+            (Federal Information Processing Standard), etc. Included in
+            most of these <span class="quote">“<span class="quote">standards</span>”</span> are rules that dictate
+            the frequency or time frames for patching and often these
+            schedules are modified because of the severity level of a
+            specific patch.</p><p>Businesses large and small are depending on an ever-changing
+            landscape of applications on a wide range of computer
+            infrastructure. These can include physical and virtual hosts
+            and may have complicated application stacks. These applications
+            may have specific kernel version dependencies, have strict
+            uptime requirements or be tied to a specific run time
+            environment (like Java). They may only be certified on a
+            specific Linux OS release, or have a particular set of
+            configuration requirements. There might be extra hardening or
+            platform requirements that set these hosts apart from the
+            rest.</p><p>Additionally, many companies have created duplicate host
+            environments like <span class="quote">“<span class="quote">development</span>”</span> or
+                <span class="quote">“<span class="quote">QA</span>”</span> landscapes that mirror
+                <span class="quote">“<span class="quote">production</span>”</span> to allow for testing or
+            validation of changes. This means at least one more complete
+            set of hosts to manage, patch, and report on. This increases
+            the challenges of meeting a rigorous patch schedule that often
+            requires patching all hosts on a quarterly basis (or more
+            frequently for critical vulnerabilities).</p><p>Is there any way to address all of the issues and regain
+            control of a complicated enterprise Linux environment?</p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-susesol"></a>A SUSE Solution</h3></div></div></div><p>SUSE Manager delivers best-in-class Linux server
+                management features like automated software management,
+                system provisioning, and monitoring. It provides a unified
+                Linux management infrastructure by standardizing and
+                automating server patching and management. These tasks can
+                be performed faster and with fewer errors, which improves
+                IT staff productivity while reducing server
+                downtime.</p><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-defin"></a>Definitions</h4></div></div></div><p>This document uses the word <span class="strong"><strong>landscape</strong></span> to describe one of several
+                    groups of Linux hosts. This is commonly used with
+                    enterprise software deployments as a way to define the
+                    role/quality of a host. Examples include production
+                    (PROD), development (DEV), quality assurance (QA), user
+                    acceptance/testing (UAT), etc.</p><p>The word <span class="strong"><strong>environment</strong></span> is also used. In this
+                    document, environment is defined as a physical
+                    separation of Linux hosts, like Corporate (CORP), Store
+                    (STORE), or NPE (Non-Production Environment).</p><p>Lastly, the word <span class="strong"><strong>organization</strong></span> is used. SUSE Manager has
+                    a concept of organizations and defines them as a
+                    separate management environment placed under the
+                    default organization that is created during initial
+                    installation of a SUSE Manager Server. This is a single
+                    parent (like an LDAP <span class="quote">“<span class="quote">O</span>”</span>) with many child
+                    placements (like an LDAP <span class="quote">“<span class="quote">OU</span>”</span>–restricted
+                    to a flat OU structure with no nesting). Organizations
+                    in SUSE Manager will typically have separate
+                    credentials required to administer them via the Web
+                    UI–and any Linux hosts managed by SUSE Manager will be
+                    registered into a single organization and only visible
+                    there. Keep these definitions in mind as you
+                    read.</p></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-example"></a>Example Scenario</h3></div></div></div><p>The Chameleon Corporation is the world’s largest reptile
+                and amphibian pet store, and has its headquarters in Yemen.
+                It has more than 1500 stores operating under the names
+                LizardsRUs, UnVeiledInc and Chameleo-rama in five different
+                countries.</p><p>The Chameleon Corporation has the following requirements
+                for managing patch and security updates to their Linux
+                hosts. Because of compliance constraints, their patch
+                lifecycle (the timing and delivery) is based on their
+                corporate security policies, the host
+                environments/landscapes, and their future management
+                needs.</p><p>Here is a high-level summary of the requirements:</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>The published Security Policy states the need to
+                        patch all Linux systems with the latest available
+                        updates, bug fixes, and enhancements on a quarterly
+                        basis. The quarters are defined as Q1: January
+                            1<sup>st</sup> through March
+                            31<sup>st</sup>, Q2: April
+                            1<sup>st</sup> through June
+                            30<sup>th</sup>, Q3: July
+                            1<sup>st</sup> through
+                        September 30<sup>th</sup>, and Q4:
+                        October 1<sup>st</sup> through
+                        December 31<sup>st</sup>.</p></li><li class="listitem"><p>The published Security Policy also states the
+                        need to patch all Linux systems with
+                            <span class="quote">“<span class="quote">critical</span>”</span> security updates (CVSS
+                        score of 7 or greater) within one month of release
+                        of the patch. This introduces a second schedule
+                        that may overlap any existing patch roll out.</p></li><li class="listitem"><p>The company has three different host
+                        environments: Corporate, Store, and NPE. These host
+                        environments are partitioned using SUSE Manager
+                        organizations. Each SUSE Manager organization has
+                        visibility into the default SUSE Manager
+                        organization’s software channels because of trusts,
+                        yet the managed hosts are naturally grouped and
+                        managed by their environment.</p></li><li class="listitem"><p>There are at least three landscapes in each
+                        environment: DEV, UAT, and PROD. There are
+                        additional landscapes for some environments (for
+                        example, SIT, DIT, etc.) but these are handled
+                        similarly to the aforementioned landscapes. Patch
+                        lifecycle promotion simply accounts for moving
+                        patches into additional stages as needed.</p></li><li class="listitem"><p>A <span class="quote">“<span class="quote">patch exceptions</span>”</span> process exists,
+                        as there is often a need to account for the removal
+                        of patches (for example kernel updates) from a
+                        rollout. Some hosts might have hardware drivers or
+                        third party software that depends on specific
+                        kernel versions. This exception process would be
+                        handled on a case-by-case basis.</p></li></ol></div><p>In summary, these requirements highlight the need for two
+                patch schedules, across three (or more) landscapes, in
+                three SUSE Manager organizations, with a way to handle a
+                storage location for patches that cannot be rolled out
+                (exceptions), yet need to be tracked, re-mediated and
+                reintroduced to ensure compliance.</p><p>SUSE Manager can handle these complexities very well and
+                can be set up to allow flexible delivery of these
+                requirements. Automation can even be applied to assist with
+                some facets, and procedures can be developed to ensure the
+                consistent delivery of patches that meet the published
+                company policies.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-features"></a>Features</h3></div></div></div><p>This document describes how to set up and configure a
+                SUSE Manager implementation to enable companies to deliver
+                these often requested features:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Automatic creation and archive of patch sets by
+                        quarter (or any other time period)</p></li><li class="listitem"><p>A consistent method of patch promotion and
+                        delivery through numerous landscapes and
+                        environments</p></li><li class="listitem"><p>An exception process for handling patches that
+                        need to be excluded from a patch cycle</p></li><li class="listitem"><p>Environment creation with historical patch
+                        sets</p></li><li class="listitem"><p>Minimal need for host channel subscription
+                        manipulation from cradle to grave</p></li><li class="listitem"><p>Support for service pack migration with custom
+                        child channels</p></li></ul></div><p>Many of these features can be tuned to meet a change in
+                requirements, like an increase in, or a reduction of, the
+                number of landscapes (DEV and PROD or Sandbox, DEV, QA,
+                UAT, PRE-PROD, PROD, etc.), or a more, or less frequent
+                delivery calendar. Keep this in mind as you read. SUSE
+                Manager is a very flexible product that has helped many
+                customers create and deploy solid systems and patch
+                management frameworks. Your requirements may differ from
+                the ones described here, but the flexibility of SUSE
+                Manager enables you to meet your ongoing and changing
+                needs.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-guidance"></a>Guidance</h3></div></div></div><p>This guide is based on SUSE Manager 2.1, but can also be
+                used with SUSE Manager 3.0. The document will not highlight
+                any Salt minion specifics nor should this matter change how
+                channel organizations and patch manipulation are handled
+                here.</p><p>A fresh installation is not necessary, but some
+                assumption is made that you have a working SUSE Manager
+                environment, with some registered hosts, and a decent
+                knowledge of the terms and capabilities. The SUSE Manager
+                documentation at <a class="link" href="https://documentation.suse.com/suma/3.2/" target="_top">https://documentation.suse.com/suma/3.2/</a> is an excellent source of information that is often
+                updated. Refer to the documentation for clarification of
+                any process that seems confusing. Many of the
+                implementation steps detailed in this document are enhanced
+                examples based on procedures, capabilities, or step-by-step
+                    <span class="quote">“<span class="quote">how-tos</span>”</span> in our product
+                documentation.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Test Your Implementation</h3><p>Some advanced features (like using the
+                        <span class="command"><strong>spacecmd</strong></span> or the XMLRPC API) will
+                    be explained in more detail, but these explanations may
+                    not be exhaustive. We will include some code examples
+                    in the Appendix that can be used as-is, or modified to
+                    suit your particular environments or needs. However,
+                    these come with <span class="strong"><strong>no
+                        warranty</strong></span>, and should not be expected to
+                    be perfect for any implementation. <span class="strong"><strong>Always test</strong></span> your
+                    particular implementation before any production
+                    usage.</p></div><p>The next section will describe the setup of SUSE Manager
+                to meet the requirements defined in the <span class="strong"><strong>Scenario</strong></span> section. We will
+                start with a description of the architecture (and
+                components) developed to meet the requirements, and then
+                proceed with steps to create it yourself. Each component
+                within this guide is used together with the others to
+                deliver a comprehensive solution in the specific scenario
+                described herein, but might be used individually to help
+                you meet your own solution requirements.</p></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-implement"></a>Implementation</h2></div></div></div><p>Let’s review. We need to set up SUSE Manager and create a set
+            of procedures, processes, and/or tools (scripts) to help us
+            with our patch lifecycle management. This will include the
+            creation (and optimally an <span class="quote">“<span class="quote">automatic</span>”</span> creation)
+            of patch archive channels from the SUSE provided
+                <span class="quote">“<span class="quote">updates</span>”</span> channels for the versions of SUSE
+            Linux Enterprise Server we use. These patch archives will be
+            the sources for our patch promotions, but can also be a source
+            to set up testing environments based on a patch set rolled out
+            in the past. This could be used to troubleshoot an error
+            condition for example, by creating a lab full of hosts patched
+            up to any previous patch set. We can also demonstrate and
+            visualize a clear view of compliance defined by a time-stamped
+            set of patches.</p><p>We also need to create a set of software channels that will
+            get our updates when <span class="strong"><strong>we</strong></span>
+            decide to roll them out. Each landscape needs to receive them
+            from the previous <span class="quote">“<span class="quote">validated</span>”</span> landscape <span class="strong"><strong>only</strong></span>. This means they will first
+            get put into DEV, and are tested on the machines there. Then
+            they move into QA and get tested there. Finally they get moved
+            into PROD. The whole thing will start over every quarter, and
+            we will handle exceptions if and when they occur. Every
+            exception will be tracked by another established process with
+            the constant goal of re-mediating any exception and making sure
+            the patch is reintroduced as quickly as possible to ensure our
+            clear view of compliance.</p><p>Other interruptions to a quarterly roll out might be the
+            release of a <span class="quote">“<span class="quote">critical</span>”</span> security patch that needs
+            to be deployed more rapidly than once-a-quarter. To handle this
+            extra schedule, we should create an addition channel for any
+            critical patches to track them and their roll out. Patches that
+            should be considered as critical patches are any CVE that has a
+            CVSS score of 7.1 or greater, or otherwise that is mandated by
+            our corporate security organization. We have two different SUSE
+            Linux Enterprise Server versions that we currently manage: SUSE
+            Linux Enterprise Server 11 SP3 and SUSE Linux Enterprise Server
+            12. We want to plan for using SUSE Manager to assist with
+            service pack migrations, so setting up to account for SUSE
+            Linux Enterprise Server 11 SP4 initially would be ideal. We
+            also maintain both 32-bit and 64-bit Intel/AMD architecture
+            versions of SUSE Linux Enterprise Server 11 SP3 so we will need
+            to account for both of them.</p><p>There are two different environments we need to manage:
+            Corporate (CORP) and Store (STORE). We have created separate
+            SUSE Manager organizations to allow our systems administrators
+            an exclusive view of the hosts they are responsible for. Each
+            SUSE Manager organization has the three landscapes (DEV, QA,
+            and PROD) that they use for patch testing/promotion.</p><p>Activation keys and bootstraps should be created for each
+            SUSE Manager organization (each environment) and each landscape
+            so that hosts can be registered into their appropriate, and
+            most likely, permanent role. For example, a bootstrap script
+            will register a SUSE Linux Enterprise Server 11 SP3 (64-bit)
+            DEV host into the correct organization and will add the
+            appropriate base and child channels that should never need to
+            be manipulated again. Automation is preferred. As mentioned,
+            the use of scripts or scheduled jobs would greatly enhance the
+            solution and provide relief to the administration staff.</p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-arch"></a>Architecture</h3></div></div></div><p>Here is a high-level outline of the architecture and
+                channels:</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Use of Prefixes</h3><p>For any <span class="strong"><strong>Base</strong></span>
+                    channel listed here–this can be a clone tree of the
+                    SUSE vendor channels–as such it would include a
+                        <span class="italic">prefix-</span> in the
+                    name. This can aid the handling of service pack
+                    migrations described in the channel creation sections
+                    that follow.</p></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>SUSE Manager Organization</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>Default (Main) - 1</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: square; "><li class="listitem"><p>32-bit Archive Channels
+                                     (Public)</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Q2 - 06-30-2015 - SLES 11 SP3
+                                     Updates for i586</p></li><li class="listitem"><p>Q3 - 09-30-2015 - SLES 11 SP3
+                                     Updates for i586</p></li></ul></div></li></ul></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: square; "><li class="listitem"><p>64-bit Archive Channels
+                                     (Public)</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Q2 - 06-30-2015 - SLES 11 SP3
+                                     Updates for x86_64</p></li><li class="listitem"><p>Q3 - 09-30-2015 - SLES 11 SP3
+                                     Updates for x86_64</p></li><li class="listitem"><p>Q2 - 06-30-2015 - SLES 12
+                                     Updates for x86_64</p></li><li class="listitem"><p>Q3 - 09-30-2015 - SLES 12
+                                     Updates for x86_64</p></li></ul></div></li></ul></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: square; "><li class="listitem"><p>Clone Sets or Child Channels
+                                     within SUSE Base Channels</p></li></ul></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: square; "><li class="listitem"><p>Base : SLES 11 SP3 Pool for
+                                     i586</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>DEV - Current Patch Set - SLES
+                                     11 SP3 Updates for i586</p></li><li class="listitem"><p>QA - Current Patch Set - SLES 11
+                                     SP3 Updates for i586</p></li><li class="listitem"><p>PROD - Current Patch Set - SLES
+                                     11 SP3 Updates for i586</p></li><li class="listitem"><p>Patch Exceptions (DO NOT
+                                     SUBSCRIBE) - SLES 11 SP3 i586</p></li><li class="listitem"><p>Security ASAP Exceptions - SLES
+                                     11 SP3 i586</p></li></ul></div></li></ul></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: square; "><li class="listitem"><p>Base : SLES 11 SP3 Pool for
+                                     x86_64</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>DEV - Current Patch Set - SLES
+                                     11 SP3 Updates for x86_64</p></li><li class="listitem"><p>QA - Current Patch Set - SLES 11
+                                     SP3 Updates for x86_64</p></li><li class="listitem"><p>PROD - Current Patch Set - SLES
+                                     11 SP3 Updates for x86_64</p></li><li class="listitem"><p>Patch Exceptions (DO NOT
+                                     SUBSCRIBE) - SLES 11 SP3 x86_64</p></li><li class="listitem"><p>Security ASAP Exceptions - SLES
+                                     11 SP3 x86_64</p></li></ul></div></li></ul></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: square; "><li class="listitem"><p>Base : SLES 12 SP3 Pool for
+                                     x86_64</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>DEV - Current Patch Set - SLES
+                                     12 Updates for x86_64</p></li><li class="listitem"><p>QA - Current Patch Set - SLES 12
+                                     Updates for x86_64</p></li><li class="listitem"><p>PROD - Current Patch Set - SLES
+                                     12 Updates for x86_64</p></li><li class="listitem"><p>Patch Exceptions (DO NOT
+                                     SUBSCRIBE) - SLES 12 x86_64</p></li><li class="listitem"><p>Security ASAP Exceptions - SLES
+                                     12 x86_64</p></li></ul></div></li></ul></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: square; "><li class="listitem"><p>Patch Exceptions Channels (as
+                                     above)</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Per Base Channel - 1 channel for
+                                     each <span class="quote">“<span class="quote">Updates</span>”</span>
+                                     channel:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>Examples:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: square; "><li class="listitem"><p>Patch Exceptions (DO NOT
+                                     SUBSCRIBE) - SLES 11 SP3 i586</p></li><li class="listitem"><p>Security ASAP Exceptions - SLES
+                                     11 SP3 i586</p></li></ul></div></li></ul></div></li></ul></div></li></ul></div></li></ul></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>Corporate (CORP) - 2</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: square; "><li class="listitem"><p>Any public channel will be
+                                     visible here</p></li><li class="listitem"><p>Private channels can be shared
+                                     per organization</p></li></ul></div></li></ul></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>Store (STORE) - 3</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: square; "><li class="listitem"><p>Any public channel will be
+                                     visible here</p></li><li class="listitem"><p>Private channels can be shared
+                                     per organization</p></li></ul></div></li></ul></div></li></ul></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-design"></a>Automation and Process Design</h3></div></div></div><p>Automation will include automatic channel clone creation
+                for the Archive channels. To best suit a particular
+                company’s use cases and product usage, a combination of
+                scripts (cron and Bash) and a configuration file will be
+                used. The archive creation will be triggered by a custom
+                cron job as follows. Criteria for dates will determine the
+                exact setup. For example, a quarterly schedule could be
+                implemented based on the first or last day of a given
+                quarter. If the trigger time is the <span class="strong"><strong>end</strong></span> of a quarter, it would need to consider
+                day 30 on the 3<sup>rd</sup> and
+                    9<sup>th</sup> months of a calendar
+                (March and September), and day 31 on the
+                    6<sup>th</sup> and
+                    12<sup>th</sup> months (June and
+                December). This will require two crontab entries such as
+                (cron syntax):</p><pre class="screen">0 0 30 6,9 * /path/to/archive-create-script</pre><pre class="screen">00 0 31 3,12 * /path/to/archive-create-script</pre><p> If the trigger for the quarter is going to happen on the
+                    1<sup>st</sup> of a month, then only
+                one crontab entry would be required, for example:</p><pre class="screen">0 0 1 1,4,7,10 * /path/to/archive-create-script</pre><p>The actual <span class="quote">“<span class="quote">archive-create-script</span>”</span> will also
+                need logic in it to determine the quarter it was run and
+                formatting logic to provide the correct syntax for SUSE
+                Manager channel cloning, etc. The script should also loop
+                through each architecture and SUSE Linux Enterprise Server
+                version to make a full set of archives based on the
+                company’s choices. Processes for patch promotion will be
+                created so that administrators can precisely and explicitly
+                define when a patch set is moved <span class="strong"><strong>into</strong></span> a given landscape, and just as
+                importantly, from <span class="strong"><strong>where</strong></span>.
+                The easiest method to do this is using a script that
+                leverages the XMLRPC API exposed in SUSE Manager. The API
+                contains <span class="quote">“<span class="quote">softwareChannel</span>”</span> methods called
+                    <span class="quote">“<span class="quote">mergePackages</span>”</span> and
+                    <span class="quote">“<span class="quote">mergeErrata</span>”</span>. These two methods can be
+                called with a source channel and target channel to quickly
+                take content from one channel and merge the differences
+                into another.</p><p>The last process will define a workflow for removing a
+                patch from the promotion process–and making sure it is
+                stored to be tracked. These patch exceptions can later be
+                reintroduced to a patch roll out calendar as the reason for
+                the exception is re-mediated. In addition to the exception
+                process of <span class="strong"><strong>removing</strong></span> a
+                patch, there is a similar process for <span class="strong"><strong>adding</strong></span> a patch as an emergency
+                dictates.</p><p>Emergency patches will likely always be available in the
+                current SUSE Updates channels, but might not have been
+                introduced into an archive channel yet. As the quarterly
+                archive channel creation job is triggered, any available
+                patches would be part of an archive set, however at any
+                other given point in time, this might have occurred before
+                the patch was released or it may be up to three months
+                until a new archive is created that contains this recent
+                patch. A method for searching and then copying a patch into
+                a target channel will need to be created. This will handle
+                those times when a critical patch is released by SUSE but
+                your archive channel will not get a copy until the quarter
+                is up.</p><p>Copying these emergency patches into place does not
+                affect the normal deployments or creation of archive
+                channels. The next archive channel creation will also
+                contain this patch, and the use of an emergency patch
+                channel with a duplicate patch (in the case of merging the
+                same patch later) will not cause any conflicts with a
+                system that already has installed it.</p><p>Further explanation can be found below in <a class="xref" href="#sec-exception" title="Exception and Escalation Channels">the section called “Exception and Escalation Channels”</a>.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-patchpromo"></a>Patch Promotion Cycle</h3></div></div></div><p>Understanding how patches (and the packages they include)
+                are obtained from SUSE, where they go after download, and
+                how they are arranged within SUSE Manager is key to setting
+                up the Advanced Patch Lifecycle system. By default, SUSE
+                Manager arranges its channel sets by a particular version
+                and architecture of SUSE Linux Enterprise Server and its
+                extensions.</p><p>For example, a base set of channels within SUSE Manager
+                for SUSE Linux Enterprise Server 11 SP3 x86_64 includes the
+                parent or base channel called a <span class="quote">“<span class="quote">pool</span>”</span>
+                channel. This channel contains packages that are the
+                functional equivalent of the installation DVD for SUSE
+                Linux Enterprise Server 11 SP3 64-bit. Under this pool
+                channel are all of the <span class="quote">“<span class="quote">child</span>”</span> channels which
+                include a channel for the SUSE Manager Client packages,
+                called SUSE Manager Tools channel, and an updates channel
+                called, in this case, SUSE Linux Enterprise Server 11 SP3
+                Updates for x86_64.</p><p>A normal set of channels that a managed host subscribes
+                to will include at least a parent channel (pool), a SUSE
+                Manager Tools channel, and an Updates channel. In some
+                cases like SUSE Linux Enterprise Server 11 SP2, this will
+                include the SUSE Linux Enterprise Server 11 SP1 Pool, the
+                SP1 Updates channel, the SP2 Core channel, SP2 Updates, SP2
+                Extension Store, and the SP2 SUSE Manager Tools
+                channel.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Long Term Service Pack Support (LTSS)</h3><p>Because both SUSE Linux Enterprise Server SP1 and SP2
+                    are in their LTSS phase, there are no longer any
+                    non-LTSS updates being created from SUSE. This means
+                    that any SP1 or SP2 hosts a company might have will
+                    need to purchase LTSS and use the LTSS Updates channel
+                    to receive further patches and support. Visit
+                        <a class="link" href="http://www.suse.com/lifecycle" target="_top">http://www.suse.com/lifecycle</a>
+                    for more information.</p></div><p>Here is a graphic that illustrates the patch promotion
+                process:</p><div class="figure"><a id="id1604"></a><p class="title"><strong>Figure 1. Patch Promotion Process</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="90%"><tr><td><img src="images/process-flow.png" width="100%" alt="Patch Promotion Process" /></td></tr></table></div></div></div><br class="figure-break" /></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-exception"></a>Exception and Escalation Channels</h3></div></div></div><p>There might be several reasons to delay or remove a patch
+                from a deployment cycle. A patch could be causing issues
+                with the stability of a system or systems, it might not
+                have passed a testing cycle from the current or previous
+                landscape, or there could be some other reason not to
+                deploy it within a patch cycle. On the other hand, there
+                might be a reason to deploy a critical patch (one that
+                patches a security vulnerability or a debilitating bug)
+                ahead of schedule. Because of the critical nature of the patch
+                it needs to go through testing and deployment as fast as
+                possible– without waiting for the next quarterly patch
+                cycle.</p><p>To handle the periodic removal or addition of these
+                exception patches, processes should be created to track
+                them appropriately. While these exceptions are being
+                tracked, they will be copied into their own channel
+                containers for safekeeping, accounting, and
+                reporting.</p><p>These channels can be created within the Archive base
+                channel or within the cloned base channel for the version
+                of SUSE Linux Enterprise Server that corresponds to the
+                patch exception (recommended).</p><p>The process for excluding a patch will be to first
+                    <span class="strong"><strong>copy</strong></span> the patch (and
+                associated packages) into the Exception Channel, and then
+                to <span class="strong"><strong>remove</strong></span> the patch (and
+                associated packages) from the current deployment landscape.
+                Optionally it can be removed from the current quarter’s
+                archive channel but it is important to realize that the
+                patch will be included in the following quarter’s archive
+                as well. It might be tempting to remove it from the SUSE
+                Updates channel, but this can often lead to a mishandling
+                or misreporting of compliance. It is much better to track
+                and <span class="strong"><strong>resolve</strong></span> the reasons
+                for the exception in the first place. This way, the patch
+                can be reintroduced to the patch deployment workflow and
+                re-mediate any potential security issues or code flaws that
+                the patch was created to fix.</p><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-securityescal"></a>Security Escalation Channel and Process
+                    Definition</h4></div></div></div><p>The process for <span class="strong"><strong>adding</strong></span> a security patch is similar to
+                    the process of excluding one. The key difference is
+                    that the patch needs to be copied into the Security
+                    Exception Channel from either the SUSE Updates channel
+                    or the latest archive if it has been created but not
+                    used for a promotion cycle yet. Assuming that this
+                        <span class="strong"><strong>new</strong></span> critical
+                    security patch has been released in the middle of a
+                    roll out phase (you have already been promoting the
+                    current quarter’s patches and this new one comes out),
+                    it is likely that this new patch has not yet appeared
+                    in an archive.</p><p>Another assumption is the need to test this new patch
+                    by promoting it through the landscapes as any normal
+                    patch set, but if necessary it can be copied directly
+                    to any stage. Simply <span class="strong"><strong>copy</strong></span> this security patch into the
+                    initial landscape (for example DEV - Current) and
+                    follow the normal deploy-test-promote cycles to get it
+                    into production. Depending on the critical nature of
+                    the patch, the normal schedule for testing could be
+                    accelerated or in rare cases bypassed altogether
+                    assuming acceptable risk.</p></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-components"></a>Components</h3></div></div></div><p>Here is a list of things we will create to enable
+                Advanced Patch Lifecycle Management using SUSE Manager 2.1:</p><h4><a id="id1630"></a>Channels</h4><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>Archive Channels</p></li><li class="listitem"><p>Current Updates Channels</p></li><li class="listitem"><p>Exception Channels (Patch Exclude or
+                            Security-ASAP)</p></li><li class="listitem"><p>Optional SP-Migration Clone Set</p></li></ol></div><h4><a id="id1640"></a>Activation Keys / Bootstraps</h4><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>Per-Organization/Per-SLES version Activation
+                            Keys</p></li><li class="listitem"><p>Per-Org/Per-SLES version Registration
+                            Bootstrap</p></li></ol></div><h4><a id="id1646"></a>Scripts</h4><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>Archive Creation Script</p></li><li class="listitem"><p>Archive Sources List Control File</p></li><li class="listitem"><p>Merge Tool Python Script</p></li></ol></div><h4><a id="id1654"></a>Crontab Entries / Automation</h4><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>Quarterly (or other frequency) archive
+                            creation call</p></li></ol></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-channels"></a>Channels</h3></div></div></div><p>As described in the architecture section above, several
+                custom channels will be created to support the patch
+                promotion process. These channels will store the archives
+                (created as clones of the SUSE Updates channels) and they
+                will also store the exception patches. For each landscape a
+                custom channel will be created to hold patches that have
+                been promoted. These channels will contain more and more
+                content over time as patches are promoted each
+                cycle.</p><p>For example, during Quarter 1 (Q1) the archive channel
+                contains 159 patches, and these are merged into the DEV
+                updates channel for SUSE Linux Enterprise Server 11 SP4. As
+                SUSE releases patches in an ongoing fashion, when the next
+                quarter’s archive is created, Q2 for this example, it
+                contains all of the Q1 patches and an additional 130
+                patches for a total of 289. The merge function will take
+                the 130 new patches (and associated packages) and add them
+                to the DEV updates channel during the next patch
+                cycle.</p><p>Each new patch cycle updates the available patches in a
+                given landscape’s <span class="quote">“<span class="quote">current updates</span>”</span> channel.
+                In this way each subsequent patch promotion adds the new
+                updates and these can be applied to any hosts subscribed to
+                the channel.</p><p>The exception channels will be populated by managing
+                individual patches, copying them from one of the landscape
+                updates channels or from one of the archive channels. When
+                a patch is copied successfully into an exception channel,
+                it can be removed from an updates channel or an
+                archive.</p><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-creatingchan"></a>Creating the Channels</h4></div></div></div><h5><a id="id1667"></a>Archive Channels:</h5><p>Custom channels are created in SUSE Manager as
+                        <span class="quote">“<span class="quote">new</span>”</span>, blank, and empty channels, or
+                        <span class="quote">“<span class="quote">clones</span>”</span>. Technically, cloned channels
+                    can also be created as empty, but in this case we will
+                    create the archive channels with content sourced from
+                    the SUSE Updates channel, the patches, AND the packages
+                    they reference. Each archive channel will reside within
+                    an empty base channel. Base channels will be created
+                    for each processor architecture managed by SUSE
+                    Manager, for example, IA-32, x86_64, s390x, PPC, etc.
+                    Multiple archives matching the different versions of
+                    SUSE Linux Enterprise Server can exist in the base
+                    channel, but they will all be the same processor
+                    architecture.</p><p>Create the base archive channels:</p><p>For each processor architecture used by the hosts
+                    that SUSE Manager manages, create empty channels named
+                        <span class="quote">“<span class="quote">32-bit Archives Channel</span>”</span> and
+                        <span class="quote">“<span class="quote">64-bit Archives Channel</span>”</span>:</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>In the Web UI click <span class="quote">“<span class="quote">Channels</span>”</span>
+                            then the submenu <span class="quote">“<span class="quote">Manage Software
+                                Channels</span>”</span> and click <span class="quote">“<span class="quote">+Create
+                                Channel</span>”</span>.</p></li><li class="listitem"><p>The channel label <span class="strong"><strong>must be</strong></span> kept in the format of
+                                <span class="quote">“<span class="quote">architecture-patch-archives-channel</span>”</span>,
+                            for example the 64-bit channel label should
+                            read
+                                <span class="quote">“<span class="quote">x86_64-patch-archives-channel</span>”</span>. </p><div class="important" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Label the Channels</h3><p>Failing to label these channels
+                                appropriately will cause the example
+                                archive script to not work properly
+                                (without modifications). SUSE Manager is
+                                very strict about channel
+                                    <span class="quote">“<span class="quote">labels</span>”</span> consisting of
+                                lowercase letters, starting with a letter
+                                (not a number) and containing no spaces,
+                                etc.</p><p>In this example of creating a label
+                                starting with <span class="quote">“<span class="quote">x86_64</span>”</span> it is
+                                assumed a 32-bit channel might be
+                                    <span class="quote">“<span class="quote">i586</span>”</span> or similar.</p></div></li><li class="listitem"><p>These archive channels have <span class="quote">“<span class="quote">NO
+                                PARENT</span>”</span>, because they
+                                <span class="quote">“<span class="quote">ARE</span>”</span> parent channels.</p></li><li class="listitem"><p>Select the appropriate architecture for this
+                            channel: x86_64 for 64-bit, and IA-32 for
+                            32-bit, etc..</p></li><li class="listitem"><p>Select the Public radio button for these
+                            channels to ensure their visibility to all
+                            organizations.</p></li><li class="listitem"><p>Repeat for each architecture type of SUSE
+                            Linux Enterprise Server you have
+                            deployed.</p></li></ol></div><p>Create the cloned archive channels.</p><p>For each version of SUSE Linux Enterprise Server that
+                    is used, create cloned channels:</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>In the Web UI click <span class="quote">“<span class="quote">Channels</span>”</span>
+                            then the submenu <span class="quote">“<span class="quote">Manage Software
+                                Channels</span>”</span> and click <span class="quote">“<span class="quote">Clone
+                                Channel</span>”</span>.</p></li><li class="listitem"><p>Select the SUSE “Updates” channel of the SUSE
+                            Linux Enterprise Server version you want to
+                            create an archive of as the Source.</p></li><li class="listitem"><p>Make sure to select the radio button for all
+                            content/patches.</p></li><li class="listitem"><p>Name the channel appropriately with an
+                            indication of Time/Date and what the archive
+                            contains, for example, <span class="quote">“<span class="quote">Q3 - 09-30-2015 -
+                                Archive of SLES 11 SP3 for
+                            x86_64</span>”</span>.</p></li><li class="listitem"><p>Create a label using proper syntax, for
+                            example:</p><pre class="screen">q3-09-30-2015-archive-sles11sp3-x86_64</pre></li><li class="listitem"><p>Important: select the appropriate base
+                            archive channel to contain the clone.</p></li><li class="listitem"><p>Include an appropriate description of the
+                            channel in the Summary and Description
+                            fields.</p></li><li class="listitem"><p>Click <span class="quote">“<span class="quote">Create Channel</span>”</span> when
+                            finished.</p></li><li class="listitem"><p>Scroll down and select the Public radio
+                            button and then click <span class="quote">“<span class="quote">Update
+                                Channel</span>”</span>.</p></li><li class="listitem"><p>Repeat for each SUSE Linux Enterprise Server
+                            version under each architecture.</p></li></ol></div><p>Optional: Use spacewalk-clone-by-date to create
+                    archive channels from the past:</p><p>See the Appendix for an example source file that can
+                    be used with the spacewalk-clone-by-date utility. This
+                    configuration file can be used to create a clone
+                    channel with a certain date range as a filter for the
+                    content in the channel:</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>The utility is called with the following
+                            syntax:</p><pre class="screen">spacewalk-clone-by-date -c "config file"</pre></li><li class="listitem"><p>Repeat this for each archive channel with a
+                            past date, modifying the configuration files to
+                            match the appropriate dates and channel
+                            source/target names.</p></li></ol></div><div class="sect4"><div class="titlepage"><div><div><h5 class="title"><a id="sec-spmigration"></a>Service Pack Migration Support with Update and
+                        Exception Channels</h5></div></div></div><p>There are a couple of generally accepted methods
+                        to manage a set of channels that allows consistent
+                        and expected behaviors when leveraging the service
+                        pack migration feature. You can find this feature
+                        in the software tab of a particular host. It allows
+                        you to update the service pack of a particular host
+                        in a one-click fashion. When using the patch
+                        lifecycle methods described in this document, some
+                        challenges arise when using the service pack
+                        migration feature. When you select a given host to
+                        do a service pack migration, the UI proposes
+                        (dictates) a set of mandatory <span class="quote">“<span class="quote">child</span>”</span>
+                        channels that will be subscribed to for a migration
+                        action. These mandatory child channels (grayed-out
+                        in the UI) will normally include the SUSE provided
+                        update channels for a given version of SUSE Linux
+                        Enterprise Server.</p><p>See the following screenshot:</p><div class="figure"><a id="id1746"></a><p class="title"><strong>Figure 2. Service Pack Migration</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="90%"><tr><td><img src="images/screen-sp-migration.png" width="100%" alt="Service Pack Migration" /></td></tr></table></div></div></div><br class="figure-break" /><p>To allow usage of the patch lifecycle processes
+                        described here <span class="strong"><strong>and</strong></span> to use the functionality of
+                        service pack migrations, it is best to create a
+                        full clone-set of the SUSE Linux Enterprise Server
+                        product versions in use at your company. This is
+                        sometimes called a clone-tree, and can be easily
+                        created using the <span class="command"><strong>spacecmd</strong></span>
+                        command of the same name,
+                            <span class="command"><strong>softwarechannel_clonetree</strong></span>.</p><p>A full clone-tree will include the base/parent
+                        channel (normally called a pool) and all child
+                        channels that currently exist underneath it. For
+                        example, using the SUSE Linux Enterprise Server 11
+                        SP3 Pool x86_64 channel as a source, you provide
+                        your own <span class="strong"><strong>prefix</strong></span>
+                        to the clone-tree command and it will make a copy
+                        of the pool and all children adding the prefix to
+                        the beginning of all the channel names and
+                        labels.</p><p>See below for an image of the original SUSE Linux
+                        Enterprise Server 11 SP3 x86_64 channels and the
+                        cloned tree with prefix versions
+                            <span class="quote">“<span class="quote">Chameleon_Co-</span>”</span> next to it:</p><div class="figure"><a id="id1761"></a><p class="title"><strong>Figure 3. Full Software Channel List for Chameleon
+                            Corporation</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="90%"><tr><td><img src="images/screen-full-sw-channel-list.png" width="100%" alt="Full Software Channel List for Chameleon Corporation" /></td></tr></table></div></div></div><br class="figure-break" /><p>The command <span class="command"><strong>spacecmd
+                            softwarechannel_clonetree</strong></span> can be
+                        called directly by providing the source and prefix
+                        information directly–or interactively by calling
+                        the command from within the spacecmd shell
+                        itself.</p><p>Example:</p><pre class="screen">spacecmd -u &lt;SMadmin&gt; -- softwarechannel_clonetree -s sles11-sp3-pool-x86_64 -p "my_company-"</pre><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">&lt;SMadmin&gt;</h3><p>Make sure to replace &lt;SMadmin&gt; with your SUSE Manager webUI administrator user name!</p></div><p>This command creates a whole set of SUSE Linux
+                        Enterprise Server 11 SP3 x86_64 channels with a
+                        prefix of <span class="quote">“<span class="quote">my_company</span>”</span>.</p><p>Repeat this process for each version of SUSE
+                        Linux Enterprise Server, and then–when using the
+                        Service Pack migration feature–you can choose
+                            <span class="strong"><strong>your</strong></span> company
+                        version of the target version of SUSE Linux
+                        Enterprise Server, and choose the child channels
+                        appropriate for the landscape the host is in (as
+                        described below).</p><p>You can then modify the cloned updates channel by
+                        removing all patches/packages, then use the merge
+                        script process to merge your <span class="quote">“<span class="quote">Current Patch
+                            Set</span>”</span> into the mandatory updates channel.
+                        This way you can do service pack migrations, but
+                        still retain <span class="strong"><strong>your</strong></span> currently promoted patch set.
+                        Otherwise, SP migrations will always update to
+                        whatever are the latest packages in the
+                            <span class="quote">“<span class="quote">mandatory</span>”</span> updates child
+                        channel.</p><p>Consider the following screenshot that shows the
+                        Q3 patch archive for SUSE Linux Enterprise Server
+                        11 SP4 with 227 packages, the SUSE Updates channel
+                        for SP4 with 234 packages, and the Chameleon
+                        Corporation version of SP4 Updates with 0 (zero)
+                        packages:</p><div class="figure"><a id="id1784"></a><p class="title"><strong>Figure 4. Partial View of Software Channel List for
+                            SUSE and Chameleon Corporation</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="90%"><tr><td><img src="images/screen-sw-channel-list-1.png" width="100%" alt="Partial View of Software Channel List for SUSE and Chameleon Corporation" /></td></tr></table></div></div></div><br class="figure-break" /><p>In the upcoming sections we will describe the
+                        creation of custom <span class="quote">“<span class="quote">current updates</span>”</span>
+                        channels and how to use a merge script. For service
+                        pack migrations using your own set of promoted
+                        patches, merge a <span class="quote">“<span class="quote">Current</span>”</span> Patch
+                        Archive from a <span class="quote">“<span class="quote">production</span>”</span> channel
+                        into the <span class="quote">“<span class="quote">Updates</span>”</span> channel so it will
+                        be used for migration efforts–or simply leave the
+                            <span class="quote">“<span class="quote">Updates</span>”</span> channel always <span class="strong"><strong>empty</strong></span> and add your
+                        Current Updates channel to the <span class="quote">“<span class="quote">Optional
+                            Child Channels</span>”</span>” selection.</p><p>With an <span class="strong"><strong>empty</strong></span>
+                        <span class="quote">“<span class="quote">Updates</span>”</span> channel and a populated
+                            <span class="quote">“<span class="quote">Current Updates</span>”</span>, you can be
+                        assured of a service pack migration working as
+                        expected and not patching the machine to a version
+                        of packages more current than whatever is deemed
+                            <span class="quote">“<span class="quote">production</span>”</span>. The custom
+                            <span class="quote">“<span class="quote">Updates</span>”</span> channels and the merge
+                        script process will be described in detail in the
+                        coming sections.</p><h6><a id="id1805"></a><span class="quote">“<span class="quote">Current Updates</span>”</span>
+                        Channels:</h6><p>Now create the <span class="quote">“<span class="quote">Current Updates</span>”</span>
+                        channels that managed hosts will subscribe to
+                        depending on their landscape, for example,
+                            <span class="quote">“<span class="quote">DEV - Current Updates - for SLES 11 SP3
+                            x86_64</span>”</span>, or <span class="quote">“<span class="quote">PROD - Current
+                            Updates - for SLES 12 x86_64</span>”</span>. There
+                        will be a full set of landscape channels for each
+                        version of SUSE Linux Enterprise Server and they
+                        will all be empty to begin with. Create a
+                            <span class="quote">“<span class="quote">new</span>”</span> channel and then optionally
+                            <span class="quote">“<span class="quote">clone</span>”</span> that one to reduce the
+                        amount of typing needed:</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>From the <span class="quote">“<span class="quote">Manage Software
+                                    Channels</span>”</span> submenu, click
+                                    <span class="quote">“<span class="quote">+Create Channel</span>”</span>.</p></li><li class="listitem"><p>Create the channel within one of the SUSE
+                                Linux Enterprise Pool Channels or, if you
+                                have your own clone set, within that
+                                pool.</p></li><li class="listitem"><p>Modify the channel to be Public.</p></li><li class="listitem"><p>Clone this new channel (without updates)
+                                into the remaining landscapes, each as a
+                                    <span class="quote">“<span class="quote">Current Updates -</span>”</span>
+                                channel, and each with the appropriate
+                                landscape prefix (for example, <span class="quote">“<span class="quote">DEV -
+                                </span>”</span>, <span class="quote">“<span class="quote">TEST - </span>”</span>,
+                                    <span class="quote">“<span class="quote">PROD - </span>”</span>, etc.).</p></li><li class="listitem"><p>You should end up with a full set of
+                                landscapes for each SUSE Linux Enterprise
+                                Server version you are going to manage.
+                                Keep in mind for the SUSE Linux Enterprise
+                                Server 11 SP1 and SP2 channels this will
+                                result in a full set x2 (times 2)–or even
+                                x4 (times 4) with LTSS. However, SP1 and
+                                SP2 Update channels are not being updated
+                                any longer, so they could be subscribed as
+                                static channels now. (See the note about
+                                LTSS in chapter <a class="xref" href="#sec-patchpromo" title="Patch Promotion Cycle">the section called “Patch Promotion Cycle”</a>.)</p></li></ol></div><div class="figure"><a id="id1831"></a><p class="title"><strong>Figure 5. Example Screenshot of <span class="quote">“<span class="quote">Current
+                                Updates</span>”</span> Channels</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="90%"><tr><td><img src="images/screen-sw-channel-list-2.png" width="100%" alt="Example Screenshot of “Current Updates” Channels" /></td></tr></table></div></div></div><br class="figure-break" /><h6><a id="id1839"></a><span class="quote">“<span class="quote">Exception</span>”</span>
+                        Channels:</h6><p>Now create the two exception channels for each
+                        version of SUSE Linux Enterprise Server being
+                        managed. While it may be possible to create a mixed
+                        channel that is unique to the architecture (like
+                        the archive channel base), tracking which
+                        distribution a patch exception has come from can
+                        get cumbersome. If you mix patches/packages from
+                        different versions of SUSE Linux Enterprise Server,
+                        it is more difficult to track, resolve, and then
+                        reintroduce these patches back into the patch
+                        workflow. It is much easier to place them into an
+                        exceptions channel specifically for the version of
+                        SUSE Linux Enterprise Server the patch came from.
+                        Create the <span class="quote">“<span class="quote">Patch Exception</span>”</span> and
+                            <span class="quote">“<span class="quote">Security ASAP Exception</span>”</span> channels
+                        as follows:</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>From the <span class="quote">“<span class="quote">Manage Software
+                                    Channels</span>”</span> submenu, click
+                                    <span class="quote">“<span class="quote">+Create Channel</span>”</span>.</p></li><li class="listitem"><p>Create the <span class="quote">“<span class="quote">Patch Exceptions - DO
+                                    NOT SUBSCRIBE</span>”</span> channel within
+                                one of the SUSE Linux Enterprise Server
+                                pool channels or, if you have your own
+                                clone set, within that pool. This channel
+                                will reside next to your landscape
+                                channels.</p></li><li class="listitem"><p>Modify the channel to be Public.</p></li><li class="listitem"><p>Create the <span class="quote">“<span class="quote">Security ASAP
+                                    Exception</span>”</span> channel as above–it
+                                too will reside next to your landscape and
+                                patch exceptions channels.</p></li><li class="listitem"><p>For SUSE Linux Enterprise Server 11 SP1
+                                and SP2 keep in mind: they reside in the
+                                same SP1 Pool base channel, so there will
+                                be exceptions and security exceptions
+                                channels for each service pack.</p></li></ol></div><div class="figure"><a id="id1859"></a><p class="title"><strong>Figure 6. Example Screenshot of
+                                <span class="quote">“<span class="quote">Exceptions</span>”</span> Channels</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="90%"><tr><td><img src="images/screen-sw-channel-list-3.png" width="100%" alt="Example Screenshot of “Exceptions” Channels" /></td></tr></table></div></div></div><br class="figure-break" /></div></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-actkeys"></a>Activation Keys / Bootstraps</h3></div></div></div><p>Typically you will have already created a set of
+                Activation Keys assigned to a specific version of SUSE
+                Linux Enterprise Server that your hosts are installed with.
+                There may be other characteristics assigned in your keys
+                like System Groups, assorted Child Channels, Software
+                Packages, etc. You can choose to modify your existing
+                Activation Keys and reuse them, or you can create new keys
+                for this implementation. This example assumes a new
+                key.</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>Within the <span class="quote">“<span class="quote">Systems</span>”</span> menu -&gt; click
+                        the <span class="quote">“<span class="quote">Activation Keys</span>”</span> submenu from the
+                        left panel.</p></li><li class="listitem"><p>Click <span class="quote">“<span class="quote">+Create Key</span>”</span> in the upper
+                        right.</p></li><li class="listitem"><p>Create the Activation Key within this
+                        Organization (remember to log in to other
+                        Organizations to create keys there if needed).
+                        Assign the appropriate entitlements, software
+                        packages, and configuration channels as
+                        appropriate.</p></li><li class="listitem"><p>Name the Activation Key according to the
+                            <span class="strong"><strong>Landscape</strong></span>
+                        host you will register to with this key.</p><p>Example:</p><div class="figure"><a id="id1884"></a><p class="title"><strong>Figure 7. Create Activation Key Screenshot</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="90%"><tr><td><img src="images/screen-act-key-details.png" width="100%" alt="Create Activation Key Screenshot" /></td></tr></table></div></div></div><br class="figure-break" /></li><li class="listitem"><p><span class="strong"><strong>Important:</strong></span>
+                        Click on the Child Channels Tab. Now you can assign
+                        the appropriate Current Updates channel depending
+                        on which <span class="strong"><strong>Landscape</strong></span> this key is for.</p><p>Example:</p><div class="figure"><a id="id1896"></a><p class="title"><strong>Figure 8. Child Channels Screenshot</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="90%"><tr><td><img src="images/screen-child-channels.png" width="100%" alt="Child Channels Screenshot" /></td></tr></table></div></div></div><br class="figure-break" /></li><li class="listitem"><p>Select the appropriate SUSE Manager Tools channel
+                        and the other needed channels to fill out
+                        the requirements for the version of SUSE Linux
+                        Enterprise Server in question.</p></li><li class="listitem"><p>Note that the <span class="strong"><strong>Security
+                            ASAP Exceptions</strong></span> channel <span class="strong"><strong>is</strong></span> selected as an
+                        active child channel, and the <span class="strong"><strong>Patch Exceptions (DO NOT
+                            SUBSCRIBE)</strong></span> channel is <span class="strong"><strong>not</strong></span> selected. This is
+                        important, because any patch/package copied into
+                        the Patch Exceptions channel should remain
+                        invisible to hosts while patches/packages copied to
+                        the Security ASAP Exceptions channel should always
+                        be immediately visible to a host.</p></li></ol></div><p>The Activation Key is called by a bootstrap script–often
+                there is a one-to-one relationship between a registration
+                bootstrap script and an activation key. Whether new
+                activation keys were created or existing ones were modified
+                to point to the landscape specific <span class="quote">“<span class="quote">current
+                    updates</span>”</span> channels, there should be a bootstrap
+                script that calls that activation key.</p><p>All new hosts will use these bootstraps to register and
+                become managed by SUSE Manager. One of the key benefits is
+                that they should never need to change their channel
+                assignments, as the host will now be assigned to its proper
+                landscape update channels and will receive new updates as
+                they are promoted each patch cycle. We will discuss
+                promotion in the next section <a class="xref" href="#sec-scripts" title="Scripts">the section called “Scripts”</a>.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-scripts"></a>Scripts</h3></div></div></div><h4><a id="id1917"></a>Patch/Package Merge Script:</h4><p>The <span class="quote">“<span class="quote">Patch/Package Merge</span>”</span> script is used to
+                    <span class="strong"><strong>promote</strong></span> patches (and
+                relevant packages) from one channel to another. It is used
+                at first to merge content from an Archive channel into the
+                first stage (<span class="strong"><strong>landscape</strong></span>),
+                for example DEV. It is then used to promote content from
+                one stage to the next until the content reaches the final
+                stage. This process is then repeated for each version of
+                SUSE Linux Enterprise Server (like 11 SP1, SP2, etc.) and
+                each corporate environment (like STORE, CORP, etc.).</p><p>Finally, the entire process is repeated for each patch
+                calendar cycle (quarterly/monthly/etc.).</p><h4><a id="id1923"></a>Channel Archive Creation Script / Channel Archive
+                Sources List Configuration File:</h4><p>This script and its associated <span class="quote">“<span class="quote">sources
+                    list</span>”</span> configuration file are called either
+                manually or by a crontab entry. The script uses the sources
+                list file to determine which versions of SUSE Linux
+                Enterprise Server and which architectures to create
+                archives for. As previously described, the Archive channels
+                are created as point-in-time clones of the various SUSE
+                Linux Enterprise Server Updates channels.</p><p>To have the correct Archive channels created, simply add
+                lines to the sources file. Each line has three fields, the
+                first being the architecture, the second being the source
+                channel, and the third being target channel text. The
+                script parses the source list and constructs the target
+                parent channel for the archives by architecture, and then
+                constructs the target channel and label, etc.</p><p>The script calls the <span class="command"><strong>spacecmd</strong></span>
+                functions <span class="command"><strong>softwarechannel_clone</strong></span> and
+                    <span class="command"><strong>softwarechannel_setorgaccess</strong></span> for
+                each entry in the sources list. It calculates the current
+                calendar quarter, creates the archives and makes these
+                archives publicly visible. See the Appendix for the entire
+                script.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-crontab"></a>Crontab Entries / Automation</h3></div></div></div><h4><a id="id1933"></a>Schedule-based Trigger for Archive Creation Script
+                (Quarter-End)</h4><p>A decision needs to be made whether a calendar quarter is
+                going to get created (looking backward) at the end of a
+                particular month, or at the beginning of a month (one day
+                past the final day of a quarter). Since the Archive
+                channels are getting created by cloning the SUSE Updates
+                channels of a particular SLES version, the decision can
+                affect the content.</p><p>Either way is fine as it will be consistent from quarter
+                to quarter. For the purposes of explaining the cron syntax,
+                we will opt to show the more difficult of the two: how to
+                call the archive script at the end of the quarter. This is
+                more difficult simply because it requires two cron entries
+                to handle both the 30<sup>th</sup> of the
+                month (for June and September) and the
+                    31<sup>st</sup> of the month (for March
+                and December).</p><p>The crontab entries will point to the archive creation
+                script and execute in months 3, 6, 9, and 12. Here are what
+                the cron entries look like: </p><pre class="screen">0 0 30 6,9 * /path/to/the/archive/script</pre><pre class="screen">0 0 31 3,12 * /path/to/the/archive/script</pre><p>The path will point to the actual
+                archive-channel-create-script.sh (or similar). This could
+                be placed in /usr/sbin/ and must be made <span class="italic">executable</span> (chmod +x).</p><p>Also it is very important to note that this script is
+                calling <span class="command"><strong>spacecmd</strong></span> commands from within a
+                Bash shell script. Spacecmd is itself a python-based shell
+                that can be invoked–allowing the use of an extensive set of
+                commands <span class="strong"><strong>within</strong></span> the
+                shell, or from outside the shell as a mediated command
+                interpreter.</p><p>The invocation of spacecmd stores a <span class="strong"><strong>.spacecmd</strong></span> directory in the
+                invoking user`s home directory. Within the .spacecmd
+                directory is a configuration file that can store credential sets
+                that can be leveraged to avoid being prompted at
+                spacecmd execution. This can be used to store credentials
+                so the cron job will execute and not pause waiting for
+                authentication credentials to be passed.</p><p>The crontab entries will point to the archive creation
+                script and execute in months 3, 6, 9, and 12. Here are what
+                the cron entries look like:</p><p>
+                <em class="parameter"><code>[spacecmd]</code></em>
+            </p><p>
+                <em class="parameter"><code>server=localhost</code></em>
+            </p><p>
+                <em class="parameter"><code>username=admin</code></em>
+            </p><p>
+                <em class="parameter"><code>password=suse1234</code></em>
+            </p><p>
+                <em class="parameter"><code>nossl=0</code></em>
+            </p><p>Storing these credentials will allow
+                    <span class="command"><strong>spacecmd</strong></span> operations from the SUSE
+                Manager’s root user to be executed without the need to pass
+                user name or password–allowing the cron job for archive
+                creation to run without failure at the appropriate
+                time.</p></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-usage"></a>Usage Workflows</h2></div></div></div><p>This guide describes an approach to patch lifecycle
+            management that leverages SUSE Manager to deliver the following
+            benefits:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Automated creation of Patch Archive Channels:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>These channels can be created on a
+                                quarterly (or more frequent) basis and
+                                allow an organization to create test
+                                environments based on a historical set of
+                                patches (for example, the creation of a lab
+                                using available patches from two calendar
+                                quarters ago).</p></li></ul></div></li><li class="listitem"><p>Leverage a static set of <span class="quote">“<span class="quote">current</span>”</span>
+                    update channels so host subscriptions do not need to
+                    change:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>Using the API/scripts, updates can be merged
+                            from a patch <span class="quote">“<span class="quote">archive</span>”</span> into a
+                            subscribed host channel removing the need to
+                            constantly clone and re-clone channels and
+                            modify host subscriptions.</p></li><li class="listitem"><p>Multi-landscape environments can use a
+                            promotion process to merge updates through each
+                            phase during testing/validation of patch
+                            sets.</p></li></ul></div></li><li class="listitem"><p>Exception handling for patches that need to be
+                excluded from a patch roll out:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>The creation of a <span class="quote">“<span class="quote">patch
+                                    exceptions</span>”</span> channel and a
+                                process for copying patches/packages into
+                                that channel (and then removing them from
+                                an updates channel) allows for tracking of
+                                patch exceptions. This channel should be
+                                    <span class="emphasis"><em>excluded</em></span> from any
+                                hosts channel subscriptions, thereby
+                                keeping all patch/package content from
+                                being visible or available for
+                                installation.</p></li><li class="listitem"><p>Patch exceptions <span class="quote">“<span class="quote">processes</span>”</span>
+                                must be developed to track
+                                remediation of all exceptions to
+                                avoid future complications from managing an
+                                ever-growing bucket of patches.</p></li></ul></div></li><li class="listitem"><p>Security ASAP Exceptions handling for patches that
+                need to roll out with a higher priority:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>The security ASAP exception channel
+                                should always be subscribed to (unlike the
+                                    <span class="quote">“<span class="quote">patch exceptions</span>”</span>
+                                channel). Subscription to this channel
+                                allows a host to obtain patches/packages
+                                added in an ad hoc manner, for example a
+                                security patch deemed important enough to
+                                deploy outside of a normal patch schedule.
+                                This could be copied from a new archive or
+                                directly from one of the SUSE (vendor)
+                                updates channels.</p></li></ul></div></li></ul></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-exprocesswf"></a>Example Process Workflows</h3></div></div></div><p>Here are some suggested workflows for the patch promotion
+                and exception processes. Keep in mind that these can be
+                modified to fit more closely to a particular operational
+                group’s existing set of processes.</p><h4><a id="id1998"></a>Workflow 1: Patch Promotion Process</h4><p>The patch promotion process follows the following sample
+                steps.</p><div class="table"><a id="id2000"></a><p class="title"><strong>Table 1. Patch Promotion Process</strong></p><div class="table-contents"><table class="table" summary="Patch Promotion Process" border="1"><colgroup><col /><col /><col /></colgroup><thead><tr><th>Action</th><th>Process</th><th>Notes</th></tr></thead><tbody><tr><td>Review</td><td>Refer to the existing calendar to
+                                determine the start date for a patch
+                                roll out.</td><td>Start dates typically happen when a new
+                                quarter begins, but this depends on your
+                                frequency and established periods for
+                                roll outs.</td></tr><tr><td>Select</td><td>Identify the SUSE Manager Organization
+                                and the environment targets for the patch
+                                roll out.</td><td>In the scenario here, this could be CORP
+                                or STORE or NPE, and depending on the use
+                                of SUSE Manager Organizations an
+                                administrator would need to log in to the
+                                Organization to see the hosts.</td></tr><tr><td>Select</td><td>Choose the SUSE Linux Enterprise Server
+                                version(s) that will be patched.</td><td>Patch promotions are done for each SUSE
+                                Linux Enterprise Server version. Each
+                                version has its own set of landscape
+                                channels that patches get promoted through
+                                (DEV, TEST, QA, PROD, etc.).</td></tr><tr><td>Merge</td><td>Merge the current archive into the
+                                initial landscape (or landscape of
+                                choice).</td><td>Using the <span class="quote">“<span class="quote">Merge Script</span>”</span>
+                                utility: select the <span class="strong"><strong>source</strong></span> channel (<span class="strong"><strong>archive</strong></span> in
+                                this case) and <span class="strong"><strong>target</strong></span> channel (DEV -
+                                Current to begin a series).</td></tr><tr><td>Deploy</td><td>Deploy patches from the current
+                                landscape to the subscribed hosts.</td><td>When patches have been merged, the
+                                status of hosts subscribed to the
+                                    <span class="quote">“<span class="quote">current</span>”</span> channel will
+                                show which patches are now available. Issue
+                                the appropriate patch commands to deploy
+                                these patches.</td></tr><tr><td>Test</td><td>Coordinate testing for the hosts that
+                                have received the latest deployed patches,
+                                or notify the appropriate teams/LOB to
+                                start their evaluation.</td><td>After the patches have been deployed, a
+                                period of testing or review should start–in
+                                order to validate the success of the patch
+                                deployment. Coordination should occur with
+                                business partners to establish success of
+                                deployment.</td></tr><tr><td>Evaluate</td><td>Evaluate the results of the previous
+                                merge/deploy and proceed with the next
+                                landscape. If final landscape, report
+                                completion.</td><td>Continue to merge and deploy patch sets
+                                into each landscape until the final one.
+                                Report completion–all hosts should show
+                                    <span class="quote">“<span class="quote">green</span>”</span> status.</td></tr></tbody></table></div></div><br class="table-break" /><h4><a id="id2046"></a>Workflow 2: Patch Exception Process</h4><p>The patch exception process follows the following sample
+                steps. Again, keep in mind that these can be modified to
+                fit more closely to a particular operational group’s
+                existing set of processes.</p><p>Consider the following table:</p><div class="table"><a id="id2049"></a><p class="title"><strong>Table 2. Patch Exception Process</strong></p><div class="table-contents"><table class="table" summary="Patch Exception Process" border="1"><colgroup><col /><col /><col /></colgroup><thead><tr><th>Action</th><th>Process</th><th>Notes</th></tr></thead><tbody><tr><td>Identify</td><td>Locate the patch you want to identify as
+                                an <span class="quote">“<span class="quote">exception</span>”</span> for potential
+                                removal from patch set.</td><td>Find the patch using the search tools in
+                                SUSE Manager, or locate the patch in a
+                                specific Archive or Landscape
+                                Channel.</td></tr><tr><td>Copy</td><td>Using the <span class="quote">“<span class="quote">Manage Channels</span>”</span>
+                                function of SUSE Manager: select the
+                                    <span class="strong"><strong>exception</strong></span> channel for a
+                                specific version of SUSE Linux Enterprise
+                                Server and add the identified patch into it
+                                from the source (from previous
+                                step).</td><td>
+                                <p>The source of the patch (channel) and
+                                    the target of the patch (exceptions
+                                    channel) are important. This step may
+                                    be repeated for different
+                                    versions of SUSE Linux Enterprise
+                                    Server. Potential sources for the patch
+                                    can be an:</p>
+                                <div class="orderedlist"><ol class="orderedlist" type="a"><li class="listitem"><p>Archive Channel</p></li><li class="listitem"><p>Landscape Channel</p></li><li class="listitem"><p>SUSE Updates Channel</p></li></ol></div>
+                            </td></tr><tr><td>Remove</td><td>Using the <span class="quote">“<span class="quote">Manage Channels</span>”</span>
+                                function of SUSE Manager:
+                                    <span class="emphasis"><em>list</em></span> the patches
+                                to find the patch that was
+                                    <span class="quote">“<span class="quote">added</span>”</span> in the previous
+                                step. Find it and then <span class="strong"><strong>remove</strong></span> it from
+                                the current phase (or phases).</td><td>Finding the patch and then removing it
+                                from a Landscape Channel keeps the
+                                subscribed hosts from seeing the patch–and
+                                reporting its applicability.</td></tr><tr><td>Track</td><td>Submit any tickets or commence any
+                                established process to track this patch
+                                exception.</td><td>The goal of tracking is to remain aware
+                                that there is an exception and attempt to
+                                re-mediate, allowing the patch to be
+                                reintroduced into a patch deployment
+                                cycle.</td></tr><tr><td>Remediate</td><td>Work to re-mediate the exception.</td><td>When a fix has been identified/created
+                                for a given exception, the patch can be
+                                reintroduced into a deployment
+                                workflow.</td></tr><tr><td>Note</td><td>Exceptions should only last for a
+                                    <span class="strong"><strong>single</strong></span> deployment cycle.
+                                Keep in mind the next archive will also
+                                contain this same patch–which is a
+                                    <span class="strong"><strong>good
+                                    thing</strong></span>.</td><td>Exceptions should always be a temporary
+                                condition. Work should always be done to
+                                fix the reasons a patch cannot roll out–
+                                compliance can be at risk while an
+                                exception exists.</td></tr></tbody></table></div></div><br class="table-break" /><h4><a id="id2102"></a>Workflow 3: Security Patch ASAP
+                Process</h4><p>The security exception process differs from the previous
+                patch exception process in that a patch is now being
+                    <span class="strong"><strong>added</strong></span> to a patch
+                roll out cycle–likely in the middle of a current
+                (inprogress) roll out. Another process table and some screenshots from the SUSE Manager
+                interface are included here to provide further clarity.</p><p>Review the following table:</p><div class="table"><a id="id2106"></a><p class="title"><strong>Table 3. Security Patch ASAP Process</strong></p><div class="table-contents"><table class="table" summary="Security Patch ASAP Process" border="1"><colgroup><col /><col /><col /></colgroup><thead><tr><th>Action</th><th>Process</th><th>Notes</th></tr></thead><tbody><tr><td>Identify</td><td>Locate the patch you want to identify as
+                                a <span class="quote">“<span class="quote">security exception</span>”</span>–for
+                                potential <span class="strong"><strong>addition
+                                    to</strong></span> a particular landscape or
+                                patch set. </td><td>Find the patch using the search tools in
+                                SUSE Manager, or locate the patch in a
+                                specific Updates Channel for a specific
+                                version of SUSE Linux Enterprise
+                                Server.</td></tr><tr><td>Copy</td><td>Using the <span class="quote">“<span class="quote">Manage Channels</span>”</span>
+                                function of SUSE Manager, select the
+                                Security ASAP Exception Channel for a
+                                specific version of SUSE Linux Enterprise
+                                Server and <span class="emphasis"><em>add</em></span> the
+                                identified patch to it from the source
+                                (likely the SUSE Updates Channel from the
+                                previous step).</td><td>
+                                <p>The source of the security patch
+                                    (SUSE Updates Channel) and the target
+                                    of the patch (Security Exceptions ASAP
+                                    Channel) is key. This step may be
+                                    repeated for different versions
+                                    of SLES. Potential source for the patch
+                                    will likely be an:</p>
+                                <div class="orderedlist"><ol class="orderedlist" type="a"><li class="listitem"><p>Archive Channel</p></li><li class="listitem"><p>Landscape Channel</p></li><li class="listitem"><p>SUSE Updates Channel</p></li></ol></div>
+                            </td></tr><tr><td>Deploy</td><td>Deploy the Security Exception patch(es)
+                                into the selected landscape to the
+                                subscribed hosts.</td><td>When the Security patches have been
+                                added to a Landscape Channel, the status of
+                                hosts subscribed to the “current” channel
+                                will show patches are now available. Issue
+                                the appropriate patch commands to deploy
+                                these patches.</td></tr><tr><td>Track</td><td>Submit any tickets or commence any
+                                established process to track this Security
+                                Patch exception.</td><td>The goal of tracking is to remain aware
+                                that a Security Patch exception has been
+                                deployed. This patch will become part of a
+                                normal archive during the next quarterly
+                                automation creation.</td></tr><tr><td>Report</td><td>Security Exceptions normally occur to
+                                handle a compliance concern. When deployed,
+                                a compliance (Audit) report can be
+                                generated.</td><td>Security Exceptions are handled as an
+                                escalation to the normal schedule. They
+                                will, as a matter of normal operation, be
+                                part of the next Archive and would be
+                                deployed as part of the default schedule–
+                                and as a corollary, the next normal roll out
+                                would not need to include this patch (as it
+                                will already be deployed).</td></tr></tbody></table></div></div><br class="table-break" /><p>This screenshot shows the function of adding a patch to
+                the Security ASAP Exceptions Channel–specifically the SLES
+                11 SP1 x86_64 version:</p><div class="figure"><a id="id2151"></a><p class="title"><strong>Figure 9. Adding a patch to the Security ASAP Exceptions
+                    Channel</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="90%"><tr><td><img src="images/screen-security-exceptions.png" width="100%" alt="Adding a patch to the Security ASAP Exceptions Channel" /></td></tr></table></div></div></div><br class="figure-break" /><p>This screenshot provides a view of the <span class="strong"><strong>List/Remove</strong></span> function of a
+                specific channel (in this case, <span class="quote">“<span class="quote">DEV - Current -
+                    SLES11-SP1-LTSS-Updates for x86_64</span>”</span>), and would
+                be the interface where a patch would be removed from a
+                channel and keep it from being visible and potentially
+                deployed as part of an exception process.</p><div class="figure"><a id="id2161"></a><p class="title"><strong>Figure 10. Adding a patch to the Security ASAP Exceptions
+                    Channel</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="90%"><tr><td><img src="images/screen-suma-patches.png" width="100%" alt="Adding a patch to the Security ASAP Exceptions Channel" /></td></tr></table></div></div></div><br class="figure-break" /></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-appendix"></a>Appendix</h2></div></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-spacewalksample"></a>Spacewalk-Clone-By-Date Configuration File
+                Sample</h3></div></div></div><p>This sample is stored as a text file. It is used with the
+                    <span class="strong"><strong>spacewalk-clone-by-date</strong></span> utility by using
+                the <span class="strong"><strong>-c</strong></span> flag to indicate
+                an input configuration file:</p><pre class="screen">spacewalk-clone-by-date -c Q3-2015-sles11sp3-x86_64-archive.conf</pre><p>Note that it specifies the base channel source <span class="strong"><strong>sles11-sp3-pool-x86_64</strong></span> and the
+                target base channel (destination) <span class="strong"><strong>cc_patch_archives_channel_64bit</strong></span> and uses
+                the directive of <span class="strong"><strong>existing-parent-do-not-modify</strong></span>
+                <span class="strong"><strong>: true</strong></span>. This tells the
+                utility that a child channel from one base will be cloned
+                into a completely different base channel. Note that your
+                channel names might be different; this means this example
+                may need modifications to work in your case. Example:
+                    <span class="strong"><strong>Q3-2015-sles11sp3-x86_64-archive.conf</strong></span>
+                contents below. </p><pre class="screen">
+{
+ "username":"SMadmin",
+ "to_date": "2015-09-30",
+ "skip_depsolve":false,
+ "security_only":false,
+ "use_update_date":false,
+ "no_errata_sync":false,
+ "dry_run":false,
+ "channels":[
+       {
+         "sles11-sp3-pool-x86_64": {
+            "label": "cc_patch_archives_channel_64bit",
+            "existing-parent-do-not-modify": true
+         },
+         "sles11-sp3-updates-x86_64": {
+            "label": "09_30_2015_q3_archive-sles11-sp3-updates-x86_64",
+            "name": "Q3-2015 Patch Archive - 09-30-2015 - SLES11-SP3-Updates for x86_64",
+            "summary": "Q3 - 2015 - Patch Archive Set (9-30-2015) - SUSE Linux Enterprise Server 11 SP3 x86_64",
+            "description": "Q3 - 2015 - Patch Archive Set (9-30-2015) - SUSE Linux Enterprise Server 11 SP3 x86_64"
+         }
+        }
+       ]
+}
+</pre><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Review Channel Patch Content </h3><p>When using the spacewalk-clone-by-date utility,
+                    review the channel patch content after creation
+                    to ensure that the channel contains the patches for the
+                    appropriate end date. Sometimes extra patches are
+                    included in the channel that are in the wrong time
+                    period and can be deleted manually.</p></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-samplepatch"></a>Sample Patch/Package Merge Script Using Python</h3></div></div></div><p>This script has a defined SUSE Manager server URL set in
+                the <code class="varname">MANAGER_URL</code>. The script prompts for
+                a SUSE Manager Administrator ID and password. It then asks
+                for a source and target channel. The script will then
+                confirm the channels and ask if it should continue. An
+                affirmative response (Y) will then allow the script to
+                merge the patches and packages from the source channel into
+                the target channel.</p><pre class="screen">#!/usr/bin/python
+import xmlrpclib
+import sys
+import getpass
+
+MANAGER_URL = "https://suma01.chameleoncorp.com/rpc/api"
+MANAGER_LOGIN = raw_input("Please Enter the SUSE Manager Login Name: ")
+MANAGER_PASSWORD = getpass.getpass("Please Enter the Password: ")
+
+MERGE_SOURCE = raw_input("Enter the SOURCE channel label to Merge FROM: ")
+MERGE_TARGET = raw_input("Enter the TARGET channel label to Merge INTO: ")
+
+print("This tool is going to take all packages and errata from the SOURCE")
+print("Channel : " + MERGE_SOURCE)
+print("and merge it into the TARGET ")
+print("Channel : " + MERGE_TARGET)
+
+def query_yes_no(question, default="yes"):
+    """Ask a yes/no question via raw_input() and return their answer.
+
+    "question" is a string that is presented to the user.
+    "default" is the presumed answer if the user just hits &lt;Enter&gt;.
+        It must be "yes" (the default), "no" or None (meaning
+        an answer is required of the user).
+
+        The "answer" return value is True for "yes" or False for "no".
+        """
+        valid = {"yes": True, "y": True, "ye": True,
+                 "no": False, "n": False}
+        if default is None:
+            prompt = " [y/n] "
+        elif default == "yes":
+            prompt = " [Y/n] "
+        elif default == "no":
+            prompt = " [y/N] "
+        else:
+            raise ValueError("invalid default answer: '%s'" % default)
+
+        while True:
+            sys.stdout.write(question + prompt)
+            choice = raw_input().lower()
+            if default is not None and choice == '':
+                return valid[default]
+            elif choice in valid:
+                return valid[choice]
+            else:
+                sys.stdout.write("Please respond with 'yes' or 'no' "
+                                 "(or 'y' or 'n').\n")
+
+query_yes_no("Is this information correct?")
+
+client = xmlrpclib.Server(MANAGER_URL, verbose=0)
+key = client.auth.login(MANAGER_LOGIN, MANAGER_PASSWORD)
+
+client.channel.software.mergePackages(key, MERGE_SOURCE, MERGE_TARGET)
+client.channel.software.mergeErrata(key, MERGE_SOURCE, MERGE_TARGET)
+
+client.auth.logout(key)</pre></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-samblecontab"></a>Sample Crontab Entries for Automation of Archive Channel
+                Creation</h3></div></div></div><p>Below are some sample cron entries that can be used to
+                run the <span class="strong"><strong>Archive Channel Creation
+                    Script</strong></span> resulting in channel creation for
+                each quarter. This example has two entries to
+                clone all patches received up until the end of a quarter. A
+                single entry could be used to create it at the beginning of
+                a quarter, but care must be taken to modify the
+                calculations in the <span class="strong"><strong>Archive
+                    Script</strong></span> to account for that. Currently the
+                example <span class="strong"><strong>Archive Channel Creation
+                    Script</strong></span> below figures out what quarter it is
+                by looking at the current date. Running the script in the
+                    4<sup>th</sup> quarter will name the
+                archive created as a 4<sup>th</sup> quarter
+                archive.</p><p>Cron entries for end of quarter: (for example
+                    30<sup>th</sup> of months June and
+                September and 31<sup>st</sup> of months
+                March and December):</p><pre class="screen">0 0 30 6,9 * /path/to/the/archive/script</pre><pre class="screen">0 0 31 3,12 * /path/to/the/archive/script</pre></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-samplechancreation"></a>Sample Archive Channel Creation Script for SUSE Manager 2.1 and 3.0</h3></div></div></div><p>The script below works with the <span class="strong"><strong>Archive Channel Sources</strong></span> file (see <a class="xref" href="#sec-samplechansources" title="Sample Archive Channel Sources List File">the section called “Sample Archive Channel Sources List File”</a>) to create quarterly
+                archives of the SUSE Updates channels. This example script
+                is written in <span class="strong"><strong>Bash</strong></span> but
+                calls <span class="command"><strong>spacecmd</strong></span> to accomplish the cloning
+                and to set the new archive to be public (accessible to
+                other organizations).</p><p>The script takes some time to run. The clone command
+                finishes quickly, but the actual cloned channel still takes
+                some time to settle down before the
+                    <span class="command"><strong>org-access</strong></span> command can access and
+                finish. If you want to test this manually you must be
+                patient. A normal crontab-type run of the script will
+                finish in due time.</p><pre class="screen">#!/bin/bash
+
+        ####################################################################
+        #    SUMA Archive Channel Creation Script - Called from Cron       #
+        #                                                                  #
+        #    This script creates quarterly archives of SUSE Manager        #
+        #    channels from SUSE Updates channels. It takes a list          #
+        #    of source channels from the archive-sources.lst file          #
+        #    that should be located in the same directory as this          #
+        #    script. Each entry in that file will be used as a             #
+        #    source channel to create an archive for patches/updates       #
+        #    in the appropriate archive channel.                           #
+        #                                                                  #
+        # REQUIRES:                                                        #
+        #                1. cron entries for each quarter :                #
+        #     e.g. 30th of months June and Sept. and 31st of months March  #
+        #       and December:                                              #
+        #                0 0 30 6,9 * /path/to/this/script                 #
+        #                0 0 31 3,12 * /path/to/this/script                #
+        #                                                                  #
+        #                2. archive-sources.lst :                          #
+        #     A list of the architecture, the source updates channel       #
+        #     for each distro and the suffix of the target channel         #
+        #     version and architecture (1 per line - no line-feed at EOF)  #
+        #   Example:                                                       #
+        #  S390x,sles11-sp3-updates-s390x,SLES11-SP3-Updates for s390x     #
+        #  ppc64,sles11-sp4-updates-ppc64,SLES11-SP4-Updates for PPC       #
+        #  x86_64,sles11-sp3-updates-x86_64,SLES11-SP3-Updates for x86_64  #
+        #         etc.                                                     #
+        #                                                                  #
+        ####################################################################
+        #                                                                  #
+        #       Created by - Jeff Price, SUSE Consulting - 2015            #
+        #                                                                  #
+        ####################################################################
+
+## date strings
+month=`date +%m`
+year=`date +%Y`
+fdate=`date +%m-%d-%Y`
+## set quarter
+if [ $month -le 3 ]
+then
+   quar=1
+elif [ $month -gt 3 ] &amp;&amp; [ $month -lt 7 ]
+then
+   quar=2
+elif [ $month -gt 6 ] &amp;&amp; [ $month -lt 10 ]
+then
+   quar=3
+elif [ $month -gt 9 ]
+then
+   quar=4
+fi
+
+## Create archives using source list
+
+while read line
+do
+        arch=`echo "$line" | awk -F, '{print $1}'`
+        src_ch=`echo "$line" | awk -F, '{print $2}'`
+        trg_ch=`echo "$line" | awk -F, '{print $3}'`
+## set archive channel
+
+target_parent=$arch"-patch-archives-channel"
+source_channel=$src_ch
+target_channel_name="Q"$quar" "$year" - "$fdate" - Archive of "$trg_ch
+target_summary="Q"$quar"-"$year" Archive Set "$trg_ch
+target_channel_label="q"$quar"-"$year"-archive-"$src_ch
+
+## Debug Output
+echo "Architecture: " $arch
+echo "Source Channel: "$src_ch
+echo "Target Channel Archive Suffix: "$trg_ch
+echo "Target Archive Parent Channel: "$target_parent
+echo "Source Channel (again): "$source_channel
+echo "Target Channel Name: "$target_channel_name
+lctn=`echo $target_channel_name|tr '[:upper:]' '[:lower:]'`
+echo "lowercase target name: "$lctn
+echo "Target Channel Label: "$target_channel_label
+echo "Target Channel Summary and Description: "$target_summary
+
+/usr/bin/spacecmd -d -- softwarechannel_clone -s “‘$src_ch’” -n
+“‘$target_channel_name’” -l “‘$target_channel_label’” -p “‘$target_parent’” - g
+/usr/bin/spacecmd -d -- softwarechannel_setorgaccess
+“‘$target_channel_label’” -e
+done &lt; ./archive-sources.lst
+
+</pre></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-samplechancreation-update"></a>Sample Archive Channel Creation Script for SUSE Manager 3.1 and 3.2</h3></div></div></div><p>The script below works with the <span class="strong"><strong>Archive Channel Sources</strong></span> file (see <a class="xref" href="#sec-samplechansources" title="Sample Archive Channel Sources List File">the section called “Sample Archive Channel Sources List File”</a>) to create quarterly
+                archives of the SUSE Updates channels. This example script
+                is written in <span class="strong"><strong>Bash</strong></span> but
+                calls <span class="command"><strong>spacecmd</strong></span> to accomplish the cloning
+                and to set the new archive to be public (accessible to
+                other organizations).</p><p>The script takes some time to run. The clone command
+                finishes quickly, but the actual cloned channel still takes
+                some time to settle down before the
+                <span class="command"><strong>org-access</strong></span> command can access and
+                finish. If you want to test this manually you must be
+                patient. A normal crontab-type run of the script will
+                finish in due time.</p><pre class="screen">#!/bin/bash
+                
+        ####################################################################
+        #    SUMA Archive Channel Creation Script - Called from Cron       #
+        #                                                                  #
+        #    This script creates quarterly archives of SUSE Manager        #
+        #    channels from SUSE Updates channels. It takes a list          #
+        #    of source channels from the archive-sources.lst file          #
+        #    that should be located in the same directory as this          #
+        #    script. Each entry in that file will be used as a             #
+        #    source channel to create an archive for patches/updates       #
+        #    in the appropriate archive channel.                           #
+        #                                                                  #
+        # REQUIRES:                                                        #
+        #                1. cron entries for each quarter :                #
+        #     e.g. 30th of months June and Sept. and 31st of months March  #
+        #       and December:                                              #
+        #                0 0 30 6,9 * /path/to/this/script                 #
+        #                0 0 31 3,12 * /path/to/this/script                #
+        #                                                                  #
+        #                2. archive-sources.lst :                          #
+        #     A list of the architecture, the source updates channel       #
+        #     for each distro and the suffix of the target channel         #
+        #     version and architecture (1 per line - no line-feed at EOF)  #
+        #   Example:                                                       #
+        #  S390x,sles11-sp3-updates-s390x,SLES11-SP3-Updates for s390x     #
+        #  ppc64,sles11-sp4-updates-ppc64,SLES11-SP4-Updates for PPC       #
+        #  x86_64,sles11-sp3-updates-x86_64,SLES11-SP3-Updates for x86_64  #
+        #         etc.                                                     #
+        #                                                                  #
+        ####################################################################
+        #                                                                  #
+        #       Created by - Jeff Price, SUSE Consulting - 2015            #
+        #       Updated for SUMA 3.1 &amp; 3.2 - Levin Forrest,            #
+        #       Lenovo Consulting - 2018                                   #
+        #                                                                  #
+        ####################################################################
+                
+## date strings
+month=`date +%m`
+year=`date +%Y`
+fdate=`date +%m-%d-%Y`
+## set quarter
+if [ $month -le 3 ]
+then
+   quar=1
+elif [ $month -gt 3 ] &amp;&amp; [ $month -lt 7 ]
+then
+   quar=2
+elif [ $month -gt 6 ] &amp;&amp; [ $month -lt 10 ]
+then
+   quar=3
+elif [ $month -gt 9 ]
+then
+   quar=4
+fi
+                
+## Create archives using source list
+                
+while read line
+do
+        arch=`echo "$line" | awk -F, '{print $1}'`
+        src_ch=`echo "$line" | awk -F, '{print $2}'`
+        trg_ch=`echo "$line" | awk -F, '{print $3}'`
+## set archive channel
+## Note the target_parent requires this EXACT channel already created
+target_parent=$arch"-patch-archives-channel"
+source_channel=$src_ch
+target_channel_name="Q"$quar" "$year" - "$fdate" - Archive of "$trg_ch
+target_summary="Q"$quar"-"$year" Archive Set "$trg_ch
+target_channel_label="q"$quar"-"$year"-archive-"$src_ch
+                
+## Debug Output
+echo "Architecture: " $arch
+echo "Source Channel: "$src_ch
+echo "Target Channel Archive Suffix: "$trg_ch
+echo "Target Archive Parent Channel: "$target_parent
+echo "Source Channel (again): "$source_channel
+echo "Target Channel Name: "$target_channel_name
+lctn=`echo $target_channel_name|tr '[:upper:]' '[:lower:]'`
+echo "lowercase target name: "$lctn
+echo "Target Channel Label: "$target_channel_label
+echo "Target Channel Summary and Description: "$target_summary
+                
+## removed double quotes from $src_ch to allow spacecmd to parse correctly
+## removed single quotes from $target_channel_label and $target_parent to allow spacecmd to parse correctly
+## only $target_channel_name should have single quotes as this variable contains spaces
+/usr/bin/spacecmd -d -- softwarechannel_clone -s $src_ch -n "'$target_channel_name'" -l "$target_channel_label" -p "$target_parent" -g
+## removed double quotes from $target_channel_label to allow spacecmd to parse correctly
+/usr/bin/spacecmd -d -- softwarechannel_setorgaccess $target_channel_label -e
+## added full directory structure to archive-sources location to allow call from crontab
+done &lt; /usr/sbin/archive-sources.lst               
+</pre></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-samplechansources"></a>Sample Archive Channel Sources List File</h3></div></div></div><p>This file is called and used by the Archive Channel
+                Creation script located above in the previous section (see
+                    <a class="xref" href="#sec-samplechancreation" title="Sample Archive Channel Creation Script for SUSE Manager 2.1 and 3.0">the section called “Sample Archive Channel Creation Script for SUSE Manager 2.1 and 3.0”</a>). Since the
+                function “readline” is used, there should only be lines
+                with data in the file. Any blank lines will be sourced as
+                data and will cause errors with the Archive Channel
+                Creation script above. </p><p>The first field is <span class="strong"><strong>architecture</strong></span>, which defines the source
+                parent archive channel. This is where the new archive will
+                be placed as a child channel. The second field is the
+                    <span class="strong"><strong>source channel
+                label</strong></span>, which is where the patches/packages are
+                coming FROM. The last field is used for <span class="strong"><strong>target channel naming</strong></span>. This
+                field will be part of the text that makes up the channel
+                name and part of the channel summary/description
+                fields.</p><pre class="screen">s390x,sles11-sp3-updates-s390x,SLES11-SP3-Updates for s390x
+x86_64,sles11-sp4-updates-x86_64,SLES11-SP4-Updates for x86_64
+i586,sles11-sp3-updates-x86_64,SLES11-SP3-Updates for x86_64</pre></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-spacemdauthent"></a>Spacecmd Automatic Authentication</h3></div></div></div><p>The archive script example here is written in Bash and
+                calls the spacecmd shell. Normal operation of spacecmd and
+                the SUSE Manager XMLRPC api requires authentication
+                credentials. In order for the archive script to run
+                successfully from cron, it would require some way of
+                passing appropriate user credentials when required. Luckily
+                there is a way to store user credential pairs.</p><p>Upon the first invocation of the spacecmd utility/shell,
+                a directory is created in the home directory of the user
+                who calls spacecmd. The directory is called .spacecmd (for example
+                /root/.spacecmd/). Within this directory is a file called
+                <span class="quote">“<span class="quote">config</span>”</span>, and within this file you can store parameters that
+                will be used when the user subsequently calls spacecmd. The
+                parameters are as follows (substitute your user name and
+                password):</p><pre class="screen">[spacecmd]
+server=localhost
+username=admin
+password=susemgr
+nossl=0</pre><p>When those credentials are stored, you should be able to
+                invoke the spacecmd shell or call spacecmd commands from
+                the command line without being prompted for a user name or
+                password.</p></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id1337"></a>Legal notice</h2></div></div></div><p> Copyright ©2006-2021 SUSE LLC and contributors. All rights reserved. </p><p> Permission is granted to copy, distribute and/or modify this document under the terms of the
+  GNU Free Documentation License, Version 1.2 or (at your option) version 1.3; with the Invariant
+  Section being this copyright notice and license. A copy of the license version 1.2 is included in
+  the section entitled <span class="quote">“<span class="quote">GNU Free Documentation License</span>”</span>. </p><p> SUSE, the SUSE logo and YaST are registered trademarks of SUSE LLC in the United States and
+  other countries. For SUSE trademarks, see <a class="link" href="http://www.suse.com/company/legal/" target="_top">http://www.suse.com/company/legal/</a>. Linux is a registered trademark of Linus Torvalds.
+  All other names or trademarks mentioned in this document may be trademarks or registered
+  trademarks of their respective owners. </p><p> Documents published as part of the <span class="strong"><strong>SUSE Best Practices</strong></span>
+  series have been contributed voluntarily by SUSE employees and third parties. They are meant to
+  serve as examples of how particular actions can be performed. They have been compiled with utmost
+  attention to detail. However, this does not guarantee complete accuracy. SUSE cannot verify that
+  actions described in these documents do what is claimed or whether actions described have
+  unintended consequences. SUSE LLC, its affiliates, the authors, and the translators may not be held
+  liable for possible errors or the consequences thereof.</p><p> Below we draw your attention to the license under which the articles are published.</p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id1338"></a>GNU Free Documentation License</h2></div></div></div><p>
+  Copyright (C) 2000, 2001, 2002 Free Software Foundation, Inc. 51 Franklin St,
+  Fifth Floor, Boston, MA 02110-1301 USA. Everyone is permitted to copy and
+  distribute verbatim copies of this license document, but changing it is not
+  allowed.
+ </p><h5><a id="id2253"></a> 0. PREAMBLE </h5><p>
+  The purpose of this License is to make a manual, textbook, or other
+  functional and useful document "free" in the sense of freedom: to assure
+  everyone the effective freedom to copy and redistribute it, with or without
+  modifying it, either commercially or non-commercially. Secondarily, this
+  License preserves for the author and publisher a way to get credit for their
+  work, while not being considered responsible for modifications made by
+  others.
+ </p><p>
+  This License is a kind of "copyleft", which means that derivative works of
+  the document must themselves be free in the same sense. It complements the
+  GNU General Public License, which is a copyleft license designed for free
+  software.
+ </p><p>
+  We have designed this License to use it for manuals for free software,
+  because free software needs free documentation: a free program should come
+  with manuals providing the same freedoms that the software does. But this
+  License is not limited to software manuals; it can be used for any textual
+  work, regardless of subject matter or whether it is published as a printed
+  book. We recommend this License principally for works whose purpose is
+  instruction or reference.
+ </p><h5><a id="id2257"></a> 1. APPLICABILITY AND DEFINITIONS </h5><p>
+  This License applies to any manual or other work, in any medium, that
+  contains a notice placed by the copyright holder saying it can be distributed
+  under the terms of this License. Such a notice grants a world-wide,
+  royalty-free license, unlimited in duration, to use that work under the
+  conditions stated herein. The "Document", below, refers to any such manual or
+  work. Any member of the public is a licensee, and is addressed as "you". You
+  accept the license if you copy, modify or distribute the work in a way
+  requiring permission under copyright law.
+ </p><p>
+  A "Modified Version" of the Document means any work containing the Document
+  or a portion of it, either copied verbatim, or with modifications and/or
+  translated into another language.
+ </p><p>
+  A "Secondary Section" is a named appendix or a front-matter section of the
+  Document that deals exclusively with the relationship of the publishers or
+  authors of the Document to the Document's overall subject (or to related
+  matters) and contains nothing that could fall directly within that overall
+  subject. (Thus, if the Document is in part a textbook of mathematics, a
+  Secondary Section may not explain any mathematics.) The relationship could be
+  a matter of historical connection with the subject or with related matters,
+  or of legal, commercial, philosophical, ethical or political position
+  regarding them.
+ </p><p>
+  The "Invariant Sections" are certain Secondary Sections whose titles are
+  designated, as being those of Invariant Sections, in the notice that says
+  that the Document is released under this License. If a section does not fit
+  the above definition of Secondary then it is not allowed to be designated as
+  Invariant. The Document may contain zero Invariant Sections. If the Document
+  does not identify any Invariant Sections then there are none.
+ </p><p>
+  The "Cover Texts" are certain short passages of text that are listed, as
+  Front-Cover Texts or Back-Cover Texts, in the notice that says that the
+  Document is released under this License. A Front-Cover Text may be at most 5
+  words, and a Back-Cover Text may be at most 25 words.
+ </p><p>
+  A "Transparent" copy of the Document means a machine-readable copy,
+  represented in a format whose specification is available to the general
+  public, that is suitable for revising the document straightforwardly with
+  generic text editors or (for images composed of pixels) generic paint
+  programs or (for drawings) some widely available drawing editor, and that is
+  suitable for input to text formatters or for automatic translation to a
+  variety of formats suitable for input to text formatters. A copy made in an
+  otherwise Transparent file format whose markup, or absence of markup, has
+  been arranged to thwart or discourage subsequent modification by readers is
+  not Transparent. An image format is not Transparent if used for any
+  substantial amount of text. A copy that is not "Transparent" is called
+  "Opaque".
+ </p><p>
+  Examples of suitable formats for Transparent copies include plain ASCII
+  without markup, Texinfo input format, LaTeX input format, SGML or XML using a
+  publicly available DTD, and standard-conforming simple HTML, PostScript or
+  PDF designed for human modification. Examples of transparent image formats
+  include PNG, XCF and JPG. Opaque formats include proprietary formats that can
+  be read and edited only by proprietary word processors, SGML or XML for which
+  the DTD and/or processing tools are not generally available, and the
+  machine-generated HTML, PostScript or PDF produced by some word processors
+  for output purposes only.
+ </p><p>
+  The "Title Page" means, for a printed book, the title page itself, plus such
+  following pages as are needed to hold, legibly, the material this License
+  requires to appear in the title page. For works in formats which do not have
+  any title page as such, "Title Page" means the text near the most prominent
+  appearance of the work's title, preceding the beginning of the body of the
+  text.
+ </p><p>
+  A section "Entitled XYZ" means a named subunit of the Document whose title
+  either is precisely XYZ or contains XYZ in parentheses following text that
+  translates XYZ in another language. (Here XYZ stands for a specific section
+  name mentioned below, such as "Acknowledgements", "Dedications",
+  "Endorsements", or "History".) To "Preserve the Title" of such a section when
+  you modify the Document means that it remains a section "Entitled XYZ"
+  according to this definition.
+ </p><p>
+  The Document may include Warranty Disclaimers next to the notice which states
+  that this License applies to the Document. These Warranty Disclaimers are
+  considered to be included by reference in this License, but only as regards
+  disclaiming warranties: any other implication that these Warranty Disclaimers
+  may have is void and has no effect on the meaning of this License.
+ </p><h5><a id="id2268"></a> 2. VERBATIM COPYING </h5><p>
+  You may copy and distribute the Document in any medium, either commercially
+  or noncommercially, provided that this License, the copyright notices, and
+  the license notice saying this License applies to the Document are reproduced
+  in all copies, and that you add no other conditions whatsoever to those of
+  this License. You may not use technical measures to obstruct or control the
+  reading or further copying of the copies you make or distribute. However, you
+  may accept compensation in exchange for copies. If you distribute a large
+  enough number of copies you must also follow the conditions in section 3.
+ </p><p>
+  You may also lend copies, under the same conditions stated above, and you may
+  publicly display copies.
+ </p><h5><a id="id2271"></a> 3. COPYING IN QUANTITY </h5><p>
+  If you publish printed copies (or copies in media that commonly have printed
+  covers) of the Document, numbering more than 100, and the Document's license
+  notice requires Cover Texts, you must enclose the copies in covers that
+  carry, clearly and legibly, all these Cover Texts: Front-Cover Texts on the
+  front cover, and Back-Cover Texts on the back cover. Both covers must also
+  clearly and legibly identify you as the publisher of these copies. The front
+  cover must present the full title with all words of the title equally
+  prominent and visible. You may add other material on the covers in addition.
+  Copying with changes limited to the covers, as long as they preserve the
+  title of the Document and satisfy these conditions, can be treated as
+  verbatim copying in other respects.
+ </p><p>
+  If the required texts for either cover are too voluminous to fit legibly, you
+  should put the first ones listed (as many as fit reasonably) on the actual
+  cover, and continue the rest onto adjacent pages.
+ </p><p>
+  If you publish or distribute Opaque copies of the Document numbering more
+  than 100, you must either include a machine-readable Transparent copy along
+  with each Opaque copy, or state in or with each Opaque copy a
+  computer-network location from which the general network-using public has
+  access to download using public-standard network protocols a complete
+  Transparent copy of the Document, free of added material. If you use the
+  latter option, you must take reasonably prudent steps, when you begin
+  distribution of Opaque copies in quantity, to ensure that this Transparent
+  copy will remain thus accessible at the stated location until at least one
+  year after the last time you distribute an Opaque copy (directly or through
+  your agents or retailers) of that edition to the public.
+ </p><p>
+  It is requested, but not required, that you contact the authors of the
+  Document well before redistributing any large number of copies, to give them
+  a chance to provide you with an updated version of the Document.
+ </p><h5><a id="id2276"></a> 4. MODIFICATIONS </h5><p>
+  You may copy and distribute a Modified Version of the Document under the
+  conditions of sections 2 and 3 above, provided that you release the Modified
+  Version under precisely this License, with the Modified Version filling the
+  role of the Document, thus licensing distribution and modification of the
+  Modified Version to whoever possesses a copy of it. In addition, you must do
+  these things in the Modified Version:
+ </p><div class="orderedlist"><ol class="orderedlist" type="A"><li class="listitem"><p>
+    Use in the Title Page (and on the covers, if any) a title distinct from
+    that of the Document, and from those of previous versions (which should, if
+    there were any, be listed in the History section of the Document). You may
+    use the same title as a previous version if the original publisher of that
+    version gives permission.
+   </p></li><li class="listitem"><p>
+    List on the Title Page, as authors, one or more persons or entities
+    responsible for authorship of the modifications in the Modified Version,
+    together with at least five of the principal authors of the Document (all
+    of its principal authors, if it has fewer than five), unless they release
+    you from this requirement.
+   </p></li><li class="listitem"><p>
+    State on the Title page the name of the publisher of the Modified Version,
+    as the publisher.
+   </p></li><li class="listitem"><p>
+    Preserve all the copyright notices of the Document.
+   </p></li><li class="listitem"><p>
+    Add an appropriate copyright notice for your modifications adjacent to the
+    other copyright notices.
+   </p></li><li class="listitem"><p>
+    Include, immediately after the copyright notices, a license notice giving
+    the public permission to use the Modified Version under the terms of this
+    License, in the form shown in the Addendum below.
+   </p></li><li class="listitem"><p>
+    Preserve in that license notice the full lists of Invariant Sections and
+    required Cover Texts given in the Document's license notice.
+   </p></li><li class="listitem"><p>
+    Include an unaltered copy of this License.
+   </p></li><li class="listitem"><p>
+    Preserve the section Entitled "History", Preserve its Title, and add to it
+    an item stating at least the title, year, new authors, and publisher of the
+    Modified Version as given on the Title Page. If there is no section
+    Entitled "History" in the Document, create one stating the title, year,
+    authors, and publisher of the Document as given on its Title Page, then add
+    an item describing the Modified Version as stated in the previous sentence.
+   </p></li><li class="listitem"><p>
+    Preserve the network location, if any, given in the Document for public
+    access to a Transparent copy of the Document, and likewise the network
+    locations given in the Document for previous versions it was based on.
+    These may be placed in the "History" section. You may omit a network
+    location for a work that was published at least four years before the
+    Document itself, or if the original publisher of the version it refers to
+    gives permission.
+   </p></li><li class="listitem"><p>
+    For any section Entitled "Acknowledgements" or "Dedications", Preserve the
+    Title of the section, and preserve in the section all the substance and
+    tone of each of the contributor acknowledgements and/or dedications given
+    therein.
+   </p></li><li class="listitem"><p>
+    Preserve all the Invariant Sections of the Document, unaltered in their
+    text and in their titles. Section numbers or the equivalent are not
+    considered part of the section titles.
+   </p></li><li class="listitem"><p>
+    Delete any section Entitled "Endorsements". Such a section may not be
+    included in the Modified Version.
+   </p></li><li class="listitem"><p>
+    Do not retitle any existing section to be Entitled "Endorsements" or to
+    conflict in title with any Invariant Section.
+   </p></li><li class="listitem"><p>
+    Preserve any Warranty Disclaimers.
+   </p></li></ol></div><p>
+  If the Modified Version includes new front-matter sections or appendices that
+  qualify as Secondary Sections and contain no material copied from the
+  Document, you may at your option designate some or all of these sections as
+  invariant. To do this, add their titles to the list of Invariant Sections in
+  the Modified Version's license notice. These titles must be distinct from any
+  other section titles.
+ </p><p>
+  You may add a section Entitled "Endorsements", provided it contains nothing
+  but endorsements of your Modified Version by various parties--for example,
+  statements of peer review or that the text has been approved by an
+  organization as the authoritative definition of a standard.
+ </p><p>
+  You may add a passage of up to five words as a Front-Cover Text, and a
+  passage of up to 25 words as a Back-Cover Text, to the end of the list of
+  Cover Texts in the Modified Version. Only one passage of Front-Cover Text and
+  one of Back-Cover Text may be added by (or through arrangements made by) any
+  one entity. If the Document already includes a cover text for the same cover,
+  previously added by you or by arrangement made by the same entity you are
+  acting on behalf of, you may not add another; but you may replace the old
+  one, on explicit permission from the previous publisher that added the old
+  one.
+ </p><p>
+  The author(s) and publisher(s) of the Document do not by this License give
+  permission to use their names for publicity for or to assert or imply
+  endorsement of any Modified Version.
+ </p><h5><a id="id2313"></a> 5. COMBINING DOCUMENTS </h5><p>
+  You may combine the Document with other documents released under this
+  License, under the terms defined in section 4 above for modified versions,
+  provided that you include in the combination all of the Invariant Sections of
+  all of the original documents, unmodified, and list them all as Invariant
+  Sections of your combined work in its license notice, and that you preserve
+  all their Warranty Disclaimers.
+ </p><p>
+  The combined work need only contain one copy of this License, and multiple
+  identical Invariant Sections may be replaced with a single copy. If there are
+  multiple Invariant Sections with the same name but different contents, make
+  the title of each such section unique by adding at the end of it, in
+  parentheses, the name of the original author or publisher of that section if
+  known, or else a unique number. Make the same adjustment to the section
+  titles in the list of Invariant Sections in the license notice of the
+  combined work.
+ </p><p>
+  In the combination, you must combine any sections Entitled "History" in the
+  various original documents, forming one section Entitled "History"; likewise
+  combine any sections Entitled "Acknowledgements", and any sections Entitled
+  "Dedications". You must delete all sections Entitled "Endorsements".
+ </p><h5><a id="id2317"></a> 6. COLLECTIONS OF DOCUMENTS </h5><p>
+  You may make a collection consisting of the Document and other documents
+  released under this License, and replace the individual copies of this
+  License in the various documents with a single copy that is included in the
+  collection, provided that you follow the rules of this License for verbatim
+  copying of each of the documents in all other respects.
+ </p><p>
+  You may extract a single document from such a collection, and distribute it
+  individually under this License, provided you insert a copy of this License
+  into the extracted document, and follow this License in all other respects
+  regarding verbatim copying of that document.
+ </p><h5><a id="id2320"></a> 7. AGGREGATION WITH INDEPENDENT WORKS </h5><p>
+  A compilation of the Document or its derivatives with other separate and
+  independent documents or works, in or on a volume of a storage or
+  distribution medium, is called an "aggregate" if the copyright resulting from
+  the compilation is not used to limit the legal rights of the compilation's
+  users beyond what the individual works permit. When the Document is included
+  in an aggregate, this License does not apply to the other works in the
+  aggregate which are not themselves derivative works of the Document.
+ </p><p>
+  If the Cover Text requirement of section 3 is applicable to these copies of
+  the Document, then if the Document is less than one half of the entire
+  aggregate, the Document's Cover Texts may be placed on covers that bracket
+  the Document within the aggregate, or the electronic equivalent of covers if
+  the Document is in electronic form. Otherwise they must appear on printed
+  covers that bracket the whole aggregate.
+ </p><h5><a id="id2323"></a> 8. TRANSLATION </h5><p>
+  Translation is considered a kind of modification, so you may distribute
+  translations of the Document under the terms of section 4. Replacing
+  Invariant Sections with translations requires special permission from their
+  copyright holders, but you may include translations of some or all Invariant
+  Sections in addition to the original versions of these Invariant Sections.
+  You may include a translation of this License, and all the license notices in
+  the Document, and any Warranty Disclaimers, provided that you also include
+  the original English version of this License and the original versions of
+  those notices and disclaimers. In case of a disagreement between the
+  translation and the original version of this License or a notice or
+  disclaimer, the original version will prevail.
+ </p><p>
+  If a section in the Document is Entitled "Acknowledgements", "Dedications",
+  or "History", the requirement (section 4) to Preserve its Title (section 1)
+  will typically require changing the actual title.
+ </p><h5><a id="id2326"></a> 9. TERMINATION </h5><p>
+  You may not copy, modify, sublicense, or distribute the Document except as
+  expressly provided for under this License. Any other attempt to copy, modify,
+  sublicense or distribute the Document is void, and will automatically
+  terminate your rights under this License. However, parties who have received
+  copies, or rights, from you under this License will not have their licenses
+  terminated so long as such parties remain in full compliance.
+ </p><h5><a id="id2328"></a> 10. FUTURE REVISIONS OF THIS LICENSE </h5><p>
+  The Free Software Foundation may publish new, revised versions of the GNU
+  Free Documentation License from time to time. Such new versions will be
+  similar in spirit to the present version, but may differ in detail to address
+  new problems or concerns. See
+  <a class="link" href="http://www.gnu.org/copyleft/" target="_top">http://www.gnu.org/copyleft/</a>.
+ </p><p>
+  Each version of the License is given a distinguishing version number. If the
+  Document specifies that a particular numbered version of this License "or any
+  later version" applies to it, you have the option of following the terms and
+  conditions either of that specified version or of any later version that has
+  been published (not as a draft) by the Free Software Foundation. If the
+  Document does not specify a version number of this License, you may choose
+  any version ever published (not as a draft) by the Free Software Foundation.
+ </p><h5><a id="id2332"></a> ADDENDUM: How to use this License for your
+  documents </h5><pre class="screen">Copyright (c) YEAR YOUR NAME.
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.2
+or any later version published by the Free Software Foundation;
+with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
+A copy of the license is included in the section entitled "GNU
+ Free Documentation License".</pre><p>
+  If you have Invariant Sections, Front-Cover Texts and Back-Cover Texts,
+  replace the "with...Texts". line with this:
+ </p><pre class="screen">with the Invariant Sections being LIST THEIR TITLES, with the
+Front-Cover Texts being LIST, and with the Back-Cover Texts being LIST.</pre><p>
+  If you have Invariant Sections without Cover Texts, or some other combination
+  of the three, merge those two alternatives to suit the situation.
+ </p><p>
+  If your document contains nontrivial examples of program code, we recommend
+  releasing these examples in parallel under your choice of free software
+  license, such as the GNU General Public License, to permit their use in free
+  software.
+ </p></div></div></body></html>

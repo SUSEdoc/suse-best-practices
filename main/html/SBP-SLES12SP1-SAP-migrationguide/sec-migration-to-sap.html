@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Migration Procedure</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="Migrate SUSE Linux Enterprise Server 12 SP1 to SUSE Linux Enterprise Server for SAP Applications 12 SP1" /><link rel="up" href="index.html" title="Migrate SUSE Linux Enterprise Server 12 SP1 to SUSE Linux Enterprise Server for SAP Applications 12 SP1" /><link rel="prev" href="index.html" title="Migrate SUSE Linux Enterprise Server 12 SP1 to SUSE Linux Enterprise Server for SAP Applications 12 SP1" /><link rel="next" href="sec-next.html" title="Next Steps" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Migration Procedure</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="index.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="sec-next.html">Next</a></td></tr></table><hr /></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-migration-to-sap"></a>Migration Procedure</h2></div></div></div><h3><a id="id1337"></a>Prerequisites</h3><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Go to the download page for SUSE Linux Enterprise
+                    Server 12 SP1 for POWER (see <a class="link" href="https://download.suse.com/Download?buildid=ivKxefYE5gc~" target="_top">https://download.suse.com/Download?buildid=ivKxefYE5gc~</a>) and download DVD1 of the SLES12 SP1 ppc64le
+                    installation media </p></li><li class="listitem"><p>The system must be able to register externally to
+                    scc.suse.com <span class="strong"><strong>or</strong></span>
+                    internally to an SMT server</p></li></ul></div><div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Attention</h3><p>This procedure has only been tested on new installations
+                using the SLES12 SP1 ppc64le installation media.</p></div><h3><a id="id1338"></a>Steps</h3><div class="procedure"><ol class="procedure" type="1"><li class="step"><p>Install SLES12 SP1 ppc64le</p><ol type="a" class="substeps"><li class="step"><p>Skip the registration</p></li><li class="step"><p>Do not install any additional Add On
+                            Products</p></li><li class="step"><p><span class="strong"><strong>Suggestion:</strong></span> Install the
+                            operating system disk using the Btrfs file
+                            system. Learn more about Btrfs in section
+                                <span class="quote">“<span class="quote">Major File Systems in Linux</span>”</span>
+                            of the Storage Administration Guide for SUSE
+                            Linux Enterprise Server 12 at <a class="link" href="https://documentation.suse.com/sles/12-GA/" target="_top">https://documentation.suse.com/sles/12-GA/</a> (you have to download the documentation via
+                            the compressed folder).</p></li><li class="step"><p>Install the following patterns</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Help and Support Documentation</p></li><li class="listitem"><p>Base System</p></li><li class="listitem"><p>Minimal System (Appliances)</p></li></ul></div></li></ol></li><li class="step"><p>Review the knowledgebase article <span class="italic">Migrating a SLES 12 SP1 for POWER LE
+                        system to SLES for SAP Applications for POWER LE 12
+                        SP1</span> (see <a class="link" href="https://www.suse.com/support/kb/doc?id=7018295" target="_top">https://www.suse.com/support/kb/doc?id=7018295</a>and download the latest migration package which is
+                    referenced in this article.</p></li><li class="step"><p><span class="strong"><strong>OPTIONAL:</strong></span> If you
+                    use Btrfs for the OS disk, create a pre-snapshot in
+                    case you want to undo the migration:</p><p>
+                    <span class="command"><strong># snapper create -t pre -p -d “before sles for
+                        sap”</strong></span>
+                </p><div class="important" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Important</h3><p>Make note of the snapshot number after running
+                        this command</p></div></li><li class="step"><p>Install and run the migration script</p><p>
+                    <span class="command"><strong># rpm -Uvh
+                        migrate-sles-to-sles4sap-*.noarch.rpm</strong></span>
+                </p><p>
+                    <span class="command"><strong># Migrate_SLES_to_SLES-for-SAP-12.sh</strong></span>
+                </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Answer ‘y’ to proceed with the next step in
+                            the migration</p></li><li class="listitem"><p>Answer ‘n’ if you would like to migrate and
+                            register using scc.suse.com</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>Enter your email address to register
+                                    SLES for SAP Applications 12 SP1 for
+                                    Power Systems</p></li><li class="listitem"><p>Enter your activation code for SLES
+                                    for SAP Applications 12 SP1 for Power
+                                    Systems</p></li></ul></div></li><li class="listitem"><p>
+                            <span class="strong"><strong>OR</strong></span>
+                        </p><p>Answer ‘y’ if you would like to migrate and
+                            register using a local SMT server</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>Enter the https URL of the SMT server
+                                    (example:
+                                    https://mysmt.company.com)</p></li></ul></div></li></ul></div></li><li class="step"><p><span class="strong"><strong>OPTIONAL:</strong></span> If you
+                    use for the OS disk, create a post-snapshot in case you
+                    want to undo the migration</p><p>
+                    <span class="command"><strong># snapper create -t post --pre-number
+                        &lt;# from step 3&gt; -d “after sles for
+                        sap”</strong></span>
+                </p></li></ol></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="index.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="sec-next.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Migrate SUSE Linux Enterprise Server 12 SP1 to SUSE Linux
+            Enterprise Server for SAP Applications 12 SP1  </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Next Steps</td></tr></table></div></body></html>

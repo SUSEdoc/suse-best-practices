@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>High Level Overview</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="SUSE Public Cloud Infrastructure Setup Guide (SLES12 SP1)" /><link rel="up" href="index.html" title="SUSE Public Cloud Infrastructure Setup Guide (SLES12 SP1)" /><link rel="prev" href="index.html" title="SUSE Public Cloud Infrastructure Setup Guide (SLES12 SP1)" /><link rel="next" href="sec-detailed-setup-guide.html" title="Detailed Setup Guide" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">High Level Overview</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="index.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="sec-detailed-setup-guide.html">Next</a></td></tr></table><hr /></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-overview"></a>High Level Overview</h2></div></div></div><p>The update infrastructure consists of 2 major components:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Region Servers</p></li><li class="listitem"><p>SMT Servers</p></li></ul></div><p>Both run as VMs within the cloud framework. All services run on
+   SUSE Linux Enterprise Server 12 SP1 or higher. These systems may be
+   registered directly to SCC or may be managed using SUSE Manager. In
+   addition to having the base repository the systems must also have the
+   Public Cloud Module repository configured.</p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-region-server-s"></a>Region Server(s)</h3></div></div></div><p>The Region Server uses information provided in a configuration
+    file, <code class="filename">/etc/regionService/regionData.cfg</code> by
+    default, to associate SMT server information with a particular region
+    of the cloud framework. If the cloud service offered has only one
+    region it is still useful to use the region server to allow for easy
+    future expansion. The goal of the overall architecture is to always
+    deliver updates for SUSE Linux Enterprise guests region local. In general, IP
+    addresses for guests are provided by a DHCP service that is part of the
+    cloud framework, and various CIDR blocks are used in various regions.
+    This region association of IP addresses, IPv4 and/or IPv6, is part of
+    the cloud framework configuration and is captured in the configuration
+    file for the region server. For cases where the association of CIDR
+    blocks to specific regions is more dynamic the Region Server REST API
+    also accepts a <code class="option">regionHint</code> argument that the guest may
+    send to obtain information about the SMT servers in the
+    guest’s region.</p><p>SUSE Linux Enterprise Server guest instances connect to a Region Server to receive a
+    list of SMT Servers available in the region in which the guest instance
+    was launched. The information provided to the client is in XML format
+    and is sufficient for the client to automatically register with the
+    region local SMT Server.</p><p>Generally, multiple Region Server instances should be operated in
+    the cloud environment to ensure availability of the Region Service if
+    any Region Server is too distant (high latency), down, or otherwise
+    unavailable. Information about the Region Servers in the cloud
+    framework is encoded in the guest images by including the region
+    server’s public certificate in the
+     <code class="filename">/var/lib/regionService/certs/</code> directory. The name
+    of the certificate files is used to attempt to connect to the Region
+    Server via HTTPS.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-smt-server-s"></a>SMT Server(s)</h3></div></div></div><p>The SMT (Subscription Management Tool) Server serves as cache for
+    the package repositories obtained from SCC (SUSE Customer Center). The SMT Server
+    itself is registered with SCC, or managed via SUSE Manager, as it would
+    be in a traditional data center.</p><p>Given the data provided by a Region Server, the client proceeds
+    through a <span class="quote">“<span class="quote">regular</span>”</span> automated registration process. This
+    registration process is identical to the process an administrator in a
+    data center would complete when registering a new system against an SMT
+    Server operated in a traditional data center.</p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="index.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="sec-detailed-setup-guide.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">SUSE Public Cloud Infrastructure Setup Guide (SLES12 SP1) </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Detailed Setup Guide</td></tr></table></div></body></html>

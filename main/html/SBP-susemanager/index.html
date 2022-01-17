@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Advanced Patch Lifecycle Management with SUSE Manager</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><meta name="description" content="This document describes how to set up and configure a SUSE Manager implementation to enable companies in the delivery of often requested features. Covered are the automatic creation and archive of patch sets by a defined time period, a consistent method of patch promotion and delivery through numerous landscapes and environments, and the exception process for handling patches that need to be excluded from a patch cycle. Also explained are the creation of an environment with historical patch sets, the minimal need for host channel subscription manipulation from cradle to grave, and the support for service pack migration with custom child channels. Disclaimer: Documents published as part of the SUSE Best Practices series have been contributed voluntarily by SUSE employees and third parties. They are meant to serve as examples of how particular actions can be performed. They have been compiled with utmost attention to detail. However, this does not guarantee complete accuracy. SUSE cannot verify that actions described in these documents do what is claimed or whether actions described have unintended consequences. SUSE LLC, its affiliates, the authors, and the translators may not be held liable for possible errors or the consequences thereof." /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="Advanced Patch Lifecycle Management with SUSE Manager" /><link rel="next" href="sec-implement.html" title="Implementation" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Advanced Patch Lifecycle Management with SUSE
+            Manager</th></tr><tr><td width="20%" align="left"> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="sec-implement.html">Next</a></td></tr></table><hr /></div><div xml:lang="en" class="article" lang="en"><div class="titlepage"><div><div><h1 class="title"><a id="art-sbp-suma-life"></a>Advanced Patch Lifecycle Management with SUSE
+            Manager</h1></div><div><h3 class="subtitle"><em>Methods and approaches for managing updates using SUSE
+            Manager in multi-landscape environments</em></h3></div><div><div class="author"><h3 class="author"><span class="firstname">Jeff</span> <span class="surname">Price, Principal Architect, SUSE</span></h3></div></div><div><div class="abstract"><p class="title"><strong>Abstract</strong></p><p>This document describes how to set up and configure a
+                SUSE Manager implementation to enable companies in the
+                delivery of often requested features. Covered are the
+                automatic creation and archive of patch sets by a defined
+                time period, a consistent method of patch promotion and
+                delivery through numerous landscapes and environments, and
+                the exception process for handling patches that need to be
+                excluded from a patch cycle. Also explained are the
+                creation of an environment with historical patch sets, the
+                minimal need for host channel subscription manipulation
+                from cradle to grave, and the support for service pack
+                migration with custom child channels.</p><p>
+                <span class="strong"><strong>Disclaimer: </strong></span>
+                Documents published as part of the SUSE Best Practices series have been contributed voluntarily
+                by SUSE employees and third parties. They are meant to serve as examples of how particular
+                actions can be performed. They have been compiled with utmost attention to detail. However,
+                this does not guarantee complete accuracy. SUSE cannot verify that actions described in these
+                documents do what is claimed or whether actions described have unintended consequences.
+                SUSE LLC, its affiliates, the authors, and the translators may not be held liable for possible errors
+                or the consequences thereof.
+            </p></div></div></div><hr /></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="sect1"><a href="index.html#sec-overview">Overview</a></span></dt><dd><dl><dt><span class="sect2"><a href="index.html#sec-susesol">A SUSE Solution</a></span></dt><dt><span class="sect2"><a href="index.html#sec-example">Example Scenario</a></span></dt><dt><span class="sect2"><a href="index.html#sec-features">Features</a></span></dt><dt><span class="sect2"><a href="index.html#sec-guidance">Guidance</a></span></dt></dl></dd><dt><span class="sect1"><a href="sec-implement.html">Implementation</a></span></dt><dd><dl><dt><span class="sect2"><a href="sec-implement.html#sec-arch">Architecture</a></span></dt><dt><span class="sect2"><a href="sec-implement.html#sec-design">Automation and Process Design</a></span></dt><dt><span class="sect2"><a href="sec-implement.html#sec-patchpromo">Patch Promotion Cycle</a></span></dt><dt><span class="sect2"><a href="sec-implement.html#sec-exception">Exception and Escalation Channels</a></span></dt><dt><span class="sect2"><a href="sec-implement.html#sec-components">Components</a></span></dt><dt><span class="sect2"><a href="sec-implement.html#sec-channels">Channels</a></span></dt><dt><span class="sect2"><a href="sec-implement.html#sec-actkeys">Activation Keys / Bootstraps</a></span></dt><dt><span class="sect2"><a href="sec-implement.html#sec-scripts">Scripts</a></span></dt><dt><span class="sect2"><a href="sec-implement.html#sec-crontab">Crontab Entries / Automation</a></span></dt></dl></dd><dt><span class="sect1"><a href="sec-usage.html">Usage Workflows</a></span></dt><dd><dl><dt><span class="sect2"><a href="sec-usage.html#sec-exprocesswf">Example Process Workflows</a></span></dt></dl></dd><dt><span class="sect1"><a href="sec-appendix.html">Appendix</a></span></dt><dd><dl><dt><span class="sect2"><a href="sec-appendix.html#sec-spacewalksample">Spacewalk-Clone-By-Date Configuration File
+                Sample</a></span></dt><dt><span class="sect2"><a href="sec-appendix.html#sec-samplepatch">Sample Patch/Package Merge Script Using Python</a></span></dt><dt><span class="sect2"><a href="sec-appendix.html#sec-samblecontab">Sample Crontab Entries for Automation of Archive Channel
+                Creation</a></span></dt><dt><span class="sect2"><a href="sec-appendix.html#sec-samplechancreation">Sample Archive Channel Creation Script for SUSE Manager 2.1 and 3.0</a></span></dt><dt><span class="sect2"><a href="sec-appendix.html#sec-samplechancreation-update">Sample Archive Channel Creation Script for SUSE Manager 3.1 and 3.2</a></span></dt><dt><span class="sect2"><a href="sec-appendix.html#sec-samplechansources">Sample Archive Channel Sources List File</a></span></dt><dt><span class="sect2"><a href="sec-appendix.html#sec-spacemdauthent">Spacecmd Automatic Authentication</a></span></dt></dl></dd><dt><span class="sect1"><a href="ar01s05.html">Legal notice</a></span></dt><dt><span class="sect1"><a href="ar01s06.html">GNU Free Documentation License</a></span></dt></dl></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-overview"></a>Overview</h2></div></div></div><p>For many organizations today, keeping systems patched and
+            secure is one of the biggest ongoing challenges that systems
+            administrators can face. Both proprietary and open source
+            software companies are constantly at work providing updates
+            that fix flaws discovered in their software products.</p><p>Adding to the pressures are the requirements imposed by
+            compliance initiatives like PCI-DSS (Payment Card Industry Data
+            Security Standard), SOX (Sarbanes-Oxley), HIPAA (Health
+            Insurance Portability and Accountability Act), FIPS 140
+            (Federal Information Processing Standard), etc. Included in
+            most of these <span class="quote">“<span class="quote">standards</span>”</span> are rules that dictate
+            the frequency or time frames for patching and often these
+            schedules are modified because of the severity level of a
+            specific patch.</p><p>Businesses large and small are depending on an ever-changing
+            landscape of applications on a wide range of computer
+            infrastructure. These can include physical and virtual hosts
+            and may have complicated application stacks. These applications
+            may have specific kernel version dependencies, have strict
+            uptime requirements or be tied to a specific run time
+            environment (like Java). They may only be certified on a
+            specific Linux OS release, or have a particular set of
+            configuration requirements. There might be extra hardening or
+            platform requirements that set these hosts apart from the
+            rest.</p><p>Additionally, many companies have created duplicate host
+            environments like <span class="quote">“<span class="quote">development</span>”</span> or
+                <span class="quote">“<span class="quote">QA</span>”</span> landscapes that mirror
+                <span class="quote">“<span class="quote">production</span>”</span> to allow for testing or
+            validation of changes. This means at least one more complete
+            set of hosts to manage, patch, and report on. This increases
+            the challenges of meeting a rigorous patch schedule that often
+            requires patching all hosts on a quarterly basis (or more
+            frequently for critical vulnerabilities).</p><p>Is there any way to address all of the issues and regain
+            control of a complicated enterprise Linux environment?</p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-susesol"></a>A SUSE Solution</h3></div></div></div><p>SUSE Manager delivers best-in-class Linux server
+                management features like automated software management,
+                system provisioning, and monitoring. It provides a unified
+                Linux management infrastructure by standardizing and
+                automating server patching and management. These tasks can
+                be performed faster and with fewer errors, which improves
+                IT staff productivity while reducing server
+                downtime.</p><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-defin"></a>Definitions</h4></div></div></div><p>This document uses the word <span class="strong"><strong>landscape</strong></span> to describe one of several
+                    groups of Linux hosts. This is commonly used with
+                    enterprise software deployments as a way to define the
+                    role/quality of a host. Examples include production
+                    (PROD), development (DEV), quality assurance (QA), user
+                    acceptance/testing (UAT), etc.</p><p>The word <span class="strong"><strong>environment</strong></span> is also used. In this
+                    document, environment is defined as a physical
+                    separation of Linux hosts, like Corporate (CORP), Store
+                    (STORE), or NPE (Non-Production Environment).</p><p>Lastly, the word <span class="strong"><strong>organization</strong></span> is used. SUSE Manager has
+                    a concept of organizations and defines them as a
+                    separate management environment placed under the
+                    default organization that is created during initial
+                    installation of a SUSE Manager Server. This is a single
+                    parent (like an LDAP <span class="quote">“<span class="quote">O</span>”</span>) with many child
+                    placements (like an LDAP <span class="quote">“<span class="quote">OU</span>”</span>–restricted
+                    to a flat OU structure with no nesting). Organizations
+                    in SUSE Manager will typically have separate
+                    credentials required to administer them via the Web
+                    UI–and any Linux hosts managed by SUSE Manager will be
+                    registered into a single organization and only visible
+                    there. Keep these definitions in mind as you
+                    read.</p></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-example"></a>Example Scenario</h3></div></div></div><p>The Chameleon Corporation is the world’s largest reptile
+                and amphibian pet store, and has its headquarters in Yemen.
+                It has more than 1500 stores operating under the names
+                LizardsRUs, UnVeiledInc and Chameleo-rama in five different
+                countries.</p><p>The Chameleon Corporation has the following requirements
+                for managing patch and security updates to their Linux
+                hosts. Because of compliance constraints, their patch
+                lifecycle (the timing and delivery) is based on their
+                corporate security policies, the host
+                environments/landscapes, and their future management
+                needs.</p><p>Here is a high-level summary of the requirements:</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>The published Security Policy states the need to
+                        patch all Linux systems with the latest available
+                        updates, bug fixes, and enhancements on a quarterly
+                        basis. The quarters are defined as Q1: January
+                            1<sup>st</sup> through March
+                            31<sup>st</sup>, Q2: April
+                            1<sup>st</sup> through June
+                            30<sup>th</sup>, Q3: July
+                            1<sup>st</sup> through
+                        September 30<sup>th</sup>, and Q4:
+                        October 1<sup>st</sup> through
+                        December 31<sup>st</sup>.</p></li><li class="listitem"><p>The published Security Policy also states the
+                        need to patch all Linux systems with
+                            <span class="quote">“<span class="quote">critical</span>”</span> security updates (CVSS
+                        score of 7 or greater) within one month of release
+                        of the patch. This introduces a second schedule
+                        that may overlap any existing patch roll out.</p></li><li class="listitem"><p>The company has three different host
+                        environments: Corporate, Store, and NPE. These host
+                        environments are partitioned using SUSE Manager
+                        organizations. Each SUSE Manager organization has
+                        visibility into the default SUSE Manager
+                        organization’s software channels because of trusts,
+                        yet the managed hosts are naturally grouped and
+                        managed by their environment.</p></li><li class="listitem"><p>There are at least three landscapes in each
+                        environment: DEV, UAT, and PROD. There are
+                        additional landscapes for some environments (for
+                        example, SIT, DIT, etc.) but these are handled
+                        similarly to the aforementioned landscapes. Patch
+                        lifecycle promotion simply accounts for moving
+                        patches into additional stages as needed.</p></li><li class="listitem"><p>A <span class="quote">“<span class="quote">patch exceptions</span>”</span> process exists,
+                        as there is often a need to account for the removal
+                        of patches (for example kernel updates) from a
+                        rollout. Some hosts might have hardware drivers or
+                        third party software that depends on specific
+                        kernel versions. This exception process would be
+                        handled on a case-by-case basis.</p></li></ol></div><p>In summary, these requirements highlight the need for two
+                patch schedules, across three (or more) landscapes, in
+                three SUSE Manager organizations, with a way to handle a
+                storage location for patches that cannot be rolled out
+                (exceptions), yet need to be tracked, re-mediated and
+                reintroduced to ensure compliance.</p><p>SUSE Manager can handle these complexities very well and
+                can be set up to allow flexible delivery of these
+                requirements. Automation can even be applied to assist with
+                some facets, and procedures can be developed to ensure the
+                consistent delivery of patches that meet the published
+                company policies.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-features"></a>Features</h3></div></div></div><p>This document describes how to set up and configure a
+                SUSE Manager implementation to enable companies to deliver
+                these often requested features:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Automatic creation and archive of patch sets by
+                        quarter (or any other time period)</p></li><li class="listitem"><p>A consistent method of patch promotion and
+                        delivery through numerous landscapes and
+                        environments</p></li><li class="listitem"><p>An exception process for handling patches that
+                        need to be excluded from a patch cycle</p></li><li class="listitem"><p>Environment creation with historical patch
+                        sets</p></li><li class="listitem"><p>Minimal need for host channel subscription
+                        manipulation from cradle to grave</p></li><li class="listitem"><p>Support for service pack migration with custom
+                        child channels</p></li></ul></div><p>Many of these features can be tuned to meet a change in
+                requirements, like an increase in, or a reduction of, the
+                number of landscapes (DEV and PROD or Sandbox, DEV, QA,
+                UAT, PRE-PROD, PROD, etc.), or a more, or less frequent
+                delivery calendar. Keep this in mind as you read. SUSE
+                Manager is a very flexible product that has helped many
+                customers create and deploy solid systems and patch
+                management frameworks. Your requirements may differ from
+                the ones described here, but the flexibility of SUSE
+                Manager enables you to meet your ongoing and changing
+                needs.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-guidance"></a>Guidance</h3></div></div></div><p>This guide is based on SUSE Manager 2.1, but can also be
+                used with SUSE Manager 3.0. The document will not highlight
+                any Salt minion specifics nor should this matter change how
+                channel organizations and patch manipulation are handled
+                here.</p><p>A fresh installation is not necessary, but some
+                assumption is made that you have a working SUSE Manager
+                environment, with some registered hosts, and a decent
+                knowledge of the terms and capabilities. The SUSE Manager
+                documentation at <a class="link" href="https://documentation.suse.com/suma/3.2/" target="_top">https://documentation.suse.com/suma/3.2/</a> is an excellent source of information that is often
+                updated. Refer to the documentation for clarification of
+                any process that seems confusing. Many of the
+                implementation steps detailed in this document are enhanced
+                examples based on procedures, capabilities, or step-by-step
+                    <span class="quote">“<span class="quote">how-tos</span>”</span> in our product
+                documentation.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Test Your Implementation</h3><p>Some advanced features (like using the
+                        <span class="command"><strong>spacecmd</strong></span> or the XMLRPC API) will
+                    be explained in more detail, but these explanations may
+                    not be exhaustive. We will include some code examples
+                    in the Appendix that can be used as-is, or modified to
+                    suit your particular environments or needs. However,
+                    these come with <span class="strong"><strong>no
+                        warranty</strong></span>, and should not be expected to
+                    be perfect for any implementation. <span class="strong"><strong>Always test</strong></span> your
+                    particular implementation before any production
+                    usage.</p></div><p>The next section will describe the setup of SUSE Manager
+                to meet the requirements defined in the <span class="strong"><strong>Scenario</strong></span> section. We will
+                start with a description of the architecture (and
+                components) developed to meet the requirements, and then
+                proceed with steps to create it yourself. Each component
+                within this guide is used together with the others to
+                deliver a comprehensive solution in the specific scenario
+                described herein, but might be used individually to help
+                you meet your own solution requirements.</p></div></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="sec-implement.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top"> </td><td width="20%" align="center"> </td><td width="40%" align="right" valign="top"> Implementation</td></tr></table></div></body></html>

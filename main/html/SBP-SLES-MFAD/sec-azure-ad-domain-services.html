@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>What is Microsoft Azure Active Directory Domain Services</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="Joining a SUSE Linux Enterprise Server to a Microsoft Azure Active Directory Domain Services Managed Domain" /><link rel="up" href="index.html" title="Joining a SUSE Linux Enterprise Server to a Microsoft Azure Active Directory Domain Services Managed Domain" /><link rel="prev" href="index.html" title="Joining a SUSE Linux Enterprise Server to a Microsoft Azure Active Directory Domain Services Managed Domain" /><link rel="next" href="sec-getting-started.html" title="Getting Started" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">What is Microsoft Azure Active Directory Domain
+            Services</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="index.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="sec-getting-started.html">Next</a></td></tr></table><hr /></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-azure-ad-domain-services"></a>What is Microsoft Azure Active Directory Domain
+            Services</h2></div></div></div><p>The Azure Active Directory service does not directly provide
+            NTLM, Kerberos, or LDAP services, while by default it provides
+            WS-Trust, OpenID Connect, and OAuth capabilities. Applications
+            hosted in Azure virtual machines however may need these
+            authentication capabilities but cannot afford the latency of
+            communicating back to on-premises infrastructure, requiring
+            domain controllers to be hosted in the cloud. Many customers do
+            not want to install their own domain controllers in
+            cloud-hosted virtual machines, configure a VPN or ExpressRoute,
+            and manage AD replication to on-premises domain
+            controllers.</p><p>This is exactly what Azure AD Domain Services (AAD-DS)
+            provides: a managed domain controller with the same users and
+            groups as you have in your Azure Active Directory (AAD). 
+            AAD-DS makes it easy to join a virtual machine to the managed
+            domain so that your application can use NTLM, Kerberos, or LDAP
+            with the same credentials that they use to log in to Office 365
+            or Azure services. </p><p>Azure AD Domain Services will provision managed domain
+            controllers into the Azure Virtual Network that you specify. In
+            the image below, the managed domain controller virtual machines
+            are greyed out. This indicates they are there but you cannot
+            access them or do anything with the virtual machine directly.
+            You simply use the familiar Windows Active Directory Domain
+            Services (ADDS) as a service.</p><div class="figure"><a id="id1337"></a><p class="title"><strong>Figure 1. Microsoft Azure AAD-DS Overview </strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/azure-aad-ds-overview.png" width="100%" alt="Microsoft Azure AAD-DS Overview" /></td></tr></table></div></div></div><br class="figure-break" /><p>In this picture, you see that AAD-DS is enabled for the
+            directory, creating two virtual machines in the subnet of
+            choice. The application server can now communicate with those
+            domain controllers to domain join the machine and enable
+            authentication and authorization. Azure AD Domain Services
+            works with either cloud-only or hybrid directories. If there is
+            an existing ADDS infrastructure on-premises, you synchronize
+            users to the AAD directory using HTTPS to enable single sign on
+            to cloud resources such as Microsoft Office 365. </p></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="index.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="sec-getting-started.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Joining a SUSE Linux Enterprise Server to a Microsoft
+            Azure Active Directory Domain Services Managed Domain </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Getting Started</td></tr></table></div></body></html>

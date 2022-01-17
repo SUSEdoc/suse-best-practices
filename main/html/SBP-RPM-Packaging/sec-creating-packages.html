@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Creating packages</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="Introduction to RPM Packaging" /><link rel="up" href="index.html" title="Introduction to RPM Packaging" /><link rel="prev" href="sec-working-packages.html" title="Working with Packages" /><link rel="next" href="ar01s04.html" title="Legal notice" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Creating packages</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="sec-working-packages.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="ar01s04.html">Next</a></td></tr></table><hr /></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-creating-packages"></a>Creating packages</h2></div></div></div><p>When packages are created they provide a so called <code class="filename">.spec</code> file. A
+            spec file defines the attributes of the package, explicit dependencies (others are
+            injected as already mentioned), and how the content of the package is created. A very
+            simple spec file would be:</p><pre class="screen">Name:           mypackage
+Version:        1.0
+Release:        0
+License:        MIT
+Summary:        Dummy package
+BuildRoot:      %{_tmppath}/%{name}-%{version}-build
+
+%description
+Dummy text
+
+%install
+mkdir -p %{buildroot}%{_datadir}/%{name}
+touch %{buildroot}%{_datadir}/%{name}/CONTENT
+
+%files
+%defattr(-,root,root)
+%{_datadir}/%{name}/CONTENT
+
+%changelog</pre><p>This spec file creates a directory <code class="filename">/usr/share/mypackage</code> and puts
+            a dummy <code class="filename">CONTENT</code> file in it.</p><p>spec files are heavily defined by macros that make sure that paths and values are
+            specified by the distribution. Those macros are shipped by the base distribution and are
+            located in <code class="filename">/usr/lib/rpm</code> and <code class="filename">/etc/rpm</code>. Other
+            packages may contribute more macros. For example the macros defined in
+                <code class="filename">/usr/lib/rpm/golang-macros.rb</code> are provided by the
+                <span class="package">golang-packaging</span> package and are useful to create packages that
+            use the <span class="strong"><strong>Go</strong></span> language.</p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-common-macros"></a>Common Macros</h3></div></div></div><p>When building spec files, you should be familiar with macros like <span class="strong"><strong>%{_prefix}</strong></span>, <span class="strong"><strong>%{_datadir}</strong></span>, <span class="strong"><strong>%{_mandir}</strong></span>,
+                    <span class="strong"><strong>%{_libdir}</strong></span>, <span class="strong"><strong>%{_bindir}</strong></span>, etc... You can evaluate a macro as follows:</p><pre class="screen">$ rpm --eval "%{_libdir}"
+/usr/lib64</pre></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-sub-packages"></a>Sub-packages</h3></div></div></div><p>Sometimes you will build multiple components from a single source that are
+                independent of each other.</p><p>The sources for a package <span class="package">Office Suite</span> may result in:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>A Word Processor</p></li><li class="listitem"><p>A Spreadsheet</p></li><li class="listitem"><p>Common libraries</p></li><li class="listitem"><p>Development files</p></li></ul></div><p>For this, you can declare <span class="package">subpackages</span>, independent description
+                and attributes sections for each component. The build section is common to all
+                subpackages, and then again in the <code class="filename">%files</code> section, you will
+                declare which files go to each subpackage. In this example, the subpackages could
+                be:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+                        <span class="package">office-wordprocessor</span>
+                    </p></li><li class="listitem"><p>
+                        <span class="package">office-spreadsheet</span>
+                    </p></li><li class="listitem"><p>
+                        <span class="package">liboffice</span>
+                    </p></li><li class="listitem"><p>
+                        <span class="package">office-devel</span>
+                    </p></li></ul></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-building-rpmbuild"></a>Building with rpmbuild</h3></div></div></div><p>You can build a package with the <span class="command"><strong>rpmbuild</strong></span> tool. It
+                requires the spec file to be in a specific location. You can tweak the standard
+                configuration to search spec files in the current directory:</p><pre class="screen">$ cat ~/.rpmmacros
+%topdir /space/packages
+%_builddir %{topdir}/build
+%_rpmdir %{topdir}/rpms
+%_sourcedir %(echo $PWD)
+%_specdir %(echo $PWD)
+%_srcrpmdir %{topdir}/rpms</pre><p>You can configure it so that built packages are saved in
+                    <code class="filename">/space/packages</code>. Make the tweaks according to your own
+                preferences.</p><p>When this is set up, enter the following command:</p><pre class="screen">$ rpmbuild -bb mypackage.spec
+Executing(%install): /bin/sh -e /var/tmp/rpm-tmp.lVzwnj
++ umask 022
++ cd /space/packages/build
++ mkdir -p /home/duncan/rpmbuild/BUILDROOT/mypackage-1.0-0.x86_64/usr/share/mypackage
++ touch /home/duncan/rpmbuild/BUILDROOT/mypackage-1.0-0.x86_64/usr/share/mypackage/CONTENT
++ /usr/lib/rpm/brp-compress
++ /usr/lib/rpm/brp-suse
+Processing files: mypackage-1.0-0.x86_64
+Provides: mypackage = 1.0-0 mypackage(x86-64) = 1.0-0
+Requires(rpmlib): rpmlib(CompressedFileNames) &lt;= 3.0.4-1 rpmlib(PayloadFilesHavePrefix) &lt;= 4.0-1
+Checking for unpackaged file(s): /usr/lib/rpm/check-files /home/duncan/rpmbuild/BUILDROOT/mypackage-1.0-0.x86_64
+Wrote: /space/packages/rpms/x86_64/mypackage-1.0-0.x86_64.rpm
+Executing(%clean): /bin/sh -e /var/tmp/rpm-tmp.0xLGri
++ umask 022
++ cd /space/packages/build
++ /usr/bin/rm -rf /home/duncan/rpmbuild/BUILDROOT/mypackage-1.0-0.x86_64
++ rm -rf filelists</pre><p>Now you can verify the content of the package:</p><pre class="screen">% rpm -qpl /space/packages/rpms/x86_64/mypackage-1.0-0.x86_64.rpm
+/usr/share/mypackage/CONTENT</pre><p>Everything that you put into the <span class="strong"><strong>%{buildroot}</strong></span>
+                did end up as content of the package.</p><p>The term <span class="quote">“<span class="quote">building a package</span>”</span> can have two meanings. One is
+                assembling the package from existing content. You could build your application in
+                Jenkins, take the built artifacts and use the spec file to package it.</p><p>However, where <span class="command"><strong>rpm</strong></span> excels is that you can build the
+                application in the spec file itself, and use the distribution and dependencies to
+                set up the build environment.</p><p>A common use case to illustrate this is the typical Linux application built with
+                    <span class="command"><strong> configure &amp;&amp; make &amp;&amp; make
+                    install</strong></span>. In the next example you build a package for gqlplus (see
+                    <a class="link" href="http://gqlplus.sourceforge.net/" target="_top">http://gqlplus.sourceforge.net/</a>, an alternative client for
+                Oracle databases.</p><p>Provided that you have readline and ncurses development headers, you can build
+                this application by unpacking the TAR archive and performing the commands mentioned
+                above. Some programs require an extra step with <span class="command"><strong>autoconf</strong></span> to
+                generate the <span class="command"><strong>configure</strong></span> script. This is specific to building
+                software and has nothing to do with packaging.</p><p>When you do <span class="command"><strong>./configure</strong></span> you need to pass the right
+                    <span class="command"><strong>--prefix</strong></span>. Macros can help here. You could use the command
+                    <span class="command"><strong>configure --prefix=%{_prefix}</strong></span>. However, there is a better
+                macro called <span class="strong"><strong>%configure</strong></span> which takes care and sets
+                most of the configuration options (You can also try expanding it with <span class="command"><strong>echo
+                    $(rpm --eval '%configure')</strong></span>).</p><p>The package cannot build if some libraries are not present. A C compiler is there,
+                but the basic build tools (<span class="command"><strong>make</strong></span>) are not available. That
+                is what <span class="strong"><strong>BuildRequires</strong></span> are for. They define what
+                packages are needed for building - but not necessarily at runtime.</p><p>On the other hand, the original <span class="package">oracle-instantclient-sqlplus</span>
+                package is required at runtime, but you do not need it to build your package.</p><pre class="screen">Name:           gqlplus
+Version:            1.15
+Release:            0
+License:            GPL-2.0
+Summary:            A drop-in replacement for sqlplus, an Oracle SQL client
+Url:                http://gqlplus.sourceforge.net/
+Group:              Productivity/Databases/Clients
+Source0:            %{name}-%{version}.tar.bz2
+BuildRequires:  readline-devel
+BuildRequires:  ncurses-devel
+BuildRequires:  gcc make autoconf automake
+BuildRoot:      %{_tmppath}/%{name}-%{version}-build
+Requires:       oracle-instantclient-sqlplus
+%description
+GQLPlus is a drop-in replacement for sqlplus, an Oracle SQL client, for Unix and Unix-like platforms. The difference between GQLPlus and sqlplus is command-line editing and history, plus table-name and column-name completion.
+
+%prep
+%setup -q
+
+%build
+aclocal &amp;&amp; autoconf
+automake --add-missing
+%configure
+make %{?_smp_mflags}
+
+%install
+%makeinstall
+
+%files
+%defattr(-,root,root)
+%doc ChangeLog README LICENSE
+%{_bindir}/gqlplus
+
+%changelog</pre><p>The <span class="strong"><strong>Source0</strong></span> section specifies a source that you
+                can refer later using the <span class="strong"><strong>%SOURCE0</strong></span> or <span class="strong"><strong>%{S:0}</strong></span> macros. You can have more than one source
+                    (<span class="strong"><strong>Source1</strong></span>, etc).</p><p>The <span class="strong"><strong>prep</strong></span> section uses the <span class="strong"><strong>%setup</strong></span> macro (see <a class="link" href="http://ftp.rpm.org/max-rpm/s1-rpm-inside-macros.html#S2-RPM-INSIDE-SETUP-MACRO" target="_top">http://ftp.rpm.org/max-rpm/s1-rpm-inside-macros.html#S2-RPM-INSIDE-SETUP-MACRO</a>to unpack the sources. You could as well operate directly on the source files if
+                you need to do something unconventional. </p><p>As we need <span class="command"><strong>make install</strong></span> to install the files inside <span class="strong"><strong>%{buildroot}</strong></span>, we should call <span class="command"><strong>make install
+                    DESTDIR=%{buildroot}</strong></span>, but <span class="strong"><strong>%makeinstall</strong></span> is a macro for that. </p><p>The <span class="strong"><strong>files</strong></span> section list the files
+                    <span class="package">rpmbuild</span> should expect to find inside the <span class="strong"><strong>%{buildroot}</strong></span> macro that will be the content of the
+                package. </p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Not Needed at Runtime</h3><p>You do not need to add a runtime <span class="strong"><strong>Requires</strong></span>
+                    to the readline and ncurses libraries. Because the executable is linked against
+                    the ones installed by the <span class="package">-devel</span> packages, it will be scanned
+                    and the right <span class="strong"><strong>Requires</strong></span> will be
+                    injected:</p></div><pre class="screen">$ rpm -qp --requires gqlplus-1.15-0.x86_64.rpm
+libc.so.6()(64bit)
+...
+libncurses.so.6()(64bit)
+libreadline.so.7()(64bit)
+oracle-instantclient-sqlplus
+...</pre><p>These symbols are provided by the right package, thus the solver will match
+                them:</p><pre class="screen">rpm -q --whatprovides 'libncurses.so.6()(64bit)'
+libncurses6-6.0-19.1.x86_64</pre><p>For more information on how to build packages for various types of software, visit
+                the <span class="strong"><strong>openSUSE Packaging Guidelines</strong></span> at <a class="link" href="https://en.opensuse.org/openSUSE:Packaging_guidelines" target="_top">https://en.opensuse.org/openSUSE:Packaging_guidelines</a>.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-building-environment"></a>Building in a Real Build Environment</h3></div></div></div><p>Building this way means the build environment is your system. If a package is
+                available in <span class="strong"><strong>BuildRequires</strong></span>, you will have to
+                install it on your system first.</p><p>If the software you are building links against some library only if it is
+                available, even if you do not mention it in your <span class="strong"><strong>BuildRequires</strong></span>, if that library is present in your system, it will
+                taint the build and make the command <span class="command"><strong>configure</strong></span> find it.</p><p> The following section outlines what to do if you want to build against only the
+                packages that are in the build requirements.</p><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-open-build-service"></a>The Open Build Service</h4></div></div></div><p>The <span class="strong"><strong>Open Build Service </strong></span> at <a class="link" href="http://openbuildservice.org/" target="_top">http://openbuildservice.org/</a> allows to build packages for
+                    multiple distributions and architectures. Visit the <span class="strong"><strong>Materials</strong></span> section of the Web site (see <a class="link" href="http://openbuildservice.org/help/" target="_top">http://openbuildservice.org/help/</a>) for a deeper
+                    introduction. For the package you are building, you can get an account at the
+                        <span class="strong"><strong>openSUSE Build Service</strong></span> instance. Go to
+                    your <span class="quote">“<span class="quote">Home Project</span>”</span>, and click <span class="quote">“<span class="quote">Create New Package</span>”</span>.
+                    Upload the spec file and sources. </p><p>After that you need to configure some target distributions for your home
+                    project. That can be one base distribution, or another project. This shows the
+                    power by allowing building based on layers that can override things from
+                    previous layers. </p><p>Add the most popular (open)SUSE distributions (latest Leap and Tumbleweed) and
+                    your package will be built automatically. A repository will be published
+                    automatically and made available for public consumption. </p><p>Every time the sources change, the package will be rebuilt. If you have more
+                    packages in the same project, those will be rebuilt in the right order, and
+                    re-published. </p><div class="figure"><a id="fig-rpm-packaging-obs"></a><p class="title"><strong>Figure 1. Open Build Service Overview of Packages</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="90%"><tr><td><img src="images/rpm-packaging-gqlplus-obs.png" width="100%" alt="Open Build Service Overview of Packages" /></td></tr></table></div></div></div><br class="figure-break" /><p>The Open Build Service cannot only build packages, but also images from those
+                    packages. All SUSE products and the openSUSE distributions are built using the
+                    Open Build Service. Contributors submit new sources, and the Open Build Service
+                    takes care of assembling everything (and openQA later ensures that everything
+                    works).</p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-using-obs-locally"></a>Using the Open Build Service locally</h4></div></div></div><p>With the <span class="command"><strong>osc</strong></span> tool you can checkout packages from
+                    the Open Build Service, make changes to them and resubmit them.</p><pre class="screen">$ osc co home:dmacvicar gqlplus
+A    home:dmacvicar
+A    home:dmacvicar/gqlplus
+A    home:dmacvicar/gqlplus/gqlplus-1.15.tar.bz2
+A    home:dmacvicar/gqlplus/gqlplus.changes
+A    home:dmacvicar/gqlplus/gqlplus.spec
+At revision 4.</pre><p>The most interesting feature is the ability to build packages or images
+                    locally. osc allows you to build in an isolated environment (either a chroot
+                    jail [see <a class="link" href="https://en.wikipedia.org/wiki/Chroot" target="_top">https://en.wikipedia.org/wiki/Chroot</a>] or a
+                    virtual machine) by setting up that environment automatically using the
+                        <span class="strong"><strong>BuildRequires</strong></span> of the spec file. It also
+                    allows you to build against a different distribution than the one you are
+                    running.</p><pre class="screen">$ cd home:dmacvicar/gqlplus
+$ osc build openSUSE_Leap_42.2
+...</pre></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-improving-package"></a>Improving the Package</h3></div></div></div><p>When you build a package in the Open Build Service, you will find out that, in
+                addition to the automated actions that inject dependencies, there are several checks
+                being done to the package. </p><p>These checks are very detailed. But this is the only way to ensure quality and
+                consistency when a product is assembled from thousands of sources by hundreds of
+                contributors. </p><p>The <span class="command"><strong>spec-cleaner</strong></span> tool can help you keeping your spec
+                file in shape: </p><pre class="screen">$ spec-cleaner -i gqlplus.spec</pre><p>For example, it can help you converting <span class="strong"><strong>BuildRequires:
+                    foo-devel</strong></span> dependencies to <span class="strong"><strong>BuildRequires:
+                    pkgconfig(foo)</strong></span>. If a <span class="package">-devel</span> package installs a
+                    <span class="package">pkg-config</span> module, a <span class="strong"><strong>Provides:
+                    pkgconfig(foo)</strong></span> is automatically injected. If the build process
+                    (<span class="command"><strong>./configure</strong></span> or <span class="command"><strong>Makefile</strong></span>) uses
+                    <span class="command"><strong>pkg-config</strong></span> to find the software, it makes more sense and it
+                is closer to reality to depend on <span class="package">pkgconfig(foo)</span> being present,
+                regardless which <span class="package">-devel</span> package provides it. </p><p>You can get more information about how to fix post-build checks in the openSUSE
+                Packaging Checks page at <a class="link" href="https://en.opensuse.org/openSUSE:Packaging_checks" target="_top">https://en.opensuse.org/openSUSE:Packaging_checks</a>. </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-changelogs"></a>Changelogs</h3></div></div></div><p>Until now you left the <span class="strong"><strong>%changelog</strong></span> section
+                empty. Some distributions write the history of the package to the changelog.
+                SUSE-flavored distributions keep the changelog in a separate
+                    <code class="filename">.changes</code> file. To quickly generate or update it, you can
+                use <span class="command"><strong>osc vc</strong></span> in the directory containing the spec file and the
+                sources.</p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="sec-working-packages.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="ar01s04.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Working with Packages </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Legal notice</td></tr></table></div></body></html>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>SUSE Public Cloud Infrastructure Setup Guide (SLES12 SP1)</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><meta name="description" content="This guide describes the setup of the required infrastructure for a SUSE public cloud in generic terms that scale from small to large cloud installations. The implementation of this setup is a requirement to obtain SUSE Certified Cloud Provider status. Additionally this setup can also be implemented in a private cloud setup. Disclaimer: Documents published as part of the SUSE Best Practices series have been contributed voluntarily by SUSE employees and third parties. They are meant to serve as examples of how particular actions can be performed. They have been compiled with utmost attention to detail. However, this does not guarantee complete accuracy. SUSE cannot verify that actions described in these documents do what is claimed or whether actions described have unintended consequences. SUSE LLC, its affiliates, the authors, and the translators may not be held liable for possible errors or the consequences thereof." /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="SUSE Public Cloud Infrastructure Setup Guide (SLES12 SP1)" /><link rel="next" href="sec-overview.html" title="High Level Overview" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">SUSE Public Cloud Infrastructure Setup Guide (SLES12 SP1)</th></tr><tr><td width="20%" align="left"> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="sec-overview.html">Next</a></td></tr></table><hr /></div><div xml:lang="en" class="article" lang="en"><div class="titlepage"><div><div><h1 class="title"><a id="art-sbp-public-cloud"></a>SUSE Public Cloud Infrastructure Setup Guide (SLES12 SP1)</h1></div><div><div class="author"><h3 class="author"><span class="firstname">Robert</span> <span class="surname">Schweikert</span></h3></div></div><div><div class="abstract"><p class="title"><strong>Abstract</strong></p><p>This guide describes the setup of the required infrastructure for
+    a SUSE public cloud in generic terms that scale from small to large
+    cloud installations. The implementation of this setup is a requirement
+    to obtain SUSE Certified Cloud Provider status. Additionally this setup
+    can also be implemented in a private cloud setup. </p><p>
+    <span class="strong"><strong>Disclaimer: </strong></span>
+    Documents published as part of the SUSE Best Practices series have been contributed voluntarily
+    by SUSE employees and third parties. They are meant to serve as examples of how particular
+    actions can be performed. They have been compiled with utmost attention to detail. However,
+    this does not guarantee complete accuracy. SUSE cannot verify that actions described in these
+    documents do what is claimed or whether actions described have unintended consequences.
+    SUSE LLC, its affiliates, the authors, and the translators may not be held liable for possible errors
+    or the consequences thereof.
+   </p></div></div></div><hr /></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="sect1"><a href="index.html#sec-intro">Introduction</a></span></dt><dt><span class="sect1"><a href="sec-overview.html">High Level Overview</a></span></dt><dd><dl><dt><span class="sect2"><a href="sec-overview.html#sec-region-server-s">Region Server(s)</a></span></dt><dt><span class="sect2"><a href="sec-overview.html#sec-smt-server-s">SMT Server(s)</a></span></dt></dl></dd><dt><span class="sect1"><a href="sec-detailed-setup-guide.html">Detailed Setup Guide</a></span></dt><dd><dl><dt><span class="sect2"><a href="sec-detailed-setup-guide.html#sec-general-setup">General Setup</a></span></dt><dt><span class="sect2"><a href="sec-detailed-setup-guide.html#sec-smt-server-setup">SMT Server Setup</a></span></dt><dt><span class="sect2"><a href="sec-detailed-setup-guide.html#sec-smt-server-monitoring">SMT Server Monitoring</a></span></dt><dt><span class="sect2"><a href="sec-detailed-setup-guide.html#sec-region-server-setup">Region Server Setup</a></span></dt><dt><span class="sect2"><a href="sec-detailed-setup-guide.html#sec-region-server-monitoring">Region Server Monitoring</a></span></dt><dt><span class="sect2"><a href="sec-detailed-setup-guide.html#sec-server-access-control">Server Access Control</a></span></dt><dt><span class="sect2"><a href="sec-detailed-setup-guide.html#sec-guest-image">Guest Image</a></span></dt><dt><span class="sect2"><a href="sec-detailed-setup-guide.html#sec-appendix-a">Appendix A</a></span></dt></dl></dd><dt><span class="sect1"><a href="ar01s04.html">Legal notice</a></span></dt><dt><span class="sect1"><a href="ar01s05.html">GNU Free Documentation License</a></span></dt></dl></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-intro"></a>Introduction</h2></div></div></div><p>Use of public cloud resources is one of the fastest growing areas
+   of the IT industry. In many cases Infrastructure as a Service (IaaS) is
+   a leading use case of public cloud. The public cloud brings with it a
+    <span class="quote">“<span class="quote">start and use</span>”</span> expectation. This poses a challenge for an
+   Enterprise Linux distribution such as SUSE Linux Enterprise to provide access to the
+   update repositories without formal registration of the OS
+   installation.</p><p>In a traditional data center a SUSE customer will set up a
+   new machine (physical or virtual) and configure the system to connect to
+   a local SMT server, be managed by SUSE Manager, or connect to the
+   SUSE Customer Center (SCC), for SUSE Linux Enterprise 12 based releases, or to the Novell Customer Center
+   (NCC), for SUSE Linux Enterprise 11 based releases to obtain updates. In the public
+   cloud the data center workflow is not practical.</p><p>Generating registration entitlements for every instance for use
+   with SCC/NCC and providing these to the user would not meet the
+    <span class="quote">“<span class="quote">fire up and use</span>”</span> expectation. Automated generation of
+   entitlements and injection into instances, while possible, would provide
+   registration with SCC/NCC. But it may generate additional cost for the
+   customer as packages would need to be downloaded from outside the cloud
+   provider`s network for update purposes. Additionally a direct
+   registration of instances with SCC/NCC would put the burden of
+   verification concerning eligibility into the SCC/NCC code base. For NCC
+   this is not possible and for SCC this is undesirable. Therefore, in a
+   public cloud setting it is important that the update infrastructure be
+   operated inside the public cloud environment.</p><p>This guide describes the setup of the required infrastructure in
+   generic terms that scale from small to large cloud installations. The
+   implementation of this setup is a requirement to obtain SUSE Certified
+   Cloud Provider status. Additionally this setup can also be implemented
+   in a private cloud setup.</p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="sec-overview.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top"> </td><td width="20%" align="center"> </td><td width="40%" align="right" valign="top"> High Level Overview</td></tr></table></div></body></html>

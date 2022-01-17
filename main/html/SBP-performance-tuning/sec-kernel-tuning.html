@@ -1,0 +1,633 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Kernel Tuning</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="Performance Analysis, Tuning and Tools on SUSE Linux Enterprise Products" /><link rel="up" href="index.html" title="Performance Analysis, Tuning and Tools on SUSE Linux Enterprise Products" /><link rel="prev" href="sec-bios-setup.html" title="BIOS Setup" /><link rel="next" href="sec-irq-config.html" title="IRQ Configuration" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Kernel Tuning</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="sec-bios-setup.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="sec-irq-config.html">Next</a></td></tr></table><hr /></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-kernel-tuning"></a>Kernel Tuning</h2></div></div></div><p>The Linux Kernel provides many parameters to be tuned via the
+                <span class="bold"><strong>sysctl</strong></span> interface or the
+                <span class="bold"><strong>proc</strong></span> file system. The following
+            chapters describe those settings which can have a direct impact
+            on overall system performance hence the values which can be
+            used for specific profiles (for example
+                <span class="quote">“<span class="quote">high-throughput</span>”</span> versus
+                <span class="quote">“<span class="quote">low-latency</span>”</span>).</p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-io-scheduler-tuning"></a>I/O Scheduler Tuning</h3></div></div></div><p>The first setting which has a direct impact on I/O
+                performance is the I/O scheduler chosen for your device.
+                The I/O scheduler can be defined for each device. This
+                means the Linux kernel allows you to use different
+                scheduling policies for different devices. This can be very
+                convenient on systems where different hard-drives perform
+                different duties, thus different policies among them may
+                make sense.</p><p>To retrieve or change the value of the I/O scheduler you
+                can access the file at
+                    <code class="filename">/sys/block/sda/queue/scheduler</code>.</p><p>On SUSE Linux Enterprise-based distributions you can
+                chose among three different scheduling algorithms to be
+                assigned to each device: <span class="bold"><strong>noop</strong></span>, <span class="bold"><strong>cfq</strong></span>
+                and <span class="bold"><strong>deadline</strong></span>.</p><p>The Complete Fair Queuing (CFQ) is a fairness-oriented
+                scheduler and is the default algorithm used by the kernel.
+                The algorithm is based on the use of a time slice in which
+                it is allowed to perform I/O on the disk.</p><p>To enable the CFQ scheduler, run the command:</p><p>
+                <span class="command"><strong>echo cfq &gt;
+                    /sys/block/sda/queue/scheduler</strong></span>
+            </p><p>The DEADLINE algorithm is a latency-oriented I/O
+                scheduler where each request is assigned a target deadline.
+                In all those cases where several threads are performing
+                reads or writes this algorithm offers greater throughput as
+                long as fairness is not a requirement.</p><p>To enable the DEADLINE scheduler, run the command:</p><p>
+                <span class="command"><strong>echo deadline &gt;
+                    /sys/block/sda/queue/scheduler</strong></span>
+            </p><p>The NOOP algorithm is the simplest of the three. It
+                performs any I/O which is sent to the scheduler without any
+                complex scheduling. We recommend to use it on those systems
+                where storage devices can perform scheduling themselves
+                hence this algorithm avoids competition between the storage
+                device and the CPU which is trying to perform any
+                scheduling. It is also recommended in virtual machines
+                which do not have a direct access to the storage device as
+                they are virtualized by the hypervisor.</p><p>To enable the NOOP scheduler, run the command:</p><p>
+                <span class="command"><strong>echo noop &gt;
+                    /sys/block/sda/queue/scheduler</strong></span>
+            </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-task-sched-tuning"></a>Task Scheduler Tuning</h3></div></div></div><p>Basic aspects and configuration of the Linux kernel task
+                scheduler are performed during the kernel configuration and
+                compilation. This document does not cover those details. It
+                rather covers some <span class="bold"><strong>sysctl</strong></span> settings which
+                can have an impact on throughput or latency of the system
+                involved with packet processing.</p><p>The default Linux kernel scheduler is the Complete Fair
+                Scheduler (CFS) which accumulates a <span class="quote">“<span class="quote">virtual
+                    runtime</span>”</span> (vruntime). When a new task needs to be
+                selected it is always the task with the minimum accumulated
+                    <span class="bold"><strong>vruntime</strong></span>.</p><p>There are few scheduling policies to be assigned to
+                running processes:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><span class="bold"><strong>SCHED_OTHER</strong></span> is
+                        the default Linux scheduling policy.</p></li><li class="listitem"><p><span class="bold"><strong>SCHED_FIFO</strong></span> uses
+                        the <span class="quote">“<span class="quote">First In First Out</span>”</span> algorithm and
+                        is usually used for some time-critical
+                        applications.</p></li><li class="listitem"><p><span class="bold"><strong>SCHED_RR</strong></span> is
+                        similar to the <span class="bold"><strong>SCHED_FIFO</strong></span> policy but it is
+                        implemented using a Round Robin algorithm.</p></li><li class="listitem"><p><span class="bold"><strong>SCHED_BATCH</strong></span> is
+                        designed for CPU-intensive applications which may
+                        require to get hold of the CPU for longer time to
+                        complete.</p></li><li class="listitem"><p><span class="bold"><strong>SCHED_IDLE</strong></span> is
+                        designed for low priority tasks which may run
+                        seldom or that are not time-critical.</p></li><li class="listitem"><p><span class="bold"><strong>SCHED_DEADLINE</strong></span>
+                        is designed to make a task complete within a given
+                        deadline very similarly to the I/O deadline
+                        scheduler.</p></li></ul></div><p>It is possible to assign processes with different
+                policies using the tool <span class="bold"><strong>chrt</strong></span>
+                (shipped with the <span class="package">util-linux package</span>).
+                The same tool can be used to retrieve information about
+                running processes and priorities supported for each of the
+                policy supported.</p><p>In the example below, you can retrieve valid priorities
+                for the various scheduling policies:</p><pre class="screen">
+# chrt -m
+SCHED_SCHED_OTHER min/max priority	: 0/0
+SCHED_SCHED_FIFO min/max priority	: 1/99
+SCHED_SCHED_RR min/max priority	: 1/99
+SCHED_SCHED_BATCH min/max priority	: 0/0
+SCHED_SCHED_IDLE min/max priority	: 0/0
+SCHED_SCHED_DEADLINE min/max priority	: 0/0
+</pre><p>Based on the above priorities you can set – for example –
+                a process with the SCHED_FIFO policy and a priority of
+                1:</p><pre class="screen"># chrt -f -p 1 &lt;PID&gt;</pre><p>Or you can set a SCHED_BATCH policy with a priority of
+                0:</p><pre class="screen"># chrt -b -p 0 &lt;PID&gt;</pre><p>The following <span class="bold"><strong>sysctl</strong></span> settings can have
+                a direct impact on throughput and latency:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><span class="italic">kernel.sched_min_granularity_ns</span>
+                        represents the minimal preemption granularity for
+                        CPU bound tasks. See <span class="bold"><strong>sched_latency_ns</strong></span> for details. The
+                        default value is 4000000 nanoseconds.</p></li><li class="listitem"><p><span class="italic">kernel.sched_wakeup_granularity_ns</span>
+                        represents the wake-up preemption granularity.
+                        Increasing this variable reduces wake-up
+                        preemption, reducing disturbance of compute bound
+                        tasks. Lowering it improves wake-up latency and
+                        throughput for latency critical tasks, particularly
+                        when a short duty cycle load component must compete
+                        with CPU bound components. The default value is
+                        2500000 nanoseconds.</p></li><li class="listitem"><p><span class="italic">kernel.sched_migration_cost_ns</span> is
+                        the amount of time after the last execution that a
+                        task is considered to be <span class="quote">“<span class="quote">cache hot</span>”</span>
+                        in migration decisions. A <span class="quote">“<span class="quote">hot</span>”</span> task
+                        is less likely to be migrated to another CPU, so
+                        increasing this variable reduces task migrations.
+                        The default value is 500000 nanoseconds. If the CPU
+                        idle time is higher than expected when there are
+                        runnable processes, try reducing this value. If
+                        tasks bounce between CPUs or nodes too often, try
+                        increasing it.</p></li><li class="listitem"><p><span class="italic">kernel.numa_balancing</span> is a boolean
+                        flag which enables or disables automatic NUMA
+                        balancing of processes / threads. Automatic NUMA
+                        balancing uses several algorithms and data
+                        structures, which are only active and allocated if
+                        automatic NUMA balancing is active on the
+                        system.</p></li></ul></div><p>Find below examples for a possible comparison for the
+                three values across different performance profiles.</p><div class="table"><a id="id1338"></a><p class="title"><strong>Table 1. Kernel Tuning - Comparison</strong></p><div class="table-contents"><table class="table" summary="Kernel Tuning - Comparison" border="1"><colgroup><col /><col /><col /><col /></colgroup><thead><tr><th> </th><th>Balanced</th><th>Higher Throughput</th><th>Lower Latency</th></tr></thead><tbody><tr><td>
+                                <p>
+                                    <span class="italic">kernel.sched_min_granularity_ns</span>
+                                </p>
+                            </td><td>
+                                <p>2,250,000</p>
+                            </td><td>
+                                <p>10,000,000</p>
+                            </td><td>
+                                <p>10,000,000</p>
+                            </td></tr><tr><td>
+                                <p>
+                                    <span class="italic">kernel.sched_wakeup_granularity_ns</span>
+                                </p>
+                            </td><td>
+                                <p>3,000,000</p>
+                            </td><td>
+                                <p>15,000,000</p>
+                            </td><td>
+                                <p>1,000,000</p>
+                            </td></tr><tr><td>
+                                <p>
+                                    <span class="italic">kernel.sched_migration_cost_ns</span>
+                                </p>
+                            </td><td>
+                                <p>500,000</p>
+                            </td><td>
+                                <p>250,000</p>
+                            </td><td>
+                                <p>5,000,000</p>
+                            </td></tr><tr><td>
+                                <p>
+                                    <span class="italic">kernel.numa_balancing</span>
+                                </p>
+                            </td><td>
+                                <p>1</p>
+                            </td><td>
+                                <p>0</p>
+                            </td><td>
+                                <p>0</p>
+                            </td></tr><tr><td>
+                                <p>
+                                    <span class="italic">kernel.pid_max</span>
+                                </p>
+                            </td><td>
+                                <p>32,768</p>
+                            </td><td>
+                                <p>1024 * NUMBER_OF_CPUS</p>
+                            </td><td>
+                                <p>32,768</p>
+                            </td></tr></tbody></table></div></div><br class="table-break" /></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-memory-man-tuning"></a>Memory Manager Tuning</h3></div></div></div><p>The Linux kernel stages disk writes into cache, and over
+                time asynchronously flushes them to disk. In addition,
+                there is the chance that a lot of I/O will overwhelm the
+                cache. The Linux kernel allows you – via the
+                    <span class="bold"><strong>sysctl</strong></span> command – to tune how much
+                data to keep in RAM before swapping it out to disk. It also
+                allows you to tune various other settings as described
+                below.</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><span class="italic">vm.dirty_ratio</span>
+                        is the absolute maximum amount of system memory
+                        (here expressed as a percentage) that can be filled
+                        with dirty pages before everything must get
+                        committed to disk. When the system gets to this
+                        point, all new I/O operations are blocked until
+                        dirty pages have been written to disk. This is
+                        often the source of long I/O pauses, but is a
+                        safeguard against too much data being cached
+                        unsafely in memory. (<span class="italic">vm.dirty_bytes</span> is
+                        preferable).</p></li></ul></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><span class="italic">vm.dirty_bytes</span>
+                        is the amount of dirty memory at which a process
+                        generating disk writes will itself start
+                        write-back. </p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title"><span class="italic">dirty_bytes</span> and <span class="italic">dirty_ratio</span></h3><p><span class="italic">dirty_bytes</span> is the counterpart
+                            of <span class="italic">dirty_ratio</span>. Only one of them
+                            may be specified at a time. When one
+                                <span class="bold"><strong>sysctl</strong></span> is written it is
+                            immediately taken into account to evaluate the
+                            dirty memory limits and the other appears as 0
+                            when read. The minimum value allowed for
+                                <span class="italic">dirty_bytes</span> is two pages (in
+                            bytes). Any value lower than this limit will be
+                            ignored and the old configuration will be
+                            retained.</p></div></li></ul></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><span class="italic">vm.dirty_background_ratio</span> is the
+                        percentage of system memory that can be filled with
+                            <span class="quote">“<span class="quote">dirty</span>”</span> pages before the <span class="bold"><strong>pdflush</strong></span>/<span class="bold"><strong>flush</strong></span>/<span class="bold"><strong>kdmflush</strong></span> background
+                        processes kick in to write it to disk.
+                            <span class="quote">“<span class="quote">Dirty</span>”</span> pages are memory pages
+                        that still need to be written to disk. As an
+                        example, if you set this value to 10 (it means
+                        10%), and your server has 256 GB of memory, then
+                        25.6 GB of data could be sitting in RAM before
+                        something is done (<span class="italic">vm.dirty_background_bytes is
+                            preferable</span>).</p></li></ul></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><span class="italic">vm.dirty_background_bytes</span> is the
+                        amount of dirty memory at which the background
+                        kernel flusher threads will start write-back. This
+                        setting is the counterpart of <span class="italic">dirty_background_ratio</span>. Only one of
+                        them may be specified at a time. When one
+                            <span class="bold"><strong>sysctl</strong></span> is written it is
+                        immediately taken into account to evaluate the
+                        dirty memory limits and the other appears as 0 when
+                        read. In some scenarios this is a better and safer
+                        setting to be used since it provides a finer tuning
+                        on the amount of memory (for example, 1% of 256 GB
+                        = 2.56 GB might already be too much for some
+                        scenarios).</p></li></ul></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><span class="italic">vm.swappiness</span>:
+                        The kernel buffers always stay in main memory,
+                        because they have to. Applications and cache
+                        however do not need to stay in RAM. The cache can
+                        be dropped, and the applications can be paged out
+                        to the swap file. Dropping cache means a potential
+                        performance hit. Likewise with paging applications
+                        out. This parameter helps the kernel decide what to
+                        do. By setting it to the maximum of 100 the kernel
+                        will swap very aggressively. By setting it to 0 the
+                        kernel will only swap to protect against an
+                        out-of-memory condition. The default is 60 which
+                        means that some swapping will occur.</p></li></ul></div><p>Find below examples for a possible comparison for the
+                three values across different performance profiles.</p><div class="table"><a id="id1339"></a><p class="title"><strong>Table 2. Memory Manager Tuning - Comparison</strong></p><div class="table-contents"><table class="table" summary="Memory Manager Tuning - Comparison" border="1"><colgroup><col /><col /><col /><col /></colgroup><thead><tr><th> </th><th>Balanced</th><th>Higher Throughput</th><th>Lower Latency</th></tr></thead><tbody><tr><td>
+                                <p>
+                                    <span class="italic">vm.dirty_ratio</span>
+                                </p>
+                            </td><td>
+                                <p>20</p>
+                            </td><td>
+                                <p>40</p>
+                            </td><td>
+                                <p>10</p>
+                            </td></tr><tr><td>
+                                <p>
+                                    <span class="italic">vm.dirty_background_ratio</span>
+                                </p>
+                            </td><td>
+                                <p>10</p>
+                            </td><td>
+                                <p>10</p>
+                            </td><td>
+                                <p>3</p>
+                            </td></tr><tr><td>
+                                <p>
+                                    <span class="italic">vm.dirty_bytes</span>
+                                </p>
+                            </td><td>
+                                <p>16,384</p>
+                            </td><td>
+                                <p>32,768</p>
+                            </td><td>
+                                <p>8,192</p>
+                            </td></tr><tr><td>
+                                <p>
+                                    <span class="italic">vm.dirty_background_bytes</span>
+                                </p>
+                            </td><td>
+                                <p>78,643,200</p>
+                            </td><td>
+                                <p>104,857,600</p>
+                            </td><td>
+                                <p>52,428,800</p>
+                            </td></tr><tr><td>
+                                <p>
+                                    <span class="italic">vm.swappiness
+                                    </span>
+                                </p>
+                            </td><td>
+                                <p>60</p>
+                            </td><td>
+                                <p>10</p>
+                            </td><td>
+                                <p>10</p>
+                            </td></tr></tbody></table></div></div><br class="table-break" /></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-net-stack-tuning"></a>Networking Stack Tuning</h3></div></div></div><p>The Linux kernel allows the modification of several
+                parameters affecting the networking stack. Since kernel
+                2.6.17 the networking stack supports full TCP auto-tuning,
+                allowing the resizing of buffers automatically between a
+                minimum and maximum value.</p><p>This chapter goes through some settings which can enhance
+                throughput and latency of the Linux kernel networking
+                stack. These settings are configurable via the
+                    <span class="bold"><strong>sysctl</strong></span> interface.</p><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-net-ipv4"></a>net.ipv4.</h4></div></div></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><span class="italic">tcp_fastopen</span> is the setting
+                            that enables or disables the RFC7413 which
+                            allows sending and receiving data in the
+                            opening SYN packet. Enabling this option has
+                            the positive effect of not losing the initial
+                            handshake packets for payload transmission.
+                            Thus it maximizes network bandwidth
+                            usage.</p></li><li class="listitem"><p><span class="italic">tcp_lowlatency</span> when enabled
+                            (value set to 1) instructs the Linux kernel to
+                            make decisions that prefer low-latency to
+                            high-throughput. By default this setting is
+                            disabled (value set to 0). It is recommended to
+                            enable this option in profiles preferring lower
+                            latency to higher throughput.</p></li><li class="listitem"><p><span class="italic">tcp_sack</span>
+                            when enabled allows selecting acknowledgments.
+                            By default it is disabled (value set to 0). It
+                            is recommended to enable this option to enhance
+                            performance.</p></li><li class="listitem"><p><span class="italic">tcp_rmem</span>
+                            is a tuple of three values, representing the
+                            minimum, the default and the maximum size of
+                            the receive buffer used by the TCP sockets. It
+                            is guaranteed to each TCP socket also under
+                            moderate memory pressure. The default value in
+                            this tuple overrides the value set by the
+                            parameter <span class="italic">net.core.rmem_default</span>.</p></li><li class="listitem"><p><span class="italic">tcp_wmem</span>
+                            is a tuple of three values, representing the
+                            minimum, the default and the maximum size of
+                            the send buffer used by the TCP sockets. Each
+                            TCP socket has the right to use it. The default
+                            value in this tuple overrides the value set by
+                            the parameter <span class="italic">net.core.wmem_default</span>.</p></li><li class="listitem"><p><span class="italic">ip_local_port_range</span> defines the
+                            local port range that is used by TCP and UDP to
+                            choose the local port. The first number is the
+                            first local port number, and the second the
+                            last local port number.</p></li><li class="listitem"><p><span class="italic">tcp_max_syn_backlog</span> represents
+                            the maximum number of remembered connection
+                            requests, which have not received an
+                            acknowledgment from the connecting client. The
+                            minimal value is 128 for low memory machines,
+                            and it will increase in proportion to the
+                            memory of machine. If the server suffers from
+                            overload, try increasing this number.</p></li><li class="listitem"><p><span class="italic">tcp_syn_retries</span> is the number
+                            of times a SYN is retried if no response is
+                            received. A lower value means less memory usage
+                            and reduces the impact of SYN flood attacks but
+                            on lossy networks a 5+ value might be
+                            worthwhile.</p></li><li class="listitem"><p><span class="italic">tcp_tw_reuse</span> allows reusing
+                            sockets in the TIME_WAIT state for new
+                            connections when it is safe from the protocol
+                            viewpoint. It is generally a safer alternative
+                            to <span class="italic">tcp_tw_recycle</span>, however it is
+                            disabled by default (value set to 0). It is an
+                            interesting setting for servers running
+                            services like Web servers or Database servers
+                            (for example MySQL), because it allows the
+                            servers to scale faster on accepting new
+                            connections (for example TCP SOCKET ACCEPT).
+                            Reusing the sockets can be very effective in
+                            reducing server load. Because this setting is
+                            very use case centric it should be used
+                            (enabled) with caution.</p></li><li class="listitem"><p><span class="italic">tcp_tw_recycle</span> enables the
+                                <span class="quote">“<span class="quote">fast recycling</span>”</span> of TIME_WAIT
+                            sockets. The default value is 0 (disabled).
+                            Some <span class="bold"><strong>sysctl</strong></span> documentation
+                            incorrectly states the default as enabled. It
+                            is known to cause some issues with scenarios of
+                            load balancing and fail over when enabled
+                            (value set to 1). The problem mostly affects
+                            scenarios where the machine configured with
+                            this setting enabled is a server behind a
+                            device performing NATting. When <span class="italic">recycle</span> is
+                            enabled, the server cannot distinguish new
+                            incoming connections from different clients
+                            behind the same NAT device. Because this
+                            setting is very use case centric it should be
+                            used (enabled) with caution.</p></li><li class="listitem"><p><span class="italic">tcp_timestamps</span> enables time
+                            stamps as defined in RFC1323. It is enabled by
+                            default (value set to 1). Use random offset for
+                            each connection rather than only using current
+                            time.</p></li></ul></div></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-net-core"></a>net.core.</h4></div></div></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><span class="italic">netdev_max_backlog</span> sets the
+                            maximum number of packets queued on the INPUT
+                            side when the interface receives packets faster
+                            than the kernel can process them.</p></li><li class="listitem"><p><span class="italic">netdev_budget</span>: if SoftIRQs do
+                            not run for long enough, the rate of incoming
+                            data could exceed the kernel's capability to
+                            consume the buffer fast enough. As a result,
+                            the NIC buffers will overflow and traffic will
+                            be lost. Occasionally, it is necessary to
+                            increase the time that SoftIRQs are allowed to
+                            run on the CPU and this parameters allows that.
+                            The default value of the budget is 300. This
+                            will cause the SoftIRQ process to consume 300
+                            messages from the NIC before getting off the
+                            CPU.</p></li><li class="listitem"><p><span class="italic">somaxconn</span>
+                            describes the limits of socket listen()
+                            backlog, known in userspace as SOMAXCONN. The
+                            default value is set to 128. See also <span class="italic">tcp_max_syn_backlog</span> for
+                            additional tuning for TCP sockets.</p></li><li class="listitem"><p><span class="italic">busy_poll</span>
+                            represents the low latency busy poll timeout
+                            for poll and select. Approximate time in
+                            microseconds to busy loop waiting for events.
+                            The recommended value depends on the number of
+                            sockets you poll on. For several sockets use
+                            the value 50, for several hundreds use 100. For
+                            more than that you probably want to use
+                            epoll.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Sockets</h3><p>Only sockets with SO_BUSY_POLL set will
+                                be busy polled. This means you can either
+                                selectively set SO_BUSY_POLL on those
+                                sockets or set <span class="italic">net.busy_read</span> globally.
+                                This will increase power usage. It is
+                                disabled by default (value set to
+                                0).</p></div></li><li class="listitem"><p><span class="italic">busy_read</span>
+                            represents the low latency busy poll timeout
+                            for socket reads. Approximate time in
+                            microseconds to busy loop waiting for packets
+                            on the device queue. This sets the default
+                            value of the SO_BUSY_POLL socket option. Can be
+                            set or overridden per socket by setting socket
+                            option SO_BUSY_POLL, which is the preferred
+                            method of enabling. If you need to enable the
+                            feature globally via <span class="bold"><strong>sysctl</strong></span>,
+                            a value of 50 is recommended. This will
+                            increase power usage. It is disabled by default
+                            (value set to 0).</p></li><li class="listitem"><p><span class="italic">rmem_max</span>
+                            represents the maximum receive socket buffer
+                            size in bytes.</p></li><li class="listitem"><p><span class="italic">wmem_max</span>
+                            represents the maximum transmit socket buffer
+                            size in bytes.</p></li><li class="listitem"><p><span class="italic">rmem_default</span> represents the
+                            default setting of the socket receive buffer in
+                            bytes.</p></li><li class="listitem"><p><span class="italic">wmem_default</span> represents the
+                            default setting of the socket transmit buffer
+                            in bytes.</p></li></ul></div><p>Find below a possible configuration comparison for
+                    the above parameters across different performance
+                    profiles.</p><div class="table"><a id="id1340"></a><p class="title"><strong>Table 3. Networking Stack Tuning - Comparison</strong></p><div class="table-contents"><table class="table" summary="Networking Stack Tuning - Comparison" border="1"><colgroup><col /><col /><col /><col /></colgroup><thead><tr><th> </th><th>Balanced</th><th>Higher Throughput</th><th>Lower Latency</th></tr></thead><tbody><tr><td>
+                                    <p>
+                                     <span class="italic">net.core.netdev_max_backlog</span>
+                                    </p>
+                                </td><td>
+                                    <p>1000</p>
+                                </td><td>
+                                    <p>250,000</p>
+                                </td><td>
+                                    <p>1000</p>
+                                </td></tr><tr><td>
+                                    <p>
+                                     <span class="italic">net.core.netdev_budget</span>
+                                    </p>
+                                </td><td>
+                                    <p>300</p>
+                                </td><td>
+                                    <p>600</p>
+                                </td><td>
+                                    <p>300</p>
+                                </td></tr><tr><td>
+                                    <p>
+                                     <span class="italic">net.core.somaxconn</span>
+                                    </p>
+                                </td><td>
+                                    <p>128</p>
+                                </td><td>
+                                    <p>4,096</p>
+                                </td><td>
+                                    <p>128</p>
+                                </td></tr><tr><td>
+                                    <p>
+                                     <span class="italic">net.core.busy_poll</span>
+                                    </p>
+                                </td><td>
+                                    <p>0</p>
+                                </td><td>
+                                    <p>0</p>
+                                </td><td>
+                                    <p>50</p>
+                                </td></tr><tr><td>
+                                    <p>
+                                     <span class="italic">net.core.busy_read</span>
+                                    </p>
+                                </td><td>
+                                    <p>0</p>
+                                </td><td>
+                                    <p>0</p>
+                                </td><td>
+                                    <p>50</p>
+                                </td></tr><tr><td>
+                                    <p>
+                                     <span class="italic">net.core.rmem_max</span>
+                                    </p>
+                                </td><td>
+                                    <p>212992</p>
+                                </td><td>
+                                    <p>TOTAL_RAM_MEMORY</p>
+                                </td><td>
+                                    <p>TOTAL_RAM_MEMORY</p>
+                                </td></tr><tr><td>
+                                    <p>
+                                     <span class="italic">net.core.wmem_max</span>
+                                    </p>
+                                </td><td>
+                                    <p>212992</p>
+                                </td><td>
+                                    <p>TOTAL_RAM_MEMORY</p>
+                                </td><td>
+                                    <p>TOTAL_RAM_MEMORY</p>
+                                </td></tr><tr><td>
+                                    <p>
+                                     <span class="italic">net.core.rmem_default</span>
+                                    </p>
+                                </td><td>
+                                    <p>212992</p>
+                                </td><td>
+                                    <p>67108864</p>
+                                </td><td>
+                                    <p>67108864</p>
+                                </td></tr><tr><td>
+                                    <p>
+                                     <span class="italic">net.core.wmem_default</span>
+                                    </p>
+                                </td><td>
+                                    <p>212992</p>
+                                </td><td>
+                                    <p>67108864</p>
+                                </td><td>
+                                    <p>67108864</p>
+                                </td></tr><tr><td>
+                                    <p>
+                                     <span class="italic">tcp_fastopen</span>
+                                    </p>
+                                </td><td>
+                                    <p>1</p>
+                                </td><td>
+                                    <p>1</p>
+                                </td><td>
+                                    <p>1</p>
+                                </td></tr><tr><td>
+                                    <p>
+                                     <span class="italic">tcp_lowlatency</span>
+                                    </p>
+                                </td><td>
+                                    <p>0</p>
+                                </td><td>
+                                    <p>0</p>
+                                </td><td>
+                                    <p>1</p>
+                                </td></tr><tr><td>
+                                    <p>
+                                     <span class="italic">tcp_sack</span>
+                                    </p>
+                                </td><td>
+                                    <p>1</p>
+                                </td><td>
+                                    <p>1</p>
+                                </td><td>
+                                    <p>1</p>
+                                </td></tr><tr><td>
+                                    <p>
+                                     <span class="italic">tcp_rmem</span>
+                                    </p>
+                                </td><td>
+                                    <p>4096 87380 6291456</p>
+                                </td><td>
+                                    <p>10240 87380 67108864</p>
+                                </td><td>
+                                    <p>10240 87380 67108864</p>
+                                </td></tr><tr><td>
+                                    <p>
+                                     <span class="italic">tcp_wmem</span>
+                                    </p>
+                                </td><td>
+                                    <p>4096 87380 6291456</p>
+                                </td><td>
+                                    <p>10240 87380 67108864</p>
+                                </td><td>
+                                    <p>10240 87380 67108864</p>
+                                </td></tr><tr><td>
+                                    <p>
+                                     <span class="italic">ip_local_port_range</span>
+                                    </p>
+                                </td><td>
+                                    <p>32768 60999</p>
+                                </td><td>
+                                    <p>1024 64999</p>
+                                </td><td>
+                                    <p>32768 60999</p>
+                                </td></tr><tr><td>
+                                    <p>
+                                     <span class="italic">tcp_max_syn_backlog</span>
+                                    </p>
+                                </td><td>
+                                    <p>256</p>
+                                </td><td>
+                                    <p>8192</p>
+                                </td><td>
+                                    <p>1024</p>
+                                </td></tr><tr><td>
+                                    <p>
+                                     <span class="italic">tcp_tw_reuse</span>
+                                    </p>
+                                </td><td>
+                                    <p>0</p>
+                                </td><td>
+                                    <p>0 (1 is better but depends on use
+                                     case)</p>
+                                </td><td>
+                                    <p>0 (1 is better but depends on use
+                                     case)</p>
+                                </td></tr><tr><td>
+                                    <p>
+                                     <span class="italic">tcp_tw_recycle</span>
+                                    </p>
+                                </td><td>
+                                    <p>0</p>
+                                </td><td>
+                                    <p>0 (1 is better but depends on use
+                                     case)</p>
+                                </td><td>
+                                    <p>0 (1 is better but depends on use
+                                     case)</p>
+                                </td></tr><tr><td>
+                                    <p>
+                                     <span class="italic">tcp_timestamps</span>
+                                    </p>
+                                </td><td>
+                                    <p>1</p>
+                                </td><td>
+                                    <p>0</p>
+                                </td><td>
+                                    <p>0</p>
+                                </td></tr><tr><td>
+                                    <p>
+                                     <span class="italic">tcp_syn_retries</span>
+                                    </p>
+                                </td><td>
+                                    <p>6</p>
+                                </td><td>
+                                    <p>8</p>
+                                </td><td>
+                                    <p>5</p>
+                                </td></tr></tbody></table></div></div><br class="table-break" /></div></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="sec-bios-setup.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="sec-irq-config.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">BIOS Setup </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> IRQ Configuration</td></tr></table></div></body></html>

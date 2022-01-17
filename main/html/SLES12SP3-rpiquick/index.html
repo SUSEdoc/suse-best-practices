@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Introduction to SUSE Linux Enterprise Server for ARM on the Raspberry Pi</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><meta name="description" content="This guide contains an overview of SUSE Linux Enterprise Server for ARM on the Raspberry Pi platform and will guide you through the setup procedure. Disclaimer: Documents published as part of the SUSE Best Practices series have been contributed voluntarily by SUSE employees and third parties. They are meant to serve as examples of how particular actions can be performed. They have been compiled with utmost attention to detail. However, this does not guarantee complete accuracy. SUSE cannot verify that actions described in these documents do what is claimed or whether actions described have unintended consequences. SUSE LLC, its affiliates, the authors, and the translators may not be held liable for possible errors or the consequences thereof." /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="Introduction to SUSE Linux Enterprise Server for ARM on the Raspberry Pi" /><link rel="next" href="sec-rpi-installation.html" title="Installation" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Introduction to SUSE Linux Enterprise Server for ARM on the
+      Raspberry Pi</th></tr><tr><td width="20%" align="left"> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="sec-rpi-installation.html">Next</a></td></tr></table><hr /></div><div xml:lang="en" class="article" lang="en"><div class="titlepage"><div><div><h1 class="title"><a id="art-sbp-rpiquick-sles12sp3"></a>Introduction to SUSE Linux Enterprise Server for ARM on the
+      Raspberry Pi</h1></div><div><div class="author"><h3 class="author"><span class="firstname">Fabian</span> <span class="surname">Vogt, Release Engineer, SUSE</span></h3></div></div><div><div class="author"><h3 class="author"><span class="firstname">Jay</span> <span class="surname">Kruemcke, Product Manager, SUSE</span></h3></div></div><div><div class="author"><h3 class="author"><span class="firstname">Andreas</span> <span class="surname">Faerber, Project Manager, SUSE</span></h3></div></div><div><div class="abstract"><p class="title"><strong>Abstract</strong></p><p> This guide contains an overview of SUSE Linux Enterprise Server for ARM
+        on the Raspberry Pi platform and will guide you through the setup
+        procedure. </p><p>
+        <span class="strong"><strong>Disclaimer: </strong></span>
+        Documents published as part of the SUSE Best Practices series have been contributed voluntarily
+        by SUSE employees and third parties. They are meant to serve as examples of how particular
+        actions can be performed. They have been compiled with utmost attention to detail. However,
+        this does not guarantee complete accuracy. SUSE cannot verify that actions described in these
+        documents do what is claimed or whether actions described have unintended consequences.
+        SUSE LLC, its affiliates, the authors, and the translators may not be held liable for possible errors
+        or the consequences thereof.
+      </p></div></div></div><hr /></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="sect1"><a href="index.html#sec-rpi-platform">Platform Overview</a></span></dt><dd><dl><dt><span class="sect2"><a href="index.html#sec-rpi-platform-system">Technical Details of the Raspberry Pi 3 Model B</a></span></dt><dt><span class="sect2"><a href="index.html#sec-rpi-platform-software">SUSE Linux Enterprise Server for ARM 12 SP3</a></span></dt></dl></dd><dt><span class="sect1"><a href="sec-rpi-installation.html">Installation</a></span></dt><dd><dl><dt><span class="sect2"><a href="sec-rpi-installation.html#sec-rpi-installation-linux">Preparing the Card on Linux</a></span></dt><dt><span class="sect2"><a href="sec-rpi-installation.html#sec-rpi-installation-windows">Preparing the Card on Microsoft Windows* Operating
+        Systems</a></span></dt><dt><span class="sect2"><a href="sec-rpi-installation.html#sec-rpi-installation-macos">Preparing the Card on macOS*</a></span></dt></dl></dd><dt><span class="sect1"><a href="sec-rpi-firstboot.html">Booting for the First Time</a></span></dt><dd><dl><dt><span class="sect2"><a href="sec-rpi-firstboot.html#sec-rpi-firstboot-yast">Initial System Setup with YaST</a></span></dt><dt><span class="sect2"><a href="sec-rpi-firstboot.html#sec-rpi-firstboot-icewm">The Desktop Environment</a></span></dt></dl></dd><dt><span class="sect1"><a href="sec-rpi-usage.html">General System Usage</a></span></dt><dd><dl><dt><span class="sect2"><a href="sec-rpi-usage.html#sec-rpi-bt">Bluetooth*</a></span></dt><dt><span class="sect2"><a href="sec-rpi-usage.html#sec-rpi-gcc">Compiler</a></span></dt></dl></dd><dt><span class="sect1"><a href="sec-rpi-configuration.html">Initial System Configuration</a></span></dt><dd><dl><dt><span class="sect2"><a href="sec-rpi-configuration.html#sec-rpi-hostname">Changing the Host Name</a></span></dt><dt><span class="sect2"><a href="sec-rpi-configuration.html#sec-rpi-network">Setting up Networking</a></span></dt><dt><span class="sect2"><a href="sec-rpi-configuration.html#sec-rpi-registration">Registration Process</a></span></dt></dl></dd><dt><span class="sect1"><a href="sec-rpi-documentation.html">Product Documentation</a></span></dt><dd><dl><dt><span class="sect2"><a href="sec-rpi-documentation.html#sec-rpi-documentation-sle">Product Documentation</a></span></dt><dt><span class="sect2"><a href="sec-rpi-documentation.html#sec-rpi-documentation-forum">SUSE Forums</a></span></dt></dl></dd><dt><span class="sect1"><a href="ar01s07.html">Legal notice</a></span></dt><dt><span class="sect1"><a href="ar01s08.html">GNU Free Documentation License</a></span></dt></dl></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-rpi-platform"></a>Platform Overview</h2></div></div></div><p> To be able to use SUSE Linux Enterprise Server for ARM on the Raspberry Pi, an
+      Arm compatible Raspberry Pi* is required. SUSE Linux Enterprise Server 12 SP3 for
+      ARM is tested to work on a Raspberry Pi 3 Model B board. </p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-rpi-platform-system"></a>Technical Details of the Raspberry Pi 3 Model B</h3></div></div></div><p> The Raspberry Pi is a series of small single-board computers
+        based on a System on a Chip (SoC) by Broadcom*, featuring various
+        peripherals on the board. </p><div class="figure"><a id="fig-rpi-platform-system-board"></a><p class="title"><strong>Figure 1. Overview of the Raspberry Pi 3 Model B Connectors, © Efa /
+          English Wikipedia / CC BY-SA 3.0</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/rpi-3b-overview-2.png" width="100%" alt="Overview of the Raspberry Pi 3 Model B connectors © Efa / English Wikipedia / CC BY-SA 3.0" /></td></tr></table></div></div></div><br class="figure-break" /><div class="figure"><a id="fig-rpi-platform-system-photo"></a><p class="title"><strong>Figure 2. Photo of the Raspberry Pi 3 Model B Connectors, © Evan-Amos /
+          Own work / Public Domain</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/rpi-3b-photo.png" width="100%" alt="Photo of the Raspberry Pi 3 Model B connectors © Evan-Amos / Own work / Public Domain" /></td></tr></table></div></div></div><br class="figure-break" /><div class="variablelist"><p class="title"><strong>Selected Features of the Raspberry Pi 3 Model B</strong></p><dl class="variablelist"><dt><span class="term">CPU</span></dt><dd><p> The Broadcom BCM2837 SoC includes a quad-core Arm*
+              Cortex*-A53 Application Processor supporting the ARMv8 32-bit
+              and 64-bit instruction sets. With the default configuration,
+              it is clocked up to 1.2 GHz. </p></dd><dt><span class="term">RAM</span></dt><dd><p> 1024 MiB DDR2 memory mounted on the back of the board.
+            </p></dd><dt><span class="term">Graphics</span></dt><dd><p> Broadcom* VideoCore* IV providing OpenGL* ES 2.0
+              support. Displays can be connected over HDMI or composite
+              (TRRS jack). </p></dd><dt><span class="term">Ethernet</span></dt><dd><p> A USB Ethernet adapter on the board provides
+              10/100 MBit/s Ethernet. </p></dd><dt><span class="term">WLAN</span></dt><dd><p> The BCM43438 chip supports IEEE-802.11b, IEEE-802.11g
+              and IEEE-802.11n in the 2.4 GHz band. It also
+              provides Bluetooth 2.0-4.1 (Low Energy). </p></dd><dt><span class="term">Storage</span></dt><dd><p>The microSDHC card slot allows for a memory card to be
+              inserted as primary boot medium.</p></dd><dt><span class="term">Power</span></dt><dd><p> The Raspberry Pi's main power source is the Micro USB
+              connector. If your Raspberry Pi comes with a power supply, it is
+              recommended to use the bundled power supply only. </p></dd><dt><span class="term">USB</span></dt><dd><p> A total of four USB 2.0 ports is available. </p></dd><dt><span class="term">Connectors</span></dt><dd><p> A 0.1 inch multi-function pin header is also available.
+              Note that not all functionality of this header is exposed in
+              SUSE Linux Enterprise Server for ARM on the Raspberry Pi. </p></dd></dl></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-rpi-platform-software"></a>SUSE Linux Enterprise Server for ARM 12 SP3</h3></div></div></div><p>SUSE Linux Enterprise Server for ARM 12 SP3 is the first fully supported
+        commercial Linux operating system release available for the
+        Raspberry Pi. You can purchase subscriptions which entitle you to
+        receive all released bug and security fixes, feature updates, and
+        technical assistance from SUSE's worldwide support. Learn more
+        about subscription and support options at <a class="link" href="https://www.suse.com/support/programs/subscriptions/?id=SUSE_Linux_Enterprise_Server" target="_top">
+          https://www.suse.com/support/programs/subscriptions/?id=SUSE_Linux_Enterprise_Server</a></p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Trial Version</h3><p> If you want to try out SUSE Linux Enterprise Server for ARM 12 SP3 on
+          the Raspberry Pi, SUSE will provide you with a trial version.
+          This gives you access to free patches and updates for a period of
+          60 days. You must sign in to the SUSE Customer Center at <a class="link" href="https://scc.suse.com/login" target="_top">https://scc.suse.com/login</a> using your Customer Center
+          account credentials to receive this free offer. If you do not
+          have a Customer Center account, you must create one to take
+          advantage of the trial version. </p></div><h4><a id="id1337"></a>Minimum System Requirements for Installation</h4><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Raspberry Pi 3 Model B</p></li><li class="listitem"><p>SD Card with at least 8GB capacity</p></li><li class="listitem"><p>USB keyboard, mouse</p></li><li class="listitem"><p>HDMI cable and monitor</p></li><li class="listitem"><p>Power supply with at least 2.5A capacity</p></li></ul></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-rpi-platform-software-sles12sp2"></a>Differences Compared to the Previous Release
+            <span class="quote">“<span class="quote">SUSE Linux Enterprise Server for the Raspberry Pi</span>”</span></h4></div></div></div><p>The previous release of <span class="quote">“<span class="quote">SUSE Linux Enterprise Server for the Raspberry Pi</span>”</span> (based
+          on SUSE Linux Enterprise Server 12 SP2) was intended for
+          experimental users of SUSE Linux Enterprise Server on the Raspberry Pi
+          platform. It included several large packages such as the C
+          compiler and development tools. The commercial release of the
+          Raspberry Pi image of SUSE Linux Enterprise Server for ARM is different in
+          several ways:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>It is based on the later code base from SUSE Linux Enterprise Server
+              12 SP3.</p></li><li class="listitem"><p>It uses the normal SUSE Linux Enterprise Server for ARM support
+              channels instead of a special purpose
+                <span class="quote">“<span class="quote">SUSE Linux Enterprise Server for the Raspberry Pi</span>”</span> channel.</p></li><li class="listitem"><p>The image is significantly smaller than the previous
+              release to allow the installation to be tailored for the
+              actual use.</p></li></ul></div><p>Additional packages can be installed by YaST or Zypper after
+          registration. Since many of our customers are interested in using
+          SUSE Linux Enterprise Server for ARM on a Raspberry Pi for industrial
+          monitoring and digital signage, it makes more sense to provide a
+          minimal image that can easily be expanded. </p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-rpi-platform-software-raspbian"></a>Differences Compared to Raspbian</h4></div></div></div><p> Raspbian is the de-facto default distribution for the
+          Raspberry Pi. The following paragraphs provide a short overview of
+          differences between SUSE Linux Enterprise Server for ARM on the Raspberry Pi
+          and Raspbian. </p><div class="variablelist"><dl class="variablelist"><dt><span class="term">Based on Upstream Kernel</span></dt><dd><p>Raspbian uses a kernel with modifications especially
+                for the Raspberry Pi. SUSE Linux Enterprise Server for ARM uses the
+                default SUSE Linux Enterprise kernel for AArch64 which is derived
+                from the official mainline kernel. </p></dd><dt><span class="term">AArch64 Instruction Set</span></dt><dd><p> SUSE Linux Enterprise Server for ARM on the Raspberry Pi is the
+                first distribution for the Raspberry Pi using the
+                AArch64 instruction set. </p></dd><dt><span class="term">Boot Process</span></dt><dd><p> In Raspbian, the kernel is loaded directly. This is
+                not supported by SUSE Linux Enterprise Server for ARM, where the
+                U-Boot boot loader is used to provide an EFI boot
+                environment. A GRUB2 EFI binary is chainloaded to provide a
+                graphical boot screen. </p></dd><dt><span class="term">Root File System</span></dt><dd><p> SUSE Linux Enterprise Server for ARM on the Raspberry Pi uses Btrfs
+                as file system for the root partition. Compression is
+                enabled by default for better SD card performance. </p></dd></dl></div></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-rpi-platform-software-yast"></a>YaST</h4></div></div></div><p> YaST is the installation and configuration framework
+          for SUSE Linux Enterprise. It is popular for its easy use, flexible graphical
+          interfaces and the capability to customize your system quickly
+          during and after the installation. YaST can be used to
+          configure your entire system: You can configure hardware, set up
+          networking, manage system services and tune your security
+          settings. All these tasks can be reached from the YaST
+          control center. To start it, choose YaST in the menu or run
+          the command <span class="command"><strong>xdg-su -c yast2</strong></span>. You will be
+          prompted to enter the password of the <code class="systemitem">root</code> user. </p><div class="figure"><a id="fig-rpi-yast2"></a><p class="title"><strong>Figure 3. The YaST Control Center</strong></p><div class="figure-contents"><div class="mediaobject"><img src="images/rpi_yast2.png" alt="The YaST control center" /></div></div></div><br class="figure-break" /><p> When started, YaST shows an overview of available
+          modules (<a class="xref" href="index.html#fig-rpi-yast2" title="Figure 3. The YaST Control Center">Figure 3, “The YaST Control Center”</a>). Simply click an icon
+          to open a module. </p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-rpi-platform-software-zypper"></a>Zypper</h4></div></div></div><p> Zypper is the package manager for SUSE Linux Enterprise. It is the tool
+          for installing, updating and removing packages and for managing
+          repositories. </p><p> The general syntax for Zypper invocations is: </p><pre class="screen">zypper <code class="option">[global-options]</code> <em class="replaceable"><code>command</code></em> <code class="option">[command-options]</code><code class="option">[arguments]</code> ...</pre><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Short Command Form</h3><p> For most commands, there is both a short and a long form.
+            An overview is available with <span class="command"><strong>zypper --help</strong></span>.
+          </p></div><div class="variablelist"><dl class="variablelist"><dt><span class="term">Installing a package</span></dt><dd><pre class="screen">zypper install mplayer</pre></dd><dt><span class="term">Removing a package</span></dt><dd><pre class="screen">zypper remove mplayer</pre></dd><dt><span class="term">List available patches</span></dt><dd><pre class="screen">zypper list-patches</pre></dd><dt><span class="term">Install available patches</span></dt><dd><pre class="screen">zypper patch</pre></dd></dl></div><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Installing Software Updates</h3><p> The recommended way to install available software updates
+            is using the YaST Online Updater. To start it, choose
+              <span class="quote">“<span class="quote">Online Update</span>”</span> in <span class="quote">“<span class="quote">Settings</span>”</span> under
+              <span class="quote">“<span class="quote">Desktop Apps</span>”</span> in the IceWM menu. </p></div></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-rpi-platform-software-limitations"></a>Limitations</h4></div></div></div><div class="variablelist"><dl class="variablelist"><dt><span class="term">Graphics not hardware-accelerated</span></dt><dd><p>X.Org hardware acceleration is disabled to
+                improve system stability and reliability.</p><p>To enable it, comment out the following line in
+                  <code class="filename">/etc/X11/xorg.conf.d/20-kms.conf</code>:
+                  <code class="literal">Option "AccelMethod" "none"</code> by
+                prefixing it with <span class="quote">“<span class="quote">#</span>”</span>.</p></dd></dl></div><p>For other limitations refer to the online version of the
+          Release Notes at <a class="link" href="https://www.suse.com/releasenotes/x86_64/SUSE-SLES/12-SP3/" target="_top">https://www.suse.com/releasenotes/x86_64/SUSE-SLES/12-SP3/</a>.</p></div></div></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="sec-rpi-installation.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top"> </td><td width="20%" align="center"> </td><td width="40%" align="right" valign="top"> Installation</td></tr></table></div></body></html>

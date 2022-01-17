@@ -1,0 +1,628 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>SUSE Manager Management Pack for Microsoft System Center Operations Manager Installation Guide</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><meta name="description" content="Using separate tools to maintain and patch systems, monitor health compliance and deploy required updates to the Windows and Linux servers can be costly and time–consuming. With SUSE Manager Management Pack for Microsoft System Center Operations Manager, Windows systems administrators can view server health information and perform both Windows and Linux patching duties, all through the same familiar console. This document leads you through the initial installation of SUSE Manager Management Pack for Microsoft System Center Operations Manager." /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div xml:lang="en" class="article" lang="en"><div class="titlepage"><div><div><h1 class="title"><a id="art-sbp-scominstallguide"></a>SUSE Manager Management Pack for Microsoft System Center
+            Operations Manager Installation Guide</h1></div><div><div class="abstract"><p class="title"><strong>Abstract</strong></p><p>Using separate tools to maintain and patch systems,
+                monitor health compliance and deploy required updates to
+                the Windows and Linux servers can be costly and
+                time–consuming. With SUSE Manager Management Pack for
+                Microsoft System Center Operations Manager, Windows systems
+                administrators can view server health information and
+                perform both Windows and Linux patching duties, all through
+                the same familiar console. This document leads you through
+                the initial installation of SUSE Manager Management Pack
+                for Microsoft System Center Operations Manager.</p></div></div></div><hr /></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="sect1"><a href="#sec-prerequisites">Prerequisites</a></span></dt><dt><span class="sect1"><a href="#sec-manpacks">Management Packs Required to Subscribe Clients to Microsoft
+            System Center Operations Manager</a></span></dt><dt><span class="sect1"><a href="#sec-manpackinstall">SUSE Manager Management Pack Installation</a></span></dt><dt><span class="sect1"><a href="#sec-manualinstall">SUSE Manager Management Pack Manual Installation
+            Process</a></span></dt><dt><span class="sect1"><a href="#sec-manpackuninstall">Uninstalling the SUSE Manager Management Pack</a></span></dt><dt><span class="sect1"><a href="#sec-manualuninstall">SUSE Manager Management Pack Manual Uninstallation
+            Process</a></span></dt><dt><span class="sect1"><a href="#sec-manpackrepair">Repairing SUSE Manager Management Pack</a></span></dt><dt><span class="sect1"><a href="#sec-updatesumadetails">Updating SUSE Manager Details</a></span></dt><dt><span class="sect1"><a href="#sec-troubleshooting">Troubleshooting</a></span></dt><dt><span class="sect1"><a href="#id1337">GNU Free Documentation License</a></span></dt></dl></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-prerequisites"></a>Prerequisites</h2></div></div></div><p>SUSE Manager Management Pack for Microsoft System Center
+            Operations Manager requires a working environment with
+            Microsoft System Center Operations Manager (SCOM) and SUSE
+            Manager. The following list outlines the environment and
+            software that should be prepared prior to the installation of
+            the SUSE Manager Management Pack. </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Supported Operating Systems:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>Windows Server 2008/2008 R2</p></li></ul></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>Windows Server 2012/2012 R2</p></li></ul></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>Windows Server 2016</p></li></ul></div></li><li class="listitem"><p>Typical environment required for SUSE Manager
+                    Management Pack:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>Windows Domain Controller (recommended for
+                            domain accounts that are used for the
+                            installation of Microsoft System Center
+                            Operations Manager)</p></li><li class="listitem"><p>SQL Server 2008/R2 and above (required for
+                            the installation of Microsoft System Center
+                            Operations Manager)</p></li><li class="listitem"><p>One of the following Microsoft System Center
+                            Operations Manager versions:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: square; "><li class="listitem"><p>Microsoft System Center Operations
+                                    Manager 2007 R2 (preferably with
+                                    Cumulative Update 6 or later)</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Microsoft System Center
+                                     Operations Manager 2007 R2
+                                     Documentation and Deployment Guide -
+                                     http://technet.microsoft.com/en-us/library/bb310604.aspx</p></li></ul></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Microsoft System Center
+                                     Operations Manager 2007 R2 Cumulative
+                                     Update 6 Download -
+                                     http://www.microsoft.com/en-us/download/details.aspx?id=29850</p></li></ul></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Microsoft System Center
+                                     Operations Manager 2007 R2 Cumulative
+                                     Update 6 Instructions -
+                                     http://support.microsoft.com/kb/2626076</p></li></ul></div></li><li class="listitem"><p>Microsoft System Center Operations
+                                    Manager 2012/R2 (preferably with the
+                                    latest Update Rollup)</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Microsoft System Center
+                                     Operations Manager 2012/R2
+                                     Documentation and Deployment Guide -
+                                     http://technet.microsoft.com/en-us/library/hh205987.aspx</p></li></ul></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Microsoft System Center
+                                     Operations Manager 2012/R2 Update
+                                     Rollup 2 Download -
+                                     http://www.microsoft.com/en-us/download/details.aspx?id=30421</p></li></ul></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Microsoft System Center
+                                     Operations Manager 2012 Update Rollup
+                                     2 Installation Instructions -
+                                     http://support.microsoft.com/kb/2706783</p></li></ul></div></li></ul></div></li><li class="listitem"><p>Microsoft System Center 2016</p></li><li class="listitem"><p>SUSE Manager 2.1, 3 and 3.1</p></li><li class="listitem"><p>Linux virtual machines with distribution
+                            versions supported by both the Microsoft System
+                            Center Operations Manager Cross Platform
+                            Management Packs and SUSE Manager</p></li></ul></div></li><li class="listitem"><p>Microsoft System Center Operations Manager
+                    Requirements</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>The cross platform management packs which add
+                            support for monitoring Unix/Linux systems must
+                            be installed. They are available for download
+                            from the following links: </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: square; "><li class="listitem"><p>Microsoft System Center Operations
+                                    Manager 2007 R2 Cross Platform
+                                    Management Packs -
+                                    http://www.microsoft.com/en-us/download/details.aspx?id=18891</p></li><li class="listitem"><p>Microsoft System Center Operations
+                                    Manager 2012 Cross Platform Management
+                                    Packs -
+                                    http://www.microsoft.com/en-us/download/details.aspx?id=29696</p></li></ul></div></li><li class="listitem"><p>At minimum, the following management packs
+                            should be installed:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: square; "><li class="listitem"><p>Microsoft.Linux.Library.mp</p></li><li class="listitem"><p>Microsoft.Unix.Library.mp</p></li><li class="listitem"><p>Microsoft.SystemCenter.WSManagement.Library.mp</p></li></ul></div></li></ul></div></li><li class="listitem"><p>SUSE Manager Management Pack Installation
+                    Requirements</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>.NET 4.0 Framework must be installed prior to
+                            running the SUSE Manager Management Pack
+                            installer. The Web installer is available from
+                            the following URL:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: square; "><li class="listitem"><p>http://www.microsoft.com/en-us/download/details.aspx?id=17851</p></li></ul></div></li></ul></div></li></ul></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-manpacks"></a>Management Packs Required to Subscribe Clients to Microsoft
+            System Center Operations Manager</h2></div></div></div><p>The following table lists the supported operating systems and
+            required management packs to subscribe clients to Microsoft
+            System Center Operations Manager.</p><div class="table"><a id="id1338"></a><p class="title"><strong>Table 1. Supported OS and Management Patches</strong></p><div class="table-contents"><table class="table" summary="Supported OS and Management Patches" border="1"><colgroup><col /><col /><col /><col /><col /></colgroup><thead><tr><th>Linux OS</th><th>Management Pack</th><th>SCOM 2007 Supportable</th><th>SCOM 2012/R2 Supportable</th><th>SCOM 2016 Supportable</th></tr></thead><tbody><tr><td>Red Hat Enterprise Linux 4 (x86/x64)</td><td>Microsoft.Linux.RHEL.4.mp</td><td>Yes</td><td>Yes</td><td>Yes</td></tr><tr><td>Red Hat Enterprise Linux 5 (x86/x64)</td><td>Microsoft.Linux.RHEL.5.mp</td><td>Yes</td><td>Yes</td><td>Yes</td></tr><tr><td>Red Hat Enterprise Linux 6 (x86/x64)</td><td> </td><td>Yes</td><td>Yes</td><td>Yes</td></tr><tr><td>SUSE Linux Enterprise Server 9 (x86)</td><td>Microsoft.Linux.SLES.9.mp</td><td>Yes</td><td>Yes</td><td>Yes</td></tr><tr><td>SUSE Linux Enterprise Server 10
+                            (x86_x64)</td><td>Microsoft.Linux.SLES.10.mp</td><td>Yes</td><td>Yes</td><td>Yes</td></tr><tr><td>SUSE Linux Enterprise Server 11
+                            (x86_64)</td><td>Microsoft.Linux.SLES.11.mp</td><td>No</td><td>Yes</td><td>Yes</td></tr><tr><td>SUSE Linux Enterprise Server 12
+                            (x64)</td><td>Microsoft.Linux.SLES.12.mp</td><td>No</td><td>Yes</td><td>Yes</td></tr></tbody></table></div></div><br class="table-break" /></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-manpackinstall"></a>SUSE Manager Management Pack Installation</h2></div></div></div><p>To successfully perform patch management tasks, the SUSE
+            Manager Management Pack has be to installed on the Microsoft
+            System Center Operations Manager Client (which is the system
+            containing only the Operations console) and on the Microsoft
+            System Center Operations Manager Server system (which contains
+            only the Server). One single SUSE Manager Management Pack
+            installer will work for the installation on both the Microsoft
+            System Center Operations Manager Client and Server
+            systems.</p><p>Follow the below steps to install the SUSE Manager Management
+            Pack:</p><div class="procedure"><a id="pro-mpinstall"></a><p class="title"><strong>Procedure 1. Step-by-Step Installation</strong></p><ol class="procedure" type="1"><li class="step"><a id="step-one-pro-mpinstall"></a><p>Copy the installer setup to the system where the
+                    installation is required. Follow the below steps to
+                    complete the installation process.</p><ol type="a" class="substeps"><li class="step"><p>Right-click the
+                                <code class="filename">setup.exe</code> file and
+                            select <span class="quote">“<span class="quote">Run as administrator</span>”</span> as
+                            shown below:</p><div class="figure"><a id="id1339"></a><p class="title"><strong>Figure 1. SUSE Manager Management Pack Setup </strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/scom-install-manpack-setup.png" width="100%" alt="SUSE Manager Management Pack Setup" /></td></tr></table></div></div></div><br class="figure-break" /><p>A setup wizard will open:</p><div class="figure"><a id="id1340"></a><p class="title"><strong>Figure 2. SUSE Manager Management Pack Setup
+                                Wizard</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/scom-install-welcome-wizard.png" width="100%" alt="SUSE Manager Management Pack Setup Wizard" /></td></tr></table></div></div></div><br class="figure-break" /></li><li class="step"><p>Click the <span class="quote">“<span class="quote">Next</span>”</span> button, select
+                            the installation folder path and one of the
+                            following options:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Everyone (can be used by all the
+                                    users in the system)</p></li><li class="listitem"><p>Just me (can be used only by the
+                                    installed user)</p></li></ul></div><div class="figure"><a id="id1341"></a><p class="title"><strong>Figure 3. Installation Folder Selection</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/scom-install-select-folder.png" width="100%" alt="Installation Folder Selection" /></td></tr></table></div></div></div><br class="figure-break" /></li><li class="step"><p>Click the <span class="quote">“<span class="quote">Next</span>”</span> button and
+                            enter the SUSE Manager Credentials:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>SUSE Manager Server</p><div class="important" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Host name</h3><p>Do not include
+                                     <span class="quote">“<span class="quote">http/https</span>”</span> in the host
+                                     name or IP address.</p></div></li><li class="listitem"><p>User Name</p></li><li class="listitem"><p>Password</p></li></ul></div><p>These SUSE Manager details will be stored in
+                            the registry keys (SUSEManagerUrl,
+                            SUSEManagerUserName, and
+                            SUSEManagerPassword).</p><div class="figure"><a id="id1342"></a><p class="title"><strong>Figure 4. SUSE Manager Credentials</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/scom-install-manpack-installation.png" width="100%" alt="SUSE Manager Credentials" /></td></tr></table></div></div></div><br class="figure-break" /></li><li class="step"><p>Click the <span class="quote">“<span class="quote">Next</span>”</span> button to
+                            confirm the installation.</p><div class="figure"><a id="id1343"></a><p class="title"><strong>Figure 5. Installation Confirmation</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/scom-install-confirm-installation.png" width="100%" alt="Installation Confirmation" /></td></tr></table></div></div></div><br class="figure-break" /></li><li class="step"><p>During installation the system checks whether
+                            all required management pack references are
+                            installed or not. If they are not installed it
+                            will prompt an error message with the missing
+                            management pack references. When the missing
+                            management packs are installed, the
+                            installation will continue.</p></li><li class="step"><p>After successful installation, click the
+                                <span class="quote">“<span class="quote">Close</span>”</span> button to exit the
+                            Wizard.</p><div class="figure"><a id="id1344"></a><p class="title"><strong>Figure 6. Installation Completion</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/scom-install-installation-complete.png" width="100%" alt="Installation Completion" /></td></tr></table></div></div></div><br class="figure-break" /></li><li class="step"><p>After the installation is completed, open the
+                            Microsoft System Center Operations Manager
+                            2007/2012/R2 console. On the Monitoring
+                            Overview screen, check for the new entry and
+                            click the link <span class="quote">“<span class="quote">Unix/Linux
+                                Servers</span>”</span>, then click the link
+                                <span class="quote">“<span class="quote">Linux</span>”</span>. You should now see a
+                            link called <span class="quote">“<span class="quote">Patch Management</span>”</span>.
+                            See the screenshot below:</p><div class="figure"><a id="id1345"></a><p class="title"><strong>Figure 7. Patch Management Selection</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/scom-install-patch-management.png" width="100%" alt="Patch Management Selection" /></td></tr></table></div></div></div><br class="figure-break" /></li></ol></li><li class="step"><a id="step-two-pro-mpinstall"></a><p>After successful installation of the SUSE Manager
+                    Management Pack, the following binaries and management
+                    packs are deployed in the Microsoft System Center
+                    Operations Manager root location (for example
+                    installation) and the Microsoft System Center
+                    Operations Manager database respectively.</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>If the Management Pack is installed on a
+                            system having only Microsoft System Center
+                            Operations Manager Client (that is a system
+                            having only Operations Console), the following
+                            assemblies are placed into the GAC folder
+                            (general path C; c:\Windows\assembly): </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>Microsoft.OpenSolutionsGroup.SuseManager.ViewType.dll</p></li><li class="listitem"><p>Microsoft.OpenSolutionsGroup.SuseManager.Utilities.dll</p></li><li class="listitem"><p>Microsoft.OpenSolutionsGroup.SuseManagerClient.dll</p></li><li class="listitem"><p>CookComputing.XmlRpcV2.dll</p></li></ul></div><p>The SUSE Manager credentials are updated in
+                            the registry at
+                                <span class="quote">“<span class="quote">HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\SUSEManagementPack</span>”</span>.</p></li><li class="listitem"><p>If the Management Pack is installed on a
+                            system having only the Microsoft System Center
+                            Operations Manager Server installed, the
+                            following assemblies are placed into the GAC
+                            folder (general path C;
+                            c:\Windows\assembly):</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>Microsoft.OpenSolutionsGroup.SuseManager.ScomModule.dll</p></li><li class="listitem"><p>Microsoft.OpenSolutionsGroup.SuseManager.Utilities.dll</p></li><li class="listitem"><p>Microsoft.OpenSolutionsGroup.SuseManagerClient.dll</p></li><li class="listitem"><p>CookComputing.XmlRpcV2.dll</p></li></ul></div><p>The Management Pack
+                                <span class="quote">“<span class="quote">Microsoft.OpenSolutionsGroup.SuseManager.mp</span>”</span>
+                            is deployed into the Microsoft System Center
+                            Operations Manager database. The SUSE Manager
+                            credentials are updated in the registry
+                                <span class="quote">“<span class="quote">HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\SUSEManagementPack</span>”</span>.
+                        </p></li><li class="listitem"><p>If the Management Pack is installed on a
+                            system having both the Microsoft System Center
+                            Operations Manager Client and Server installed,
+                            the following assemblies are placed into the
+                            GAC folder (general path C;
+                            c:\Windows\assembly):</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>Microsoft.OpenSolutionsGroup.SuseManager.ViewType.dll</p></li><li class="listitem"><p>Microsoft.OpenSolutionsGroup.SuseManager.ScomModule.dll</p></li><li class="listitem"><p>Microsoft.OpenSolutionsGroup.SuseManager.Utilities.dll</p></li><li class="listitem"><p>Microsoft.OpenSolutionsGroup.SuseManagerClient.dll</p></li><li class="listitem"><p>CookComputing.XmlRpcV2.dll</p></li></ul></div><p>The Management Pack
+                                <span class="quote">“<span class="quote">Microsoft.OpenSolutionsGroup.SuseManager.mp</span>”</span>
+                            is deployed into the Microsoft System Center
+                            Operations Manager database. The SUSE Manager
+                            credentials are updated in the registry
+                                <span class="quote">“<span class="quote">HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\SUSEManagementPack</span>”</span>.
+                        </p></li></ul></div></li><li class="step"><a id="step-three-pro-mpinstall"></a><p>To update the SUSE Manager details after a successful
+                    installation (for example to point the SUSE Manager
+                    Management Pack to a different SUSE Manager server
+                    after the installation is completed) use the Desktop
+                    shortcut <span class="quote">“<span class="quote">SUSE Manager MP Settings</span>”</span> or
+                        <code class="filename">SUSEManagerMPSettings.exe</code> in the
+                    Management Pack installation location.</p></li><li class="step"><a id="step-four-pro-mpinstall"></a><p>A log file <span class="quote">“<span class="quote">LogInfo.txt</span>”</span> exists in the
+                    Management Pack installation folder. This log file
+                    keeps track of all activities done by the installer in
+                    detail during the installation process. If the
+                    installation fails, the installer will notify the user
+                    with an error message, and error details will be logged
+                    in the log file.</p><div class="figure"><a id="id1346"></a><p class="title"><strong>Figure 8. Example for Log File Text</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/scom-install-loginfo-text.png" width="100%" alt="Example for Log File Text" /></td></tr></table></div></div></div><br class="figure-break" /></li></ol></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-manualinstall"></a>SUSE Manager Management Pack Manual Installation
+            Process</h2></div></div></div><p>For the manual installation of the SUSE Manager Management
+            Pack installation follow the steps below:</p><div class="procedure"><ol class="procedure" type="1"><li class="step"><p>Extract all files into a new folder.</p></li><li class="step"><p>Place all binaries into the respective folder as
+                    specified under <a class="xref" href="#sec-manpackinstall" title="SUSE Manager Management Pack Installation">the section called “SUSE Manager Management Pack Installation”</a>,
+                        <a class="xref" href="#pro-mpinstall" title="Procedure 1. Step-by-Step Installation">Procedure 1, “Step-by-Step Installation”</a>, <a class="xref" href="#step-two-pro-mpinstall" title="Step 2">Step 2</a> above.</p></li><li class="step"><p>Use <code class="filename">SUSEManagerMPSettings.exe</code>
+                    from the above extracted folder to update the SUSE
+                    Manager credentials in the registry.</p></li><li class="step"><p>If you are installing the SUSE Manager Management
+                    Pack on a system where Microsoft System Center
+                    Operations Manager Server is installed, open the
+                    application <span class="quote">“<span class="quote">Operations Console</span>”</span> and
+                    import the SUSE Manager Management Pack
+                    (Microsoft.OpenSolutionsGroup.SuseManager.mp) from the
+                    above extracted folder into the Microsoft System Center
+                    Operations Manager Database.</p></li></ol></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-manpackuninstall"></a>Uninstalling the SUSE Manager Management Pack</h2></div></div></div><p>To uninstall the SUSE Manager Management Pack from Microsoft
+            System Center Operations Manager, follow the steps
+            below:</p><div class="procedure"><ol class="procedure" type="1"><li class="step"><p>Double-click or right-click the installer and select
+                    the option <span class="quote">“<span class="quote">Remove SUSE Manager Management
+                        Pack</span>”</span>.</p></li><li class="step"><p>Click <span class="quote">“<span class="quote">Finish</span>”</span> and the Management Pack
+                    will be uninstalled.</p><div class="figure"><a id="id1672"></a><p class="title"><strong>Figure 9. Uninstalling SUSE Manager Management
+                        Pack</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/scom-install-manpack-uninstall.png" width="100%" alt="Uninstalling SUSE Manager Management Pack" /></td></tr></table></div></div></div><br class="figure-break" /></li><li class="step"><p>After a successful uninstallation the installer will
+                    notify the user.</p></li><li class="step"><p>During the uninstallation process, the installer will
+                    remove:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>All binaries from GAC</p></li><li class="listitem"><p>The SUSE Manager Management Pack from
+                            Microsoft System Center Operations
+                            Manager</p></li><li class="listitem"><p>The file <code class="filename">updateSUSE.exe</code>,
+                            including the SUSE Manager Management Pack
+                            installation folder</p></li><li class="listitem"><p>And the registry entries added by the
+                            installer during the installation process, as
+                            specified under <a class="xref" href="#sec-manpackinstall" title="SUSE Manager Management Pack Installation">the section called “SUSE Manager Management Pack Installation”</a>
+                            <a class="xref" href="#pro-mpinstall" title="Procedure 1. Step-by-Step Installation">Procedure 1, “Step-by-Step Installation”</a>, <a class="xref" href="#step-two-pro-mpinstall" title="Step 2">Step 2</a> during
+                            the installation process.</p></li></ul></div></li><li class="step"><p>To ensure the uninstallation process has been
+                    successful, open the Microsoft System Center Operations
+                    Manager console. Under the folder <span class="quote">“<span class="quote">Unix/Linux
+                        Servers</span>”</span> check for the entry called
+                        <span class="quote">“<span class="quote">Patch Management</span>”</span>. It should be
+                    removed.</p></li></ol></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-manualuninstall"></a>SUSE Manager Management Pack Manual Uninstallation
+            Process</h2></div></div></div><p>For a manual uninstallation of the SUSE Manager Management
+            Pack follow these steps:</p><div class="procedure"><ol class="procedure" type="1"><li class="step"><p>If you are uninstalling the SUSE Manager Management
+                    Pack from a system having Microsoft System Center
+                    Operations Manager Server installed, open the
+                    application <span class="quote">“<span class="quote">Operations Console</span>”</span> and
+                    delete the SUSE Manager Management Pack
+                    (Microsoft.OpenSolutionsGroup.SuseManager.mp).</p></li><li class="step"><p>Remove all binaries from GAC as specified under <a class="xref" href="#sec-manpackinstall" title="SUSE Manager Management Pack Installation">the section called “SUSE Manager Management Pack Installation”</a>, <a class="xref" href="#pro-mpinstall" title="Procedure 1. Step-by-Step Installation">Procedure 1, “Step-by-Step Installation”</a>, <a class="xref" href="#step-two-pro-mpinstall" title="Step 2">Step 2</a> above.</p></li><li class="step"><p>Clear the SUSE Manager registry entries (as specified
+                    under <a class="xref" href="#sec-manpackinstall" title="SUSE Manager Management Pack Installation">the section called “SUSE Manager Management Pack Installation”</a>, <a class="xref" href="#pro-mpinstall" title="Procedure 1. Step-by-Step Installation">Procedure 1, “Step-by-Step Installation”</a>, <a class="xref" href="#step-two-pro-mpinstall" title="Step 2">Step 2</a>).</p></li><li class="step"><p>Remove the above extracted folder (as specified in
+                        <a class="xref" href="#sec-manualinstall" title="SUSE Manager Management Pack Manual Installation Process">the section called “SUSE Manager Management Pack Manual Installation
+            Process”</a>).</p></li></ol></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-manpackrepair"></a>Repairing SUSE Manager Management Pack</h2></div></div></div><p>To repair the SUSE Manager Management Pack installed on
+            Microsoft System Center Operations Manager, follow the steps
+            below:</p><div class="procedure"><ol class="procedure" type="1"><li class="step"><p>Double-click or right-click the installer, then
+                    select the option <span class="quote">“<span class="quote">Repair SUSE Manager Management
+                        Pack</span>”</span>.</p><div class="figure"><a id="id1727"></a><p class="title"><strong>Figure 10. Repairing SUSE Manager Management Pack</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/scom-install-manpack-repair.png" width="100%" alt="Repairing SUSE Manager Management Pack" /></td></tr></table></div></div></div><br class="figure-break" /></li><li class="step"><p>Click the <span class="quote">“<span class="quote">Finish</span>”</span> button. The SUSE
+                    Manager Management Pack will be repaired. All files
+                    specified under <a class="xref" href="#sec-manpackinstall" title="SUSE Manager Management Pack Installation">the section called “SUSE Manager Management Pack Installation”</a>
+                    will be replaced by the installer.</p></li></ol></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-updatesumadetails"></a>Updating SUSE Manager Details</h2></div></div></div><p>To update the details of SUSE Manager, follow the steps
+            below:</p><div class="procedure"><ol class="procedure" type="1"><li class="step"><p>Double-click
+                        <code class="filename">SUSEManagerMPSettings.exe</code>,
+                    which is contained in the Management Pack installation
+                    folder (the folder selected at the time of
+                    installation) or in the shortcut placed on your
+                    desktop.</p></li><li class="step"><p>A window will open to enter new SUSE Manager
+                    details.</p><div class="figure"><a id="id1747"></a><p class="title"><strong>Figure 11. Update SUSE Manager Details</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/scom-install-update-settings.png" width="100%" alt="Update SUSE Manager Details" /></td></tr></table></div></div></div><br class="figure-break" /></li><li class="step"><p>Enter the values and click <span class="quote">“<span class="quote">Update
+                        Settings</span>”</span>.</p></li><li class="step"><p>The SUSE Manager credentials are updated in the
+                    registry
+                        <span class="quote">“<span class="quote">HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\SUSEManagementPack</span>”</span>.
+                </p></li><li class="step"><p>After successfully updating the SUSE Manager details,
+                    click <span class="quote">“<span class="quote">Close</span>”</span> to close the window.</p></li></ol></div><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Write Permission</h3><p>You should have write permission for the registry to
+                update the SUSE Manager details.</p></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-troubleshooting"></a>Troubleshooting</h2></div></div></div><p>The below list contains troubleshooting tips and
+            hints:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Check the error details in the log file (LogInfo.txt
+                    in the SUSE Manager Management Pack installation
+                    location) and resolve them accordingly.</p></li><li class="listitem"><p>The SUSE Manager Management Pack installation may
+                    fail because following keys have not been found, or
+                    there is an invalid entry, in the Microsoft System
+                    Center Operations Manager registry location.</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>For Microsoft System Center Operations
+                            Manager 2012: <code class="filename">Computer\HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\System Centre Operations Manager\SetUp\Console\InstallDirectory</code>
+                        </p><p>or: <code class="filename">Computer\HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\System Centre Operations Manager\SetUp\Server\InstallDirectory</code>
+                        </p></li><li class="listitem"><p>For Microsoft System Center Operations
+                            Manager 2007R2:
+                            <code class="filename">Computer\HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\
+                                Microsoft Operations Manager\3.0\SetUp\InstallDirectory</code>
+                        </p></li></ul></div></li><li class="listitem"><p>Make sure to give proper credentials to the SUSE
+                    Manager server while installing the Management
+                    Pack.</p></li><li class="listitem"><p>If you have any trouble while uninstalling the SUSE
+                    Manager Management Pack, follow the steps below:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>Check if the SUSE Manager Management Pack
+                            uninstallation fails because there are binaries
+                            used by another process, or because SUSE
+                            Manager Management Pack has a dependency with
+                            another Management Pack in Microsoft System
+                            Center Operations Manager. </p></li><li class="listitem"><p>If this is the case resolve the dependency
+                            manually and repeat the uninstallation
+                            process.</p></li><li class="listitem"><p>Check whether the Operations Console is
+                            closed.</p></li><li class="listitem"><p>Check that the below registry path contains
+                            valid SUSE Manager credentials:
+                                <code class="filename">Computer\HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\SUSEManagementPack</code></p></li></ul></div></li></ul></div><div class="important" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Important</h3><p>Keep in mind the following points:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>After the installation, it takes up to four
+                        minutes to display a list of systems subscribed to
+                        Microsoft System Center Operations Manager and SUSE
+                        Manager in the Systems tab under Patch management.
+                        The SUSE Manager probe refreshes every four minutes
+                        in the background.</p></li><li class="listitem"><p>To access Patch Management, you need to be added
+                        as a user to the Microsoft System Center Operations
+                        Manager administrator account group.</p></li><li class="listitem"><p>As a new user performing a first time
+                        installation, you need to set the Operations Manager
+                        URL (the Microsoft System Center Operations Manager
+                        Server URL). Access the Operations Console and then
+                        proceed with the installation setup.</p></li><li class="listitem"><p>If you have difficulties uninstalling the SUSE
+                        Manager Management Pack (because of deletion of the
+                        Management Pack, deletion of the binaries, or
+                        corruption of the installation file, etc.), use the
+                        repair option and try to perform the uninstallation
+                        process again.</p></li><li class="listitem"><p>The SUSE Manager Management Pack installer works
+                        for Microsoft System Center Operations Manager
+                        2007, 2012 and 2016.</p></li><li class="listitem"><p>If you want to upgrade Microsoft System Center
+                        Operations Manager from version 2007 to 2012, first
+                        uninstall the SUSE Manager Management Pack and then
+                        upgrade Microsoft System Center Operations Manager.
+                        After the successful upgrade, re-install the SUSE
+                        Manager Management Pack.</p></li></ul></div></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id1337"></a>GNU Free Documentation License</h2></div></div></div><p>
+  Copyright (C) 2000, 2001, 2002 Free Software Foundation, Inc. 51 Franklin St,
+  Fifth Floor, Boston, MA 02110-1301 USA. Everyone is permitted to copy and
+  distribute verbatim copies of this license document, but changing it is not
+  allowed.
+ </p><h5><a id="id1816"></a> 0. PREAMBLE </h5><p>
+  The purpose of this License is to make a manual, textbook, or other
+  functional and useful document "free" in the sense of freedom: to assure
+  everyone the effective freedom to copy and redistribute it, with or without
+  modifying it, either commercially or non-commercially. Secondarily, this
+  License preserves for the author and publisher a way to get credit for their
+  work, while not being considered responsible for modifications made by
+  others.
+ </p><p>
+  This License is a kind of "copyleft", which means that derivative works of
+  the document must themselves be free in the same sense. It complements the
+  GNU General Public License, which is a copyleft license designed for free
+  software.
+ </p><p>
+  We have designed this License to use it for manuals for free software,
+  because free software needs free documentation: a free program should come
+  with manuals providing the same freedoms that the software does. But this
+  License is not limited to software manuals; it can be used for any textual
+  work, regardless of subject matter or whether it is published as a printed
+  book. We recommend this License principally for works whose purpose is
+  instruction or reference.
+ </p><h5><a id="id1820"></a> 1. APPLICABILITY AND DEFINITIONS </h5><p>
+  This License applies to any manual or other work, in any medium, that
+  contains a notice placed by the copyright holder saying it can be distributed
+  under the terms of this License. Such a notice grants a world-wide,
+  royalty-free license, unlimited in duration, to use that work under the
+  conditions stated herein. The "Document", below, refers to any such manual or
+  work. Any member of the public is a licensee, and is addressed as "you". You
+  accept the license if you copy, modify or distribute the work in a way
+  requiring permission under copyright law.
+ </p><p>
+  A "Modified Version" of the Document means any work containing the Document
+  or a portion of it, either copied verbatim, or with modifications and/or
+  translated into another language.
+ </p><p>
+  A "Secondary Section" is a named appendix or a front-matter section of the
+  Document that deals exclusively with the relationship of the publishers or
+  authors of the Document to the Document's overall subject (or to related
+  matters) and contains nothing that could fall directly within that overall
+  subject. (Thus, if the Document is in part a textbook of mathematics, a
+  Secondary Section may not explain any mathematics.) The relationship could be
+  a matter of historical connection with the subject or with related matters,
+  or of legal, commercial, philosophical, ethical or political position
+  regarding them.
+ </p><p>
+  The "Invariant Sections" are certain Secondary Sections whose titles are
+  designated, as being those of Invariant Sections, in the notice that says
+  that the Document is released under this License. If a section does not fit
+  the above definition of Secondary then it is not allowed to be designated as
+  Invariant. The Document may contain zero Invariant Sections. If the Document
+  does not identify any Invariant Sections then there are none.
+ </p><p>
+  The "Cover Texts" are certain short passages of text that are listed, as
+  Front-Cover Texts or Back-Cover Texts, in the notice that says that the
+  Document is released under this License. A Front-Cover Text may be at most 5
+  words, and a Back-Cover Text may be at most 25 words.
+ </p><p>
+  A "Transparent" copy of the Document means a machine-readable copy,
+  represented in a format whose specification is available to the general
+  public, that is suitable for revising the document straightforwardly with
+  generic text editors or (for images composed of pixels) generic paint
+  programs or (for drawings) some widely available drawing editor, and that is
+  suitable for input to text formatters or for automatic translation to a
+  variety of formats suitable for input to text formatters. A copy made in an
+  otherwise Transparent file format whose markup, or absence of markup, has
+  been arranged to thwart or discourage subsequent modification by readers is
+  not Transparent. An image format is not Transparent if used for any
+  substantial amount of text. A copy that is not "Transparent" is called
+  "Opaque".
+ </p><p>
+  Examples of suitable formats for Transparent copies include plain ASCII
+  without markup, Texinfo input format, LaTeX input format, SGML or XML using a
+  publicly available DTD, and standard-conforming simple HTML, PostScript or
+  PDF designed for human modification. Examples of transparent image formats
+  include PNG, XCF and JPG. Opaque formats include proprietary formats that can
+  be read and edited only by proprietary word processors, SGML or XML for which
+  the DTD and/or processing tools are not generally available, and the
+  machine-generated HTML, PostScript or PDF produced by some word processors
+  for output purposes only.
+ </p><p>
+  The "Title Page" means, for a printed book, the title page itself, plus such
+  following pages as are needed to hold, legibly, the material this License
+  requires to appear in the title page. For works in formats which do not have
+  any title page as such, "Title Page" means the text near the most prominent
+  appearance of the work's title, preceding the beginning of the body of the
+  text.
+ </p><p>
+  A section "Entitled XYZ" means a named subunit of the Document whose title
+  either is precisely XYZ or contains XYZ in parentheses following text that
+  translates XYZ in another language. (Here XYZ stands for a specific section
+  name mentioned below, such as "Acknowledgements", "Dedications",
+  "Endorsements", or "History".) To "Preserve the Title" of such a section when
+  you modify the Document means that it remains a section "Entitled XYZ"
+  according to this definition.
+ </p><p>
+  The Document may include Warranty Disclaimers next to the notice which states
+  that this License applies to the Document. These Warranty Disclaimers are
+  considered to be included by reference in this License, but only as regards
+  disclaiming warranties: any other implication that these Warranty Disclaimers
+  may have is void and has no effect on the meaning of this License.
+ </p><h5><a id="id1831"></a> 2. VERBATIM COPYING </h5><p>
+  You may copy and distribute the Document in any medium, either commercially
+  or noncommercially, provided that this License, the copyright notices, and
+  the license notice saying this License applies to the Document are reproduced
+  in all copies, and that you add no other conditions whatsoever to those of
+  this License. You may not use technical measures to obstruct or control the
+  reading or further copying of the copies you make or distribute. However, you
+  may accept compensation in exchange for copies. If you distribute a large
+  enough number of copies you must also follow the conditions in section 3.
+ </p><p>
+  You may also lend copies, under the same conditions stated above, and you may
+  publicly display copies.
+ </p><h5><a id="id1834"></a> 3. COPYING IN QUANTITY </h5><p>
+  If you publish printed copies (or copies in media that commonly have printed
+  covers) of the Document, numbering more than 100, and the Document's license
+  notice requires Cover Texts, you must enclose the copies in covers that
+  carry, clearly and legibly, all these Cover Texts: Front-Cover Texts on the
+  front cover, and Back-Cover Texts on the back cover. Both covers must also
+  clearly and legibly identify you as the publisher of these copies. The front
+  cover must present the full title with all words of the title equally
+  prominent and visible. You may add other material on the covers in addition.
+  Copying with changes limited to the covers, as long as they preserve the
+  title of the Document and satisfy these conditions, can be treated as
+  verbatim copying in other respects.
+ </p><p>
+  If the required texts for either cover are too voluminous to fit legibly, you
+  should put the first ones listed (as many as fit reasonably) on the actual
+  cover, and continue the rest onto adjacent pages.
+ </p><p>
+  If you publish or distribute Opaque copies of the Document numbering more
+  than 100, you must either include a machine-readable Transparent copy along
+  with each Opaque copy, or state in or with each Opaque copy a
+  computer-network location from which the general network-using public has
+  access to download using public-standard network protocols a complete
+  Transparent copy of the Document, free of added material. If you use the
+  latter option, you must take reasonably prudent steps, when you begin
+  distribution of Opaque copies in quantity, to ensure that this Transparent
+  copy will remain thus accessible at the stated location until at least one
+  year after the last time you distribute an Opaque copy (directly or through
+  your agents or retailers) of that edition to the public.
+ </p><p>
+  It is requested, but not required, that you contact the authors of the
+  Document well before redistributing any large number of copies, to give them
+  a chance to provide you with an updated version of the Document.
+ </p><h5><a id="id1839"></a> 4. MODIFICATIONS </h5><p>
+  You may copy and distribute a Modified Version of the Document under the
+  conditions of sections 2 and 3 above, provided that you release the Modified
+  Version under precisely this License, with the Modified Version filling the
+  role of the Document, thus licensing distribution and modification of the
+  Modified Version to whoever possesses a copy of it. In addition, you must do
+  these things in the Modified Version:
+ </p><div class="orderedlist"><ol class="orderedlist" type="A"><li class="listitem"><p>
+    Use in the Title Page (and on the covers, if any) a title distinct from
+    that of the Document, and from those of previous versions (which should, if
+    there were any, be listed in the History section of the Document). You may
+    use the same title as a previous version if the original publisher of that
+    version gives permission.
+   </p></li><li class="listitem"><p>
+    List on the Title Page, as authors, one or more persons or entities
+    responsible for authorship of the modifications in the Modified Version,
+    together with at least five of the principal authors of the Document (all
+    of its principal authors, if it has fewer than five), unless they release
+    you from this requirement.
+   </p></li><li class="listitem"><p>
+    State on the Title page the name of the publisher of the Modified Version,
+    as the publisher.
+   </p></li><li class="listitem"><p>
+    Preserve all the copyright notices of the Document.
+   </p></li><li class="listitem"><p>
+    Add an appropriate copyright notice for your modifications adjacent to the
+    other copyright notices.
+   </p></li><li class="listitem"><p>
+    Include, immediately after the copyright notices, a license notice giving
+    the public permission to use the Modified Version under the terms of this
+    License, in the form shown in the Addendum below.
+   </p></li><li class="listitem"><p>
+    Preserve in that license notice the full lists of Invariant Sections and
+    required Cover Texts given in the Document's license notice.
+   </p></li><li class="listitem"><p>
+    Include an unaltered copy of this License.
+   </p></li><li class="listitem"><p>
+    Preserve the section Entitled "History", Preserve its Title, and add to it
+    an item stating at least the title, year, new authors, and publisher of the
+    Modified Version as given on the Title Page. If there is no section
+    Entitled "History" in the Document, create one stating the title, year,
+    authors, and publisher of the Document as given on its Title Page, then add
+    an item describing the Modified Version as stated in the previous sentence.
+   </p></li><li class="listitem"><p>
+    Preserve the network location, if any, given in the Document for public
+    access to a Transparent copy of the Document, and likewise the network
+    locations given in the Document for previous versions it was based on.
+    These may be placed in the "History" section. You may omit a network
+    location for a work that was published at least four years before the
+    Document itself, or if the original publisher of the version it refers to
+    gives permission.
+   </p></li><li class="listitem"><p>
+    For any section Entitled "Acknowledgements" or "Dedications", Preserve the
+    Title of the section, and preserve in the section all the substance and
+    tone of each of the contributor acknowledgements and/or dedications given
+    therein.
+   </p></li><li class="listitem"><p>
+    Preserve all the Invariant Sections of the Document, unaltered in their
+    text and in their titles. Section numbers or the equivalent are not
+    considered part of the section titles.
+   </p></li><li class="listitem"><p>
+    Delete any section Entitled "Endorsements". Such a section may not be
+    included in the Modified Version.
+   </p></li><li class="listitem"><p>
+    Do not retitle any existing section to be Entitled "Endorsements" or to
+    conflict in title with any Invariant Section.
+   </p></li><li class="listitem"><p>
+    Preserve any Warranty Disclaimers.
+   </p></li></ol></div><p>
+  If the Modified Version includes new front-matter sections or appendices that
+  qualify as Secondary Sections and contain no material copied from the
+  Document, you may at your option designate some or all of these sections as
+  invariant. To do this, add their titles to the list of Invariant Sections in
+  the Modified Version's license notice. These titles must be distinct from any
+  other section titles.
+ </p><p>
+  You may add a section Entitled "Endorsements", provided it contains nothing
+  but endorsements of your Modified Version by various parties--for example,
+  statements of peer review or that the text has been approved by an
+  organization as the authoritative definition of a standard.
+ </p><p>
+  You may add a passage of up to five words as a Front-Cover Text, and a
+  passage of up to 25 words as a Back-Cover Text, to the end of the list of
+  Cover Texts in the Modified Version. Only one passage of Front-Cover Text and
+  one of Back-Cover Text may be added by (or through arrangements made by) any
+  one entity. If the Document already includes a cover text for the same cover,
+  previously added by you or by arrangement made by the same entity you are
+  acting on behalf of, you may not add another; but you may replace the old
+  one, on explicit permission from the previous publisher that added the old
+  one.
+ </p><p>
+  The author(s) and publisher(s) of the Document do not by this License give
+  permission to use their names for publicity for or to assert or imply
+  endorsement of any Modified Version.
+ </p><h5><a id="id1876"></a> 5. COMBINING DOCUMENTS </h5><p>
+  You may combine the Document with other documents released under this
+  License, under the terms defined in section 4 above for modified versions,
+  provided that you include in the combination all of the Invariant Sections of
+  all of the original documents, unmodified, and list them all as Invariant
+  Sections of your combined work in its license notice, and that you preserve
+  all their Warranty Disclaimers.
+ </p><p>
+  The combined work need only contain one copy of this License, and multiple
+  identical Invariant Sections may be replaced with a single copy. If there are
+  multiple Invariant Sections with the same name but different contents, make
+  the title of each such section unique by adding at the end of it, in
+  parentheses, the name of the original author or publisher of that section if
+  known, or else a unique number. Make the same adjustment to the section
+  titles in the list of Invariant Sections in the license notice of the
+  combined work.
+ </p><p>
+  In the combination, you must combine any sections Entitled "History" in the
+  various original documents, forming one section Entitled "History"; likewise
+  combine any sections Entitled "Acknowledgements", and any sections Entitled
+  "Dedications". You must delete all sections Entitled "Endorsements".
+ </p><h5><a id="id1880"></a> 6. COLLECTIONS OF DOCUMENTS </h5><p>
+  You may make a collection consisting of the Document and other documents
+  released under this License, and replace the individual copies of this
+  License in the various documents with a single copy that is included in the
+  collection, provided that you follow the rules of this License for verbatim
+  copying of each of the documents in all other respects.
+ </p><p>
+  You may extract a single document from such a collection, and distribute it
+  individually under this License, provided you insert a copy of this License
+  into the extracted document, and follow this License in all other respects
+  regarding verbatim copying of that document.
+ </p><h5><a id="id1883"></a> 7. AGGREGATION WITH INDEPENDENT WORKS </h5><p>
+  A compilation of the Document or its derivatives with other separate and
+  independent documents or works, in or on a volume of a storage or
+  distribution medium, is called an "aggregate" if the copyright resulting from
+  the compilation is not used to limit the legal rights of the compilation's
+  users beyond what the individual works permit. When the Document is included
+  in an aggregate, this License does not apply to the other works in the
+  aggregate which are not themselves derivative works of the Document.
+ </p><p>
+  If the Cover Text requirement of section 3 is applicable to these copies of
+  the Document, then if the Document is less than one half of the entire
+  aggregate, the Document's Cover Texts may be placed on covers that bracket
+  the Document within the aggregate, or the electronic equivalent of covers if
+  the Document is in electronic form. Otherwise they must appear on printed
+  covers that bracket the whole aggregate.
+ </p><h5><a id="id1886"></a> 8. TRANSLATION </h5><p>
+  Translation is considered a kind of modification, so you may distribute
+  translations of the Document under the terms of section 4. Replacing
+  Invariant Sections with translations requires special permission from their
+  copyright holders, but you may include translations of some or all Invariant
+  Sections in addition to the original versions of these Invariant Sections.
+  You may include a translation of this License, and all the license notices in
+  the Document, and any Warranty Disclaimers, provided that you also include
+  the original English version of this License and the original versions of
+  those notices and disclaimers. In case of a disagreement between the
+  translation and the original version of this License or a notice or
+  disclaimer, the original version will prevail.
+ </p><p>
+  If a section in the Document is Entitled "Acknowledgements", "Dedications",
+  or "History", the requirement (section 4) to Preserve its Title (section 1)
+  will typically require changing the actual title.
+ </p><h5><a id="id1889"></a> 9. TERMINATION </h5><p>
+  You may not copy, modify, sublicense, or distribute the Document except as
+  expressly provided for under this License. Any other attempt to copy, modify,
+  sublicense or distribute the Document is void, and will automatically
+  terminate your rights under this License. However, parties who have received
+  copies, or rights, from you under this License will not have their licenses
+  terminated so long as such parties remain in full compliance.
+ </p><h5><a id="id1891"></a> 10. FUTURE REVISIONS OF THIS LICENSE </h5><p>
+  The Free Software Foundation may publish new, revised versions of the GNU
+  Free Documentation License from time to time. Such new versions will be
+  similar in spirit to the present version, but may differ in detail to address
+  new problems or concerns. See
+  <a class="link" href="http://www.gnu.org/copyleft/" target="_top">http://www.gnu.org/copyleft/</a>.
+ </p><p>
+  Each version of the License is given a distinguishing version number. If the
+  Document specifies that a particular numbered version of this License "or any
+  later version" applies to it, you have the option of following the terms and
+  conditions either of that specified version or of any later version that has
+  been published (not as a draft) by the Free Software Foundation. If the
+  Document does not specify a version number of this License, you may choose
+  any version ever published (not as a draft) by the Free Software Foundation.
+ </p><h5><a id="id1895"></a> ADDENDUM: How to use this License for your
+  documents </h5><pre class="screen">Copyright (c) YEAR YOUR NAME.
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.2
+or any later version published by the Free Software Foundation;
+with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
+A copy of the license is included in the section entitled "GNU
+ Free Documentation License".</pre><p>
+  If you have Invariant Sections, Front-Cover Texts and Back-Cover Texts,
+  replace the "with...Texts". line with this:
+ </p><pre class="screen">with the Invariant Sections being LIST THEIR TITLES, with the
+Front-Cover Texts being LIST, and with the Back-Cover Texts being LIST.</pre><p>
+  If you have Invariant Sections without Cover Texts, or some other combination
+  of the three, merge those two alternatives to suit the situation.
+ </p><p>
+  If your document contains nontrivial examples of program code, we recommend
+  releasing these examples in parallel under your choice of free software
+  license, such as the GNU General Public License, to permit their use in free
+  software.
+ </p></div></div></body></html>

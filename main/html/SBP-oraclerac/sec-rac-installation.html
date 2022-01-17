@@ -1,0 +1,365 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Oracle RAC Installation</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="Installing Oracle RAC on SUSE Linux Enterprise Server 12" /><link rel="up" href="index.html" title="Installing Oracle RAC on SUSE Linux Enterprise Server 12" /><link rel="prev" href="sec-prerequisites.html" title="Prerequisites" /><link rel="next" href="sec-add-comments.html" title="Additional Comments" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Oracle RAC Installation</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="sec-prerequisites.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="sec-add-comments.html">Next</a></td></tr></table><hr /></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-rac-installation"></a>Oracle RAC Installation</h2></div></div></div><p>The following sections explain how to perform your Oracle RAC installation.</p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-grid-infra"></a>Installing Oracle Grid Infrastructure</h3></div></div></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-grid-prep"></a>Preparation</h4></div></div></div><p>Log in to the SUSE Linux Enterprise Server 12 64-bit OS as a
+                    non-administration user. Download the Oracle Database 12c Release 1 Grid
+                    Infrastructure (12.1.0.2.0) for Linux x86-64.</p><p>Extract <code class="filename">grid.zip</code> and run the installer
+                        <span class="command"><strong>'./runInstaller'</strong></span> from Grid ShipHome.</p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-grid-installation"></a>Installation</h4></div></div></div><p>For the actual installation, follow the steps below:</p><div class="procedure"><ol class="procedure" type="1"><li class="step"><p>Select <span class="strong"><strong>Installation Option</strong></span>.</p><div class="figure"><a id="id1341"></a><p class="title"><strong>Figure 1. Installation Option </strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-install-option.png" width="100%" alt="Installation Option" /></td></tr></table></div></div></div><br class="figure-break" /><p>Choose the option <span class="strong"><strong>Install and Configure Oracle
+                                Grid Infrastructure for a Cluster</strong></span>", then click <span class="strong"><strong>Next</strong></span> to continue.</p></li><li class="step"><p>Proceed to <span class="strong"><strong>Cluster Type</strong></span>.</p><div class="figure"><a id="id1342"></a><p class="title"><strong>Figure 2. Cluster Type</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-cluster-type.png" width="100%" alt="Cluster Type" /></td></tr></table></div></div></div><br class="figure-break" /><p>Choose the option <span class="strong"><strong>Configure a Standard
+                                Cluster</strong></span>", then click <span class="strong"><strong>Next</strong></span> to continue.</p></li><li class="step"><p>Proceed to <span class="strong"><strong>Installation Type</strong></span>.</p><div class="figure"><a id="id1343"></a><p class="title"><strong>Figure 3. Installation Type </strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-install-type.png" width="100%" alt="Installation Type" /></td></tr></table></div></div></div><br class="figure-break" /><p>Choose the option <span class="strong"><strong>Advanced
+                                Installation</strong></span>", then click <span class="strong"><strong>Next</strong></span> to continue.</p></li><li class="step"><p>Proceed to <span class="strong"><strong>Product Languages</strong></span>.</p><div class="figure"><a id="id1344"></a><p class="title"><strong>Figure 4. Product Languages</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-product-language.png" width="100%" alt="Product Languages" /></td></tr></table></div></div></div><br class="figure-break" /><p>Select all languages, then click <span class="strong"><strong>Next</strong></span> to continue.</p></li><li class="step"><p>Fill in the required <span class="strong"><strong>Grid Plug and Play
+                                Information</strong></span>.</p><div class="figure"><a id="id1345"></a><p class="title"><strong>Figure 5. Grid Plug and Play Information</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-grid-info.png" width="100%" alt="Grid Plug and Play Information" /></td></tr></table></div></div></div><br class="figure-break" /><p>Fill in the information as displayed in the screenshot, then click
+                                <span class="strong"><strong>Next</strong></span> to continue.</p><p>For more details about the GNS configuration consult the official
+                            Oracle documentation at <a class="link" href="https://docs.oracle.com/database/121/CWLIN/toc.htm" target="_top">https://docs.oracle.com/database/121/CWLIN/toc.htm</a>.</p></li><li class="step"><p>Proceed to <span class="strong"><strong>Cluster Node
+                            Information</strong></span>.</p><div class="figure"><a id="id1346"></a><p class="title"><strong>Figure 6. Cluster Node Information </strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-cluster-node-info.png" width="100%" alt="Cluster Node Information" /></td></tr></table></div></div></div><br class="figure-break" /><p>Provide the list of nodes with their public host name and virtual
+                            host name, then click <span class="strong"><strong>Next</strong></span> to
+                            continue.</p></li><li class="step"><p>Specify the <span class="strong"><strong>Network Interface Usage</strong></span>
+                            .</p><div class="figure"><a id="id1347"></a><p class="title"><strong>Figure 7. Network Interface Usage</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-network-interface.png" width="100%" alt="Network Interface Usage" /></td></tr></table></div></div></div><br class="figure-break" /><p>Provide the details of the interfaces that are used by Oracle Grid for
+                            public and private traffic, then click <span class="strong"><strong>Next</strong></span> to continue.</p></li><li class="step"><p>Fill in the <span class="strong"><strong>Storage Option
+                                Information</strong></span>.</p><div class="figure"><a id="id1348"></a><p class="title"><strong>Figure 8. Storage Option Information</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-storage-option.png" width="100%" alt="Storage Option Information" /></td></tr></table></div></div></div><br class="figure-break" /><p>Choose the option <span class="strong"><strong>Use Standard ASM for
+                                storage</strong></span>, then click <span class="strong"><strong>Next</strong></span> to continue.</p></li><li class="step"><p>Proceed to <span class="strong"><strong>Create ASM Disk
+                            Group</strong></span>.</p><div class="figure"><a id="id1349"></a><p class="title"><strong>Figure 9. Create AMS Disk Group</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-asm-disk-group.png" width="100%" alt="Create AMS Disk Group" /></td></tr></table></div></div></div><br class="figure-break" /><p>Depending on your needs, create an <span class="strong"><strong> ASM Disk
+                                Group </strong></span>, then click <span class="strong"><strong>Next</strong></span> to continue.</p></li><li class="step"><p>Specify the <span class="strong"><strong>ASM Password</strong></span>.</p><div class="figure"><a id="id1350"></a><p class="title"><strong>Figure 10. ASM Password</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-asm-password.png" width="100%" alt="ASM Password" /></td></tr></table></div></div></div><br class="figure-break" /><p>Fill in the ASM Password as shown in the screenshot above, then click
+                                <span class="strong"><strong>Next</strong></span> to continue.</p></li><li class="step"><p>Define the <span class="strong"><strong>Failure Isolation
+                                Support</strong></span>.</p><div class="figure"><a id="id1351"></a><p class="title"><strong>Figure 11. Failure Isolation Support</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-failure-isolation.png" width="100%" alt="Failure Isolation Support" /></td></tr></table></div></div></div><br class="figure-break" /><p>Choose the option <span class="strong"><strong>Do not use IPMI</strong></span>,
+                            then click <span class="strong"><strong>Next</strong></span> to continue.</p></li><li class="step"><p>Specify the <span class="strong"><strong>Management
+                            Options</strong></span>.</p><div class="figure"><a id="id1352"></a><p class="title"><strong>Figure 12. Management Options</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-management-options.png" width="100%" alt="Management Options" /></td></tr></table></div></div></div><br class="figure-break" /><p>If you select or deselect the option <span class="strong"><strong>Register
+                                with EM</strong></span> depends on your needs. After you made your choice
+                            click <span class="strong"><strong>Next</strong></span> to continue.</p></li><li class="step"><p>Proceed to <span class="emphasis">Privileged Operating System
+                                Groups</span>.</p><div class="figure"><a id="id1353"></a><p class="title"><strong>Figure 13. Privileged Operating System Groups</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-priviledged-osgroups.png" width="100%" alt="Privileged Operating System Groups" /></td></tr></table></div></div></div><br class="figure-break" /><p>The operating system groups are selected by default. Click <span class="strong"><strong>Next</strong></span> to continue.</p></li><li class="step"><p>Specify the <span class="strong"><strong>Installation
+                            Location</strong></span>.</p><div class="figure"><a id="id1354"></a><p class="title"><strong>Figure 14. Installation Location</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-install-location.png" width="100%" alt="Installation Location" /></td></tr></table></div></div></div><br class="figure-break" /><p>Fill in the <span class="strong"><strong>Oracle base</strong></span> and the
+                                <span class="strong"><strong>Software location</strong></span>, then click
+                                <span class="strong"><strong>Next</strong></span> to continue.</p></li><li class="step"><p>Create the <span class="strong"><strong>Inventory</strong></span>.</p><div class="figure"><a id="id1355"></a><p class="title"><strong>Figure 15. Create Inventory</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-create-inventory.png" width="100%" alt="Create Inventory" /></td></tr></table></div></div></div><br class="figure-break" /><p>If this is your first installation on this host, specify a directory
+                            for the installation metadata files. Click <span class="strong"><strong>Next</strong></span> to continue.</p></li><li class="step"><p>Proceed to <span class="strong"><strong>Root Script Execution
+                                Configuration</strong></span>.</p><div class="figure"><a id="id1356"></a><p class="title"><strong>Figure 16. Root Script Execution Configuration</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-root-script.png" width="100%" alt="Root Script Execution Configuration" /></td></tr></table></div></div></div><br class="figure-break" /><p>While configuring the software, you need to perform certain operations
+                            as <span class="strong"><strong>root</strong></span> user. Choose the option as
+                            shown above. The <span class="strong"><strong>Installer</strong></span> will then
+                            perform these operations automatically. Fill in the password for
+                                <span class="strong"><strong>root</strong></span> user. Click <span class="strong"><strong>Next</strong></span> to continue.</p></li><li class="step"><p>Proceed to <span class="strong"><strong>Prerequisite
+                            Check</strong></span>s.</p><div class="figure"><a id="id1357"></a><p class="title"><strong>Figure 17. Prerequisite Checks 1</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-prerequis-checks-1.png" width="100%" alt="Prerequisite Checks 1" /></td></tr></table></div></div></div><br class="figure-break" /><p>Perform the prerequisite check as shown on the screen above. Click
+                                <span class="strong"><strong>Fix&amp;Check Again</strong></span> to recheck
+                            the system.</p><div class="figure"><a id="id1358"></a><p class="title"><strong>Figure 18. Prerequisite Checks 2</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-prerequis-checks-2.png" width="100%" alt="Prerequisite Checks 2" /></td></tr></table></div></div></div><br class="figure-break" /><p>Follow the prompts, and run the fixup script as <span class="strong"><strong>root</strong></span> manually on each node. Click <span class="strong"><strong>OK</strong></span>.</p><pre class="screen"><span class="red">c2n1:/home #</span> /tmp/CVU_12.1.0.2.0_oracle/runfixup.sh
+All Fix-up operations were completed successfully.
+<span class="red">c2n1:/home #</span></pre><div class="figure"><a id="id1359"></a><p class="title"><strong>Figure 19. Prerequisite Checks 3</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-prerequis-checks-3.png" width="100%" alt="Prerequisite Checks 3" /></td></tr></table></div></div></div><br class="figure-break" /><p>On the <span class="strong"><strong>Fixup Result</strong></span> tab, activate
+                            the option <span class="strong"><strong>Ignore All</strong></span>. Click
+                                <span class="strong"><strong>Next</strong></span> to continue.</p></li><li class="step"><p>Review the <span class="strong"><strong>Summary</strong></span>.</p><div class="figure"><a id="id1360"></a><p class="title"><strong>Figure 20. Summary</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-summary.png" width="100%" alt="Summary" /></td></tr></table></div></div></div><br class="figure-break" /><p>Review the installation <span class="strong"><strong>Summary</strong></span> as
+                            shown above. If everything is correct, click <span class="strong"><strong>Install</strong></span> to continue.</p></li><li class="step"><p>Install the product.</p><div class="figure"><a id="id1361"></a><p class="title"><strong>Figure 21. Install Product - Progress</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-install-product-processing.png" width="100%" alt="Install Product - Progress" /></td></tr></table></div></div></div><br class="figure-break" /><p>The packages are being installed.</p><div class="figure"><a id="id1362"></a><p class="title"><strong>Figure 22. Install Product - Configuration Steps </strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-install-product-completed.png" width="100%" alt="Install Product - Configuration Steps" /></td></tr></table></div></div></div><br class="figure-break" /><p>The action <span class="strong"><strong>prepare for configuration
+                                steps</strong></span> is to be completed. At this point you first need to
+                            install the Oracle Patch 18456643. After that, click <span class="strong"><strong>Yes</strong></span> to run the configuration
+                            scripts.</p><div class="figure"><a id="id1363"></a><p class="title"><strong>Figure 23. Install Product - Verification Utility </strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-install-product-starting.png" width="100%" alt="Install Product - Verification Utility" /></td></tr></table></div></div></div><br class="figure-break" /><p>An error message will pop up <span class="strong"><strong>Oracle Cluster
+                                Verification Utility failed</strong></span>. Ignore the error and click
+                                <span class="strong"><strong>OK</strong></span> to continue.</p><div class="figure"><a id="id1364"></a><p class="title"><strong>Figure 24. Install Product - Setup Completed </strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-install-product-setup1.png" width="100%" alt="Install Product - Setup Completed" /></td></tr></table></div></div></div><br class="figure-break" /><p>When the setup is completed, click <span class="strong"><strong>Next</strong></span> to continue.</p><div class="figure"><a id="id1365"></a><p class="title"><strong>Figure 25. Install Product - Setup Completed Message</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-install-product-setup2.png" width="100%" alt="Install Product - Setup Completed Message" /></td></tr></table></div></div></div><br class="figure-break" /><p>An error message will pop up to inform you about some configuration
+                            assistants that failed. Click <span class="strong"><strong>Yes</strong></span> to
+                            confirm.</p><div class="figure"><a id="id1366"></a><p class="title"><strong>Figure 26. Install Product - Finish</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-finish.png" width="100%" alt="Install Product - Finish" /></td></tr></table></div></div></div><br class="figure-break" /><p>You have now finished the installation of the Oracle Grid
+                            Infrastructure for a Cluster.</p></li></ol></div></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-grid-infra-post-installation"></a>Post-Installation Checks</h4></div></div></div><div class="procedure"><ol class="procedure" type="1"><li class="step"><p>Check the Oracle Clusterware health:</p><pre class="screen"><span class="strong"><strong>oracle@c2n1:~&gt; /home/grid/bin/crsctl check cluster -all</strong></span>
+**************************************************************
+c2n1:
+CRS-4537: Cluster Ready Services is online
+CRS-4529: Cluster Synchronization Services is online
+CRS-4533: Event Manager is online
+**************************************************************
+c2n2:
+CRS-4537: Cluster Ready Services is online
+CRS-4529: Cluster Synchronization Services is online
+CRS-4533: Event Manager is online
+**************************************************************
+c2n3:
+CRS-4537: Cluster Ready Services is online
+CRS-4529: Cluster Synchronization Services is online
+CRS-4533: Event Manager is online
+**************************************************************
+c2n4:
+CRS-4537: Cluster Ready Services is online
+CRS-4529: Cluster Synchronization Services is online
+CRS-4533: Event Manager is online
+**************************************************************</pre></li><li class="step"><p>Check the Oracle Clusterware resources:</p><pre class="screen"><span class="strong"><strong>oracle@c2n1:~&gt; /home/grid/bin/srvctl status nodeapps</strong></span>
+VIP c2n1-vip.provo.novell.com is enabled
+VIP c2n1-vip.provo.novell.com is running on node: c2n1
+VIP c2n2-vip.provo.novell.com is enabled
+VIP c2n2-vip.provo.novell.com is running on node: c2n2
+VIP c2n3-vip.provo.novell.com is enabled
+VIP c2n3-vip.provo.novell.com is running on node: c2n3
+VIP c2n4-vip.provo.novell.com is enabled
+VIP c2n4-vip.provo.novell.com is running on node: c2n4
+Network is enabled
+Network is running on node: c2n1
+Network is running on node: c2n4
+Network is running on node: c2n3
+Network is running on node: c2n2
+ONS is enabled
+ONS daemon is running on node: c2n1
+ONS daemon is running on node: c2n4
+ONS daemon is running on node: c2n3
+ONS daemon is running on node: c2n2</pre></li><li class="step"><p>Check the status of the designated resources:</p><pre class="screen"><span class="strong"><strong>oracle@c2n1:~&gt; /home/grid/bin/crsctl stat res -t</strong></span>
+--------------------------------------------------------------------------------
+Name        Target State      Server                   State details
+--------------------------------------------------------------------------------
+Local Resources
+--------------------------------------------------------------------------------
+ora.LISTENER.lsnr
+         ONLINE  ONLINE       c2n1                     STABLE
+         ONLINE  ONLINE       c2n2                     STABLE
+         ONLINE  ONLINE       c2n3                     STABLE
+         ONLINE  ONLINE       c2n4                     STABLE
+ora.SUSETEST.dg
+         ONLINE  ONLINE       c2n1                     STABLE
+         ONLINE  ONLINE       c2n2                     STABLE
+         ONLINE  ONLINE       c2n3                     STABLE
+         ONLINE  ONLINE       c2n4                     STABLE
+ora.SUSETEST01.dg
+         ONLINE  ONLINE       c2n1                     STABLE
+         ONLINE  ONLINE       c2n2                     STABLE
+         ONLINE  ONLINE       c2n3                     STABLE
+         ONLINE  ONLINE       c2n4                     STABLE
+ora.asm
+         ONLINE  ONLINE       c2n1                     Started,STABLE
+         ONLINE  ONLINE       c2n2                     Started,STABLE
+         ONLINE  ONLINE       c2n3                     Started,STABLE
+         ONLINE  ONLINE       c2n4                     Started,STABLE
+ora.net1.network
+         ONLINE  ONLINE       c2n1                     STABLE
+         ONLINE  ONLINE       c2n2                     STABLE
+         ONLINE  ONLINE       c2n3                     STABLE
+         ONLINE  ONLINE       c2n4                     STABLE
+ora.ons
+         ONLINE  ONLINE       c2n1                     STABLE
+         ONLINE  ONLINE       c2n2                     STABLE
+         ONLINE  ONLINE       c2n3                     STABLE
+         ONLINE  ONLINE       c2n4                     STABLE
+--------------------------------------------------------------------------------
+Cluster Resources
+--------------------------------------------------------------------------------
+ora.LISTENER_SCAN1.lsnr
+    1    ONLINE  ONLINE       c2n4                     STABLE
+ora.LISTENER_SCAN2.lsnr
+    1    ONLINE  ONLINE       c2n3                     STABLE
+ora.LISTENER_SCAN3.lsnr
+    1    ONLINE  ONLINE       c2n1                     STABLE
+ora.MGMTLSNR
+    1    ONLINE  ONLINE       c2n1                     169.254.38.57 10.1.1.1,STABLE
+ora.c2n1.vip
+    1    ONLINE  ONLINE       c2n1                     STABLE
+ora.c2n2.vip
+    1    ONLINE  ONLINE       c2n2                     STABLE
+ora.c2n3.vip
+    1    ONLINE  ONLINE       c2n3                     STABLE
+ora.c2n4.vip
+    1    ONLINE  ONLINE       c2n4                     STABLE
+ora.cvu
+    1    ONLINE  ONLINE       c2n1                     STABLE
+ora.mgmtdb
+    1    ONLINE  ONLINE       c2n1                     Open,STABLE
+ora.oc4j
+    1    ONLINE  ONLINE       c2n1                     STABLE
+ora.scan1.vip
+    1    ONLINE  ONLINE       c2n4                     STABLE
+ora.scan2.vip
+    1    ONLINE  ONLINE       c2n3                     STABLE
+ora.scan3.vip
+    1    ONLINE  ONLINE       c2n1                     STABLE
+--------------------------------------------------------------------------------
+ </pre></li><li class="step"><p>Check OCR and the Voting disk files:</p><pre class="screen"><span class="strong"><strong>oracle@c2n1:~&gt; /home/grid/bin/ocrcheck</strong></span>
+Status of Oracle Cluster Registry is as follows :
+        Version                  :          4
+        Total space (kbytes)     :     409568
+        Used space (kbytes)      :       1696
+        Available space (kbytes) :     407872
+        ID                       : 1286433802
+        Device/File Name         :  +SUSETEST
+                     Device/File integrity check succeeded
+
+                     Device/File not configured
+
+                     Device/File not configured
+
+                     Device/File not configured
+
+                     Device/File not configured
+
+        Cluster registry integrity check succeeded
+
+        Logical corruption check bypassed due to non-privileged user
+
+<span class="strong"><strong>oracle@c2n1:~&gt; /home/grid/bin/crsctl query css votedisk</strong></span>
+##  STATE    File Universal Id                File Name Disk group
+--  -----    -----------------                --------- ---------
+1. ONLINE   3195ba343d234f0cbf92bf2df0f7d3b9 (/dev/oradata/disk1) [SUSETEST]
+2. ONLINE   3410554dce114fa1bfb86b8cd1f3288b (/dev/oradata/disk2) [SUSETEST]
+3. ONLINE   69bb2fac7bac4f71bf4b3ec63154f76c (/dev/oradata/disk3) [SUSETEST]
+Located 3 voting disk(s).
+
+</pre></li></ol></div></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-database"></a>Installing Oracle Database</h3></div></div></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-db-install-prep"></a>Preparation</h4></div></div></div><p>Log in to the SUSE Linux Enterprise Server 12 64-bit OS as a non-admin user.
+                    Download the Oracle Database 12c Release 1 (12.1.0.2.0) for Linux x86-64.</p><p>Extract <code class="filename">grid.zip</code> and run the installer
+                        <span class="command"><strong>'./runInstaller'</strong></span> from Database ShipHome.</p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-db-installation"></a>Installation</h4></div></div></div><p>For the actual installation, follow the steps below:</p><div class="procedure"><ol class="procedure" type="1"><li class="step"><p>Select <span class="strong"><strong>Configure Security
+                            Updates</strong></span></p><div class="figure"><a id="id1367"></a><p class="title"><strong>Figure 27. Configure Security Updates </strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-security-updates.png" width="100%" alt="Configure Security Updates" /></td></tr></table></div></div></div><br class="figure-break" /><p>Provide your e-mail address to be informed of security issues, then
+                            click <span class="strong"><strong>Next</strong></span> to continue.</p></li><li class="step"><p>Proceed to <span class="strong"><strong>Installation Option</strong></span>.</p><div class="figure"><a id="id1368"></a><p class="title"><strong>Figure 28. Installation Option</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-install-option-2.png" width="100%" alt="Installation Option" /></td></tr></table></div></div></div><br class="figure-break" /><p>Choose the option <span class="emphasis"><em>Install database software only</em></span>,
+                            then click <span class="emphasis"><em>Next</em></span> to continue.</p></li><li class="step"><p>Proceed to <span class="strong"><strong>Grid Installation
+                            Options</strong></span>.</p><div class="figure"><a id="id1369"></a><p class="title"><strong>Figure 29. Grid Installation Options</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-grid-install.png" width="100%" alt="Grid Installation Options" /></td></tr></table></div></div></div><br class="figure-break" /><p>Choose the option <span class="strong"><strong>Oracle Real Application
+                                Clusters database installation</strong></span>, then click <span class="strong"><strong>Next</strong></span> to continue.</p></li><li class="step"><p>Go to <span class="strong"><strong>Nodes Selection</strong></span> to select
+                            from the list of nodes.</p><div class="figure"><a id="id1370"></a><p class="title"><strong>Figure 30. Nodes Selection</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-list-nodes.png" width="100%" alt="Nodes Selection" /></td></tr></table></div></div></div><br class="figure-break" /><p>Select all nodes in the cluster, then click <span class="strong"><strong>Next</strong></span> to continue.</p></li><li class="step"><p>Proceed to <span class="strong"><strong>Product Languages</strong></span>.</p><div class="figure"><a id="id1371"></a><p class="title"><strong>Figure 31. Product Languages</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-product-language-2.png" width="100%" alt="Product Languages" /></td></tr></table></div></div></div><br class="figure-break" /><p>Select all languages, then click <span class="strong"><strong>Next</strong></span> to continue.</p></li><li class="step"><p>Select the <span class="strong"><strong>Database Edition</strong></span>.</p><div class="figure"><a id="id1372"></a><p class="title"><strong>Figure 32. Database Edition</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-database-edition.png" width="100%" alt="Database Edition" /></td></tr></table></div></div></div><br class="figure-break" /><p>Choose the option <span class="strong"><strong>Enterprise
+                                Edition</strong></span>, then click <span class="strong"><strong>Next</strong></span> to continue.</p></li><li class="step"><p>Specify the <span class="strong"><strong>Installation
+                            Location</strong></span>.</p><div class="figure"><a id="id1373"></a><p class="title"><strong>Figure 33. Installation Location</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-install-location-2.png" width="100%" alt="Installation Location" /></td></tr></table></div></div></div><br class="figure-break" /><p>Fill in the <span class="strong"><strong>Oracle base</strong></span> and the
+                                <span class="strong"><strong>Software location</strong></span> as shown above,
+                            then click <span class="strong"><strong>Next</strong></span> to continue.</p></li><li class="step"><p>Define the privileged <span class="strong"><strong>Operating System
+                                Groups</strong></span>.</p><div class="figure"><a id="id1374"></a><p class="title"><strong>Figure 34. Operating System Groups</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-priviledged-osgroups-2.png" width="100%" alt="Operating System Groups" /></td></tr></table></div></div></div><br class="figure-break" /><p>The privileged Operating System groups are selected by default. Click
+                                <span class="strong"><strong>Next</strong></span> to continue.</p></li><li class="step"><p>Perform the <span class="strong"><strong>Prerequisite Checks
+                            </strong></span>.</p><div class="figure"><a id="id1375"></a><p class="title"><strong>Figure 35. Prerequisite Checks</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-prerequis-checks-1-1.png" width="100%" alt="Prerequisite Checks" /></td></tr></table></div></div></div><br class="figure-break" /><p>Perform the pre-check as shown above; to recheck the system. Click
+                                <span class="strong"><strong>Fix&amp;Check Again</strong></span> to
+                            continue.</p><div class="figure"><a id="id1376"></a><p class="title"><strong>Figure 36. Fixup Script</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-prerequis-checks-2-2.png" width="100%" alt="Fixup Script" /></td></tr></table></div></div></div><br class="figure-break" /><p>Follow the prompts. Manually run the fixup script as
+                                <span class="quote">“<span class="quote">root</span>”</span> user on each node, then click <span class="strong"><strong>OK</strong></span>.</p><p>You should see the following output:</p><pre class="screen"><span class="red">c2n1 ~ #:</span> /tmp/CVU_12.1.0.2.0_oracle/runfixup.sh
+All Fix-up operations were completed successfully.</pre><p>Check the <span class="strong"><strong>Fixup Results</strong></span>
+                            here:</p><div class="figure"><a id="id1377"></a><p class="title"><strong>Figure 37. Fixup Results</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-prerequis-checks-3-3.png" width="100%" alt="Fixup Results" /></td></tr></table></div></div></div><br class="figure-break" /><p>Check the <span class="strong"><strong>Verification Results</strong></span>
+                            here:</p><div class="figure"><a id="id1378"></a><p class="title"><strong>Figure 38. Verification Results</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-prerequis-checks-3.png" width="100%" alt="Verification Results" /></td></tr></table></div></div></div><br class="figure-break" /><p>Select the option <span class="strong"><strong>Ignore All</strong></span>, then
+                            click <span class="strong"><strong>Next</strong></span> to continue.</p></li><li class="step"><p>Review the <span class="strong"><strong>Summary</strong></span>.</p><div class="figure"><a id="id1379"></a><p class="title"><strong>Figure 39. Summary</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-summary-2.png" width="100%" alt="Summary" /></td></tr></table></div></div></div><br class="figure-break" /><p>If you see the installation summary as shown above, click <span class="strong"><strong>Install</strong></span> to continue.</p></li><li class="step"><p>Proceed to <span class="strong"><strong>Install Product</strong></span>.</p><div class="figure"><a id="id1380"></a><p class="title"><strong>Figure 40. Install Product</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-install-product-loading.png" width="100%" alt="Install Product" /></td></tr></table></div></div></div><br class="figure-break" /><p>While the product loads, a window pops up where you can execute the
+                            configuration scripts.</p><div class="figure"><a id="id1381"></a><p class="title"><strong>Figure 41. Execute Configuration Scripts</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-install-product-saving.png" width="100%" alt="Execute Configuration Scripts" /></td></tr></table></div></div></div><br class="figure-break" /><p>Execute <code class="filename">root.sh</code> as the <span class="strong"><strong>root</strong></span> user in each cluster node, then click <span class="strong"><strong>OK</strong></span> to continue.</p><p>You will see the following output:</p><pre class="screen"><span class="red">c2n1:~ #</span> /home/oracle/app/product/12.1.0/dbhome_1/root.sh
+Performing root user operation.
+
+The following environment variables are set as:
+    ORACLE_OWNER=oracle
+    ORACLE_Home=/home/oracle/app/product/12.1.0/dbhome_1
+
+Enter the full pathname of the local bin directory: [/usr/local/bin]
+The contents of "dbhome" have not changed. No need to overwrite.
+The contents of "oraenv" have not changed. No need to overwrite.
+The contents of "coraenv" have not changed. No need to overwrite.
+
+Entries will be added to the /etc/oratab file as needed by
+Database Configuration Assistant when a database is created
+Finished running generic part of root script.
+Now product-specific root actions will be performed.</pre><p>The next screen indicates that the installation has been finished
+                            successfully.</p><div class="figure"><a id="id1382"></a><p class="title"><strong>Figure 42. Finish</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-finish-installation-successful.png" width="100%" alt="Finish" /></td></tr></table></div></div></div><br class="figure-break" /><p>The installation of your Oracle Database is finished. Click <span class="strong"><strong>Close</strong></span> to close the screen.</p></li></ol></div></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-asm-disk-group"></a>Create ASM Disk Group</h4></div></div></div><p>Use the ASM Configuration Assistant to create the ASM disk group for datafile
+                    storage.</p><div class="figure"><a id="id1383"></a><p class="title"><strong>Figure 43. ASM Configuration Assistant</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-asmca.png" width="100%" alt="ASM Configuration Assistant" /></td></tr></table></div></div></div><br class="figure-break" /><p>Follow the instructions displayed on the screen.</p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-create-db"></a>Create Oracle RAC 12.1.0.2 Database</h4></div></div></div><p>Perform the following steps to create your Oracle RAC 12.1.0.2 database by
+                    using the Database Configuration Assistant:</p><div class="procedure"><ol class="procedure" type="1"><li class="step"><p>Select <span class="strong"><strong>Database Operation</strong></span>.</p><div class="figure"><a id="id1384"></a><p class="title"><strong>Figure 44. Database Operation</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-database-operation.png" width="100%" alt="Database Operation" /></td></tr></table></div></div></div><br class="figure-break" /><p>Choose the option <span class="strong"><strong>Create Database</strong></span>,
+                            then click <span class="strong"><strong>Next</strong></span> to continue.</p></li><li class="step"><p>Proceed to <span class="strong"><strong>Creation Mode</strong></span>.</p><div class="figure"><a id="id1385"></a><p class="title"><strong>Figure 45. Creation Mode</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-creation-mode.png" width="100%" alt="Creation Mode" /></td></tr></table></div></div></div><br class="figure-break" /><p>Choose the option <span class="strong"><strong>Advanced Mode</strong></span>,
+                            then click <span class="strong"><strong>Next</strong></span> to continue.</p></li><li class="step"><p>Define the <span class="strong"><strong>Database Template</strong></span>.</p><div class="figure"><a id="id1386"></a><p class="title"><strong>Figure 46. Database Template</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-database-template.png" width="100%" alt="Database Template" /></td></tr></table></div></div></div><br class="figure-break" /><p>Select the type of database you want to configure, then click
+                                <span class="strong"><strong>Next</strong></span> to continue.</p></li><li class="step"><p>Proceed to <span class="strong"><strong>Database
+                            Identification</strong></span>.</p><div class="figure"><a id="id1387"></a><p class="title"><strong>Figure 47. Database Identification</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-database-identification.png" width="100%" alt="Database Identification" /></td></tr></table></div></div></div><br class="figure-break" /><p>Fill in the <span class="strong"><strong>Global Database Name</strong></span> as
+                            shown above, then click <span class="strong"><strong>Next</strong></span> to
+                            continue.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Container Database</h3><p>Oracle Database 12C supports the creation of a Container Database.
+                                This means you can also create a Container Database depending on
+                                your needs.</p></div></li><li class="step"><p>Proceed to <span class="strong"><strong>Database Placement</strong></span>.</p><div class="figure"><a id="id1388"></a><p class="title"><strong>Figure 48. Database Placement</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-database-placement.png" width="100%" alt="Database Placement" /></td></tr></table></div></div></div><br class="figure-break" /><p>Review the <span class="strong"><strong>Server Pools</strong></span> information
+                            as shown above. Click <span class="strong"><strong>Next</strong></span> to
+                            continue.</p></li><li class="step"><p>Specify the <span class="strong"><strong>Management Options</strong></span>.</p><div class="figure"><a id="id1389"></a><p class="title"><strong>Figure 49. Management Options</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-management-options-2.png" width="100%" alt="Management Options" /></td></tr></table></div></div></div><br class="figure-break" /><p>Specify the management options for the database, then click <span class="strong"><strong>Next</strong></span> to continue.</p></li><li class="step"><p>Proceed to <span class="strong"><strong>Database Credentials</strong></span>.</p><div class="figure"><a id="id1390"></a><p class="title"><strong>Figure 50. Database Credentials</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-database-credentials.png" width="100%" alt="Database Credentials" /></td></tr></table></div></div></div><br class="figure-break" /><p>Specify the administrative password for the database users, then click
+                                <span class="strong"><strong>Next</strong></span> to continue.</p></li><li class="step"><p>Proceed to <span class="strong"><strong>Storage Locations</strong></span>.</p><div class="figure"><a id="id1391"></a><p class="title"><strong>Figure 51. Storage Locations</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-storage-locations.png" width="100%" alt="Storage Locations" /></td></tr></table></div></div></div><br class="figure-break" /><p>Specify the database files storage information as shown above, then
+                            click <span class="strong"><strong>Next</strong></span> to continue.</p></li><li class="step"><p>Proceed to <span class="strong"><strong>Database Options</strong></span>.</p><div class="figure"><a id="id1392"></a><p class="title"><strong>Figure 52. Database Options</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-database-options.png" width="100%" alt="Database Options" /></td></tr></table></div></div></div><br class="figure-break" /><p>According to your needs, specify whether to add the schemas to
+                            your database. Click <span class="strong"><strong>Next</strong></span> to
+                            continue.</p></li><li class="step"><p>Proceed to <span class="strong"><strong>Initialization
+                            Parameters</strong></span>.</p><div class="figure"><a id="id1393"></a><p class="title"><strong>Figure 53. Initialization Parameters</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-initialization-parameters.png" width="100%" alt="Initialization Parameters" /></td></tr></table></div></div></div><br class="figure-break" /><p>Choose the option <span class="strong"><strong>Typical Settings</strong></span>
+                            and adjust the parameters to meet your requirements. Click <span class="strong"><strong>Next</strong></span> to continue.</p></li><li class="step"><p>Proceed to <span class="strong"><strong>Creation Options</strong></span>.</p><div class="figure"><a id="id1394"></a><p class="title"><strong>Figure 54. Creation Options</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-creation-options.png" width="100%" alt="Creation Options" /></td></tr></table></div></div></div><br class="figure-break" /><p>Select the database creation options as shown above, then click
+                                <span class="strong"><strong>Next</strong></span> to continue.</p></li><li class="step"><p>Perform the <span class="strong"><strong>Prerequisite
+                            Checks</strong></span>.</p><div class="figure"><a id="id1395"></a><p class="title"><strong>Figure 55. Prerequisite Checks</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-prerequis-checks-5.png" width="100%" alt="Prerequisite Checks" /></td></tr></table></div></div></div><br class="figure-break" /><p>Select the option <span class="strong"><strong>Ignore All</strong></span>, then
+                            click <span class="strong"><strong>Next</strong></span> to continue.</p></li><li class="step"><p>Review the <span class="strong"><strong>Summary</strong></span>.</p><div class="figure"><a id="id1396"></a><p class="title"><strong>Figure 56. Summary</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-summary-3.png" width="100%" alt="Summary" /></td></tr></table></div></div></div><br class="figure-break" /><p>Review and check the information displayed in the <span class="strong"><strong>Database Configuration Summary</strong></span> as shown
+                            above. Click <span class="strong"><strong>Finish</strong></span> to
+                            continue.</p></li><li class="step"><p>Review the <span class="strong"><strong>Progress Page</strong></span>.</p><div class="figure"><a id="id1397"></a><p class="title"><strong>Figure 57. Progress Page</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-progress-page.png" width="100%" alt="Progress Page" /></td></tr></table></div></div></div><br class="figure-break" /><p>The creation of your database is now progressing as shown above. Wait
+                            until the creation process is completed.</p></li><li class="step"><p>Proceed to <span class="strong"><strong>Finish</strong></span>.</p><div class="figure"><a id="id1398"></a><p class="title"><strong>Figure 58. Finish</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-finish-2.png" width="100%" alt="Finish" /></td></tr></table></div></div></div><br class="figure-break" /><p>When the creation of the database is completed, some information is
+                            displayed on the screen as shown above. Click <span class="strong"><strong>Close</strong></span> to close the screen.</p></li></ol></div></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-db-post-install-checks"></a>Post-Installation Checks</h4></div></div></div><div class="procedure"><ol class="procedure" type="1"><li class="step"><p>Verify the database status and the configuration.</p><pre class="screen"><span class="strong"><strong>oracle@c2n1:~&gt; export ORACLE_HOME=/home/oracle/app/product/12.1.0/dbhome_1</strong></span>
+<span class="strong"><strong>oracle@c2n1:~&gt; /home/oracle/app/product/12.1.0/dbhome_1/bin/srvctl status database -d susedb</strong></span>
+Instance SUSEDB_1 is running on node c2n2
+Instance SUSEDB_2 is running on node c2n3
+Instance SUSEDB_3 is running on node c2n4
+Instance SUSEDB_4 is running on node c2n1</pre><pre class="screen"><span class="strong"><strong>oracle@c2n1:~&gt; /home/oracle/app/product/12.1.0/dbhome_1/bin/srvctl config database -d susedb -a</strong></span>
+Database unique name: SUSEDB
+Database name: SUSEDB
+Oracle home: /home/oracle/app/product/12.1.0/dbhome_1
+Oracle user: oracle
+Spfile: +SUSETEST01/SUSEDB/PARAMETERFILE/spfile.274.908484433
+Password file: +SUSETEST01/SUSEDB/PASSWORD/pwdsusedb.256.908484093
+Domain:
+Start options: open
+Stop options: immediate
+Database role: PRIMARY
+Management policy: AUTOMATIC
+Server pools: susepool
+Disk Groups: SUSETEST01
+Mount point paths:
+Services:
+Type: RAC
+Start concurrency:
+Stop concurrency:
+Database is enabled
+Database is individually enabled on nodes:
+Database is individually disabled on nodes:
+OSDBA group: dba
+OSOPER group:
+Database instances:
+Configured nodes:
+Database is policy managed</pre><pre class="screen"><span class="strong"><strong>oracle@c2n1:~&gt; /home/grid/bin/crsctl stat res -t</strong></span>
+--------------------------------------------------------------------------------
+Name        Target State      Server                   State details
+--------------------------------------------------------------------------------
+Local Resources
+--------------------------------------------------------------------------------
+ora.LISTENER.lsnr
+        ONLINE  ONLINE       c2n1                     STABLE
+        ONLINE  ONLINE       c2n2                     STABLE
+        ONLINE  ONLINE       c2n3                     STABLE
+        ONLINE  ONLINE       c2n4                     STABLE
+ora.SUSETEST.dg
+        ONLINE  ONLINE       c2n1                     STABLE
+        ONLINE  ONLINE       c2n2                     STABLE
+        ONLINE  ONLINE       c2n3                     STABLE
+        ONLINE  ONLINE       c2n4                     STABLE
+ora.SUSETEST01.dg
+        ONLINE  ONLINE       c2n1                     STABLE
+        ONLINE  ONLINE       c2n2                     STABLE
+        ONLINE  ONLINE       c2n3                     STABLE
+        ONLINE  ONLINE       c2n4                     STABLE
+ora.asm
+        ONLINE  ONLINE       c2n1                     Started,STABLE
+        ONLINE  ONLINE       c2n2                     Started,STABLE
+        ONLINE  ONLINE       c2n3                     Started,STABLE
+        ONLINE  ONLINE       c2n4                     Started,STABLE
+ora.net1.network
+        ONLINE  ONLINE       c2n1                     STABLE
+        ONLINE  ONLINE       c2n2                     STABLE
+        ONLINE  ONLINE       c2n3                     STABLE
+        ONLINE  ONLINE       c2n4                     STABLE
+ora.ons
+        ONLINE  ONLINE       c2n1                     STABLE
+        ONLINE  ONLINE       c2n2                     STABLE
+        ONLINE  ONLINE       c2n3                     STABLE
+        ONLINE  ONLINE       c2n4                     STABLE
+--------------------------------------------------------------------------------
+Cluster Resources
+--------------------------------------------------------------------------------
+ora.LISTENER_SCAN1.lsnr
+    1    ONLINE  ONLINE       c2n4                     STABLE
+ora.LISTENER_SCAN2.lsnr
+    1    ONLINE  ONLINE       c2n3                     STABLE
+ora.LISTENER_SCAN3.lsnr
+    1    ONLINE  ONLINE       c2n1                     STABLE
+ora.MGMTLSNR
+    1    ONLINE  ONLINE       c2n1                     169.254.38.57 10.1.1.1,STABLE
+ora.c2n1.vip
+    1    ONLINE  ONLINE       c2n1                     STABLE
+ora.c2n2.vip
+    1    ONLINE  ONLINE       c2n2                     STABLE
+ora.c2n3.vip
+    1    ONLINE  ONLINE       c2n3                     STABLE
+ora.c2n4.vip
+    1    ONLINE  ONLINE       c2n4                     STABLE
+ora.cvu
+    1    ONLINE  ONLINE       c2n1                     STABLE
+ora.mgmtdb
+    1    ONLINE  ONLINE       c2n1                     Open,STABLE
+ora.oc4j
+    1    ONLINE  ONLINE       c2n1                     STABLE
+ora.scan1.vip
+    1    ONLINE  ONLINE       c2n4                     STABLE
+ora.scan2.vip
+    1    ONLINE  ONLINE       c2n3                     STABLE
+ora.scan3.vip
+    1    ONLINE  ONLINE       c2n1                     STABLE
+ora.susedb.db
+    1    ONLINE  ONLINE       c2n2                     Open,STABLE
+    2    ONLINE  ONLINE       c2n3                     Open,STABLE
+    3    ONLINE  ONLINE       c2n4                     Open,STABLE
+    4    ONLINE  ONLINE       c2n1                     Open,STABLE
+--------------------------------------------------------------------------------</pre></li><li class="step"><p>Verify the availability of your <span class="strong"><strong>Oracle
+                        Enterprise Manager</strong></span>.</p><div class="figure"><a id="id1399"></a><p class="title"><strong>Figure 59. Oracle Enterprise Manager</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/oracle-rac-enterprise-manager.png" width="100%" alt="Oracle Enterprise Manager" /></td></tr></table></div></div></div><br class="figure-break" /></li></ol></div></div></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="sec-prerequisites.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="sec-add-comments.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Prerequisites </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Additional Comments</td></tr></table></div></body></html>

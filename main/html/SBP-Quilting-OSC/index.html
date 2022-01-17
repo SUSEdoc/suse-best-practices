@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>How to Modify a Package in the Open Build Service</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><meta name="description" content="This document leads you through the process of modifying a software package in the Open Build Service (OBS) using the osc and quilt tools. It also discusses simple error cases, based upon the author’s own experiences, but it does not attempt to be a full manual or to cover all options. The steps described here should work well, but if you encounter any difficulties, you should consult the manuals or ask an expert for help. This document does not intend to provide a guide for the Open Build Service. If you want to learn more about OBS, visit the project’s Web page at http://openbuildservice.org/ and read the specific documentation there http://openbuildservice.org/help/ Disclaimer: Documents published as part of the SUSE Best Practices series have been contributed voluntarily by SUSE employees and third parties. They are meant to serve as examples of how particular actions can be performed. They have been compiled with utmost attention to detail. However, this does not guarantee complete accuracy. SUSE cannot verify that actions described in these documents do what is claimed or whether actions described have unintended consequences. SUSE LLC, its affiliates, the authors, and the translators may not be held liable for possible errors or the consequences thereof." /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="How to Modify a Package in the Open Build Service" /><link rel="next" href="sec-repos-projects.html" title="Repositories and Projects" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">How to Modify a Package in the Open Build Service</th></tr><tr><td width="20%" align="left"> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="sec-repos-projects.html">Next</a></td></tr></table><hr /></div><div xml:lang="en" class="article" lang="en"><div class="titlepage"><div><div><h1 class="title"><a id="art-sbp-quilting-osc"></a>How to Modify a Package in the Open Build Service</h1></div><div><h3 class="subtitle"><em>Quilting with OSC</em></h3></div><div><div class="author"><h3 class="author"><span class="firstname">Josef</span> <span class="surname">Moellers, Senior Developer SUSE Linux Enterprise
+                    Network Services, SUSE</span></h3></div></div><div><div class="abstract"><p class="title"><strong>Abstract</strong></p><p>This document leads you through the process of modifying
+                a software package in the Open Build Service (OBS) using
+                the <span class="command"><strong>osc</strong></span> and <span class="command"><strong>quilt</strong></span>
+                tools. It also discusses simple error cases, based upon the
+                author’s own experiences, but it does not attempt to be a
+                full manual or to cover all options. The steps described
+                here should work well, but if you encounter any
+                difficulties, you should consult the manuals or ask an
+                expert for help. </p><p>This document does not intend to provide a guide for the
+                Open Build Service. If you want to learn more about OBS,
+                visit the project’s Web page at <a class="link" href="http://openbuildservice.org/" target="_top">http://openbuildservice.org/</a> and read the
+                specific documentation there <a class="link" href="http://openbuildservice.org/help/" target="_top">http://openbuildservice.org/help/</a>
+            </p><p>
+                <span class="strong"><strong>Disclaimer: </strong></span>
+                Documents published as part of the SUSE Best Practices series have been contributed voluntarily
+                by SUSE employees and third parties. They are meant to serve as examples of how particular
+                actions can be performed. They have been compiled with utmost attention to detail. However,
+                this does not guarantee complete accuracy. SUSE cannot verify that actions described in these
+                documents do what is claimed or whether actions described have unintended consequences.
+                SUSE LLC, its affiliates, the authors, and the translators may not be held liable for possible errors
+                or the consequences thereof.
+            </p></div></div></div><hr /></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="sect1"><a href="index.html#sec-intro">Introduction: Open Build Service and the Tools
+                <span class="command"><strong>osc</strong></span> and <span class="command"><strong>quilt</strong></span></a></span></dt><dt><span class="sect1"><a href="sec-repos-projects.html">Repositories and Projects</a></span></dt><dd><dl><dt><span class="sect2"><a href="sec-repos-projects.html#sec-upstream">Upstream</a></span></dt><dt><span class="sect2"><a href="sec-repos-projects.html#sec-dev-repo">Development Repository</a></span></dt><dt><span class="sect2"><a href="sec-repos-projects.html#sec-factory">Factory</a></span></dt><dt><span class="sect2"><a href="sec-repos-projects.html#sec-home-project">Home Project</a></span></dt><dt><span class="sect2"><a href="sec-repos-projects.html#sec-branch">Branch</a></span></dt><dt><span class="sect2"><a href="sec-repos-projects.html#sec-product-projects">Product Projects</a></span></dt></dl></dd><dt><span class="sect1"><a href="sec-package.html">Package</a></span></dt><dt><span class="sect1"><a href="sec-get-package.html">Getting the Package</a></span></dt><dd><dl><dt><span class="sect2"><a href="sec-get-package.html#sec-devel-repo-main">Development Repository – Maintainer or Bugowner</a></span></dt><dt><span class="sect2"><a href="sec-get-package.html#sec-devel-repo-non-main">Development Repository - Non-Maintainer or Non-Bugowner </a></span></dt></dl></dd><dt><span class="sect1"><a href="sec-working-sources.html">Working on the Sources</a></span></dt><dd><dl><dt><span class="sect2"><a href="sec-working-sources.html#sec-upgrading">Upgrading</a></span></dt><dt><span class="sect2"><a href="sec-working-sources.html#sec-patching">Patching</a></span></dt></dl></dd><dt><span class="sect1"><a href="sec-build-package.html">Build the Package</a></span></dt><dt><span class="sect1"><a href="sec-test.html">Test</a></span></dt><dt><span class="sect1"><a href="sec-submit.html">Submit</a></span></dt><dt><span class="sect1"><a href="sec-propagate-patch.html">Propagate a patch</a></span></dt><dt><span class="sect1"><a href="sec-conclusion.html">Conclusion</a></span></dt><dt><span class="sect1"><a href="ar01s11.html">Legal notice</a></span></dt><dt><span class="sect1"><a href="ar01s12.html">GNU Free Documentation License</a></span></dt></dl></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-intro"></a>Introduction: Open Build Service and the Tools
+                <span class="command"><strong>osc</strong></span> and <span class="command"><strong>quilt</strong></span></h2></div></div></div><p>The Open Build Service command line client
+                <span class="command"><strong>osc</strong></span> is a tool developed to interact with
+            OBS servers. It provides many functions including: </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Creating, modifying and deleting the information
+                    (meta data) about projects and packages and downloading
+                    or uploading their code and packaging </p></li><li class="listitem"><p>Managing the repositories or targets that projects or
+                    packages build against </p></li><li class="listitem"><p>Preparing and running local builds of packages
+                </p></li><li class="listitem"><p>Making and managing requests to modify packages in
+                    projects (so called <span class="italic">Submit
+                        Requests</span>)</p></li></ul></div><p><span class="command"><strong>quilt</strong></span> is a software utility for managing a
+            series of changes to the source code of any computer program.
+            Such changes are often called <span class="quote">“<span class="quote">patches</span>”</span> or
+                <span class="quote">“<span class="quote">patch sets</span>”</span>. <span class="command"><strong>quilt</strong></span> takes
+            an arbitrary number of patches and turns them into a single
+            patch. In doing so, <span class="command"><strong>quilt</strong></span> makes it easier
+            for other programmers to test and evaluate the different
+            changes before they are permanently inserted into the source
+            code. In short, <span class="command"><strong>quilt</strong></span> allows you to easily
+            manage many patches by keeping track of the changes each patch
+            makes. Patches can be applied, un-applied, refreshed, and more. </p><p>To understand how <span class="command"><strong>osc</strong></span> and
+                <span class="command"><strong>quilt</strong></span> work, a few terms and technologies
+            need to be described more in detail:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>OBS manages <span class="italic">repositories</span>, such as <span class="strong"><strong>devel:tools</strong></span>, <span class="strong"><strong>SUSE:SLE-15:GA</strong></span>, or
+                        <span class="strong"><strong>home:&lt;username&gt;</strong></span>. <span class="italic">Repositories</span> are sometimes
+                    also called <span class="italic">projects</span>. In this documentation, projects
+                    are abbreviated as <span class="strong"><strong>PRJ</strong></span>.</p></li><li class="listitem"><p>A <span class="italic">repository</span>
+                    contains a set of <span class="italic">packages</span>, such as <span class="strong"><strong>pam_krb5</strong></span>, <span class="strong"><strong>ntp</strong></span>, <span class="strong"><strong>wget</strong></span>, <span class="strong"><strong>zypper</strong></span>. In this document,
+                    packages are abbreviated as <span class="strong"><strong>PKG</strong></span>. Keep in mind that a package can
+                    (and usually will) appear in more than one repository,
+                    but for all practical purposes each one is a copy in
+                    its own right.</p></li><li class="listitem"><p>A package consists of a set of files, which
+                    contains:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>at least a <code class="filename">spec</code>
+                            file,</p></li><li class="listitem"><p>an archive of <span class="italic">pristine sources</span> – these are
+                            the <span class="quote">“<span class="quote">original</span>”</span> sources for the
+                            package without any patches applied – possibly
+                            accompanied by a <code class="filename">signature</code>
+                            file,</p></li><li class="listitem"><p>a <code class="filename">changes</code> file,</p></li><li class="listitem"><p>possibly a set of <span class="italic"></span>patches which are to be applied in a given
+                            sequence, the order being defined by the
+                                <code class="filename">spec</code> file, and</p></li><li class="listitem"><p>sometimes additional files, which are not
+                            part of the sources or which control some
+                            aspects of the building process, for example an
+                                <code class="filename">rpmlintrc</code> file.</p></li></ul></div></li></ul></div><p>While there exists only <span class="strong"><strong>one</strong></span> Open Build Service, it maintains two
+            separate collections, or APIs (as they are called in the
+            documentation) of repositories:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>the <span class="italic">external</span> build
+                    service at <a class="link" href="https://api.opensuse.org" target="_top">https://api.opensuse.org</a>. It can be used by
+                    everyone. When you log in to this Web site, you can
+                    view all projects available in the external build
+                    service. </p></li><li class="listitem"><p>the <span class="italic">internal</span> build
+                    service where the SUSE products are maintained. Only
+                    SUSE employees can access this Web site using their log
+                    in credentials. Here you can view the existing projects
+                    in the internal build service.</p></li></ul></div><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">External Build Service</h3><p>By default, the <span class="command"><strong>osc</strong></span> command works on
+                the external build service only. To make it work on the
+                internal build service, you need to add the special option
+                with argument <code class="option">-A int</code>. As this paper
+                focuses on the external API of the Open Build Service, only
+                the plain <span class="command"><strong>osc</strong></span> command is used.</p></div><p>This document guides you through the process of modifying a
+            package by updating it to a new version, adding an existing
+            upstream patch or by building a new patch.</p><p>You might need to add a patch to several versions of the
+            respective package in more than one project. The reason is
+            that, if you fix a bug, you often need to fix it in various
+            SUSE Linux Enterprise releases. For example, if you fix a bug
+            in SUSE Linux Enterprise 11, you might also need to fix it in
+            SUSE Linux Enterprise 12. For this purpose we will use two
+            tools:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><span class="command"><strong>osc</strong></span> to manage the package(s)
+                    and</p></li><li class="listitem"><p><span class="command"><strong>quilt</strong></span> to manage the
+                    patch(es)</p></li></ul></div><p>Using two tools occasionally requires switching from one tool
+            to the other. At the <span class="quote">“<span class="quote">junctions</span>”</span>, each of the
+            tools will <span class="quote">“<span class="quote">enter the realm</span>”</span> of the other tool.
+            But in good Unix tradition, each tool performs its own job,
+            while being aware of the other tool. The commands for both
+            tools come with a very extensive set of subcommands and very
+            good manual pages. Options explained or mentioned in this
+            document are usually placed after the subcommand. In
+            consequence, for a correct command, type :</p><pre class="screen">osc mbranch -c &lt;PKG&gt;</pre><p>and NOT</p><pre class="screen">osc -c mbranch &lt;PKG&gt;</pre><p>The former command requests to check out files from the
+            created branches, while the latter would specify to use an
+            alternate configuration file <span class="strong"><strong>
+                <span class="quote">“<span class="quote">mbranch</span>”</span>
+            </strong></span> with <span class="command"><strong>&lt;PKG&gt;</strong></span> as the
+            subcommand.</p><p>Both tools come with a built-in help system. To display the
+            information for a given subcommand, type:</p><pre class="screen">osc help &lt;subcommand&gt;</pre><p>or</p><pre class="screen">quilt &lt;subcommand&gt; -h</pre></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="sec-repos-projects.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top"> </td><td width="20%" align="center"> </td><td width="40%" align="right" valign="top"> Repositories and Projects</td></tr></table></div></body></html>

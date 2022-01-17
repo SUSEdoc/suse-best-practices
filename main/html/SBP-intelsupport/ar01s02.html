@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>The Question About Platform Support</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="SUSE Linux Enterprise Server - Support for Intel Server Platforms" /><link rel="up" href="index.html" title="SUSE Linux Enterprise Server - Support for Intel Server Platforms" /><link rel="prev" href="index.html" title="SUSE Linux Enterprise Server - Support for Intel Server Platforms" /><link rel="next" href="ar01s03.html" title="Full System Validation Counts" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">The Question About Platform Support</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="index.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="ar01s03.html">Next</a></td></tr></table><hr /></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id1337"></a>The Question About Platform Support</h2></div></div></div><p>Among the most frequently asked customer questions regarding SUSE Linux Enterprise
+            Server are question about general platform support. For the purpose of the document at
+            hand, we formulate them as follows:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Question 1: Which SUSE Linux Enterprise Server releases support Haswell CPUs
+                    and chipsets?</p></li><li class="listitem"><p>Question 2: We see that that HP x240 and IBM x3520 servers utilizing Haswell
+                    chipsets have been YES certified. Does this mean that the Intel E7-4800 v3 CPU
+                    is also supported?</p></li></ul></div><p>The short answer to these question is: SUSE supports what is YES Certified. Anything
+            else should be considered unknown. But looking under the surface, the answer is much
+            more complex:</p><p>Haswell is <span class="strong"><strong>not</strong></span> a chipset or a CPU. It is a
+            microarchitecture design behind a range of CPUs used in lightweight, low power mobile
+            platforms up to highly scalable server systems. The first CPUs and platforms under this
+            microarchitecture were released in 2013. Until 2015, a huge number of CPUs had been
+            added. They can be (and unfortunately are) all referred to as <span class="quote">“<span class="quote">Haswell</span>”</span>
+            platforms even if they differ in their design and operating system support.</p><p>Since Haswell (and every other Xeon* CPU released by Intel) is backward compatible
+            from an instruction set standpoint, theoretically it and other new Intel CPUs can run
+            every previous version of SUSE Linux Enterprise Server. This means that, at from a
+            technical or CPU perspective, Haswell can run on SUSE Linux Enterprise Server 12 and any
+            older version of it. But, customers do not use CPUs alone; they use complete systems.
+            These systems are comprised of other components besides the CPU. Of all these
+            components, the CPU itself normally has the least impact on the operating system
+            support. In consequence, a statement about Haswell support, or even a specific Intel CPU
+            version does not provide valuable information to the customer wanting to know which
+            server <span class="strong"><strong>systems</strong></span> are supported with which operating
+            system version.</p><p>SUSE only provides support for complete systems that have been validated by SUSE or
+            the hardware vendors for use with the particular version of SUSE Linux Enterprise
+            server. [^2] </p><p>When a system has been validated as supported for a given major release of SUSE Linux
+            Enterprise Server and its Service Packs, it is considered supported for the subsequent
+            service packs of that major release. With new major releases currently the hardware must
+            be re-validated for supportability. However SUSE strives to make sure recent hardware
+            that is supported on previous releases will also be supported on new major releases. It
+            is possible that very old hardware will be <span class="quote">“<span class="quote">dropped</span>”</span> from support with very
+            new major versions of SUSE Linux Enterprise Server.</p><p>In addition, SUSE avoids to make generalized support statements for CPU or CPU
+            micro-architectures (for example <span class="quote">“<span class="quote">Haswell</span>”</span>) to end users. SUSE includes
+            some statements about CPU support in the SUSE Linux Enterprise Server release notes.
+            However, these statements are based on new CPUs that were used during development and
+            testing of the new SUSE release and are not meant to indicate supportability of any
+            particular hardware system. </p><p>The following sections will provide more details about the reasons why SUSE only
+            supports validated systems.</p></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="index.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="ar01s03.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">SUSE Linux Enterprise Server - Support for Intel Server Platforms </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Full System Validation Counts</td></tr></table></div></body></html>

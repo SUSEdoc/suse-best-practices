@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Setting Up PXE Boot</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="How to Set Up a Multi-PXE Installation Server" /><link rel="up" href="index.html" title="How to Set Up a Multi-PXE Installation Server" /><link rel="prev" href="sec-setup-tftp.html" title="Setting Up TFTP" /><link rel="next" href="sec-setup-smt.html" title="Setting Up SMT" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Setting Up PXE Boot</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="sec-setup-tftp.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="sec-setup-smt.html">Next</a></td></tr></table><hr /></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-setup-pxe"></a>Setting Up PXE Boot</h2></div></div></div><p>To ensure you set up your install server correctly, read carefully through the
+            following sections. Proceed as described and double check your entries to avoid typos.
+            Getting all the right files in the right places allows you to add more architectures,
+            operating system install options, etc.  </p><p>Create a structure in <code class="filename">/srv/tftpboot</code> to support the various
+            options:</p><pre class="screen">mkdir /srv/tftpboot/bios
+mkdir /srv/tftpboot/bios/x86
+mkdir /srv/tftpboot/EFI
+mkdir /srv/tftpboot/EFI/x86
+mkdir /srv/tftpboot/EFI/x86/boot
+mkdir /srv/tftpboot/EFI/armv8
+mkdir /srv/tftpboot/EFI/armv8/boot</pre><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-setup-x86-bios"></a>Setting Up the x86 BIOS Boot Environment</h3></div></div></div><p>At this point, you need to copy the necessary boot files for the x86 BIOS
+                environment to the appropriate boot location. To do so, navigate to the appropriate
+                directory as shown below:</p><pre class="screen">cd /srv/install/x86/sles12/sp2/cd1/boot/x86_64/loader/
+cp -a linux initrd message /srv/tftpboot/bios/x86/</pre><p>While still in the loader directory, create the directory for the configuration
+                file and copy it in:</p><pre class="screen">mkdir /srv/tftpboot/bios/x86/pxelinux.cfg
+cp -a isolinux.cfg /srv/tftpboot/bios/x86/pxelinux.cfg/default</pre><p>Copy <code class="filename">pxelinux.0</code> to the same structure:</p><pre class="screen">cp /usr/share/syslinux/pxelinux.0 /srv/tftpboot/bios/x86/</pre><p>Now that the files are all in place, edit the configuration to ensure all the
+                correct boot options are also in place.  Start with
+                    editing <code class="filename">/srv/tftpboot/bios/x86/pxelinux.cfg/default</code>. See
+                the example below:</p><pre class="screen">default harddisk
+
+# hard disk
+label harddisk
+  localboot -2
+  # install
+label install
+  kernel linux
+  append initrd=initrd showopts install=nfs://192.168.124.3/srv/install/x86/sles12/sp2/cd1
+
+display message
+implicit 0
+prompt 1
+timeout 600</pre><p>Now edit <code class="filename">/srv/tftpboot/bios/x86/message</code> to reflect the
+                default file you edited before. See the example below:</p><pre class="screen">              Welcome to the Installer Environment!
+
+To start the installation enter 'install' and press &lt;return&gt;.
+
+Available boot options:
+  harddisk   - Boot from Hard Disk (this is default)
+  install     - Installation
+
+Have a lot of fun...</pre></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-setup-x86-efi"></a>Setting Up the x86 EFI Boot Environment</h3></div></div></div><p>Start by copying the files required for UEFI booting of a <span class="strong"><strong>grub2-efi</strong></span> environment.</p><pre class="screen">cd /srv/install/x86/sles12/sp2/cd1/EFI/BOOT
+cp -a bootx64.efi grub.efi MokManager.efi /srv/tftpboot/EFI/x86/</pre><p>Copy the kernel and initrd to the directory structure.</p><pre class="screen">cd /srv/install/x86/sles12/sp2/cd1/boot/x86_64/loader/
+cp -a linux initrd /srv/tftpboot/EFI/x86/boot</pre><p>Now you need to create a <code class="filename">grub.cfg</code> file. This file goes in
+                    <code class="filename">/srv/tftpboot/EFI/x86</code> and should have contents similar to
+                the below example:</p><pre class="screen">set timeout=5
+menuentry 'Install SLES12 SP2 for x86_64' {
+ linuxefi /EFI/x86/boot/linux install=nfs://192.168.124.3/srv/install/x86/sles12/sp2/cd1
+ initrdefi /EFI/x86/boot/initrd
+ }</pre></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-setup-armv8-efi"></a>Setting Up the ARMv8 EFI Boot Environment</h3></div></div></div><p>Setting up the ARMv8 EFI boot environment is done in a way very similar to the
+                x86_64 EFI environment. Start by copying the files required for UEFI booting of a
+                    <span class="strong"><strong>grub2-efi</strong></span> environment:</p><pre class="screen">cd /srv/install/armv8/sles12/sp2/cd1/EFI/BOOT
+cp -a bootaa64.efi /srv/tftpboot/EFI/armv8/</pre><p>Copy the kernel and initrd to the directory structure:</p><pre class="screen">cd /srv/install/armv8/sles12/sp2/cd1/boot/aarch64
+cp -a linux initrd /srv/tftpboot/EFI/armv8/boot</pre><p>Next you need to edit the  <code class="filename">grub.cfg</code> file and add a new
+                section.  This file is located in the directory
+                    <code class="filename">/srv/tftpboot/EFI/armv8</code>.  You should add contents similar
+                to the example below.</p><pre class="screen">menuentry 'Install SLES12 SP2 for SoftIron OverDrive' {
+ linux /EFI/armv8/boot/linux network=1 usessh=1 sshpassword="suse" \
+   install=nfs://192.168.124.3/srv/install/armv8/sles12/sp2/cd1 \
+   console=ttyAMA0,115200n8
+ initrd /EFI/armv8/boot/initrd
+}</pre><p>This addition to the configuration file contains a few other options to enable the
+                serial console and to allow installation via <span class="command"><strong>ssh</strong></span>. This is helpful
+                for systems that do not have a standard KVM console interface.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">ARM Platforms</h3><p>Be aware that this configuration is specifically set up only for a specific
+                    ARM platform.</p></div></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="sec-setup-tftp.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="sec-setup-smt.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Setting Up TFTP </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Setting Up SMT</td></tr></table></div></body></html>

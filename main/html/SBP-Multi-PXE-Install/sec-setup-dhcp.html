@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Setting Up DHCP Services</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="How to Set Up a Multi-PXE Installation Server" /><link rel="up" href="index.html" title="How to Set Up a Multi-PXE Installation Server" /><link rel="prev" href="sec-setup-ntp.html" title="Setting Up NTP Server" /><link rel="next" href="sec-setup-repositories.html" title="Setting Up Repositories" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Setting Up DHCP Services</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="sec-setup-ntp.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="sec-setup-repositories.html">Next</a></td></tr></table><hr /></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-setup-dhcp"></a>Setting Up DHCP Services</h2></div></div></div><p>Go into YaST and select <span class="strong"><strong>DHCP Server</strong></span> from network
+            services. Configure the IP range you want to use. After that, it is your choice on
+            whether you use YaST or edit the configuration file
+                (<code class="filename">/etc/dhcpd.conf</code>) manually. As with the other services, be sure
+            to open the ports in the firewall. The end result needs to be a file that looks like the
+            below:</p><pre class="screen">option domain-name "my.lab";
+option domain-name-servers 172.16.253.5;
+option routers 192.168.124.1;
+option ntp-servers 192.168.124.3;
+option arch code 93 = unsigned integer 16; # RFC4578
+default-lease-time 3600;
+ddns-update-style none;
+subnet 192.168.124.0 netmask 255.255.255.0 {
+  range 192.168.124.100 192.168.124.199;
+  next-server 192.168.124.3;
+  default-lease-time 3600;
+  max-lease-time 3600;
+  if option arch = 00:07 or option arch = 00:09 {
+   filename "/EFI/x86/bootx64.efi";
+    } else if option arch = 00:0b {
+   filename "/EFI/armv8/bootaa64.efi";
+    } else {
+   filename "/bios/x86/pxelinux.0";
+    }
+}</pre><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">
+                <code class="code">if option arch</code>
+            </h3><p>The <code class="code">if option arch</code> sections allow the DHCP server to make the correct
+                decision on which file to use for booting.</p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="sec-setup-ntp.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="sec-setup-repositories.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Setting Up NTP Server </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Setting Up Repositories</td></tr></table></div></body></html>

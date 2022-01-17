@@ -1,0 +1,524 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Migrating from KVM for IBM z Systems to KVM integrated with SUSE Linux Enterprise Server</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><meta name="description" content="On March 7, 2017, IBM announced the end of support for their product KVM for IBM z Systems. To learn more, read the official IBM Withdrawal Announcement at . Preceding the IBM announcement on March 1, 2017, SUSE announced full support for KVM delivered with SUSE Linux Enterprise Server for z Systems and LinuxONE 12 SP2 and newer versions. You can find more details in the article at . Customers that have deployed or are testing KVM for IBM z Systems may have been using the IBM Redbook Getting Started with KVM for IBM z Systems at . This SUSE Best Practices document will also cover the most important details about how to migrate a virtual machine from KVM for IBM z Systems to KVM delivered with SUSE Linux Enterprise Server. Disclaimer: Documents published as part of the SUSE Best Practices series have been contributed voluntarily by SUSE employees and third parties. They are meant to serve as examples of how particular actions can be performed. They have been compiled with utmost attention to detail. However, this does not guarantee complete accuracy. SUSE cannot verify that actions described in these documents do what is claimed or whether actions described have unintended consequences. SUSE LLC, its affiliates, the authors, and the translators may not be held liable for possible errors or the consequences thereof." /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div xml:lang="en" class="article" lang="en"><div class="titlepage"><div><div><h1 class="title"><a id="art-sbp-kvm-slesz"></a>Migrating from KVM for IBM z Systems to KVM integrated with SUSE Linux Enterprise
+            Server</h1></div><div><h3 class="subtitle"><em></em></h3></div><div><div class="author"><h3 class="author"><span class="firstname">Mike</span> <span class="surname">Friesenegger, Technology Strategist - Alliances and Integrated Systems,
+                    SUSE</span></h3></div></div><div><div class="abstract"><p class="title"><strong>Abstract</strong></p><p>On March 7, 2017, IBM announced the end of support for their product KVM for IBM z
+                Systems. To learn more, read the official IBM Withdrawal Announcement at <a class="link" href="https://www-01.ibm.com/common/ssi/rep_ca/8/897/ENUS917-048/ENUS917-048.PDF" target="_top">https://www-01.ibm.com/common/ssi/rep_ca/8/897/ENUS917-048/ENUS917-048.PDF</a>. Preceding the IBM announcement on March 1, 2017, SUSE announced full support for
+                KVM delivered with SUSE Linux Enterprise Server for z Systems and LinuxONE 12 SP2
+                and newer versions. You can find more details in the article at <a class="link" href="https://www.suse.com/communities/blog/virtualization-suse-kvm-support-ibm-z-systems-linuxone/" target="_top">https://www.suse.com/communities/blog/virtualization-suse-kvm-support-ibm-z-systems-linuxone/</a>.</p><p>Customers that have deployed or are testing KVM for IBM z Systems may have been
+                using the IBM Redbook <span class="quote">“<span class="quote">Getting Started with KVM for IBM z Systems</span>”</span> at
+                    <a class="link" href=" http://www.redbooks.ibm.com/abstracts/sg248332.html?Open&amp;pdfbookmark" target="_top"> http://www.redbooks.ibm.com/abstracts/sg248332.html?Open&amp;pdfbookmark</a> . This SUSE Best Practices document will also cover the most important details
+                about how to migrate a virtual machine from KVM for IBM z Systems to KVM delivered
+                with SUSE Linux Enterprise Server.</p><p>
+                <span class="strong"><strong>Disclaimer: </strong></span>
+                Documents published as part of the SUSE Best Practices series have been contributed voluntarily
+                by SUSE employees and third parties. They are meant to serve as examples of how particular
+                actions can be performed. They have been compiled with utmost attention to detail. However,
+                this does not guarantee complete accuracy. SUSE cannot verify that actions described in these
+                documents do what is claimed or whether actions described have unintended consequences.
+                SUSE LLC, its affiliates, the authors, and the translators may not be held liable for possible errors
+                or the consequences thereof.
+            </p></div></div></div><hr /></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="sect1"><a href="#sec-installing">Installing SUSE Linux Enterprise Server for z Systems and LinuxONE as KVM
+            Host</a></span></dt><dt><span class="sect1"><a href="#sec-managing-kvm">Managing KVM Instances</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec-manage-commandline">Using the Command Line to Create and Manage Instances</a></span></dt><dt><span class="sect2"><a href="#sec-manage-gui">Managing Virtual Machines Using a GUI</a></span></dt></dl></dd><dt><span class="sect1"><a href="#sec-ibmkvm-to-sleskvm">Moving an Existing KVM for IBM z Systems Virtual Machine to KVM in SUSE Linux Enterprise
+            Server</a></span></dt><dt><span class="sect1"><a href="#sec-troubleshooting">Troubleshooting</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec-problem-solving">Common Problems and Their Solutions</a></span></dt></dl></dd><dt><span class="sect1"><a href="#id1337">Legal notice</a></span></dt><dt><span class="sect1"><a href="#id1338">GNU Free Documentation License</a></span></dt></dl></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-installing"></a>Installing SUSE Linux Enterprise Server for z Systems and LinuxONE as KVM
+            Host</h2></div></div></div><p>Like KVM for IBM z Systems, KVM integrated with SUSE Linux Enterprise Server for z Systems and LinuxONE is
+            supported when installed into an LPAR. The section <span class="quote">“<span class="quote">Installation on IBM z
+                Systems</span>”</span> of the SUSE Linux Enterprise Server Deployment Guide at <a class="link" href="https://www.suse.com/documentation/sles-12/book_sle_deployment/data/cha_zseries.html" target="_top">https://www.suse.com/documentation/sles-12/book_sle_deployment/data/cha_zseries.html</a> provides information regarding supported hardware and memory requirements for
+            installing into an LPAR. The section <span class="quote">“<span class="quote">Overview of an LPAR Installation</span>”</span> at
+                <a class="link" href="https://www.suse.com/documentation/sles-12/book_sle_deployment/data/sec_zseries_prep.html#sec_prep_inst_types" target="_top">https://www.suse.com/documentation/sles-12/book_sle_deployment/data/sec_zseries_prep.html#sec_prep_inst_types</a> reviews the preparation and initial steps in starting the SUSE Linux Enterprise
+            Server Installation System. </p><p>A suggested partitioning layout includes separating the storage of the KVM disk images
+            from the operating system. Using the Btrfs file system for the operating system enables
+            rollback capabilities when patching the system. The default location for the KVM disk
+            images is <code class="filename">/var/lib/libvirt/images/</code>. It is recommended to use
+            Logical Volume Manager with the XFS file system for KVM disk images.</p><p>Enabling the firewall is not a requirement but a security decision for each
+            organization. Discuss with your organization's security group if to enable the
+            firewall.</p><p>For the <span class="quote">“<span class="quote">Software Selection</span>”</span> in the installer, use the list below for the
+            minimum and suggested additional patterns to be installed.</p><p>Minimum Patterns:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Base System</p></li><li class="listitem"><p>Minimal System (Appliances)</p></li><li class="listitem"><p>Help and Support Documentation</p></li><li class="listitem"><p>KVM Virtualization Host and tools</p></li></ul></div><p>Suggested additional Patterns:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>GNOME Desktop Environment &amp; X Window System (needed for managing
+                    virtual machines using a GUI)</p></li></ul></div><p>Make sure to register and fully patch the KVM host either during the initial
+            installation or after the installation is complete.</p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-managing-kvm"></a>Managing KVM Instances</h2></div></div></div><p>It is recommended to use the SUSE-provided utilities that manage virtual machines
+            using the libvirt API. The section <span class="quote">“<span class="quote">Managing Virtual Machines with libvirt</span>”</span>
+            of the Virtualization Guide at <a class="link" href="https://www.suse.com/documentation/sles-12/book_virt/data/part_virt_libvirt.html" target="_top">https://www.suse.com/documentation/sles-12/book_virt/data/part_virt_libvirt.html</a> provides information about using both command line and GUI based tools. It is
+            strongly recommended to use the previous link because it contains detailed information
+            about VM installation and management as well as storage and network management for VMs.
+            The sections below provide additional information about accessing a particular
+            tool.</p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-manage-commandline"></a>Using the Command Line to Create and Manage Instances</h3></div></div></div><p><span class="command"><strong>virsh</strong></span> and <span class="command"><strong>virt-install</strong></span> are
+                the command line utilities to manage virtual machines. These utilities are installed
+                as part of the KVM virtualization host and tools pattern. The section
+                    <span class="quote">“<span class="quote">Virtualization Console Tools</span>”</span> at <a class="link" href="https://www.suse.com/documentation/sles-12/book_virt/data/sec_tools_intro_console.html" target="_top">https://www.suse.com/documentation/sles-12/book_virt/data/sec_tools_intro_console.html</a> provides an introduction to these utilities.</p><p>The <span class="command"><strong>virsh</strong></span> and
+                <span class="command"><strong>virsh-install</strong></span>tools can be used both from an SSH session,
+                or in a terminal/console session when working via Virtual Network Computing (VNC).</p><p>Connect via SSH to log in to the KVM host to use <span class="command"><strong>virsh</strong></span>
+                and <span class="command"><strong>virt-install</strong></span>.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-manage-gui"></a>Managing Virtual Machines Using a GUI</h3></div></div></div><p>Virtual Machine Manager (<span class="command"><strong>virt-manager</strong></span>) is the GUI tool
+                used to manage virtual machines. This utility is installed as part of the KVM
+                virtualization host and tools pattern. The section <span class="quote">“<span class="quote">Virtualization GUI
+                    Tools</span>”</span> of the Virtualization Guide at <a class="link" href="https://www.suse.com/documentation/sles-12/book_virt/data/sec_tools_intro_gui.html" target="_top">https://www.suse.com/documentation/sles-12/book_virt/data/sec_tools_intro_gui.html</a> provides an introduction.</p><p>To access the <span class="command"><strong>virt-manager</strong></span> GUI, use X11 forwarding via
+                SSH or vncviewer. X11 forwarding is a good option if the connection (local or
+                metropolitan area network) speed between the client and the KVM host has relatively low latency. Use
+                    <span class="command"><strong>vncviewer</strong></span> if you find that X11 redirection is too
+                slow. Perform the following actions to enable access to
+                    <span class="command"><strong>virt-manager</strong></span>.</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Both X11 forwarding via SSH and
+                        <span class="command"><strong>vncviewer</strong></span></p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>Install the suggested additional patterns listed above using YaST
+                                or Zypper</p></li></ul></div></li><li class="listitem"><p>For X11 forwarding via SSH</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>From a client terminal, type <span class="command"><strong>ssh -X &lt;KVM
+                                    hostname&gt;</strong></span></p></li></ul></div></li><li class="listitem"><p>For <span class="command"><strong>vncviewer</strong></span> access to the KVM host</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>Start YaST and go into <span class="quote">“<span class="quote">Network Services | Remote
+                                    Administration (VNC)</span>”</span></p></li><li class="listitem"><p>Select <span class="quote">“<span class="quote">Open Port in Firewall</span>”</span> if the firewall was enabled during the installation</p></li><li class="listitem"><p>Select <span class="quote">“<span class="quote">Allow Remote Administration Without Session
+                                    Management</span>”</span> and click OK</p></li><li class="listitem"><p> From a client terminal, type <span class="command"><strong>vncviewer &lt;KVM
+                                    hostname:1&gt;</strong></span></p></li><li class="listitem"><p>Log in to the KVM host in the window opened by the previous
+                                command</p></li><li class="listitem"><p>Click <span class="quote">“<span class="quote">Applications | Utilities | XTerm</span>”</span></p></li></ul></div></li><li class="listitem"><p>Within the X11 forwarding via SSH client terminal and XTerm window in
+                            <span class="command"><strong>vncviewer</strong></span> window</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>Type <span class="command"><strong>virt-manager</strong></span></p></li></ul></div></li></ul></div></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-ibmkvm-to-sleskvm"></a>Moving an Existing KVM for IBM z Systems Virtual Machine to KVM in SUSE Linux Enterprise
+            Server</h2></div></div></div><p>The following section explains how to move a KVM for IBM z Systems virtual machine to KVM
+            integrated with SUSE Linux Enterprise Server. A VM was created on KVM for IBM z Systems
+            following the section 3.7 of the IBM Redbook <span class="quote">“<span class="quote">Getting Started with KVM for IBM z
+                Systems </span>”</span> at <a class="link" href="http://www.redbooks.ibm.com/redbooks/pdfs/sg248332.pdf" target="_top">http://www.redbooks.ibm.com/redbooks/pdfs/sg248332.pdf</a>. This
+            procedure assumes that the KVM for IBM z Systems VM has a virtual disk file and is
+            attached to a virtual network defined using libvirt. Below is the XML definition of the
+            VM and virtual network based on the example in the IBM Redbook.</p><h3><a id="id1339"></a>VM Definition</h3><pre class="screen">&lt;domain type='kvm'&gt;
+  &lt;name&gt;s12s2&lt;/name&gt;
+  &lt;uuid&gt;97968b48-295e-465a-9265-2cc89f4fb9cd&lt;/uuid&gt;
+  &lt;description&gt;IBM KVM to SLES KVM&lt;/description&gt;
+  &lt;memory unit='KiB'&gt;524288&lt;/memory&gt;
+  &lt;currentMemory unit='KiB'&gt;524288&lt;/currentMemory&gt;
+  &lt;vcpu placement='static'&gt;1&lt;/vcpu&gt;
+  &lt;os&gt;
+    &lt;type arch='s390x' machine='s390-ccw-kvmibm-1.1.1'&gt;hvm&lt;/type&gt;
+    &lt;boot dev='hd'/&gt;
+  &lt;/os&gt;
+  &lt;clock offset='utc'/&gt;
+  &lt;on_poweroff&gt;destroy&lt;/on_poweroff&gt;
+  &lt;on_reboot&gt;restart&lt;/on_reboot&gt;
+  &lt;on_crash&gt;preserve&lt;/on_crash&gt;
+  &lt;devices&gt;
+    &lt;emulator&gt;/usr/bin/qemu-system-s390x&lt;/emulator&gt;
+      &lt;disk type='file' device='disk'&gt;
+        &lt;driver name='qemu' type='qcow2'/&gt;
+        &lt;source file='/var/lib/libvirt/images/s12s2.img'/&gt;
+        &lt;target dev='vda' bus='virtio'/&gt;
+        &lt;address type='ccw' cssid='0xfe' ssid='0x0' devno='0x0002'/&gt;
+      &lt;/disk&gt;
+      &lt;interface type='bridge'&gt;
+        &lt;mac address='52:54:00:58:35:20'/&gt;
+        &lt;source bridge='virbr0'/&gt;
+        &lt;model type='virtio'/&gt;
+        &lt;address type='ccw' cssid='0xfe' ssid='0x0' devno='0x0000'/&gt;
+      &lt;/interface&gt;
+      &lt;console type='pty'&gt;
+        &lt;target type='sclp' port='0'/&gt;
+      &lt;/console&gt;
+      &lt;memballoon model='virtio'&gt;
+        &lt;address type='ccw' cssid='0xfe' ssid='0x0' devno='0x0001'/&gt;
+      &lt;/memballoon&gt;
+   &lt;/devices&gt;
+&lt;/domain&gt;</pre><h3><a id="id1340"></a>Virtual Network Definition</h3><pre class="screen">&lt;network&gt;
+  &lt;name&gt;default&lt;/name&gt;
+  &lt;uuid&gt;4e4ab47a-3889-4eba-81d0-dda245a44091&lt;/uuid&gt;
+  &lt;forward mode='nat'&gt;
+    &lt;nat&gt;
+      &lt;port start='1024' end='65535'/&gt;
+    &lt;/nat&gt;
+   &lt;/forward&gt;
+   &lt;bridge name='virbr0' stp='on' delay='0'/&gt;
+   &lt;mac address='52:54:00:c0:47:bc'/&gt;
+   &lt;ip address='192.168.122.1' netmask='255.255.255.0'&gt;
+     &lt;dhcp&gt;
+       &lt;range start='192.168.122.2' end='192.168.122.254'/&gt;
+     &lt;/dhcp&gt;
+   &lt;/ip&gt;
+&lt;/network&gt;
+        </pre><p>The VM and network definition for a customer deployment may be considerably different
+            but the basic procedure to move the VM to KVM in SUSE Linux Enterprise Server will be
+            the same, as outlined below.</p><div class="procedure"><ol class="procedure" type="1"><li class="step"><p>Connect via SSH to the KVM for IBM z Systems host as root or as the user used
+                    to define VMs</p></li><li class="step"><p>Find a VM configured on the KVM for IBM z Systems host that you want to move
+                    to a SUSE Linux Enterprise Server KVM host</p><ol type="a" class="substeps"><li class="step"><p>List all defined VMs with <span class="command"><strong>virsh list --all</strong></span> and
+                            choose the VM to migrate</p></li><li class="step"><p>Dump the XML definition of the VM to be migrated via the command
+                                <span class="command"><strong>'virsh dumpxml &lt;vmname&gt; &gt; ~/&lt;vmname&gt;.xml'
+                            </strong></span> (where &lt;vmname&gt; is the name of a VM to move)</p></li><li class="step"><p>View the content of the XML file via the command <span class="command"><strong>less
+                                ~/&lt;vmname&gt;.xml</strong></span> and make note of the following
+                            information</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Location of the VM disk file(s) which is &lt;source file=
+                                    in the above VM definition</p></li><li class="listitem"><p>The name of the network bridge(s) which is &lt;source
+                                    bridge= in the above VM definition</p></li></ul></div></li></ol></li><li class="step"><p>Determine the virtual network(s) associated to the VM</p><ol type="a" class="substeps"><li class="step"><p>List all defined network bridges with <span class="command"><strong>virsh net-list
+                                --all</strong></span></p></li><li class="step"><p>Repeat the command <span class="command"><strong>virsh net-dumpxml &lt;network name&gt; &gt;
+                                ~/net-&lt;network name&gt;.xml</strong></span>for each network bridge to
+                            dump the XML definition for all of the network bridges</p></li><li class="step"><p>Repeat the command <span class="command"><strong>grep -H &lt;network bridge name from
+                                the information gathered before&gt; ~/net-*.xml</strong></span> for each
+                            network bridge to determine the XML file to migrate</p></li><li class="step"><p>Make note of the filename(s) from the grep output above</p></li></ol></li><li class="step"><p>Copy the VM disk file(s), the VM xml file and the network xml file(s) to the
+                    SUSE Linux Enterprise Server KVM host</p><ol type="a" class="substeps"><li class="step"><p> Enter the command <span class="command"><strong>rsync -S --progress &lt;VM disk file&gt;
+                                &lt;VM xml file&gt; &lt;network xml&gt; &lt;SLES KVM
+                                Host&gt;:/var/lib/libvirt/images</strong></span></p></li></ol></li><li class="step"><p>Connect via SSH to the SUSE Linux Enterprise Server KVM host as root or as the
+                    user used to define VMs</p></li><li class="step"><p>Remove the bridge if it already exists on the KVM host</p><ol type="a" class="substeps"><li class="step"><p>Type <span class="command"><strong>virsh net-list --all</strong></span></p></li><li class="step"><p>Type <span class="command"><strong>virsh net-undefine &lt;network name&gt;</strong></span> when
+                            the network name is the same as a network name on the KVM for IBM z
+                            Systems host</p></li></ol></li><li class="step"><p>Add the bridge from KVM for IBM z Systems</p><ol type="a" class="substeps"><li class="step"><p>Define the network name(s) with <span class="command"><strong>virsh net-define
+                                &lt;network xml file(s)&gt;</strong></span></p></li><li class="step"><p>Start the network name(s) with <span class="command"><strong>virsh net-start
+                                &lt;network xml file(s)&gt;</strong></span></p></li><li class="step"><p>Autostart the network name(s) on system restart with <span class="command"><strong>virsh
+                                net-autostart &lt;network xml file(s)&gt;</strong></span></p></li></ol></li><li class="step"><p>Edit the VM xml file by changing</p><pre class="screen">&lt;type arch='s390x' machine='s390-ccw-kvmibm-1.1.1'&gt;hvm&lt;/type&gt;</pre><p>to</p><pre class="screen">&lt;type arch='s390x' machine='s390-ccw-virtio'&gt;hvm&lt;/type&gt;</pre></li><li class="step"><p>Define the VM in SUSE Linux Enterprise Server KVM</p><ol type="a" class="substeps"><li class="step"><p>Use the command <span class="command"><strong>virsh define &lt;VM xml
+                            file&gt;</strong></span></p></li></ol></li><li class="step"><p>Start and verify the newly migrated VM is running</p><ol type="a" class="substeps"><li class="step"><p>Start the VM with <span class="command"><strong>virsh start &lt;VM
+                            name&gt;</strong></span></p></li><li class="step"><p>Verify that the VM is running with <span class="command"><strong>virsh
+                            list</strong></span></p></li><li class="step"><p>Connect via SSH to the VM to verify that networking is working</p></li></ol></li></ol></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-troubleshooting"></a>Troubleshooting</h2></div></div></div><p>For basic troubleshooting information review the section
+                <span class="quote">“<span class="quote">Troubleshooting</span>”</span> of the SUSE Linux Enterprise Server Administration
+            guide at <a class="link" href="https://www.suse.com/documentation/sles-12/book_sle_admin/data/part_trouble.html" target="_top">https://www.suse.com/documentation/sles-12/book_sle_admin/data/part_trouble.html</a> . In case of specific issues, opening a support request may be necessary. To receive
+            support, you need an appropriate subscription with SUSE; for more information, see <a class="link" href="http://www.suse.com/products/server/services-and-support/" target="_top">http://www.suse.com/products/server/services-and-support/</a> .</p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-problem-solving"></a>Common Problems and Their Solutions</h3></div></div></div><p>If there is a solution you want to see added to this section, use the comment
+                field at the top of the HTML version of this document for your feedback. This
+                section will be updated with suggested solutions over time. Please come back and
+                check often.</p></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id1337"></a>Legal notice</h2></div></div></div><p> Copyright ©2006-2021 SUSE LLC and contributors. All rights reserved. </p><p> Permission is granted to copy, distribute and/or modify this document under the terms of the
+  GNU Free Documentation License, Version 1.2 or (at your option) version 1.3; with the Invariant
+  Section being this copyright notice and license. A copy of the license version 1.2 is included in
+  the section entitled <span class="quote">“<span class="quote">GNU Free Documentation License</span>”</span>. </p><p> SUSE, the SUSE logo and YaST are registered trademarks of SUSE LLC in the United States and
+  other countries. For SUSE trademarks, see <a class="link" href="http://www.suse.com/company/legal/" target="_top">http://www.suse.com/company/legal/</a>. Linux is a registered trademark of Linus Torvalds.
+  All other names or trademarks mentioned in this document may be trademarks or registered
+  trademarks of their respective owners. </p><p> Documents published as part of the <span class="strong"><strong>SUSE Best Practices</strong></span>
+  series have been contributed voluntarily by SUSE employees and third parties. They are meant to
+  serve as examples of how particular actions can be performed. They have been compiled with utmost
+  attention to detail. However, this does not guarantee complete accuracy. SUSE cannot verify that
+  actions described in these documents do what is claimed or whether actions described have
+  unintended consequences. SUSE LLC, its affiliates, the authors, and the translators may not be held
+  liable for possible errors or the consequences thereof.</p><p> Below we draw your attention to the license under which the articles are published.</p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id1338"></a>GNU Free Documentation License</h2></div></div></div><p>
+  Copyright (C) 2000, 2001, 2002 Free Software Foundation, Inc. 51 Franklin St,
+  Fifth Floor, Boston, MA 02110-1301 USA. Everyone is permitted to copy and
+  distribute verbatim copies of this license document, but changing it is not
+  allowed.
+ </p><h5><a id="id1341"></a> 0. PREAMBLE </h5><p>
+  The purpose of this License is to make a manual, textbook, or other
+  functional and useful document "free" in the sense of freedom: to assure
+  everyone the effective freedom to copy and redistribute it, with or without
+  modifying it, either commercially or non-commercially. Secondarily, this
+  License preserves for the author and publisher a way to get credit for their
+  work, while not being considered responsible for modifications made by
+  others.
+ </p><p>
+  This License is a kind of "copyleft", which means that derivative works of
+  the document must themselves be free in the same sense. It complements the
+  GNU General Public License, which is a copyleft license designed for free
+  software.
+ </p><p>
+  We have designed this License to use it for manuals for free software,
+  because free software needs free documentation: a free program should come
+  with manuals providing the same freedoms that the software does. But this
+  License is not limited to software manuals; it can be used for any textual
+  work, regardless of subject matter or whether it is published as a printed
+  book. We recommend this License principally for works whose purpose is
+  instruction or reference.
+ </p><h5><a id="id1342"></a> 1. APPLICABILITY AND DEFINITIONS </h5><p>
+  This License applies to any manual or other work, in any medium, that
+  contains a notice placed by the copyright holder saying it can be distributed
+  under the terms of this License. Such a notice grants a world-wide,
+  royalty-free license, unlimited in duration, to use that work under the
+  conditions stated herein. The "Document", below, refers to any such manual or
+  work. Any member of the public is a licensee, and is addressed as "you". You
+  accept the license if you copy, modify or distribute the work in a way
+  requiring permission under copyright law.
+ </p><p>
+  A "Modified Version" of the Document means any work containing the Document
+  or a portion of it, either copied verbatim, or with modifications and/or
+  translated into another language.
+ </p><p>
+  A "Secondary Section" is a named appendix or a front-matter section of the
+  Document that deals exclusively with the relationship of the publishers or
+  authors of the Document to the Document's overall subject (or to related
+  matters) and contains nothing that could fall directly within that overall
+  subject. (Thus, if the Document is in part a textbook of mathematics, a
+  Secondary Section may not explain any mathematics.) The relationship could be
+  a matter of historical connection with the subject or with related matters,
+  or of legal, commercial, philosophical, ethical or political position
+  regarding them.
+ </p><p>
+  The "Invariant Sections" are certain Secondary Sections whose titles are
+  designated, as being those of Invariant Sections, in the notice that says
+  that the Document is released under this License. If a section does not fit
+  the above definition of Secondary then it is not allowed to be designated as
+  Invariant. The Document may contain zero Invariant Sections. If the Document
+  does not identify any Invariant Sections then there are none.
+ </p><p>
+  The "Cover Texts" are certain short passages of text that are listed, as
+  Front-Cover Texts or Back-Cover Texts, in the notice that says that the
+  Document is released under this License. A Front-Cover Text may be at most 5
+  words, and a Back-Cover Text may be at most 25 words.
+ </p><p>
+  A "Transparent" copy of the Document means a machine-readable copy,
+  represented in a format whose specification is available to the general
+  public, that is suitable for revising the document straightforwardly with
+  generic text editors or (for images composed of pixels) generic paint
+  programs or (for drawings) some widely available drawing editor, and that is
+  suitable for input to text formatters or for automatic translation to a
+  variety of formats suitable for input to text formatters. A copy made in an
+  otherwise Transparent file format whose markup, or absence of markup, has
+  been arranged to thwart or discourage subsequent modification by readers is
+  not Transparent. An image format is not Transparent if used for any
+  substantial amount of text. A copy that is not "Transparent" is called
+  "Opaque".
+ </p><p>
+  Examples of suitable formats for Transparent copies include plain ASCII
+  without markup, Texinfo input format, LaTeX input format, SGML or XML using a
+  publicly available DTD, and standard-conforming simple HTML, PostScript or
+  PDF designed for human modification. Examples of transparent image formats
+  include PNG, XCF and JPG. Opaque formats include proprietary formats that can
+  be read and edited only by proprietary word processors, SGML or XML for which
+  the DTD and/or processing tools are not generally available, and the
+  machine-generated HTML, PostScript or PDF produced by some word processors
+  for output purposes only.
+ </p><p>
+  The "Title Page" means, for a printed book, the title page itself, plus such
+  following pages as are needed to hold, legibly, the material this License
+  requires to appear in the title page. For works in formats which do not have
+  any title page as such, "Title Page" means the text near the most prominent
+  appearance of the work's title, preceding the beginning of the body of the
+  text.
+ </p><p>
+  A section "Entitled XYZ" means a named subunit of the Document whose title
+  either is precisely XYZ or contains XYZ in parentheses following text that
+  translates XYZ in another language. (Here XYZ stands for a specific section
+  name mentioned below, such as "Acknowledgements", "Dedications",
+  "Endorsements", or "History".) To "Preserve the Title" of such a section when
+  you modify the Document means that it remains a section "Entitled XYZ"
+  according to this definition.
+ </p><p>
+  The Document may include Warranty Disclaimers next to the notice which states
+  that this License applies to the Document. These Warranty Disclaimers are
+  considered to be included by reference in this License, but only as regards
+  disclaiming warranties: any other implication that these Warranty Disclaimers
+  may have is void and has no effect on the meaning of this License.
+ </p><h5><a id="id1343"></a> 2. VERBATIM COPYING </h5><p>
+  You may copy and distribute the Document in any medium, either commercially
+  or noncommercially, provided that this License, the copyright notices, and
+  the license notice saying this License applies to the Document are reproduced
+  in all copies, and that you add no other conditions whatsoever to those of
+  this License. You may not use technical measures to obstruct or control the
+  reading or further copying of the copies you make or distribute. However, you
+  may accept compensation in exchange for copies. If you distribute a large
+  enough number of copies you must also follow the conditions in section 3.
+ </p><p>
+  You may also lend copies, under the same conditions stated above, and you may
+  publicly display copies.
+ </p><h5><a id="id1344"></a> 3. COPYING IN QUANTITY </h5><p>
+  If you publish printed copies (or copies in media that commonly have printed
+  covers) of the Document, numbering more than 100, and the Document's license
+  notice requires Cover Texts, you must enclose the copies in covers that
+  carry, clearly and legibly, all these Cover Texts: Front-Cover Texts on the
+  front cover, and Back-Cover Texts on the back cover. Both covers must also
+  clearly and legibly identify you as the publisher of these copies. The front
+  cover must present the full title with all words of the title equally
+  prominent and visible. You may add other material on the covers in addition.
+  Copying with changes limited to the covers, as long as they preserve the
+  title of the Document and satisfy these conditions, can be treated as
+  verbatim copying in other respects.
+ </p><p>
+  If the required texts for either cover are too voluminous to fit legibly, you
+  should put the first ones listed (as many as fit reasonably) on the actual
+  cover, and continue the rest onto adjacent pages.
+ </p><p>
+  If you publish or distribute Opaque copies of the Document numbering more
+  than 100, you must either include a machine-readable Transparent copy along
+  with each Opaque copy, or state in or with each Opaque copy a
+  computer-network location from which the general network-using public has
+  access to download using public-standard network protocols a complete
+  Transparent copy of the Document, free of added material. If you use the
+  latter option, you must take reasonably prudent steps, when you begin
+  distribution of Opaque copies in quantity, to ensure that this Transparent
+  copy will remain thus accessible at the stated location until at least one
+  year after the last time you distribute an Opaque copy (directly or through
+  your agents or retailers) of that edition to the public.
+ </p><p>
+  It is requested, but not required, that you contact the authors of the
+  Document well before redistributing any large number of copies, to give them
+  a chance to provide you with an updated version of the Document.
+ </p><h5><a id="id1345"></a> 4. MODIFICATIONS </h5><p>
+  You may copy and distribute a Modified Version of the Document under the
+  conditions of sections 2 and 3 above, provided that you release the Modified
+  Version under precisely this License, with the Modified Version filling the
+  role of the Document, thus licensing distribution and modification of the
+  Modified Version to whoever possesses a copy of it. In addition, you must do
+  these things in the Modified Version:
+ </p><div class="orderedlist"><ol class="orderedlist" type="A"><li class="listitem"><p>
+    Use in the Title Page (and on the covers, if any) a title distinct from
+    that of the Document, and from those of previous versions (which should, if
+    there were any, be listed in the History section of the Document). You may
+    use the same title as a previous version if the original publisher of that
+    version gives permission.
+   </p></li><li class="listitem"><p>
+    List on the Title Page, as authors, one or more persons or entities
+    responsible for authorship of the modifications in the Modified Version,
+    together with at least five of the principal authors of the Document (all
+    of its principal authors, if it has fewer than five), unless they release
+    you from this requirement.
+   </p></li><li class="listitem"><p>
+    State on the Title page the name of the publisher of the Modified Version,
+    as the publisher.
+   </p></li><li class="listitem"><p>
+    Preserve all the copyright notices of the Document.
+   </p></li><li class="listitem"><p>
+    Add an appropriate copyright notice for your modifications adjacent to the
+    other copyright notices.
+   </p></li><li class="listitem"><p>
+    Include, immediately after the copyright notices, a license notice giving
+    the public permission to use the Modified Version under the terms of this
+    License, in the form shown in the Addendum below.
+   </p></li><li class="listitem"><p>
+    Preserve in that license notice the full lists of Invariant Sections and
+    required Cover Texts given in the Document's license notice.
+   </p></li><li class="listitem"><p>
+    Include an unaltered copy of this License.
+   </p></li><li class="listitem"><p>
+    Preserve the section Entitled "History", Preserve its Title, and add to it
+    an item stating at least the title, year, new authors, and publisher of the
+    Modified Version as given on the Title Page. If there is no section
+    Entitled "History" in the Document, create one stating the title, year,
+    authors, and publisher of the Document as given on its Title Page, then add
+    an item describing the Modified Version as stated in the previous sentence.
+   </p></li><li class="listitem"><p>
+    Preserve the network location, if any, given in the Document for public
+    access to a Transparent copy of the Document, and likewise the network
+    locations given in the Document for previous versions it was based on.
+    These may be placed in the "History" section. You may omit a network
+    location for a work that was published at least four years before the
+    Document itself, or if the original publisher of the version it refers to
+    gives permission.
+   </p></li><li class="listitem"><p>
+    For any section Entitled "Acknowledgements" or "Dedications", Preserve the
+    Title of the section, and preserve in the section all the substance and
+    tone of each of the contributor acknowledgements and/or dedications given
+    therein.
+   </p></li><li class="listitem"><p>
+    Preserve all the Invariant Sections of the Document, unaltered in their
+    text and in their titles. Section numbers or the equivalent are not
+    considered part of the section titles.
+   </p></li><li class="listitem"><p>
+    Delete any section Entitled "Endorsements". Such a section may not be
+    included in the Modified Version.
+   </p></li><li class="listitem"><p>
+    Do not retitle any existing section to be Entitled "Endorsements" or to
+    conflict in title with any Invariant Section.
+   </p></li><li class="listitem"><p>
+    Preserve any Warranty Disclaimers.
+   </p></li></ol></div><p>
+  If the Modified Version includes new front-matter sections or appendices that
+  qualify as Secondary Sections and contain no material copied from the
+  Document, you may at your option designate some or all of these sections as
+  invariant. To do this, add their titles to the list of Invariant Sections in
+  the Modified Version's license notice. These titles must be distinct from any
+  other section titles.
+ </p><p>
+  You may add a section Entitled "Endorsements", provided it contains nothing
+  but endorsements of your Modified Version by various parties--for example,
+  statements of peer review or that the text has been approved by an
+  organization as the authoritative definition of a standard.
+ </p><p>
+  You may add a passage of up to five words as a Front-Cover Text, and a
+  passage of up to 25 words as a Back-Cover Text, to the end of the list of
+  Cover Texts in the Modified Version. Only one passage of Front-Cover Text and
+  one of Back-Cover Text may be added by (or through arrangements made by) any
+  one entity. If the Document already includes a cover text for the same cover,
+  previously added by you or by arrangement made by the same entity you are
+  acting on behalf of, you may not add another; but you may replace the old
+  one, on explicit permission from the previous publisher that added the old
+  one.
+ </p><p>
+  The author(s) and publisher(s) of the Document do not by this License give
+  permission to use their names for publicity for or to assert or imply
+  endorsement of any Modified Version.
+ </p><h5><a id="id1346"></a> 5. COMBINING DOCUMENTS </h5><p>
+  You may combine the Document with other documents released under this
+  License, under the terms defined in section 4 above for modified versions,
+  provided that you include in the combination all of the Invariant Sections of
+  all of the original documents, unmodified, and list them all as Invariant
+  Sections of your combined work in its license notice, and that you preserve
+  all their Warranty Disclaimers.
+ </p><p>
+  The combined work need only contain one copy of this License, and multiple
+  identical Invariant Sections may be replaced with a single copy. If there are
+  multiple Invariant Sections with the same name but different contents, make
+  the title of each such section unique by adding at the end of it, in
+  parentheses, the name of the original author or publisher of that section if
+  known, or else a unique number. Make the same adjustment to the section
+  titles in the list of Invariant Sections in the license notice of the
+  combined work.
+ </p><p>
+  In the combination, you must combine any sections Entitled "History" in the
+  various original documents, forming one section Entitled "History"; likewise
+  combine any sections Entitled "Acknowledgements", and any sections Entitled
+  "Dedications". You must delete all sections Entitled "Endorsements".
+ </p><h5><a id="id1347"></a> 6. COLLECTIONS OF DOCUMENTS </h5><p>
+  You may make a collection consisting of the Document and other documents
+  released under this License, and replace the individual copies of this
+  License in the various documents with a single copy that is included in the
+  collection, provided that you follow the rules of this License for verbatim
+  copying of each of the documents in all other respects.
+ </p><p>
+  You may extract a single document from such a collection, and distribute it
+  individually under this License, provided you insert a copy of this License
+  into the extracted document, and follow this License in all other respects
+  regarding verbatim copying of that document.
+ </p><h5><a id="id1348"></a> 7. AGGREGATION WITH INDEPENDENT WORKS </h5><p>
+  A compilation of the Document or its derivatives with other separate and
+  independent documents or works, in or on a volume of a storage or
+  distribution medium, is called an "aggregate" if the copyright resulting from
+  the compilation is not used to limit the legal rights of the compilation's
+  users beyond what the individual works permit. When the Document is included
+  in an aggregate, this License does not apply to the other works in the
+  aggregate which are not themselves derivative works of the Document.
+ </p><p>
+  If the Cover Text requirement of section 3 is applicable to these copies of
+  the Document, then if the Document is less than one half of the entire
+  aggregate, the Document's Cover Texts may be placed on covers that bracket
+  the Document within the aggregate, or the electronic equivalent of covers if
+  the Document is in electronic form. Otherwise they must appear on printed
+  covers that bracket the whole aggregate.
+ </p><h5><a id="id1349"></a> 8. TRANSLATION </h5><p>
+  Translation is considered a kind of modification, so you may distribute
+  translations of the Document under the terms of section 4. Replacing
+  Invariant Sections with translations requires special permission from their
+  copyright holders, but you may include translations of some or all Invariant
+  Sections in addition to the original versions of these Invariant Sections.
+  You may include a translation of this License, and all the license notices in
+  the Document, and any Warranty Disclaimers, provided that you also include
+  the original English version of this License and the original versions of
+  those notices and disclaimers. In case of a disagreement between the
+  translation and the original version of this License or a notice or
+  disclaimer, the original version will prevail.
+ </p><p>
+  If a section in the Document is Entitled "Acknowledgements", "Dedications",
+  or "History", the requirement (section 4) to Preserve its Title (section 1)
+  will typically require changing the actual title.
+ </p><h5><a id="id1350"></a> 9. TERMINATION </h5><p>
+  You may not copy, modify, sublicense, or distribute the Document except as
+  expressly provided for under this License. Any other attempt to copy, modify,
+  sublicense or distribute the Document is void, and will automatically
+  terminate your rights under this License. However, parties who have received
+  copies, or rights, from you under this License will not have their licenses
+  terminated so long as such parties remain in full compliance.
+ </p><h5><a id="id1351"></a> 10. FUTURE REVISIONS OF THIS LICENSE </h5><p>
+  The Free Software Foundation may publish new, revised versions of the GNU
+  Free Documentation License from time to time. Such new versions will be
+  similar in spirit to the present version, but may differ in detail to address
+  new problems or concerns. See
+  <a class="link" href="http://www.gnu.org/copyleft/" target="_top">http://www.gnu.org/copyleft/</a>.
+ </p><p>
+  Each version of the License is given a distinguishing version number. If the
+  Document specifies that a particular numbered version of this License "or any
+  later version" applies to it, you have the option of following the terms and
+  conditions either of that specified version or of any later version that has
+  been published (not as a draft) by the Free Software Foundation. If the
+  Document does not specify a version number of this License, you may choose
+  any version ever published (not as a draft) by the Free Software Foundation.
+ </p><h5><a id="id1352"></a> ADDENDUM: How to use this License for your
+  documents </h5><pre class="screen">Copyright (c) YEAR YOUR NAME.
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.2
+or any later version published by the Free Software Foundation;
+with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
+A copy of the license is included in the section entitled "GNU
+ Free Documentation License".</pre><p>
+  If you have Invariant Sections, Front-Cover Texts and Back-Cover Texts,
+  replace the "with...Texts". line with this:
+ </p><pre class="screen">with the Invariant Sections being LIST THEIR TITLES, with the
+Front-Cover Texts being LIST, and with the Back-Cover Texts being LIST.</pre><p>
+  If you have Invariant Sections without Cover Texts, or some other combination
+  of the three, merge those two alternatives to suit the situation.
+ </p><p>
+  If your document contains nontrivial examples of program code, we recommend
+  releasing these examples in parallel under your choice of free software
+  license, such as the GNU General Public License, to permit their use in free
+  software.
+ </p></div></div></body></html>

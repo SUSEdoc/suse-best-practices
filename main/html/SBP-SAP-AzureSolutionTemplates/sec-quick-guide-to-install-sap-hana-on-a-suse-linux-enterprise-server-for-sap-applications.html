@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Quick Guide to Install SAP HANA on a SUSE Linux Enterprise Server for SAP Applications</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="SUSE and Microsoft Solution Templates for SAP Applications" /><link rel="up" href="index.html" title="SUSE and Microsoft Solution Templates for SAP Applications" /><link rel="prev" href="sec-sap-netweaver-3-tier-ha-template.html" title="SAP Netweaver 3-tier HA Template" /><link rel="next" href="ar01s06.html" title="Legal notice" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Quick Guide to Install SAP HANA on a SUSE Linux Enterprise
+      Server for SAP Applications</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="sec-sap-netweaver-3-tier-ha-template.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="ar01s06.html">Next</a></td></tr></table><hr /></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-quick-guide-to-install-sap-hana-on-a-suse-linux-enterprise-server-for-sap-applications"></a>Quick Guide to Install SAP HANA on a SUSE Linux Enterprise
+      Server for SAP Applications</h2></div></div></div><p>This section leads you through the installation of a default SAP
+      HANA on SUSE Linux Enterprise Server.</p><p>It does not replace the SAP documentation - <span class="strong"><strong>PLEASE</strong></span> read the SAP HANA installation
+      documentation.</p><div class="important" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Transfer</h3><p>You need to transfer the SAP media for SAP HANA to the Azure
+        cloud environment.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-file-share-for-sap-media"></a>File Share for SAP Media</h3></div></div></div><p>Azure Files offers shared storage for applications using the
+        Server Message Block (SMB) protocol which is very useful to upload
+        the SAP HANA Media to it and use it from both machines.</p><p>
+        <a class="link" href="https://docs.microsoft.com/en-us/azure/storage/files/storage-files-introduction" target="_top">https://docs.microsoft.com/en-us/azure/storage/files/storage-files-introduction</a>
+      </p><p>To use Azure Storage, you need to create first a storage
+        account.</p><p>In the example below, the Azure CLI v2 command line installed
+        on our local machine is used. It is also possible to install it on
+        the virtual machine you have created in Azure.</p><p>For more details see <a class="link" href="https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-zypper?view=azure-cli-latest" target="_top">https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-zypper?view=azure-cli-latest</a>.</p><p>Another way would be to follow the more general steps from
+          <a class="link" href="https://docs.microsoft.com/en-us/azure/virtual-machines/linux/mount-azure-file-storage-on-linux-using-smb" target="_top">https://docs.microsoft.com/en-us/azure/virtual-machines/linux/mount-azure-file-storage-on-linux-using-smb</a></p><p>or using the portal</p><p>
+        <a class="link" href="https://github.com/AzureCAT-GSI/SAP-HANA-ARM/blob/master/UploadToAzure.md" target="_top">https://github.com/AzureCAT-GSI/SAP-HANA-ARM/blob/master/UploadToAzure.md</a>
+      </p><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-steps-to-create-a-file-share-in-azure"></a>Steps to Create a File Share in Azure</h4></div></div></div><p>First you need a resource group where the storage should be
+          placed in.</p><p>Substitute the <span class="italic">--location</span>
+          parameter with the azure region you have chosen:</p><pre class="screen">az group create --name mytestRG <span class="italic">--location westeurope</span></pre><p>Now you can create the storage account in your resource
+          group:</p><pre class="screen">az storage account create \
+    --name hsrsa4sapmedia \
+    --resource-group mytestRG \
+    --sku Standard_LRS \
+    --location westeurope</pre><p>A good practice is to share the connection string using
+          variables, as you need to add it to every following storage
+          commands:</p><pre class="screen">az storage account show-connection-string \
+    --name hsrsa4sapmedia \
+    --resource-group mytestRG</pre><p>Set the AZURE_STORAGE_CONNECTION_STRING environment variable
+          with the output value of the command. You should enclose the
+          connection string in quotes.</p><pre class="screen">export AZURE_STORAGE_CONNECTION_STRING="YOUR_connection_string"</pre></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-sap-media"></a>SAP Media</h3></div></div></div><p>Installation media for SAP HANA should be downloaded and placed
+        in the Azure file share created in the step before. For this we
+        create an own directory called "SapBits".</p><p>You need to download the SAP package 51052325, which should
+        consist of four files:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>51052325_part1.exe</p></li><li class="listitem"><p>51052325_part2.rar</p></li><li class="listitem"><p>51052325_part3.rar</p></li><li class="listitem"><p>51052325_part4.rar</p></li></ul></div><p>If you have the files in your download directory on your
+        machine, the command looks as follows:</p><pre class="screen">az storage share create --name mediashare
+az storage directory create --name SapBits --share-name mediashare
+
+az storage file upload --share-name mediashare/SapBits --source ~/Download/51052325_part1.exe
+az storage file upload --share-name mediashare/SapBits --source ~/Download/51052325_part2.rar
+az storage file upload --share-name mediashare/SapBits --source ~/Download/51052325_part3.rar
+az storage file upload --share-name mediashare/SapBits --source /Download/51052325_part4.rar</pre><p>The next steps need to be done on your virtual machine you
+        created for HANA in Azure. Log in to this machine.nius.</p><p>Mount it on the SUSE Linux Enterprise Server system in Azure
+        with the command:</p><pre class="screen">sudo zypper in cifs-utils unrar
+
+mkdir -p /hana/shared/SapBits
+
+sudo mount -t cifs //hsrsa4sapmedia.file.core.windows.net/mediashare/SapBits /mnt -o vers=3.0,username=storage-account-name,password=storage-account-key,dir_mode=0777,file_mode=0777,serverino
+
+sudo cp -v /mnt/51052325* /hana/shared/SapBits
+
+sudo umount /mnt</pre><p>Extract the HANA software</p><pre class="screen">cd /hana/shared/SapBits
+unrar x 51052325_part1.exe</pre><p>If you need the hana software later again, you do not need this
+        step as it is extracted</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-hana-install"></a>HANA Install</h3></div></div></div><p>Hana requires a few packages installed within SUSE Linux
+        Enterprise Server.</p><pre class="screen">zypper in -t pattern sap-hana</pre><p>and configuration settings</p><pre class="screen">saptune daemon start
+saptune solution apply HANA</pre><p>There are several possibilities to install SAP HANA, which are
+        detailed in the following sections.</p><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-with-use-of-the-suse-installation-wizard"></a>Installation Using the SUSE Installation Wizard</h4></div></div></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p> Start YaST. </p></li><li class="listitem"><p>Under <span class="quote">“<span class="quote">Software</span>”</span> choose the <span class="quote">“<span class="quote">SAP
+                Installation Wizard</span>”</span>:</p></li></ul></div><div class="figure"><a id="id1341"></a><p class="title"><strong>Figure 4. YaST Control Center - SAP Installation Wizard</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/azure_hana_wizard1.png" width="100%" alt="YaST Control Center - SAP Installation Wizard" /></td></tr></table></div></div></div><br class="figure-break" /><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Point the Installer to the directory with the SAP Media
+              from the step above (for example
+              /hana/shared/SapBits/51052325):</p></li></ul></div><div class="figure"><a id="id1342"></a><p class="title"><strong>Figure 5. SAP Installation Wizard - Directory</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/azure_hana_wizard3.png" width="100%" alt="SAP Installation Wizard - Directory" /></td></tr></table></div></div></div><br class="figure-break" /><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>The sap media get copied to the local machine:</p></li></ul></div><div class="figure"><a id="id1343"></a><p class="title"><strong>Figure 6. SAP Installation Wizard - Copying Media</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/azure_hana_wizard4.png" width="100%" alt="SAP Installation Wizard - Copying Media" /></td></tr></table></div></div></div><br class="figure-break" /><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Say <span class="quote">“<span class="quote">No</span>”</span> if you asked for
+              Supplement/3rd-party media share:</p></li></ul></div><div class="figure"><a id="id1344"></a><p class="title"><strong>Figure 7. SAP Installation Wizard - Medium</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/azure_hana_wizard5.png" width="100%" alt="SAP Installation Wizard - Medium" /></td></tr></table></div></div></div><br class="figure-break" /><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Click <span class="quote">“<span class="quote">Next</span>”</span> at the screen asking for SAP
+              add-ons:</p></li></ul></div><div class="figure"><a id="id1345"></a><p class="title"><strong>Figure 8. SAP Installation Wizard - SAP Add-ons</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/azure_hana_wizard6.png" width="100%" alt="SAP Installation Wizard - SAP Add-ons" /></td></tr></table></div></div></div><br class="figure-break" /><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p> Fill out the four fields for HANA:</p></li></ul></div><div class="figure"><a id="id1346"></a><p class="title"><strong>Figure 9. SAP Installation Wizard - System Parameters</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/azure_hana_wizard7.png" width="100%" alt="SAP Installation Wizard - System Parameters" /></td></tr></table></div></div></div><br class="figure-break" /><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Say <span class="quote">“<span class="quote">No</span>”</span> if you are asked for more products:
+            </p></li></ul></div><div class="figure"><a id="id1347"></a><p class="title"><strong>Figure 10. SAP Installation Wizard - More SAP Products</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/azure_hana_wizard8.png" width="100%" alt="SAP Installation Wizard - More SAP Products" /></td></tr></table></div></div></div><br class="figure-break" /><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p> Agree with the question to continue the installation:
+            </p></li></ul></div><div class="figure"><a id="id1348"></a><p class="title"><strong>Figure 11. SAP Installation Wizard - Continue Installation</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/azure_hana_wizard9.png" width="100%" alt="SAP Installation Wizard - Continue Installation" /></td></tr></table></div></div></div><br class="figure-break" /><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>HANA gets installed and started. </p></li></ul></div><p>This installation process will take some time - be patient.
+          You will see the log output in the window.</p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-using-the-command-line"></a>Installation Using the Command Line</h4></div></div></div><p>The HANA installer will ask for some values.</p><p>Answer the questions according to your well prepared sheet
+          with all needed parameters. Do <span class="strong"><strong>NOT</strong></span> install HANA with a virtual host name,
+            <span class="strong"><strong>use</strong></span> the physical host name.
+          Double-check before you type!</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p> Install the SAP HANA Database as described in the SAP
+              HANA Server Installation Guide on <span class="strong"><strong>both</strong></span> machines. </p><div class="orderedlist"><ol class="orderedlist" type="a"><li class="listitem"><p> Change to the directory where you have downloaded
+                    <span class="strong"><strong>and unpacked</strong></span> the
+                  installation medium ( in our example it should be
+                  /hana/shared/SapBits ): </p><pre class="screen">   cd /hana/shared/SapBits/51052325/DATA_UNITS/HDB_LCM_LINUX_X86_64</pre></li><li class="listitem"><p> Start the SAP HANA database lifecycle manager
+                  interactively at the command line: </p><pre class="screen">   sudo ./hdblcm</pre></li></ol></div></li></ol></div></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-for-3-tier-templates-how-to-connect-to-the-other-systems"></a>For 3-tier Templates: How to Connect to the Other
+        Systems</h3></div></div></div><p>Only the XSCS machine has a public IP address and needs to be
+        used as intermediate hop (jumphost) between your actual SSH target
+        and yourself.</p><p>Instead of using something like <span class="quote">“<span class="quote">insecure</span>”</span> SSH
+        agent forwarding, where the data gets exposed at every jump, you
+        can use ProxyCommand to proxy all your commands through your
+        jumphost.</p><p>Consider the following scenario:</p><pre class="screen">+--------+    +---------+    /------ | Host A |
+| Laptop |--P-| XSCS    |---+
++--------+    +---------+    \-------| Host B |
+                              ...
+                              \------| Host X |</pre><p>A configuration like this will allow you to proxy through the
+        jumphost within the admin subnet to HOST A and B,
+        …</p><pre class="screen">on YOUR local system create a ssh config file:
+
+$ cat .ssh/config
+Host XSCS
+   User <span class="strong"><strong>adminuser used here as example</strong></span>
+   Hostname <span class="strong"><strong>public-ip-of-xscs</strong></span>
+   Port 22 # a non-standard port would be a good idea
+
+Host hosta
+   User adminuser
+   Hostname <span class="strong"><strong>private-ip of host a</strong></span>
+   Port 22
+   ProxyCommand ssh -q -W %h:%p XSCS
+
+Host hostb
+   User adminuser
+   Hostname <span class="strong"><strong>private-ip of host b</strong></span>
+   Port 22
+   ProxyCommand ssh -q -W %h:%p XSCS
+
+etc...</pre><pre class="screen">ssh adminuser@hosta</pre><p>or</p><pre class="screen">ssh adminuser@<span class="strong"><strong>private-ip-hosta</strong></span></pre></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="sec-sap-netweaver-3-tier-ha-template.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="ar01s06.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">SAP Netweaver 3-tier HA Template </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Legal notice</td></tr></table></div></body></html>

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Background</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="Kernel Module Packages Manual for SUSE-based Distributions" /><link rel="up" href="index.html" title="Kernel Module Packages Manual for SUSE-based Distributions" /><link rel="prev" href="index.html" title="Kernel Module Packages Manual for SUSE-based Distributions" /><link rel="next" href="sec-kernel-packages.html" title="Kernel Packages" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Background</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="index.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="sec-kernel-packages.html">Next</a></td></tr></table><hr /></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-background"></a>Background</h2></div></div></div><p>The Linux kernel supports adding functionality at runtime
+            through kernel-loadable modules. It includes more than 1500
+            modules, about 75 percent of which are hardware drivers. These
+            modules are shipped as part of the kernel packages. In some
+            cases it is desirable to add additional modules or replace
+            existing ones. For example, a driver for a particular storage
+            controller that was not available at the time of product
+            release might be added later to support new hardware.</p><p>Kernel modules interact with the kernel by the means of
+            exported symbols, in a way similar to how user space binaries
+            use shared libraries. The /proc/kallsyms file lists all symbols
+            currently known to the kernel. To ensure that the kernel and
+            modules refer to the same symbols, a version checksum
+            (modversion) is added to each symbol. The checksum is computed
+            from the symbol's type: in the case of function symbols, the
+            checksum is determined by the function's parameters and return
+            type.</p><p>When any of a function's parameters or the return type
+            changes, the checksum changes as well. This includes all the
+            data types involved recursively:</p><p>If a function takes a <span class="strong"><strong>struct
+                task_struct</strong></span> as parameter and <span class="strong"><strong>struct task_struct</strong></span> includes a
+            field of type <span class="strong"><strong>struct dentry</strong></span>,
+            then a change to <span class="strong"><strong>struct
+                dentry</strong></span> will cause the symbol's version checksum
+            to change as well. Symbol version checksums for different
+            kernel flavors (for example <span class="strong"><strong>kernel-default</strong></span> versus <span class="strong"><strong>kernel-xen</strong></span>) will not match, and symbol versions
+            of the same kernel package on different architectures (for
+            example <span class="strong"><strong>kernel-default</strong></span> on
+            i386 versus x86_64) will not match either. This mechanism
+            ensures that the kernel and kernel modules agree on the types
+            of data structures that they use to communicate.</p><p>Unless symbol version checking is disabled, modules will load
+            only if the checksums of the symbols they use match the
+            checksums of the symbols that the kernel exports. The exported
+            symbols and their version checksums comprise the kernel
+            Application Binary Interface (kABI). When an updated kernel
+            includes kABI changes, kernel modules that use any modified
+            symbols must be updated as well. </p><p>During its multi-year lifecycle, products like SUSE Linux
+            Enterprise Server undergo continuous changes. In addition,
+            different kinds of updates like service packs (SPs),
+            maintenance/security updates, and customer-specific updates
+            (Program Temporary Fixes) are released. The Application Binary
+            Interface (ABI) between the kernel and kernel modules is
+            volatile. Some kernel updates will change the kernel ABI (kABI)
+            by adding or removing exported symbols, or existing symbol
+            checksums can change in a kernel update because of changes in
+            data structures they reference. SUSE strives to keep the kernel
+            ABI stable in maintenance and security and customer-specific
+            updates, but sometimes changes cannot be avoided. In service
+            packs, SUSE reserves the right to introduce more intrusive
+            changes, which increases the likelihood of ABI changes. SUSE
+            believes that the added flexibility outweighs the disadvantages
+            of breaking older modules. For full discussion of this topic,
+            see the documentation <span class="quote">“<span class="quote">SUSE SolidDriver Documentation:
+                SUSE Kernel ABI Stability</span>”</span> at <a class="link" href="https://drivers.suse.com/doc/SolidDriver/SUSE_Kernel_ABI_Stability.html" target="_top">https://drivers.suse.com/doc/SolidDriver/SUSE_Kernel_ABI_Stability.html</a>
+            and <span class="quote">“<span class="quote">The Linux Kernel Driver Interface</span>”</span> from Greg
+            Kroah-Hartman at <a class="link" href="http://www.kroah.com/log/linux/stable_api_nonsense.html" target="_top">http://www.kroah.com/log/linux/stable_api_nonsense.html
+            </a> (also provided as <span class="strong"><strong>stable_api_nonsense.txt</strong></span> in the upstream kernel
+            source tree).</p><p>SUSE-based operating systems include technology to ensure
+            that kernel modules can be reused or updated in synchronization
+            with kernel updates. To use this technology, kernel modules
+            must be packaged into Kernel Module Packages (KMPs) as defined
+            in this document.</p></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="index.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="sec-kernel-packages.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Kernel Module Packages Manual for SUSE-based
+            Distributions </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Kernel Packages</td></tr></table></div></body></html>

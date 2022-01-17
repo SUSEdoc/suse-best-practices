@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Using the Packages</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="Security Module in SUSE Linux Enterprise 11" /><link rel="up" href="index.html" title="Security Module in SUSE Linux Enterprise 11" /><link rel="prev" href="sec-getsoftware.html" title="Getting the Software" /><link rel="next" href="sec-appendix.html" title="Appendix A" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Using the Packages</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="sec-getsoftware.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="sec-appendix.html">Next</a></td></tr></table><hr /></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-usingpack"></a>Using the Packages</h2></div></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-interactpack"></a>The Interactive Packages</h3></div></div></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-curlwget"></a>curl-openssl1 and wget-openssl1</h4></div></div></div><p>If you have chosen to install the curl-openssl1 or wget-openssl1 packages, you
+                    now have a choice as to which one should be the system-wide default when someone
+                    simply enters the <span class="command"><strong>curl</strong></span> command or <span class="command"><strong>wget</strong></span>
+                    command. Setting or changing this is accomplished through the use of the SUSE
+                    alternatives system (see <span class="quote">“<span class="quote">man 8 update-alternatives</span>”</span> for more
+                    information). We will be using the curl package for our examples, but as you
+                    would expect, the same can and should be done for the wget package.</p><p>To see which version of curl is the system default, enter the following
+                    command:</p><pre class="screen">update-alternatives --display curl</pre><p>You should see output similar to this:</p><pre class="screen"># update-alternatives --display curl
+curl - status is auto.
+ link currently points to /usr/bin/curl.openssl1
+/usr/bin/curl.openssl0 - priority 15
+/usr/bin/curl.openssl1 - priority 20
+Current 'best' version is /usr/bin/curl.openssl1.</pre><p>If this is not the state you want, you can change it using the
+                        <span class="command"><strong>update-alternatives --set</strong></span> command:</p><pre class="screen">update-alternatives --set curl /usr/bin/curl.openssl0
+Using '/usr/bin/curl.openssl0' to provide 'curl'.</pre><p>You can then reissue the command with <span class="command"><strong>--display</strong></span>:</p><pre class="screen"># update-alternatives --display curl
+curl - status is manual.
+ link currently points to /usr/bin/curl.openssl0
+/usr/bin/curl.openssl0 - priority 15
+/usr/bin/curl.openssl1 - priority 20
+Current 'best' version is /usr/bin/curl.openssl1.</pre><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Status Change</h3><p>Note that besides the link being updated, the <span class="quote">“<span class="quote">status</span>”</span> of it
+                        has been changed from <span class="quote">“<span class="quote">auto</span>”</span> to <span class="quote">“<span class="quote">manual</span>”</span>. That
+                        means that the <span class="command"><strong>curl.openssl0</strong></span> command will remain the
+                        default until someone with root user authority issues another
+                            <span class="command"><strong>update-alternatives --set curl</strong></span> or
+                            <span class="command"><strong>update-alternatives --auto curl </strong></span>command.</p></div><p>Individual users will need to use shell aliases or fully qualified paths to
+                    the appropriate command if they want something other than the system
+                    default.</p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-openssl1"></a>openssl1</h4></div></div></div><p>The openssl package contains two commands that might be of interest to users
+                    or system administrators, <span class="command"><strong>c_rehash</strong></span> and
+                        <span class="command"><strong>openssl</strong></span>. The openssl1 package has renamed those two
+                    commands to <span class="command"><strong>c_rehash1</strong></span> and <span class="command"><strong>openssl1</strong></span>. Anyone
+                    who wants to be sure they are executing the OpenSSL 1 versions must use the new
+                    names explicitly. Note that the <span class="command"><strong>c_rehash1</strong></span> command can
+                    generate signatures for both OpenSSL 0.9.8 and OpenSSL 1, but
+                        the<span class="command"><strong>c_rehash</strong></span> command cannot.</p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-libldap"></a>libldap-openssl1</h4></div></div></div><p>The libldap-openssl1 package contains commands such as
+                        <span class="command"><strong>ldapadd</strong></span>, <span class="command"><strong>ldapsearch,</strong></span> etc. They are
+                    located in <code class="filename">/opt/suse/bin</code> so they will not be used by
+                    default. If you want to execute them by default you can either specify the fully
+                    qualified path to the commands, modify your PATH environment variable to contain
+                        <code class="filename">/opt/suse/bin</code> before <code class="filename">/usr/bin</code>, or
+                    create aliases that point to the newer version. </p><p>Some consideration is being given to modifying this package to use the same
+                    update-alternatives method as the curl and wget packages. If and when that
+                    happens, the commands in <code class="filename">/opt/suse/bin</code> will be moved into a
+                    different package, most likely named openldap2-client-openssl1. This will make
+                    the contents and naming similar to what is being done now for the OpenSSL 0.9.8
+                    package, openldap2-client.</p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-openssh"></a>openssh-openssl1 and postfix-openssl1</h4></div></div></div><p>The OpenSSH and Postfix packages contain both client and server/admin
+                    components. Since only one version can be installed at a time, by definition
+                    users will not have a choice as to which version they execute.</p></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-serverpack"></a>The Server Packages</h3></div></div></div><p>For OpenSSH and Postfix, the post installation scripts that are executed by RPM
+                should set up everything needed in the configuration files and then restart the
+                services. If the services were not running at the time the packages were installed,
+                they will <span class="italic">not</span> be started automatically. To ensure
+                they are running check their status:</p><pre class="screen">service sshd status
+service postfix status</pre><p>If either or both are not running, start them:</p><pre class="screen">service sshd start
+service postfix start</pre><p>From this point on, there should be no differences from how the services were
+                managed previously.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-developmentpack"></a>The Development Packages</h3></div></div></div><p>The two development packages will only be of interest to customers that are doing
+                in-house development of C or C++ software that uses these libraries. And they are
+                relevant for customers that are installing vendor packages that require all or part
+                of their source code to be compiled and linked to these libraries. If the
+                corresponding -devel packages from OpenSSL 0.9.8 were never installed on a
+                particular system, there should be no need to install the OpenSSL 1.0 versions
+                either.</p><p>Because only one set of the development packages can be installed at any one time,
+                it is cumbersome to try to do development against both versions on the same system.
+                Switching between the two will require uninstalling one version and reinstalling the
+                other, as needed.</p><p>Depending on what libraries your OpenSSL 1 application requires, you might need to
+                also install one or all of the following packages:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>libldap-openssl1-2_4-2</p></li><li class="listitem"><p>cyrus-sasl-openssl1</p></li><li class="listitem"><p>libcurl4-openssl1</p></li><li class="listitem"><p>cyrus-sasl-openssl1-plain</p></li><li class="listitem"><p>cyrus-sasl-openssl1-gssapi</p></li><li class="listitem"><p>cyrus-sasl-openssl1-digestmd5</p></li></ul></div><p>If your application does not require them, then they will only be installed if
+                needed by other packages such postfix-openssl1, etc.</p><p>These OpenSSL 1 libraries are located in <code class="filename">/opt/suse/lib64</code> or
+                    <code class="filename">/opt/suse/lib</code> on 32-bit systems. This allows them to be
+                installed concurrently with the OpenSSL 0.9.8 versions. Because they have exactly
+                the same file names as the OpenSSL 0.9.8 libraries in
+                    <code class="filename">/usr/lib64</code> and <code class="filename">/usr/lib</code>, it is
+                important to make sure that your software build processes are referencing the
+                correct versions.</p><p>The way to accomplish this is by telling the compiler/linker where to find the
+                desired version. So, when compiling and linking software against OpenSSL 1, pass the
+                following parameters to the <span class="command"><strong>gcc</strong></span> command:</p><p>
+                <span class="command"><strong>-Wl,-rpath,/opt/suse/lib64</strong></span>
+            </p><p>or on 32-bit systems:</p><p>
+                <span class="command"><strong>-Wl,-rpath,/opt/suse/lib</strong></span>
+            </p><p>This causes both the application and libraries that are built to look for the
+                libraries in <code class="filename">/opt/suse/lib64</code> or
+                    <code class="filename">/opt/suse/lib</code> first, and in the regular system locations
+                later.</p><p>This can most reliably be done by updating whatever <span class="quote">“<span class="quote">make file</span>”</span> is
+                being used to build the software. Note that this must be done for any <span class="strong"><strong>libraries</strong></span> being built, as well as binary executables.
+                Having a library pointing to the wrong version will be just as wrong as having the
+                program being executed pointing to the wrong version.</p><p>When compiling and linking against OpenSSL 0.9.8, you have a choice; either leave
+                the <span class="command"><strong>-Wl,-rpath</strong></span> out entirely, or point to
+                    <code class="filename">/usr/lib64</code> or on 32-bit systems
+                    <code class="filename">/usr/lib</code>.</p><p>To confirm if your software has been built correctly, execute the following
+                command against it:</p><pre class="screen">readelf ­a /path/to/your/binaryorlibrary | grep RUNPATH</pre><p>You should see something similar to this example:</p><pre class="screen">readelf -a /usr/lib/postfix/smtp | grep RUNPATH
+0x000000000000001d (RUNPATH)            Library runpath: [/opt/suse/lib64]</pre><p>To confirm if your application is not referencing any of the OpenSSL 0.9.8
+                libraries, use the <span class="command"><strong>/usr/bin/ldd</strong></span> command as in this
+                example:</p><pre class="screen">ldd /usr/lib/postfix/smtp | grep /libssl.so.0
+ldd /usr/lib/postfix/smtp | grep /libcrypto.so.0</pre><p>You should not see any output from either of those commands when run against your
+                application files. If you do, it means that your application was linked against the
+                wrong version of OpenSSL and you need to re-examine your build processes.</p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="sec-getsoftware.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="sec-appendix.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Getting the Software </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Appendix A</td></tr></table></div></body></html>

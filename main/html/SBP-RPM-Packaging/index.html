@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Introduction to RPM Packaging</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><meta name="description" content="In general, a pre-built, open source application is called a package and bundles all the binary, data, and configuration files required to run the application. A package also includes all the steps required to deploy the application on a system, typically in the form of a script. The script might generate data, start and stop system services, or manipulate files and directories. A script might also perform operations to upgrade existing software to a new version. Because each operating system has its idiosyncrasies, a package is typically tailored to a specific system. Moreover, each operating system provides its own package manager, a special utility to add and remove packages from the system. SUSE-based systems – openSUSE and SUSE Linux Enterprise - use the RPM Package Manager. The package manager precludes partial and faulty installations and uninstalls by adding and removing the files in a package atomically. The package manager also maintains a manifest of all packages installed on the system and can validate the existence of prerequisites and co-requisites beforehand. This document describes in detail how to create an RPM package on SUSE-based systems. Disclaimer: Documents published as part of the SUSE Best Practices series have been contributed voluntarily by SUSE employees and third parties. They are meant to serve as examples of how particular actions can be performed. They have been compiled with utmost attention to detail. However, this does not guarantee complete accuracy. SUSE cannot verify that actions described in these documents do what is claimed or whether actions described have unintended consequences. SUSE LLC, its affiliates, the authors, and the translators may not be held liable for possible errors or the consequences thereof." /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="Introduction to RPM Packaging" /><link rel="next" href="sec-working-packages.html" title="Working with Packages" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Introduction to RPM Packaging</th></tr><tr><td width="20%" align="left"> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="sec-working-packages.html">Next</a></td></tr></table><hr /></div><div xml:lang="en" class="article" lang="en"><div class="titlepage"><div><div><h1 class="title"><a id="art-sbp-rpm-packaging"></a>Introduction to RPM Packaging</h1></div><div><h3 class="subtitle"><em></em></h3></div><div><div class="author"><h3 class="author"><span class="firstname">Duncan</span> <span class="surname">Mac-Vicar Prett, Director Data Center Management R&amp;D, SUSE</span></h3></div></div><div><div class="abstract"><p class="title"><strong>Abstract</strong></p><p>In general, a pre-built, open source application is called a <span class="italic">package</span> and bundles all the binary, data, and
+                configuration files required to run the application. A package also includes all the
+                steps required to deploy the application on a system, typically in the form of a
+                script. The script might generate data, start and stop system services, or
+                manipulate files and directories. A script might also perform operations to upgrade
+                existing software to a new version.</p><p>Because each operating system has its idiosyncrasies, a package is typically
+                tailored to a specific system. Moreover, each operating system provides its own
+                    <span class="italic">package manager</span>, a special utility to add and
+                remove packages from the system. SUSE-based systems – openSUSE and SUSE Linux
+                Enterprise - use the RPM Package Manager. The package manager precludes partial and
+                faulty installations and <span class="quote">“<span class="quote">uninstalls</span>”</span> by adding and removing the files
+                in a package atomically. The package manager also maintains a manifest of all
+                packages installed on the system and can validate the existence of prerequisites and
+                co-requisites beforehand. </p><p>This document describes in detail how to create an RPM package on SUSE-based
+            systems. </p><p>
+                <span class="strong"><strong>Disclaimer: </strong></span>
+                Documents published as part of the SUSE Best Practices series have been contributed voluntarily
+                by SUSE employees and third parties. They are meant to serve as examples of how particular
+                actions can be performed. They have been compiled with utmost attention to detail. However,
+                this does not guarantee complete accuracy. SUSE cannot verify that actions described in these
+                documents do what is claimed or whether actions described have unintended consequences.
+                SUSE LLC, its affiliates, the authors, and the translators may not be held liable for possible errors
+                or the consequences thereof.
+            </p></div></div></div><hr /></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="sect1"><a href="index.html#sec-package">What Is a Package</a></span></dt><dd><dl><dt><span class="sect2"><a href="index.html#sec-anatomy">Anatomy of a Package</a></span></dt><dt><span class="sect2"><a href="index.html#sec-installing-packages">Installing Packages</a></span></dt><dt><span class="sect2"><a href="index.html#sec-dependency">Dependency Matching</a></span></dt><dt><span class="sect2"><a href="index.html#sec-weak-dependencies">Weak Dependencies</a></span></dt></dl></dd><dt><span class="sect1"><a href="sec-working-packages.html">Working with Packages</a></span></dt><dd><dl><dt><span class="sect2"><a href="sec-working-packages.html#sec-repositories">Repositories</a></span></dt><dt><span class="sect2"><a href="sec-working-packages.html#sec-pack-manager-operations">Other Package Manager Operations</a></span></dt><dt><span class="sect2"><a href="sec-working-packages.html#sec-other-solvable-types">Other Solvable Types (Products, Patterns, System)</a></span></dt></dl></dd><dt><span class="sect1"><a href="sec-creating-packages.html">Creating packages</a></span></dt><dd><dl><dt><span class="sect2"><a href="sec-creating-packages.html#sec-common-macros">Common Macros</a></span></dt><dt><span class="sect2"><a href="sec-creating-packages.html#sec-sub-packages">Sub-packages</a></span></dt><dt><span class="sect2"><a href="sec-creating-packages.html#sec-building-rpmbuild">Building with rpmbuild</a></span></dt><dt><span class="sect2"><a href="sec-creating-packages.html#sec-building-environment">Building in a Real Build Environment</a></span></dt><dt><span class="sect2"><a href="sec-creating-packages.html#sec-improving-package">Improving the Package</a></span></dt><dt><span class="sect2"><a href="sec-creating-packages.html#sec-changelogs">Changelogs</a></span></dt></dl></dd><dt><span class="sect1"><a href="ar01s04.html">Legal notice</a></span></dt><dt><span class="sect1"><a href="ar01s05.html">GNU Free Documentation License</a></span></dt></dl></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-package"></a>What Is a Package</h2></div></div></div><p>A package is a way of distributing software on Linux systems. A single application is
+            distributed as one or more packages. Usually the main package contains the program, and
+            in addition some optional or secondary packages.</p><p>On some platforms, applications are self-contained into a directory. This means
+            installing an application is simply adding a directory, and uninstalling the application
+            is simply removing this directory.</p><p>Linux systems tend to share as much of their components as possible. Partly this is the case
+            because of some advantages of this philosophy. But mainly it happens because of the fact
+            that in the Linux ecosystem, the whole universe is built by the same entity, except for
+            a few 3rd party applications. This makes it easy to assume that a library is available
+            for all applications to consume. </p><p>In a MacOS system, only the core comes from a single vendor, and all applications are
+            provided by third party suppliers. It is therefore harder to make assumptions, and they
+            tend to ship their own version of any depending component, with the exception of
+            everything being documented as the <span class="quote">“<span class="quote">platform</span>”</span>.</p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-anatomy"></a>Anatomy of a Package</h3></div></div></div><p>As an example, we start with a well-known UNIX tool: rsync.</p><p>A package is an archive file:</p><pre class="screen">rsync-3.1.2-1.5.x86_64.rpm</pre><p>This archive file contains all files related to the application:</p><pre class="screen">$ rpm -qpl rsync-3.1.2-1.5.x86_64.rpm
+
+/etc/logrotate.d/rsync
+/etc/rsyncd.conf
+/etc/rsyncd.secrets
+/etc/sysconfig/SuSEfirewall2.d/services/rsync-server
+/etc/xinetd.d/rsync
+/usr/bin/rsync
+/usr/bin/rsyncstats
+/usr/lib/systemd/system/rsyncd.service
+/usr/sbin/rcrsyncd
+/usr/sbin/rsyncd
+/usr/share/doc/packages/rsync
+/usr/share/doc/packages/rsync/COPYING
+/usr/share/doc/packages/rsync/NEWS
+/usr/share/doc/packages/rsync/README
+/usr/share/doc/packages/rsync/tech_report.tex
+/usr/share/man/man1/rsync.1.gz
+/usr/share/man/man5/rsyncd.conf.5.gz</pre><p>Additionally, it contains some extra metadata. This metadata should include but it
+                is not limited to:</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>Name</p></li><li class="listitem"><p>Summary</p></li><li class="listitem"><p>Description</p></li><li class="listitem"><p>License</p></li><li class="listitem"><p>etc.</p></li></ol></div><p>As an example, the metadata for <span class="command"><strong>rsync</strong></span> look as
+                follows:</p><pre class="screen">$ rpm -qpi rsync-3.1.2-1.5.x86_64.rpm
+
+Name        : rsync
+Version     : 3.1.2
+Release     : 1.5
+Architecture: x86_64
+Install Date: Wed 26 Oct 2016 01:31:12 PM CEST
+Group       : Productivity/Networking/Other
+Size        : 636561
+License     : GPL-3.0+
+Signature   : RSA/SHA256, Mon 17 Oct 2016 02:32:40 AM CEST, Key ID b88b2fd43dbdc284
+Source RPM  : rsync-3.1.2-1.5.src.rpm
+Build Date  : Mon 17 Oct 2016 02:32:26 AM CEST
+Build Host  : lamb18
+Relocations : (not relocatable)
+Packager    : http://bugs.opensuse.org
+Vendor      : openSUSE
+URL         : http://rsync.samba.org/
+Summary     : Versatile tool for fast incremental file transfer
+Description :
+Rsync is a fast and extraordinarily versatile file  copying  tool. It can copy
+locally, to/from another host over any remote shell, or to/from a remote rsync
+daemon. It offers a large number of options that control every aspect of its
+behavior and permit very flexible specification of the set of files to be
+copied. It is famous for its delta-transfer algorithm, which reduces the amount
+of data sent over the network by sending only the differences between the
+source files and the existing files in the destination. Rsync is widely used
+for backups and mirroring and as an improved copy command for everyday use.
+Distribution: openSUSE Tumbleweed</pre><p>To get a list of additional packages which the respective package requires to be
+                installed to work, use the command <span class="command"><strong>Requires</strong></span> as shown
+                below:</p><pre class="screen">$ rpm -qp --requires rsync-3.1.2-1.5.x86_64.rpm
+/bin/sh
+/usr/bin/perl
+config(rsync) = 3.1.2-1.5
+coreutils
+diffutils
+fillup
+grep
+libacl.so.1()(64bit)
+libacl.so.1(ACL_1.0)(64bit)
+libc.so.6()(64bit)
+libc.so.6(GLIBC_2.10)(64bit)
+libc.so.6(GLIBC_2.14)(64bit)
+libc.so.6(GLIBC_2.15)(64bit)
+libc.so.6(GLIBC_2.2.5)(64bit)
+libc.so.6(GLIBC_2.3)(64bit)
+libc.so.6(GLIBC_2.3.4)(64bit)
+libc.so.6(GLIBC_2.4)(64bit)
+libc.so.6(GLIBC_2.6)(64bit)
+libc.so.6(GLIBC_2.7)(64bit)
+libc.so.6(GLIBC_2.8)(64bit)
+libpopt.so.0()(64bit)
+libpopt.so.0(LIBPOPT_0)(64bit)
+libslp.so.1()(64bit)
+rpmlib(CompressedFileNames) &lt;= 3.0.4-1
+rpmlib(PayloadFilesHavePrefix) &lt;= 4.0-1
+rpmlib(PayloadIsLzma) &lt;= 4.4.6-1
+sed
+systemd</pre><p>As an example, a package may need a library, or an executable that is called
+                during runtime.</p><p>To get a list of information the respective package provides for other packages to
+                work, use the command <span class="command"><strong>Provides</strong></span> as shown below:</p><pre class="screen">$ rpm -qp --provides rsync-3.1.2-1.5.x86_64.rpm
+config(rsync) = 3.1.2-1.5
+rsync = 3.1.2-1.5
+rsync(x86-64) = 3.1.2-1.5</pre></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-installing-packages"></a>Installing Packages</h3></div></div></div><p>When a package is installed, the content (or list of files) is placed on the
+                system at the location of each file path relative to the root
+                    (<code class="filename">/</code>) directory. </p><p>Additionally, the metadata of the package (and the fact that it is installed) is
+                recorded in a system-wide database located in <code class="filename">/var/lib/rpm</code>.
+                This is managed by the <span class="command"><strong>rpm</strong></span> tool, the utility that manages
+                packages at the lowest level.</p><p>Packages can be installed with the <span class="command"><strong>rpm</strong></span> tools:</p><pre class="screen">$ rpm -U rsync-3.1.2-1.5.x86_64.rpm</pre><p>When you do this, you can perform the same queries without specifying the
+                    <span class="command"><strong>-p</strong></span> option and using what is called the NVRA
+                (name-version-release-architecture, <span class="package">rsync-3.1.2-1.5.x86_64</span>) or a
+                subset of it, for example, just the name (<span class="package">rsync</span>). </p><pre class="screen">$ rpm -q --provides rsync</pre><p>The <span class="command"><strong>rpm</strong></span> tool will not help you if the dependencies of
+                the package are not met at installation time. It will then refuse to install the
+                package to avoid having the system in an inconsistent state.</p><p>Features like automatically finding the required packages and retrieving them, are
+                implemented in higher-level tools like <span class="command"><strong>zypper</strong></span>.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-dependency"></a>Dependency Matching</h3></div></div></div><p>The section <a class="xref" href="index.html#sec-anatomy" title="Anatomy of a Package">the section called “Anatomy of a Package”</a> explains that a package contains a list
+                of <span class="command"><strong>Requires</strong></span> and <span class="command"><strong>Provides</strong></span>. Those are not
+                package names, but arbitrary symbols. A package can require or provide any string of
+                text. </p><p>The main rule is that each package provides its own name. This means the rsync
+                package <span class="command"><strong>Provides: rsync</strong></span>.</p><p>You have also learned that rsync requires <span class="package">/bin/sh</span>. While this
+                looks like a file name, in our context it is an arbitrary symbol and the meaning is
+                given by the whole distribution. The reason why it does not require a package named
+                    <span class="package">sh</span> instead is that it provides a layer of indirection that
+                makes the system cohesive. </p><p><span class="package">/bin/sh</span> is a capability provided by the <span class="package">bash</span>
+                package. This allows rsync to depend on any shell implementation as long as it
+                provides that symbol. </p><p>The distribution build system will scan all executables a package installs in a
+                system and inject automatically those <span class="command"><strong>Provides</strong></span>. The packager does
+                not need to take care of them.</p><p>The same is done with libraries. As an example, <span class="package">rsync</span> does not
+                depend on the <span class="package">glibc</span> package. When <span class="package">glibc</span> was
+                built, the build system scanned the content, found
+                    <span class="package">/lib64/libc.so.6</span> and injected a <span class="command"><strong>Provides:
+                    libc.so.6()(64bit)</strong></span> into the <span class="package">glibc</span> metadata. In the
+                case of shared libraries it is not so important where they are located, because the
+                linker configuration takes care of that. When the <span class="package">rsync</span> package
+                was built (<span class="package">glibc</span> needed to be installed at that point to build
+                it), the build system scanned the executable <code class="filename">/usr/lib/rsync</code> and
+                realized it was linked against <span class="package">libc.so.6</span>:</p><pre class="screen">$ ldd /usr/bin/rsync
+        linux-vdso.so.1 (0x00007ffccb34a000)
+        libacl.so.1 =&gt; /lib64/libacl.so.1 (0x00007fc406028000)
+        libpopt.so.0 =&gt; /usr/lib64/libpopt.so.0 (0x00007fc405e1b000)
+        libslp.so.1 =&gt; /usr/lib64/libslp.so.1 (0x00007fc405c02000)
+        libc.so.6 =&gt; /lib64/libc.so.6 (0x00007fc405863000)
+        libattr.so.1 =&gt; /lib64/libattr.so.1 (0x00007fc40565e000)
+        libcrypto.so.1.0.0 =&gt; /lib64/libcrypto.so.1.0.0 (0x00007fc4051c4000)
+        libpthread.so.0 =&gt; /lib64/libpthread.so.0 (0x00007fc404fa7000)
+        /lib64/ld-linux-x86-64.so.2 (0x00005653cd048000)
+        libdl.so.2 =&gt; /lib64/libdl.so.2 (0x00007fc404da3000)
+        libz.so.1 =&gt; /lib64/libz.so.1 (0x00007fc404b8d000)</pre><p>Therefore, it injected Requires: libc.so.6()(64bit) to the rsync package.</p><p>Now compare it to other packaging systems. The package
+                    <span class="package">musicplayer</span> requires <span class="package">libsound</span>.
+                    <code class="filename">/usr/bin/musicplayer</code> links to
+                    <code class="filename">/usr/lib64/libsound.so.5</code>. At a later point in time,
+                    <span class="package">musicplayer</span> is rebuilt against a newer
+                    <span class="package">libsound</span>, which is not published. The user installs
+                    <span class="package">musicplayer</span> without any issue because it only
+                    <span class="command"><strong>Requires: libsound</strong></span> (as in the package name). However, when
+                the user tries to run it, he or she gets the following message:</p><pre class="screen">$ musicplayer
+error while loading shared libraries: libsound.so.7: cannot open shared object file: No such file or directory</pre><p>The layer of indirection of automatically injected dependencies prevents this
+                manual work from keeping dependencies in synchronization. Packages only provide what
+                they really carry (because provides are injected by advanced scanners). Packages
+                only require what they really need (because requires are injected by scanning
+                executables, scripts for shebangs, etc.).</p><p>This allows rpm based distributions to use these conventions highly cohesive. It
+                makes upgrades less problematic and the danger of breaking your system nearly
+                non-existent. At the same time, the conventions and indirections between <span class="strong"><strong>Provides</strong></span> and <span class="strong"><strong>Requires</strong></span> allow for packages to depend on more abstract capabilities,
+                instead of specific package names (which sometimes get renamed, split, obsoleted,
+                etc). For example, you can be sure the <span class="package">vim</span> package provides
+                    <span class="package">vi</span>.</p><p>There are also other dependencies with more advances purposes:
+                    <span class="command"><strong>Conflicts</strong></span>, <span class="command"><strong>Obsoletes</strong></span>, etc. Their names let
+                you easily understand what purposes they have.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-weak-dependencies"></a>Weak Dependencies</h3></div></div></div><p>Not everything is as strict as you might think. Sometimes a package works better
+                if another package is present. Sometimes a package enhances the functionality of
+                another package, however in neither case they are required. For this purpose,
+                packages can have the following dependencies:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><span class="command"><strong>Recommends</strong></span>: a soft version of requires. If the
+                        recommended packages are not installed, the package will be installed
+                        anyway. Higher level tools however may pull automatically recommended
+                        packages based on user settings.</p></li><li class="listitem"><p>The reverse of this dependency is <span class="command"><strong>Supplements</strong></span>. For
+                        example a package <span class="package">spellchecker</span> could
+                            <span class="command"><strong>Supplements</strong></span> an <span class="package">office-suite</span>
+                        package.</p></li><li class="listitem"><p><span class="command"><strong>Suggests</strong></span> and <span class="command"><strong>Enhances</strong></span>:the forward
+                        and backward version of Recommends and Supplements in a weaker
+                        version.</p></li></ul></div></div></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="sec-working-packages.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top"> </td><td width="20%" align="center"> </td><td width="40%" align="right" valign="top"> Working with Packages</td></tr></table></div></body></html>

@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Working with Packages</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="Introduction to RPM Packaging" /><link rel="up" href="index.html" title="Introduction to RPM Packaging" /><link rel="prev" href="index.html" title="Introduction to RPM Packaging" /><link rel="next" href="sec-creating-packages.html" title="Creating packages" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Working with Packages</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="index.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="sec-creating-packages.html">Next</a></td></tr></table><hr /></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-working-packages"></a>Working with Packages</h2></div></div></div><p>For daily system administration and maintenance, the <span class="command"><strong>rpm</strong></span>
+            tool does not suffice. You will quickly fall into what is commonly called the
+            “dependency hell”. This means you download packages manually to quickly satisfy a
+            dependency, but then you realize the new package implicates another dependency.</p><p>This problem is taken care of by a tool that implements a solver. The solver
+            considers: </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>The list of installed packages (and therefore all its dependencies)</p></li><li class="listitem"><p>The list of available packages</p></li><li class="listitem"><p>The user request (<span class="quote">“<span class="quote">install package foo</span>”</span>, <span class="quote">“<span class="quote">upgrade
+                        system</span>”</span>)</p></li></ul></div><p>The solver performs an operation that finds the best solution to a problem that has
+            many solutions. Therefore “best” is defined by policies, user settings, the distribution
+            itself, etc. </p><p>On SUSE systems, the solver is implemented by the <span class="strong"><strong>libsolv</strong></span> /&gt; project (see more at <a class="link" href="https://github.com/openSUSE/libsolv" target="_top">https://github.com/openSUSE/libsolv</a>. This engine implements both a
+            satisfiability algorithm and an efficient way to represent the problem in memory.
+            Originally it was developed by Michael Schroeder at SUSE, but today it powers also other
+            distribution package managers, such as Fedora’s <span class="command"><strong>dnf</strong></span>.</p><p>The rest of the package manager includes:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Handling of package repositories</p></li><li class="listitem"><p>Checking the integrity of packages</p></li><li class="listitem"><p>Fetching remote packages</p></li><li class="listitem"><p>Reading and honoring user/system policies</p></li></ul></div><p>In SUSE systems, this functionality is implemented by the <span class="strong"><strong>ZYpp</strong></span> (see <a class="link" href="https://en.opensuse.org/Portal:Libzypp" target="_top">https://en.opensuse.org/Portal:Libzypp</a>)library, which also includes a command-line tool called
+                <span class="command"><strong>zypper</strong></span>. While tools like <span class="strong"><strong>YaST</strong></span> (see <a class="link" href="https://yast.github.io/" target="_top">https://yast.github.io/</a>) also interact
+            with <span class="strong"><strong>ZYpp</strong></span>, on the console you will likely interact
+            with <span class="command"><strong>zypper</strong></span>. The command </p><pre class="screen">$ zypper install rsync-3.1.2-1.5.x86_64.rpm</pre><p>will, unlike rpm, check what else your system is missing, retrieve it, and then
+            install all the required packages in the right order. It will also warn you if another
+            package conflicts with what you are installing, or if the operation has more than one
+            solution, and ask you for your decision what to do.</p><p>But from where does the system <span class="quote">“<span class="quote">retrieve other packages</span>”</span>?</p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-repositories"></a>Repositories</h3></div></div></div><p>zypper can install a package directly from an rpm file. If there is the need for
+                installing dependencies or retrieving packages – for example when you upgrade a
+                system - you will need a “library” of packages. This is what is called a repository.
+                A repository is:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>A collection of packages</p></li><li class="listitem"><p>A set of metadata files</p></li></ul></div><p>The metadata is nothing more than the information present in the rpm file (Name,
+                Description, Dependencies). The metadata allows the package manager to operate with
+                the repository without having stored all rpm files locally. Every operation that is
+                processed uses the given information of the package, and then the rpm files are
+                retrieved on demand at installation time.</p><pre class="screen">$ zypper lr
+
+# | Alias          | Name           | Enabled | GPG Check | Refresh
+--+----------------+----------------+---------+-----------+--------
+1 | non-oss        | NON-OSS        | Yes     | ( p) Yes  | Yes
+2 | oss            | OSS            | Yes     | ( p) Yes  | Yes
+3 | oss-update     | OSS Update     | Yes     | ( p) Yes  | Yes
+4 | update-non-oss | Update Non-Oss | Yes     | ( p) Yes  | Yes</pre><p>A system normally will have the following repositories:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>The base repository, which contains all the distribution packages </p></li><li class="listitem"><p>Additional modules, add-on products or extensions</p></li><li class="listitem"><p>An update repository for each base product or extension </p></li></ul></div><p>Running list repositories with <span class="command"><strong>-u</strong></span> will display the URI of the
+                repository:</p><pre class="screen">zypper lr -u
+            http://download.opensuse.org/update/leap/42.2/oss/.</pre><p>If you visit the URI, you will see:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>a <code class="filename">x86_64</code> directory containing all
+                        architecture-dependent packages (this means ones that contain executables,
+                        shared libraries, etc)</p></li><li class="listitem"><p>a <code class="filename">noarch</code> directory containing
+                        architecture-independent packages (this means ones containing data or
+                        scripts)</p></li><li class="listitem"><p>a <code class="filename">repodata</code> directory, containing the metadata for all
+                        packages </p></li></ul></div><p>The metadata for this type of repositories consists in a
+                    <code class="filename">repodata/repomd.xml</code> file index, which is signed
+                    (<code class="filename">repomd.xml.asc</code>) using a key already present in the
+                original system. <code class="filename">repodata/repomd.xml</code> refers to other metadata
+                file with their checksums. The most important file is
+                    <code class="filename">primary.xml</code> which contains all package dependencies.</p><p>If you have a directory with rpm packages, you can create the metadata for them
+                using the <span class="command"><strong>createrepo</strong></span> tool. After that you can serve that
+                repository via HTTP.</p><p>If you have a directory with rpms you want to use as repository, you don’t need to
+                add metadata. ZYpp allows to have a plain local directory as a repository, and will
+                read the metadata directly from the rpm files into its cache.</p><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-refresh-repo"></a>Refreshing a Repository</h4></div></div></div><p>You can refresh a repository with the command </p><p>
+                    <span class="command"><strong>$ zypper ref</strong></span>
+                </p><p>While the base repository of the distribution is normally immutable,
+                    repositories like the one containing updates often get new content. The purpose
+                    of refreshing a repository is to get the up-to-date version of the metadata
+                    locally, so that all operations (solving, retrieval) match the current content
+                    of the repository.</p><p>If a repository is out of date, it means the local metadata represents a
+                    previous version of the repository content. You could try to solve this and
+                    fetch packages, but those packages may not exists on the repository anymore, and
+                    you will get an error at retrieval time.</p><p>The list of repositories of the system is kept in
+                        <code class="filename">/etc/zypp/repos.d</code>. <span class="command"><strong>zypper</strong></span>
+                    provides most of repository operations in a safer way than trying to update
+                    these files manually.</p><p>During refresh, metadata is cached locally at
+                        <code class="filename">/var/cache/zypp/raw</code> and converted to an efficient
+                    format for solving operations in <code class="filename">/var/cache/zypp/solv</code>. </p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-services"></a>Services</h4></div></div></div><p>Services are a higher-level version of repositories. It is another index that
+                    lists repositories. When the system is subscribed to a service, refreshing the
+                    service will result in a new list of repositories, and the package manager will
+                    add new ones or remove obsolete ones.</p><p>Services are used for example on SUSE Linux Enterprise with the SUSE Customer
+                    Center (SCC). A customer is subscribed to a service provided by SCC using proper
+                    credentials. The customer, based on his or her entitlements, can “activate” a
+                    new product. SUSE Customer Center knows about those activations, and on service
+                    refresh, it will provide a new list of repositories that includes the new
+                    activated product.</p><p>Services can be installed remote (like SCC), or locally, via a plug-in, on the
+                    system. The package manager asks the plug-in for a list of repositories. It is
+                    up to the plug-in to build this list. This is normally used for integration with
+                    other systems. For example, the connectivity between
+                        <span class="command"><strong>zypper</strong></span> and Spacewalk respective SUSE Manager (see
+                        <a class="link" href="https://www.suse.com/products/suse-manager/" target="_top">https://www.suse.com/products/suse-manager/</a> was
+                    originally implemented using a local plug-in.</p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-repo-sources"></a>Repository sources</h4></div></div></div><p>If you are using SUSE Linux Enterprise, your repositories will appear after
+                    the <span class="command"><strong>SUSEConnect</strong></span> tool registers your product against
+                    the SUSE Customer Center at <a class="link" href="https://scc.suse.com/login" target="_top">https://scc.suse.com/login</a>.</p><p>If you are using openSUSE, the default installation will set up the base and
+                    update the repositories. Additionally, there is a lot of content published by
+                    the community on the build service projects or via projects like
+                        <span class="command"><strong>packman</strong></span>packman (see <a class="link" href="http://packman.links2linux.org/" target="_top">http://packman.links2linux.org/</a>.</p><p>SUSE Linux Enterprise users can take advantage of the community content via
+                    the Package Hub at <a class="link" href="https://packagehub.suse.com/" target="_top">https://packagehub.suse.com/</a>.</p></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-pack-manager-operations"></a>Other Package Manager Operations</h3></div></div></div><p>You can use <span class="command"><strong>zypper lu</strong></span> to list updates, and <span class="command"><strong>zypper
+                    up</strong></span> to install them.</p><p>You can lock packages to avoid them being removed or pulled-in using
+                    <span class="command"><strong>zypper addlock</strong></span> or <span class="command"><strong> zypper removelock</strong></span>. You
+                can also list active locks with <span class="command"><strong>zypper locks</strong></span>.</p><p>The distribution upgrade operation <span class="command"><strong>dup</strong></span> is used to do
+                destructive upgrades. This means packages may be suggested for removal as
+                dependencies like <span class="command"><strong>Obsoletes</strong></span> are taken into account. It is usually
+                used to upgrade to major releases or to update rolling distributions like Tumbleweed
+                (see <a class="link" href="https://en.opensuse.org/Portal:Tumbleweed" target="_top">https://en.opensuse.org/Portal:Tumbleweed</a>. This command
+                needs to be used with care.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-other-solvable-types"></a>Other Solvable Types (Products, Patterns, System)</h3></div></div></div><p>The package manager solver loads all available and installed packages and cares
+                for solving the dependencies. However, there are other entities similar to packages
+                that also have dependencies.</p><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-patterns"></a>Patterns</h4></div></div></div><p>Patterns are used to install a collection of software in a comfortable way.
+                    For example you can install a working Laptop-oriented system with the
+                    command:</p><pre class="screen">$ zypper install -t pattern laptop</pre><p>But where do patterns come from? They do not exists on their own. The package
+                    managers creates them dynamically from packages named patterns-XXXXXX which have
+                    a special set of dependencies. Installing a pattern would actually install the
+                    package representing that pattern. The other way around is true, if you install
+                    the package representing the pattern, it will make the system look like the
+                    pattern is installed.</p><p>The command:</p><pre class="screen">$ zypper info --provides patterns-openSUSE-laptop</pre><p>reveals some detail behind patterns (equivalent to <span class="command"><strong>rpm -q --provides
+                        patterns-openSUSE-laptop</strong></span>).</p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-products"></a>Products</h4></div></div></div><p>Similar to patterns, products can be queried with:</p><pre class="screen">$ zypper search -t product</pre><p><span class="quote">“<span class="quote">Product</span>”</span> comes from a package called
+                        <span class="package">XXXXXX-release</span> which has some special dependencies
+                        (<span class="command"><strong>rpm -q --provides openSUSE-release</strong></span>). The release
+                    package/product installs some information in
+                        <code class="filename">/etc/products.d</code> that is used by other tools get
+                    information about the base and add-on products installed.</p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-patches"></a>Patches</h4></div></div></div><p>Patches are used for updates and described by the
+                        <code class="filename">updateinfo.xml</code> section of the metadata. They represent
+                    an entity that conflicts with older versions of one or more packages. Installing
+                    a patch does not install packages, but generates a conflict in the solver that
+                    ends with the affected version of packages being upgraded.</p><p>Patches also carry additional property, like the <span class="strong"><strong>CVE</strong></span> (see <a class="link" href="https://cve.mitre.org/" target="_top">https://cve.mitre.org/</a>identifiers
+                    of the issues they fix or links to bug tracker incidents.</p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-system"></a>System</h4></div></div></div><p>During solving, there is one entity providing dependencies that is used to
+                    match locale and hardware information. If you have a Wi-Fi card, the package
+                    manager will dynamically read <code class="filename">/sys/devices</code> and make this
+                    entity have provides like: </p><pre class="screen">Provides :modalias(pci:v0000104Cd0000840[01]sv*sd*bc*sc*i*)</pre><p>A package providing a Wi-Fi driver for some cards (for example,
+                        <span class="package">wlan-kmp-default</span>), could have the following
+                    dependencies:</p><pre class="screen">Supplements: modalias(kernel-default:pci:v0000104Cd0000840[01]sv*sd*bc*sc*i*)
+Supplements: modalias(kernel-default:pci:v0000104Cd00009066sv*sd*bc*sc*i*)
+Supplements: modalias(kernel-default:pci:v000010B7d00006000sv*sd*bc*sc*i*)</pre><p>This results in the fact that, at solving time, if the hardware is present,
+                    the driver will be selected automatically.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">SUSE SolidDriver Program</h3><p>This is one of the core features of the Kernel Module Packages (KMP)
+                        section of the SUSE SolidDriver Program (see <a class="link" href="https://drivers.suse.com/doc/SolidDriver/Kernel_Module_Packages.html" target="_top">https://drivers.suse.com/doc/SolidDriver/Kernel_Module_Packages.html</a>. For more information about the SUSE SolidDriver Program and about KMP's,
+                        check the article <span class="quote">“<span class="quote">Using SLES and the SLE SDK to Build a Kernel Module
+                            Package (KMP)</span>”</span> at <a class="link" href="https://www.suse.com/communities/blog/using-sles-and-the-sle-sdk-build-kernel-module-package-kmp/" target="_top">https://www.suse.com/communities/blog/using-sles-and-the-sle-sdk-build-kernel-module-package-kmp/</a>.</p></div><p>Something similar is done with translation packages and the current configured
+                    system locale.</p><div class="important" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">All Information Comes from the Installed Packages</h3><p>Be aware that all those types mentioned (Patterns, Products, System) are
+                        only present at solving time. Actually your system consists only of
+                        packages, and all information comes from the installed packages. Every
+                        operation on patches, patterns and products result in a package operation.
+                        The purpose behind is to make the package manager compatible with the lower
+                        level <span class="command"><strong>rpm</strong></span> tool.</p></div></div></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="index.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="sec-creating-packages.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Introduction to RPM Packaging </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Creating packages</td></tr></table></div></body></html>

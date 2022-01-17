@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Deployment in an Air-Gapped Environment </title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="SUSE Private Registry Powered by Harbor 2.1" /><link rel="up" href="index.html" title="SUSE Private Registry Powered by Harbor 2.1" /><link rel="prev" href="id-deployment-of-suse-private-registry.html" title="Deployment of SUSE Private Registry" /><link rel="next" href="troubleshooting.html" title="Troubleshooting" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Deployment in an Air-Gapped Environment </th></tr><tr><td width="20%" align="left"><a accesskey="p" href="id-deployment-of-suse-private-registry.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="troubleshooting.html">Next</a></td></tr></table><hr /></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id-deployment-in-an-air-gapped-environment"></a>Deployment in an Air-Gapped Environment </h2></div></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="id-introduction-2"></a>Introduction</h3></div></div></div><p>K3s is a lightweight Kubernetes distribution from Rancher that can be
+deployed on a single node. </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="id-use-cases"></a>Use Cases</h3></div></div></div><div class="variablelist"><dl class="variablelist"><dt><span class="term">Testing</span></dt><dd><p>The customer wants to test SUSE Private Registry Powered by Harbor 2.1, but they do not
+have a Kubernetes cluster prepared.</p></dd><dt><span class="term">Single-node setup</span></dt><dd><p>A production setup for customers that want to use SUSE Private Registry Powered by Harbor 2.1,
+but do not want to deploy CaaSP, Racher’s RKE or any other Kubernetes cluster.</p></dd><dt><span class="term">Air-gapped environments</span></dt><dd><p>K3s can be deployed without access to the Internet.
+With SUSE Private Registry Powered by Harbor 2.1 running on such a cluster, it could for example serve as an image
+registry for other Kubernetes clusters in the customer’s network.</p></dd></dl></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="id-requirements"></a>Requirements</h3></div></div></div><p>You should have Helm installed on the machine where you want to install k3s.</p><p>Make sure that you have enough disk space. Rancher does not mention any specific
+requirements for disk size, so prepare at least a few gigabytes. It is possible
+to put the <code class="literal">/var/lib/rancher</code> directory on any partition or disk where you know
+that you have enough space. In case space starts to run out, you might encounter
+<a class="link" href="https://github.com/rancher/k3s/issues/1552" target="_top">k3s issue #1552</a>.</p><p>Also check for the latest available <span class="emphasis"><em>stable</em></span> version of k3s by consulting the
+<a class="link" href="https://github.com/k3s-io/k3s/releases" target="_top">releases page</a>. We do not recommend
+running pre-release versions. If you encounter 404 errors trying to download
+packages from GitHub, this is probably due to the release of a newer version.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="id-deployment"></a>Deployment</h3></div></div></div><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>We recommend that you read
+<a class="link" href="https://rancher.com/docs/k3s/latest/en/installation/airgap/#manually-deploy-images-method" target="_top">the upstream guide</a>
+on deploying k3s into an air-gapped environment.</p></li><li class="listitem"><p>Before you begin, download all the packages for the installation.</p><div class="orderedlist"><ol class="orderedlist" type="a"><li class="listitem"><p>You will need to download three different files to install k3s.</p><div class="orderedlist"><ol class="orderedlist" type="i"><li class="listitem"><p>The k3s install script. You can fetch this with the command:</p><pre class="screen">curl https://get.k3s.io -o install.sh</pre></li><li class="listitem"><p>The k3s binary (called just <code class="literal">k3s</code>).</p></li><li class="listitem"><p>The bundle of images required for basic k3s air-gapped deployment and for
+some optional features (such as the Traefik ingress controller). This is called
+<code class="literal">k3s-airgap-images-amd64.tar</code>.</p><p>Fetch the latter two files from: <a class="link" href="https://github.com/k3s-io/k3s/releases/latest" target="_top">https://github.com/k3s-io/k3s/releases/latest</a></p></li></ol></div></li><li class="listitem"><p>Fetch the images required for the SUSE Private Registry:</p><pre class="screen">mkdir images
+for component in core nginx notary-server notary-signer trivy-adapter registryctl jobservice registry db redis; do
+ image="registry.suse.com/harbor/harbor-$component:2.1.2"; \
+ docker pull $image; docker save -o "images/harbor-$component-2.1.2.tar" $image; \
+done</pre></li><li class="listitem"><p>Transfer all the files onto the air-gapped machine where k3s will run, for
+example using a USB key.</p></li><li class="listitem"><p>On that machine, prepare the images and install the binary:</p><pre class="screen">sudo mkdir -p /var/lib/rancher/k3s/agent/images/
+sudo cp k3s-airgap-images-amd64.tar /var/lib/rancher/k3s/agent/images/
+sudo cp k3s /usr/local/bin/k3s
+sudo chown +x /usr/local/bin/k3s
+sudo chown +x /usr/local/bin/install.sh</pre></li><li class="listitem"><p>Install k3s.  It is not necessary to start the <code class="literal">systemd</code> service yet, if you
+want to watch the start process closely for the first time</p><pre class="screen">INSTALL_K3S_SKIP_ENABLE=true INSTALL_K3S_SKIP_DOWNLOAD=true ./install.sh</pre><div class="tip" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Tip</h3><p>The <code class="literal">INSTALL_K3S_SKIP_ENABLE</code> setting means that the <code class="literal">systemd</code> service for
+k3s will not be enabled and started, but you can ignore the value and actually
+use the service.</p></div></li><li class="listitem"><p>Install the images required for the SUSE Private Registry into the k3s images
+directory, so that the server can import them when it starts:</p><pre class="screen">sudo cp images/*.tar /var/lib/rancher/k3s/agent/images/</pre></li><li class="listitem"><p>Start the k3s server as root.</p><pre class="screen">su
+k3s server --write-kubeconfig-mode 644</pre><div class="tip" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Tip</h3><p>The additional option tells <code class="literal">k3s</code> to reset the permissions on
+<code class="literal">/etc/rancher/k3s/k3s.yaml</code> as it loads.</p></div><p>To see more information, you can to pass the <code class="literal">--debug</code> option to the command,
+but you will receive a <span class="strong"><strong>lot</strong></span> of information. Alternatively, you can start the
+corresponding <code class="literal">systemd</code> service:</p><pre class="screen">systemctl start k3s</pre></li><li class="listitem"><p>In another window, check the start-up process. The first time will be slow,
+as all the images must be imported. Check the current image list with:</p><pre class="screen">su
+k3s crictl images</pre><p>Use the usual <code class="literal">kubectl</code> command to check the state of initial deployment:</p><pre class="screen">su
+k3s kubectl get deployments</pre><p>The above command talks to the default Kubernetes instance. If you want to use
+your own <code class="literal">kubectl</code> file, point to the appropriate config file first:</p><pre class="screen">export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+kubectl get deployments</pre></li></ol></div></li><li class="listitem"><p>Prepare the Trivy offline database</p><p>Trivy is the security scanner installed with Harbor. By default, it
+downloads the vulnerability database from GitHub. However, it can also be
+deployed into the air-gapped environment. Refer to the
+<a class="link" href="https://github.com/aquasecurity/trivy/blob/master/docs/air-gap.md" target="_top">upstream guidelines</a>
+for such scenarios. Here, we cover the case where Trivy is deployed with Harbor
+using a Helm chart.</p><div class="orderedlist"><ol class="orderedlist" type="a"><li class="listitem"><p>First, on a machine with the internet access, download the offline
+database from <a class="link" href="https://github.com/aquasecurity/trivy-db/releases/" target="_top">https://github.com/aquasecurity/trivy-db/releases/</a>
+and move it to your air-gapped machine.</p></li><li class="listitem"><p>You must create a Persistent Volume where the database can be kept. For the
+purpose of this example, we will use the default <code class="literal">storageClass</code> that is set up
+for k3s, the one using the local-path provisioner. This allows us to map the
+Persistent Volume to a local directory on the host machine where the k3s node
+is running.</p></li><li class="listitem"><p>Example of Persistent Volume and persistentVolumeClaim definitions:</p><p><strong>pv-trivy.yaml. </strong>
+</p><pre class="screen">apiVersion: v1
+kind: PersistentVolume
+metadata:
+ finalizers:
+ - kubernetes.io/pv-protection
+ name: trivy-pv-volume
+spec:
+ accessModes:
+ - ReadWriteOnce
+ capacity:
+   storage: 2Gi
+ hostPath:
+   # local path on my machine
+   path: /data/trivy-pv
+   type: DirectoryOrCreate
+ persistentVolumeReclaimPolicy: Retain
+ storageClassName: local-path
+ volumeMode: Filesystem</pre><p>
+</p><p><strong>pvc-trivy.yaml. </strong>
+</p><pre class="screen">apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+ name: trivy-pvc
+ namespace: registry
+spec:
+ accessModes:
+ - ReadWriteOnce
+ storageClassName: local-path
+ resources:
+   requests:
+     storage: 2Gi
+ volumeName: trivy-pv-volume</pre><p>
+</p><p>Save these files as <code class="literal">pv-trivy.yaml</code> and <code class="literal">pvc-trivy.yaml</code>.</p></li><li class="listitem"><p>Create the directory <code class="literal">/data/trivy-pv</code> (see the value of <code class="literal">path</code> in the
+<code class="literal">pv-trivy.yaml</code> file). Unpack the downloaded Trivy database under the <code class="literal">trivy/db</code>
+subdirectory, and change the ownership of the whole directory to user and group
+10000:</p><pre class="screen">sudo mkdir -p /data/trivy-pv/trivy/db
+sudo tar -zxf trivy-offline.db.tgz -C /data/trivy-pv/trivy/db/
+sudo chown -R 10000:10000 /data/trivy-pv</pre></li></ol></div></li><li class="listitem"><p>Install SUSE Private Registry</p><div class="orderedlist"><ol class="orderedlist" type="a"><li class="listitem"><p>Now you can install SUSE Private Registry the usual way. Find out the
+external address provided by the default ingress controller:</p><pre class="screen">kubectl get services</pre></li><li class="listitem"><p>Use the IP number to provide correct values for the core components in the Helm
+chart and create, for example, <code class="literal">harbor-config-values.yaml</code>. Add the parts to
+mount the correct volume with the Trivy database.</p><p><strong>harbor-config-values.yaml. </strong>
+</p><pre class="screen">expose:
+ # Set the way how to expose the service. Default value is "ingress".
+ ingress:
+   hosts:
+     core: "&lt;ingress_url&gt;"
+externalURL: "https://&lt;ingress_url&gt;"
+trivy:
+ # do not download trivy DB from github:
+ skipUpdate: true
+# use existing trivy PVC (prepare offline DB there)
+persistence:
+ persistentVolumeClaim:
+   trivy:
+     existingClaim: "trivy-pvc"</pre><p>
+</p></li><li class="listitem"><p>Fetch the Helm chart and install Harbor into the new namespace.</p><pre class="screen">export HELM_EXPERIMENTAL_OCI=1
+helm chart pull registry.suse.com/harbor/harbor:1.5
+helm chart export registry.suse.com/harbor/harbor:1.5</pre></li><li class="listitem"><p>Do not forget to create Kubernetes objects for the Trivy database:</p><pre class="screen">kubectl create namespace registry
+kubectl apply -n pv-trivy.yaml
+kubectl apply -n pvc-trivy.yaml
+helm install -n negistry suse-registry ./harbor -f</pre><p> </p></li></ol></div></li></ol></div></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="id-deployment-of-suse-private-registry.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="troubleshooting.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Deployment of SUSE Private Registry </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Troubleshooting</td></tr></table></div></body></html>

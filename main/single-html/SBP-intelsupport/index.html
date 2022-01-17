@@ -1,0 +1,490 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>SUSE Linux Enterprise Server - Support for Intel Server Platforms</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><meta name="description" content="Customers often need to know in detail which versions of SUSE Linux Enterprise Server are supported by a specific Intel* microarchitecture. This article explains the background why there is no easy answer to that question, and what details are really important for customers to know about supported systems and where to find the correct information. Disclaimer: Documents published as part of the SUSE Best Practices series have been contributed voluntarily by SUSE employees and third parties. They are meant to serve as examples of how particular actions can be performed. They have been compiled with utmost attention to detail. However, this does not guarantee complete accuracy. SUSE cannot verify that actions described in these documents do what is claimed or whether actions described have unintended consequences. SUSE LLC, its affiliates, the authors, and the translators may not be held liable for possible errors or the consequences thereof." /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div xml:lang="en" class="article" lang="en"><div class="titlepage"><div><div><h1 class="title"><a id="art-intel-support"></a>SUSE Linux Enterprise Server - Support for Intel Server Platforms</h1></div><div><h3 class="subtitle"><em>YES Certified Products</em></h3></div><div><div class="author"><h3 class="author"><span class="firstname">Scott</span> <span class="surname">Bahling, Senior Technical Account Manager, SUSE </span></h3></div></div><div><div class="abstract"><p class="title"><strong>Abstract</strong></p><p>Customers often need to know in detail which versions of SUSE Linux Enterprise
+                Server are supported by a specific Intel* microarchitecture. This article explains
+                the background why there is no easy answer to that question, and what details are
+                really important for customers to know about supported systems and where to find the
+                correct information.</p><p>
+                <span class="strong"><strong>Disclaimer: </strong></span>
+                Documents published as part of the SUSE Best Practices series have been contributed voluntarily
+                by SUSE employees and third parties. They are meant to serve as examples of how particular
+                actions can be performed. They have been compiled with utmost attention to detail. However,
+                this does not guarantee complete accuracy. SUSE cannot verify that actions described in these
+                documents do what is claimed or whether actions described have unintended consequences.
+                SUSE LLC, its affiliates, the authors, and the translators may not be held liable for possible errors
+                or the consequences thereof.
+            </p></div></div></div><hr /></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="sect1"><a href="#sec-intel-support-background"> Background</a></span></dt><dt><span class="sect1"><a href="#id1337">The Question About Platform Support</a></span></dt><dt><span class="sect1"><a href="#id1338">Full System Validation Counts</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec-intel-support-cpus">CPUs</a></span></dt><dt><span class="sect2"><a href="#sec-intel-support-chipset">Basic I/O Chipset</a></span></dt><dt><span class="sect2"><a href="#sec-intel-support-adapters">Network and Storage Adapters</a></span></dt><dt><span class="sect2"><a href="#sec-intel-support-firmware">System Firmware</a></span></dt><dt><span class="sect2"><a href="#sec-intel-support-summary">Summary</a></span></dt></dl></dd><dt><span class="sect1"><a href="#sec-intel-support-cpufeatures"> New CPU Features</a></span></dt><dt><span class="sect1"><a href="#id1339">YES Certification</a></span></dt><dt><span class="sect1"><a href="#id1340">Legal notice</a></span></dt><dt><span class="sect1"><a href="#id1341">GNU Free Documentation License</a></span></dt></dl></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-intel-support-background"></a> Background</h2></div></div></div><p>The purpose of this article is to answer one of the most often asked and seemingly
+            simple question. But even if the question seems to be simple, there is no simple answer
+            to it. For the sake of illustration actual customer questions about a specific Intel
+            code named “Haswell” (the Intel E7-4800 v3 CPU), as well as a comparison to some IHV
+            implementations (HP* x240 and IBM* 3520 servers) are used in the document at hand. The
+            concepts presented here however apply to just about every standard Intel server
+            platform, and in principle they apply to desktop and mobile platforms as well. </p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id1337"></a>The Question About Platform Support</h2></div></div></div><p>Among the most frequently asked customer questions regarding SUSE Linux Enterprise
+            Server are question about general platform support. For the purpose of the document at
+            hand, we formulate them as follows:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Question 1: Which SUSE Linux Enterprise Server releases support Haswell CPUs
+                    and chipsets?</p></li><li class="listitem"><p>Question 2: We see that that HP x240 and IBM x3520 servers utilizing Haswell
+                    chipsets have been YES certified. Does this mean that the Intel E7-4800 v3 CPU
+                    is also supported?</p></li></ul></div><p>The short answer to these question is: SUSE supports what is YES Certified. Anything
+            else should be considered unknown. But looking under the surface, the answer is much
+            more complex:</p><p>Haswell is <span class="strong"><strong>not</strong></span> a chipset or a CPU. It is a
+            microarchitecture design behind a range of CPUs used in lightweight, low power mobile
+            platforms up to highly scalable server systems. The first CPUs and platforms under this
+            microarchitecture were released in 2013. Until 2015, a huge number of CPUs had been
+            added. They can be (and unfortunately are) all referred to as <span class="quote">“<span class="quote">Haswell</span>”</span>
+            platforms even if they differ in their design and operating system support.</p><p>Since Haswell (and every other Xeon* CPU released by Intel) is backward compatible
+            from an instruction set standpoint, theoretically it and other new Intel CPUs can run
+            every previous version of SUSE Linux Enterprise Server. This means that, at from a
+            technical or CPU perspective, Haswell can run on SUSE Linux Enterprise Server 12 and any
+            older version of it. But, customers do not use CPUs alone; they use complete systems.
+            These systems are comprised of other components besides the CPU. Of all these
+            components, the CPU itself normally has the least impact on the operating system
+            support. In consequence, a statement about Haswell support, or even a specific Intel CPU
+            version does not provide valuable information to the customer wanting to know which
+            server <span class="strong"><strong>systems</strong></span> are supported with which operating
+            system version.</p><p>SUSE only provides support for complete systems that have been validated by SUSE or
+            the hardware vendors for use with the particular version of SUSE Linux Enterprise
+            server. [^2] </p><p>When a system has been validated as supported for a given major release of SUSE Linux
+            Enterprise Server and its Service Packs, it is considered supported for the subsequent
+            service packs of that major release. With new major releases currently the hardware must
+            be re-validated for supportability. However SUSE strives to make sure recent hardware
+            that is supported on previous releases will also be supported on new major releases. It
+            is possible that very old hardware will be <span class="quote">“<span class="quote">dropped</span>”</span> from support with very
+            new major versions of SUSE Linux Enterprise Server.</p><p>In addition, SUSE avoids to make generalized support statements for CPU or CPU
+            micro-architectures (for example <span class="quote">“<span class="quote">Haswell</span>”</span>) to end users. SUSE includes
+            some statements about CPU support in the SUSE Linux Enterprise Server release notes.
+            However, these statements are based on new CPUs that were used during development and
+            testing of the new SUSE release and are not meant to indicate supportability of any
+            particular hardware system. </p><p>The following sections will provide more details about the reasons why SUSE only
+            supports validated systems.</p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id1338"></a>Full System Validation Counts</h2></div></div></div><p>Systems are made up of CPUs, basic I/O <span class="quote">“<span class="quote">chipsets</span>”</span>, Network and storage
+            controllers and Firmware. To determine if a system is supported requires that the
+            complete system is tested for compatibility. The components that typically affect
+            supportability in SUSE Linux Enterprise Server releases are briefly described in the
+            following sections.</p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-intel-support-cpus"></a>CPUs</h3></div></div></div><p>Intel CPUs are basically compatible with all versions of SUSE Linux
+                Enterprise Server. They will execute x86 or x86_64 based code in a compatible way
+                and therefore run our software. This is a theoretical statement. In practice the
+                other components that make up the complete system utilizing a CPU are usually the
+                determining factors that dictate which version of the operating system is required
+                for support and that make the use of older operating system versions with newer CPUs
+                challenging.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-intel-support-chipset"></a>Basic I/O Chipset</h3></div></div></div><p>Most people refer to the basic I/O chipset or Platform Controller Hub (PCH) for
+                Intel based systems as the <span class="quote">“<span class="quote">chipset</span>”</span>, or in our case for the document
+                at hand the <span class="quote">“<span class="quote">Haswell chipset</span>”</span>. These chipsets may require updates to the
+                kernel or other operating system subsystems for proper support. In the HP and IBM
+                examples given, these are two different chipsets: HP x240 utilizing Intel C610, IBM
+                x3250 utilizing Intel C226. Because the two systems make use of two different
+                chipsets, knowing that the HP system is supported does not allow for any statement
+                about the support status of the IBM system. </p><p>In addition, the E7-4800 v3 CPUs from the example above and referenced in the
+                query most likely use yet a different chipset. Again, knowing the status of the HP
+                and IBM systems does not help to determine if the systems the customer is interested
+                in (and which are not specified) are also supported.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-intel-support-adapters"></a>Network and Storage Adapters</h3></div></div></div><p>Looking at the network and storage adapters, here is where real divergence begins.
+                Regardless of the CPU microarchitecture used, each system vendor is free to pick and
+                choose different network and storage adapters for their systems. Even individual
+                systems within a microarchitecture family will have different controller options.
+                Support for these controllers is dependent on service pack levels and/or driver
+                updates.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-intel-support-firmware"></a>System Firmware</h3></div></div></div><p>Last but not least, the system firmware plays an important role in the
+                compatibility of SUSE Linux Enterprise Server with hardware. It can make a
+                difference between a system booting or not. </p><p>Firmware implementation is often required for certain CPU or platform features to
+                function. Vendors can choose to disable or otherwise <span class="quote">“<span class="quote">control</span>”</span> platform
+                features via system firmware. Therefore it is not possible to make a statement about
+                supportability of any platform or its features without testing and validating that
+                platform with its particular firmware implementation.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-intel-support-summary"></a>Summary</h3></div></div></div><p>To claim supportability of a product (for example a particular vendors server
+                model) that the customer will use requires testing and validating all parts of the
+                product - not just the CPU. Support statements around particular CPUs or CPU
+                microarchitectures do not help to determine if any specific server product is
+                supported. </p><p> Therefore SUSE only makes support statements around individual, validated
+                systems. We do that via YES certifications.</p></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-intel-support-cpufeatures"></a> New CPU Features</h2></div></div></div><p>There is another dimension that does not allow for statements about the supportability
+            of microarchitectures such as <span class="quote">“<span class="quote">Haswell</span>”</span> in general or specific CPUs like
+            E7-4800 v3. New CPUs, while backward compatible, also bring new features. These new
+            features usually do not affect operating system operation or support, but might provide
+            added value that the customer is interested in leveraging. </p><p>Such new features might require updates to the operating system to function properly.
+            The list of CPU features is long and SUSE currently does not maintain a comprehensive
+            matrix of all features supported. Again, even those features may depend on system vendor
+            implementation (firmware can disable such features). If customers are interested in the
+            support for a specific CPU feature, they should ask SUSE or the hardware vendor about
+            the specific requirement for the definitive answer. In some cases SUSE will need to work
+            together with Intel and the system manufacturer to validate the support of any specific
+            CPU feature.</p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id1339"></a>YES Certification</h2></div></div></div><p> Information technology is a critical asset for any business and deploying compatible
+            and supported hardware protects and enhances your valuable information technology
+            assets. For hardware, SUSE works closely with companies testing products through the YES
+            Certified program. </p><p>The two main goals of the YES Certified Program are:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Help customers easily identify and purchase hardware solutions that have
+                        been tested for compatibility and are supported in a SUSE environment.
+                    </p></li><li class="listitem"><p>Help Hardware Vendors deliver and market solutions that work well and are
+                        easily supported in a SUSE environment. </p></li></ul></div><p>YES Certified is for hardware applications. Because these products interact directly
+            with an operating system, SUSE has developed rigorous compatibility tests to ensure very
+            high levels of compatibility between hardware and the operating system. Hardware Vendors
+            participating in the YES Certified program agree to a close relationship with SUSE for
+            delivering support to customers. In addition, YES Certified configurations are
+            documented and published as official YES Certified bulletins on the SUSE web
+            site.</p><p> If you call SUSE for end-user or system integrator support and your network
+            incorporates YES Certified products, SUSE technicians can reference existing support
+            documentation such as YES Certified bulletins and Technical Information Documents. If
+            the error persists, technicians can duplicate the situation in a SUSE lab or work with
+            the product vendor, leveraging the relationship that was developed during the testing
+            process, to resolve the problem. In short, YES Certified is the first line of hardware
+            interoperability assurance for SUSE customers.</p><p>To find out if the system you chose for your IT environment is YES Certified and
+            supported, you can look up the YES Certified search at <a class="link" href="https://www.suse.com/yessearch/Search.jsp" target="_top">https://www.suse.com/yessearch/Search.jsp</a> For more information about
+            the YES Certified Program, see the YES Certified Frequently Asked Questions at <a class="link" href="https://www.suse.com/partners/ihv/yes/frequently-asked-questions" target="_top">https://www.suse.com/partners/ihv/yes/frequently-asked-questions</a>.</p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id1340"></a>Legal notice</h2></div></div></div><p> Copyright ©2006-2021 SUSE LLC and contributors. All rights reserved. </p><p> Permission is granted to copy, distribute and/or modify this document under the terms of the
+  GNU Free Documentation License, Version 1.2 or (at your option) version 1.3; with the Invariant
+  Section being this copyright notice and license. A copy of the license version 1.2 is included in
+  the section entitled <span class="quote">“<span class="quote">GNU Free Documentation License</span>”</span>. </p><p> SUSE, the SUSE logo and YaST are registered trademarks of SUSE LLC in the United States and
+  other countries. For SUSE trademarks, see <a class="link" href="http://www.suse.com/company/legal/" target="_top">http://www.suse.com/company/legal/</a>. Linux is a registered trademark of Linus Torvalds.
+  All other names or trademarks mentioned in this document may be trademarks or registered
+  trademarks of their respective owners. </p><p> Documents published as part of the <span class="strong"><strong>SUSE Best Practices</strong></span>
+  series have been contributed voluntarily by SUSE employees and third parties. They are meant to
+  serve as examples of how particular actions can be performed. They have been compiled with utmost
+  attention to detail. However, this does not guarantee complete accuracy. SUSE cannot verify that
+  actions described in these documents do what is claimed or whether actions described have
+  unintended consequences. SUSE LLC, its affiliates, the authors, and the translators may not be held
+  liable for possible errors or the consequences thereof.</p><p> Below we draw your attention to the license under which the articles are published.</p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id1341"></a>GNU Free Documentation License</h2></div></div></div><p>
+  Copyright (C) 2000, 2001, 2002 Free Software Foundation, Inc. 51 Franklin St,
+  Fifth Floor, Boston, MA 02110-1301 USA. Everyone is permitted to copy and
+  distribute verbatim copies of this license document, but changing it is not
+  allowed.
+ </p><h5><a id="id1342"></a> 0. PREAMBLE </h5><p>
+  The purpose of this License is to make a manual, textbook, or other
+  functional and useful document "free" in the sense of freedom: to assure
+  everyone the effective freedom to copy and redistribute it, with or without
+  modifying it, either commercially or non-commercially. Secondarily, this
+  License preserves for the author and publisher a way to get credit for their
+  work, while not being considered responsible for modifications made by
+  others.
+ </p><p>
+  This License is a kind of "copyleft", which means that derivative works of
+  the document must themselves be free in the same sense. It complements the
+  GNU General Public License, which is a copyleft license designed for free
+  software.
+ </p><p>
+  We have designed this License to use it for manuals for free software,
+  because free software needs free documentation: a free program should come
+  with manuals providing the same freedoms that the software does. But this
+  License is not limited to software manuals; it can be used for any textual
+  work, regardless of subject matter or whether it is published as a printed
+  book. We recommend this License principally for works whose purpose is
+  instruction or reference.
+ </p><h5><a id="id1343"></a> 1. APPLICABILITY AND DEFINITIONS </h5><p>
+  This License applies to any manual or other work, in any medium, that
+  contains a notice placed by the copyright holder saying it can be distributed
+  under the terms of this License. Such a notice grants a world-wide,
+  royalty-free license, unlimited in duration, to use that work under the
+  conditions stated herein. The "Document", below, refers to any such manual or
+  work. Any member of the public is a licensee, and is addressed as "you". You
+  accept the license if you copy, modify or distribute the work in a way
+  requiring permission under copyright law.
+ </p><p>
+  A "Modified Version" of the Document means any work containing the Document
+  or a portion of it, either copied verbatim, or with modifications and/or
+  translated into another language.
+ </p><p>
+  A "Secondary Section" is a named appendix or a front-matter section of the
+  Document that deals exclusively with the relationship of the publishers or
+  authors of the Document to the Document's overall subject (or to related
+  matters) and contains nothing that could fall directly within that overall
+  subject. (Thus, if the Document is in part a textbook of mathematics, a
+  Secondary Section may not explain any mathematics.) The relationship could be
+  a matter of historical connection with the subject or with related matters,
+  or of legal, commercial, philosophical, ethical or political position
+  regarding them.
+ </p><p>
+  The "Invariant Sections" are certain Secondary Sections whose titles are
+  designated, as being those of Invariant Sections, in the notice that says
+  that the Document is released under this License. If a section does not fit
+  the above definition of Secondary then it is not allowed to be designated as
+  Invariant. The Document may contain zero Invariant Sections. If the Document
+  does not identify any Invariant Sections then there are none.
+ </p><p>
+  The "Cover Texts" are certain short passages of text that are listed, as
+  Front-Cover Texts or Back-Cover Texts, in the notice that says that the
+  Document is released under this License. A Front-Cover Text may be at most 5
+  words, and a Back-Cover Text may be at most 25 words.
+ </p><p>
+  A "Transparent" copy of the Document means a machine-readable copy,
+  represented in a format whose specification is available to the general
+  public, that is suitable for revising the document straightforwardly with
+  generic text editors or (for images composed of pixels) generic paint
+  programs or (for drawings) some widely available drawing editor, and that is
+  suitable for input to text formatters or for automatic translation to a
+  variety of formats suitable for input to text formatters. A copy made in an
+  otherwise Transparent file format whose markup, or absence of markup, has
+  been arranged to thwart or discourage subsequent modification by readers is
+  not Transparent. An image format is not Transparent if used for any
+  substantial amount of text. A copy that is not "Transparent" is called
+  "Opaque".
+ </p><p>
+  Examples of suitable formats for Transparent copies include plain ASCII
+  without markup, Texinfo input format, LaTeX input format, SGML or XML using a
+  publicly available DTD, and standard-conforming simple HTML, PostScript or
+  PDF designed for human modification. Examples of transparent image formats
+  include PNG, XCF and JPG. Opaque formats include proprietary formats that can
+  be read and edited only by proprietary word processors, SGML or XML for which
+  the DTD and/or processing tools are not generally available, and the
+  machine-generated HTML, PostScript or PDF produced by some word processors
+  for output purposes only.
+ </p><p>
+  The "Title Page" means, for a printed book, the title page itself, plus such
+  following pages as are needed to hold, legibly, the material this License
+  requires to appear in the title page. For works in formats which do not have
+  any title page as such, "Title Page" means the text near the most prominent
+  appearance of the work's title, preceding the beginning of the body of the
+  text.
+ </p><p>
+  A section "Entitled XYZ" means a named subunit of the Document whose title
+  either is precisely XYZ or contains XYZ in parentheses following text that
+  translates XYZ in another language. (Here XYZ stands for a specific section
+  name mentioned below, such as "Acknowledgements", "Dedications",
+  "Endorsements", or "History".) To "Preserve the Title" of such a section when
+  you modify the Document means that it remains a section "Entitled XYZ"
+  according to this definition.
+ </p><p>
+  The Document may include Warranty Disclaimers next to the notice which states
+  that this License applies to the Document. These Warranty Disclaimers are
+  considered to be included by reference in this License, but only as regards
+  disclaiming warranties: any other implication that these Warranty Disclaimers
+  may have is void and has no effect on the meaning of this License.
+ </p><h5><a id="id1344"></a> 2. VERBATIM COPYING </h5><p>
+  You may copy and distribute the Document in any medium, either commercially
+  or noncommercially, provided that this License, the copyright notices, and
+  the license notice saying this License applies to the Document are reproduced
+  in all copies, and that you add no other conditions whatsoever to those of
+  this License. You may not use technical measures to obstruct or control the
+  reading or further copying of the copies you make or distribute. However, you
+  may accept compensation in exchange for copies. If you distribute a large
+  enough number of copies you must also follow the conditions in section 3.
+ </p><p>
+  You may also lend copies, under the same conditions stated above, and you may
+  publicly display copies.
+ </p><h5><a id="id1345"></a> 3. COPYING IN QUANTITY </h5><p>
+  If you publish printed copies (or copies in media that commonly have printed
+  covers) of the Document, numbering more than 100, and the Document's license
+  notice requires Cover Texts, you must enclose the copies in covers that
+  carry, clearly and legibly, all these Cover Texts: Front-Cover Texts on the
+  front cover, and Back-Cover Texts on the back cover. Both covers must also
+  clearly and legibly identify you as the publisher of these copies. The front
+  cover must present the full title with all words of the title equally
+  prominent and visible. You may add other material on the covers in addition.
+  Copying with changes limited to the covers, as long as they preserve the
+  title of the Document and satisfy these conditions, can be treated as
+  verbatim copying in other respects.
+ </p><p>
+  If the required texts for either cover are too voluminous to fit legibly, you
+  should put the first ones listed (as many as fit reasonably) on the actual
+  cover, and continue the rest onto adjacent pages.
+ </p><p>
+  If you publish or distribute Opaque copies of the Document numbering more
+  than 100, you must either include a machine-readable Transparent copy along
+  with each Opaque copy, or state in or with each Opaque copy a
+  computer-network location from which the general network-using public has
+  access to download using public-standard network protocols a complete
+  Transparent copy of the Document, free of added material. If you use the
+  latter option, you must take reasonably prudent steps, when you begin
+  distribution of Opaque copies in quantity, to ensure that this Transparent
+  copy will remain thus accessible at the stated location until at least one
+  year after the last time you distribute an Opaque copy (directly or through
+  your agents or retailers) of that edition to the public.
+ </p><p>
+  It is requested, but not required, that you contact the authors of the
+  Document well before redistributing any large number of copies, to give them
+  a chance to provide you with an updated version of the Document.
+ </p><h5><a id="id1346"></a> 4. MODIFICATIONS </h5><p>
+  You may copy and distribute a Modified Version of the Document under the
+  conditions of sections 2 and 3 above, provided that you release the Modified
+  Version under precisely this License, with the Modified Version filling the
+  role of the Document, thus licensing distribution and modification of the
+  Modified Version to whoever possesses a copy of it. In addition, you must do
+  these things in the Modified Version:
+ </p><div class="orderedlist"><ol class="orderedlist" type="A"><li class="listitem"><p>
+    Use in the Title Page (and on the covers, if any) a title distinct from
+    that of the Document, and from those of previous versions (which should, if
+    there were any, be listed in the History section of the Document). You may
+    use the same title as a previous version if the original publisher of that
+    version gives permission.
+   </p></li><li class="listitem"><p>
+    List on the Title Page, as authors, one or more persons or entities
+    responsible for authorship of the modifications in the Modified Version,
+    together with at least five of the principal authors of the Document (all
+    of its principal authors, if it has fewer than five), unless they release
+    you from this requirement.
+   </p></li><li class="listitem"><p>
+    State on the Title page the name of the publisher of the Modified Version,
+    as the publisher.
+   </p></li><li class="listitem"><p>
+    Preserve all the copyright notices of the Document.
+   </p></li><li class="listitem"><p>
+    Add an appropriate copyright notice for your modifications adjacent to the
+    other copyright notices.
+   </p></li><li class="listitem"><p>
+    Include, immediately after the copyright notices, a license notice giving
+    the public permission to use the Modified Version under the terms of this
+    License, in the form shown in the Addendum below.
+   </p></li><li class="listitem"><p>
+    Preserve in that license notice the full lists of Invariant Sections and
+    required Cover Texts given in the Document's license notice.
+   </p></li><li class="listitem"><p>
+    Include an unaltered copy of this License.
+   </p></li><li class="listitem"><p>
+    Preserve the section Entitled "History", Preserve its Title, and add to it
+    an item stating at least the title, year, new authors, and publisher of the
+    Modified Version as given on the Title Page. If there is no section
+    Entitled "History" in the Document, create one stating the title, year,
+    authors, and publisher of the Document as given on its Title Page, then add
+    an item describing the Modified Version as stated in the previous sentence.
+   </p></li><li class="listitem"><p>
+    Preserve the network location, if any, given in the Document for public
+    access to a Transparent copy of the Document, and likewise the network
+    locations given in the Document for previous versions it was based on.
+    These may be placed in the "History" section. You may omit a network
+    location for a work that was published at least four years before the
+    Document itself, or if the original publisher of the version it refers to
+    gives permission.
+   </p></li><li class="listitem"><p>
+    For any section Entitled "Acknowledgements" or "Dedications", Preserve the
+    Title of the section, and preserve in the section all the substance and
+    tone of each of the contributor acknowledgements and/or dedications given
+    therein.
+   </p></li><li class="listitem"><p>
+    Preserve all the Invariant Sections of the Document, unaltered in their
+    text and in their titles. Section numbers or the equivalent are not
+    considered part of the section titles.
+   </p></li><li class="listitem"><p>
+    Delete any section Entitled "Endorsements". Such a section may not be
+    included in the Modified Version.
+   </p></li><li class="listitem"><p>
+    Do not retitle any existing section to be Entitled "Endorsements" or to
+    conflict in title with any Invariant Section.
+   </p></li><li class="listitem"><p>
+    Preserve any Warranty Disclaimers.
+   </p></li></ol></div><p>
+  If the Modified Version includes new front-matter sections or appendices that
+  qualify as Secondary Sections and contain no material copied from the
+  Document, you may at your option designate some or all of these sections as
+  invariant. To do this, add their titles to the list of Invariant Sections in
+  the Modified Version's license notice. These titles must be distinct from any
+  other section titles.
+ </p><p>
+  You may add a section Entitled "Endorsements", provided it contains nothing
+  but endorsements of your Modified Version by various parties--for example,
+  statements of peer review or that the text has been approved by an
+  organization as the authoritative definition of a standard.
+ </p><p>
+  You may add a passage of up to five words as a Front-Cover Text, and a
+  passage of up to 25 words as a Back-Cover Text, to the end of the list of
+  Cover Texts in the Modified Version. Only one passage of Front-Cover Text and
+  one of Back-Cover Text may be added by (or through arrangements made by) any
+  one entity. If the Document already includes a cover text for the same cover,
+  previously added by you or by arrangement made by the same entity you are
+  acting on behalf of, you may not add another; but you may replace the old
+  one, on explicit permission from the previous publisher that added the old
+  one.
+ </p><p>
+  The author(s) and publisher(s) of the Document do not by this License give
+  permission to use their names for publicity for or to assert or imply
+  endorsement of any Modified Version.
+ </p><h5><a id="id1347"></a> 5. COMBINING DOCUMENTS </h5><p>
+  You may combine the Document with other documents released under this
+  License, under the terms defined in section 4 above for modified versions,
+  provided that you include in the combination all of the Invariant Sections of
+  all of the original documents, unmodified, and list them all as Invariant
+  Sections of your combined work in its license notice, and that you preserve
+  all their Warranty Disclaimers.
+ </p><p>
+  The combined work need only contain one copy of this License, and multiple
+  identical Invariant Sections may be replaced with a single copy. If there are
+  multiple Invariant Sections with the same name but different contents, make
+  the title of each such section unique by adding at the end of it, in
+  parentheses, the name of the original author or publisher of that section if
+  known, or else a unique number. Make the same adjustment to the section
+  titles in the list of Invariant Sections in the license notice of the
+  combined work.
+ </p><p>
+  In the combination, you must combine any sections Entitled "History" in the
+  various original documents, forming one section Entitled "History"; likewise
+  combine any sections Entitled "Acknowledgements", and any sections Entitled
+  "Dedications". You must delete all sections Entitled "Endorsements".
+ </p><h5><a id="id1348"></a> 6. COLLECTIONS OF DOCUMENTS </h5><p>
+  You may make a collection consisting of the Document and other documents
+  released under this License, and replace the individual copies of this
+  License in the various documents with a single copy that is included in the
+  collection, provided that you follow the rules of this License for verbatim
+  copying of each of the documents in all other respects.
+ </p><p>
+  You may extract a single document from such a collection, and distribute it
+  individually under this License, provided you insert a copy of this License
+  into the extracted document, and follow this License in all other respects
+  regarding verbatim copying of that document.
+ </p><h5><a id="id1349"></a> 7. AGGREGATION WITH INDEPENDENT WORKS </h5><p>
+  A compilation of the Document or its derivatives with other separate and
+  independent documents or works, in or on a volume of a storage or
+  distribution medium, is called an "aggregate" if the copyright resulting from
+  the compilation is not used to limit the legal rights of the compilation's
+  users beyond what the individual works permit. When the Document is included
+  in an aggregate, this License does not apply to the other works in the
+  aggregate which are not themselves derivative works of the Document.
+ </p><p>
+  If the Cover Text requirement of section 3 is applicable to these copies of
+  the Document, then if the Document is less than one half of the entire
+  aggregate, the Document's Cover Texts may be placed on covers that bracket
+  the Document within the aggregate, or the electronic equivalent of covers if
+  the Document is in electronic form. Otherwise they must appear on printed
+  covers that bracket the whole aggregate.
+ </p><h5><a id="id1350"></a> 8. TRANSLATION </h5><p>
+  Translation is considered a kind of modification, so you may distribute
+  translations of the Document under the terms of section 4. Replacing
+  Invariant Sections with translations requires special permission from their
+  copyright holders, but you may include translations of some or all Invariant
+  Sections in addition to the original versions of these Invariant Sections.
+  You may include a translation of this License, and all the license notices in
+  the Document, and any Warranty Disclaimers, provided that you also include
+  the original English version of this License and the original versions of
+  those notices and disclaimers. In case of a disagreement between the
+  translation and the original version of this License or a notice or
+  disclaimer, the original version will prevail.
+ </p><p>
+  If a section in the Document is Entitled "Acknowledgements", "Dedications",
+  or "History", the requirement (section 4) to Preserve its Title (section 1)
+  will typically require changing the actual title.
+ </p><h5><a id="id1351"></a> 9. TERMINATION </h5><p>
+  You may not copy, modify, sublicense, or distribute the Document except as
+  expressly provided for under this License. Any other attempt to copy, modify,
+  sublicense or distribute the Document is void, and will automatically
+  terminate your rights under this License. However, parties who have received
+  copies, or rights, from you under this License will not have their licenses
+  terminated so long as such parties remain in full compliance.
+ </p><h5><a id="id1352"></a> 10. FUTURE REVISIONS OF THIS LICENSE </h5><p>
+  The Free Software Foundation may publish new, revised versions of the GNU
+  Free Documentation License from time to time. Such new versions will be
+  similar in spirit to the present version, but may differ in detail to address
+  new problems or concerns. See
+  <a class="link" href="http://www.gnu.org/copyleft/" target="_top">http://www.gnu.org/copyleft/</a>.
+ </p><p>
+  Each version of the License is given a distinguishing version number. If the
+  Document specifies that a particular numbered version of this License "or any
+  later version" applies to it, you have the option of following the terms and
+  conditions either of that specified version or of any later version that has
+  been published (not as a draft) by the Free Software Foundation. If the
+  Document does not specify a version number of this License, you may choose
+  any version ever published (not as a draft) by the Free Software Foundation.
+ </p><h5><a id="id1353"></a> ADDENDUM: How to use this License for your
+  documents </h5><pre class="screen">Copyright (c) YEAR YOUR NAME.
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.2
+or any later version published by the Free Software Foundation;
+with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
+A copy of the license is included in the section entitled "GNU
+ Free Documentation License".</pre><p>
+  If you have Invariant Sections, Front-Cover Texts and Back-Cover Texts,
+  replace the "with...Texts". line with this:
+ </p><pre class="screen">with the Invariant Sections being LIST THEIR TITLES, with the
+Front-Cover Texts being LIST, and with the Back-Cover Texts being LIST.</pre><p>
+  If you have Invariant Sections without Cover Texts, or some other combination
+  of the three, merge those two alternatives to suit the situation.
+ </p><p>
+  If your document contains nontrivial examples of program code, we recommend
+  releasing these examples in parallel under your choice of free software
+  license, such as the GNU General Public License, to permit their use in free
+  software.
+ </p></div></div></body></html>

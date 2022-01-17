@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Hypervisor</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="SUSE Best Practices for SAP HANA on KVM" /><link rel="up" href="index.html" title="SUSE Best Practices for SAP HANA on KVM" /><link rel="prev" href="sec-supported-scenarios-prerequisites.html" title="Supported Scenarios and Prerequisites" /><link rel="next" href="sec-Guest-VM-XML-Configuration.html" title="Guest VM XML Configuration" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Hypervisor</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="sec-supported-scenarios-prerequisites.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="sec-Guest-VM-XML-Configuration.html">Next</a></td></tr></table><hr /></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-hypervisor"></a>Hypervisor</h2></div></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-kvm-hypervisor-installation"></a>KVM Hypervisor Installation</h3></div></div></div><p>For details refer to Section 6.4 Installation of Virtualization Components of the SUSE
+        Virtualization Guide (<a class="link" href="https://documentation.suse.com/sles/12-SP4/html/SLES-all/cha-vt-installation.html#sec-vt-installation-patterns" target="_top">https://documentation.suse.com/sles/12-SP4/html/SLES-all/cha-vt-installation.html#sec-vt-installation-patterns</a>)</p><p>Install the KVM packages using the following Zypper patterns:</p><pre class="screen">zypper in -t pattern kvm_server kvm_tools</pre><p>In addition, it is also useful to install the <span class="quote">“<span class="quote">lstopo</span>”</span> tool which is part
+        of the <span class="quote">“<span class="quote">hwloc</span>”</span> package contained inside the <span class="quote">“<span class="quote">HPC Module</span>”</span> for SUSE
+        Linux Enterprise Server.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-configure-networking-on-hypervisor"></a>Configure Networking on Hypervisor</h3></div></div></div><p>To achieve maximum performance required for productive SAP HANA workloads the PCI
+        address of the respective network port(s) must be assigned directly into the KVM Guest VM to
+        ensure that the Guest VM has enough network device channels to accommodate the network
+        traffic. Ideally the VM Guest should be able to access the same number of network device
+        channels as the host, this can be checked and compared between host and guest VM with
+          <span class="command"><strong>ethtool -l &lt;device&gt;</strong></span>, for example:</p><pre class="screen"># ethtool -l eth1
+Channel parameters for eth1:
+Pre-set maximums:
+RX:             0
+TX:             0
+Other:          1
+Combined:       63
+Current hardware settings:
+RX:             0
+TX:             0
+Other:          1
+Combined:       63</pre><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-assign-network-port-at-pci-nic-level"></a>Assign Network Port at PCI NIC Level</h4></div></div></div><p>The required network port(s) should be assigned to the Guest VM as described in
+          section <span class="quote">“<span class="quote">14.10.2 Adding a PCI Device with virsh</span>”</span> in the SUSE Virtualization
+          Guide for SUSE Linux Enterprise Server 12 SP2(<a class="link" href="https://documentation.suse.com/sles/12-SP2/" target="_top">https://documentation.suse.com/sles/12-SP2/</a>)</p><p><strong>Persist detach of PCI NIC port. </strong>Before starting the VM, the PCI NIC port must be detached from the Hypervisor OS,
+            otherwise the VM will not start. The PCI NIC detach can be automated at boot time by
+            creating a service file (after-local.service) pointing to /etc/init.d/after.local which
+            contains the commands to detach the NIC.</p><p>Create the systemd unit file /etc/systemd/system/after.local.</p><pre class="screen">[Unit]
+Description=/etc/init.d/after.local Compatibility
+After=libvirtd.service
+Requires=libvirtd.service
+[Service]
+Type=oneshot
+ExecStart=/etc/init.d/after.local
+RemainAfterExit=true
+
+[Install]
+WantedBy=multi-user.target</pre><p>Then create the script /etc/init.d/after.local which will detach the PCI device (where
+            <span class="quote">“<span class="quote">pci_xxxx_xx_xx_0</span>”</span> must be replaced with the correct PCI address).</p><pre class="screen">#! /bin/sh
+#
+# Copyright (c) 2010 SuSE LINUX Products GmbH, Germany.  All rights reserved.
+# ...
+virsh nodedev-detach pci_xxxx_xx_xx_0</pre></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-storage-hypervisor"></a>Storage Configuration on Hypervisor</h3></div></div></div><p>As with compute resources, the storage used for running SAP HANA must also be SAP
+        certified. Therefore only the storage from SAP HANA Appliances or SAP HANA Certified
+        Enterprise Storage (<a class="link" href="https://www.sap.com/dmc/exp/2014-09-02-hana-hardware/enEN/enterprise-storage.html" target="_top">https://www.sap.com/dmc/exp/2014-09-02-hana-hardware/enEN/enterprise-storage.html</a>)
+        is supported. In all cases the SAP HANA storage configuration recommendations from the
+        respective hardware vendor and the SAP HANA Storage Requirements for TDI (<a class="link" href="https://www.sap.com/documents/2015/03/74cdb554-5a7c-0010-82c7-eda71af511fa.html" target="_top">https://www.sap.com/documents/2015/03/74cdb554-5a7c-0010-82c7-eda71af511fa.html</a>)
+        should be followed. The SUSE Best Practices for SAP HANA on KVM - SUSE Linux Enterprise
+        Server for SAP Applications 12 SP2 has been designed and tested to map the block devices for
+        SAP HANA on the Hypervisor directly into the VM. Therefore any LVM (Logical Volume Manager)
+        configuration should be made inside the Guest VM only. Multipathing by contrast should be
+        only configured on the Hypervisor.</p><p>Ultimately the storage for SAP HANA must be able to fulfill the SAP HANA HWCCT
+        requirements from within the VM. For details on HWCCT and the required storage
+        KPI’s refer to SAP Note 1943937 <span class="quote">“<span class="quote">Hardware Configuration Check Tool - Central
+          Note</span>”</span> (<a class="link" href="https://launchpad.support.sap.com/" target="_top">https://launchpad.support.sap.com/</a>notes/1943937)
+        and SAP Note 2501817 - HWCCT 1.0 (≥220) (<a class="link" href="https://launchpad.support.sap.com/" target="_top">https://launchpad.support.sap.com/</a>notes/2501817).</p><p>Network Attached Storage has not been tested with SAP HANA on KVM, if there is a
+        requirement for this contact <code class="email">&lt;<a class="email" href="mailto:saphana@suse.com">saphana@suse.com</a>&gt;</code>.</p><p>Most of the configuration steps to configure the storage are at the Guest VM XML level,
+        see section <a class="xref" href="sec-Guest-VM-XML-Configuration.html#sec-storage" title="Storage">the section called “Storage”</a>. Nevertheless storage on the Hypervisor
+        should:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Follow the storage layout recommendations from the appropriate hardware
+            vendor.</p></li><li class="listitem"><p>Not use LVM (Logical Volume Manager) on the Hypervisor level for SAP HANA volumes
+            since nested LVM is not supported.</p></li><li class="listitem"><p>Configure Multipathing on the Hypervisor only, not inside the Guest VM.</p></li></ul></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-hypervisor-operating-system-configuration"></a>Hypervisor Operating System Configuration</h3></div></div></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-tuned"></a>tuned</h4></div></div></div><p>Install <span class="quote">“<span class="quote">tuned</span>”</span> and set the profile to
+          <span class="quote">“<span class="quote">latency-performance</span>”</span>. Do not use the <span class="quote">“<span class="quote">sap-hana profile</span>”</span> on the
+          Hypervisor. This can be configured with the following commands:</p><pre class="screen">zypper in tuned
+
+systemctl enable tuned
+
+systemctl start tuned
+
+tuned-adm profile latency-performance</pre><div class="sect4"><div class="titlepage"><div><div><h5 class="title"><a id="sec-verify-tuned-has-set-cpu-frequency-governor-and-performance-bias"></a>Verify <span class="quote">“<span class="quote">tuned</span>”</span> Has Set CPU Frequency Governor and Performance
+            Bias</h5></div></div></div><p>The CPU frequency governor should be set to <span class="quote">“<span class="quote">performance</span>”</span> to avoid
+            latency issues because of ramping the CPU frequency up and down in response to changes
+            in the system’s load. The governor setting can be verified with the following
+            command to check what is set under <span class="quote">“<span class="quote">current policy</span>”</span>:</p><pre class="screen">cpupower -c all  frequency-info</pre><p>Additionally the performance bias setting should also be set to 0 (performance). The
+            performance bias setting can be verified with the following command:</p><pre class="screen">cpupower -c all info</pre></div></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-irqbalance"></a>irqbalance</h4></div></div></div><p>The irqbalance service should be disabled because it can cause latency issues when the
+          /proc/irq/* files are read. To disable irqbalance run the following command:</p><pre class="screen">systemctl disable irqbalance.service
+
+systemctl stop irqbalance.service</pre></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-customize-the-linux-kernel-boot-options"></a>Customize the Linux Kernel Boot Options</h4></div></div></div><p>To edit the boot options for the Linux kernel to the following:</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>Edit <code class="filename">/etc/defaults/grub</code> and add the following boot options to
+              the line <span class="quote">“<span class="quote">GRUB_CMDLINE_LINUX_DEFAULT</span>”</span> (A detailed explanation of these
+              options follows).</p><pre class="screen">numa_balancing=disable   kvm_intel.ple_gap=0  transparent_hugepage=never  elevator=deadline  intel_idle.max_cstate=1  processor.max_cstate=1 default_hugepagesz=1GB hugepagesz=1GB hugepages=&lt;number of hugepages&gt;</pre><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Calculating Value</h3><p>The value for <span class="quote">“<span class="quote">&lt;number of hugepages&gt;</span>”</span> should be
+                calculated by taking the number GiB’s of RAM minus approx. 7% for the
+                Hypervisor OS. For example 2 TiB RAM (2048 GiB) minus 7% are
+                approx. 1900 hugepages</p></div></li><li class="listitem"><p>Run the following command:</p><pre class="screen">grub2-mkconfig -o /boot/grub2/grub.cfg</pre></li><li class="listitem"><p>Reboot the system:</p><pre class="screen">reboot</pre></li></ol></div></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-technical-explanation-of-the-above-described-configuration-settings"></a>Technical Explanation of the Above Described Configuration Settings</h4></div></div></div><p>
+          <span class="strong"><strong>Automatic NUMA Balancing (numa_balancing=disable)</strong></span>
+        </p><p>Automatic NUMA balancing can result in increased system latency and should therefore
+          be disabled.</p><p>
+          <span class="strong"><strong>KVM PLE-GAP (kvm_intel.ple_gap=0)</strong></span>
+        </p><p>Pause Loop Exit (PLE) is a feature whereby a spinning guest CPU releases the physical
+          CPU until a lock is free. This is useful in cases where multiple virtual CPUs are using
+          the same physical CPU but causes unnecessary delays when a guest is not
+          overcommitted.</p><p>
+          <span class="strong"><strong>Transparent Hugepages (transparent_hugepage=never)</strong></span>
+        </p><p>Because 1G pages are used for the virtual machine, then there is no additional benefit
+          from having THP enabled. Disabling it will avoid khugepaged interfering with the virtual
+          machine while it scans for pages to promote to hugepages.</p><p>
+          <span class="strong"><strong>I/O Scheduler (elevator=deadline)</strong></span>
+        </p><p>The deadline I/O scheduler should be used for all disks/LUNs mapped into the KVM
+          guest.</p><p>
+          <span class="strong"><strong>Processor C-states (intel_idle.max_cstate=1
+            processor.max_cstate=1)</strong></span>
+        </p><p>The processor will attempt to save power when idle by switching to a lower power
+          state. Unfortunately this incurs latency when switching in and out of these states.
+          Optimal performance is achieved by limiting the processor to states C0 (normal running
+          state) and C1 (first lower power state). Note that while there is an exit latency
+          associated with C1 states, it is offset on hyperthread-enabled platforms by the fact
+          sibling cores can borrow resources from sibling cores if they are in the C1 state and some
+          CPUs can boost the CPU frequency higher if siblings are in the C1 state.</p><p>
+          <span class="strong"><strong>Hugepages (default_hugepagesz=1 GB
+            hugepagesz=1 GB hugepages=&lt;number of hugepages&gt;)</strong></span>
+        </p><p>The use of 1 GiB hugepages is to reduce overhead and contention when the
+          guest is updating its page tables. This requires allocation of 1 GiB hugepages on
+          the host. The number of pages to allocate depends on the memory size of the guest.
+          1 GiB pages are not pageable by the OS, so they always remain in RAM and
+          therefore the <span class="quote">“<span class="quote">locked</span>”</span> definition in libvirt XML files is not required. It
+          also important to ensure the order of the hugepage options, specifically the <span class="quote">“<span class="quote">number
+            of hugepages</span>”</span> option must come after the 1 GiB hugepage size
+          definitions.</p><p>The value for <span class="quote">“<span class="quote">&lt;number of hugepages&gt;</span>”</span> should be calculated
+          by taking the number GiB’s of RAM minus approx. 7% for the Hypervisor OS. For
+          example 2 TiB RAM (2048 GiB) minus 7% are approx. 1900 hugepages.</p></div></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="sec-supported-scenarios-prerequisites.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="sec-Guest-VM-XML-Configuration.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Supported Scenarios and Prerequisites </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Guest VM XML Configuration</td></tr></table></div></body></html>

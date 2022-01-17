@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Memory and CPU Binding</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="Optimizing Linux for AMD EPYC with SUSE Linux Enterprise 12 SP3" /><link rel="up" href="index.html" title="Optimizing Linux for AMD EPYC with SUSE Linux Enterprise 12 SP3" /><link rel="prev" href="sec-epyc-topology.html" title="EPYC Topology" /><link rel="next" href="sec-hp-storage-interrupt-affinity.html" title="High-performance Storage Devices and Interrupt Affinity" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Memory and CPU Binding</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="sec-epyc-topology.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="sec-hp-storage-interrupt-affinity.html">Next</a></td></tr></table><hr /></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-memory-cpu-binding"></a>Memory and CPU Binding</h2></div></div></div><p>NUMA is a scalable memory architecture for multiprocessor systems
+      that can reduce contention on a memory channel. A full discussion on
+      tuning for NUMA is beyond the scope for this paper. But the document
+        <span class="quote">“<span class="quote">A NUMA API for Linux</span>”</span> at <a class="link" href="http://developer.amd.com/wordpress/media/2012/10/LibNUMA-WP-fv1.pdf" target="_top">http://developer.amd.com/wordpress/media/2012/10/LibNUMA-WP-fv1.pdf</a>
+      provides a valuable introduction.</p><p>The default policy for programs is the <span class="quote">“<span class="quote">local
+        policy</span>”</span>. A program which calls <span class="command"><strong>malloc()</strong></span>
+      or <span class="command"><strong>mmap()</strong></span> reserves virtual address space but does
+      not immediately allocate physical memory. The physical memory is
+      allocated the first time the address is accessed by any thread and,
+      if possible, the memory will be local to the accessing CPU. If the
+      mapping is of a file, the first access may have occurred at any time
+      in the past so there are no guarantees about locality.</p><p>Memory allocated to a node is less likely to move if a thread
+      changes to a CPU on another node or if multiple programs are remote
+      accessing the data, unless <span class="italic">Automatic NUMA
+        Balancing (NUMAB)</span> is enabled. When NUMAB is enabled,
+      unbound process accesses are sampled. If there are enough remote
+      accesses then the data will be migrated to local memory. This
+      mechanism is not perfect and incurs overhead of its own. This means
+      it can be important for performance for thread and process migrations
+      between nodes to be minimized and for memory placement to be
+      carefully considered and tuned.</p><p>The <span class="package">taskset</span> tool is used to set or get the CPU
+      affinity for new or existing processes. An example use is to confine
+      a new process to CPUs local to one node. Where possible, local memory
+      will be used. But if the total required memory is larger than the
+      node then remote memory can still be used. In such configurations, it
+      is recommended to size the workload such that it fits in the node.
+      This avoids that any of the data is being paged out when
+        <span class="package">kswapd</span> wakes to reclaim memory from the local
+      node.</p><p><span class="package">numactl</span> controls both memory and CPU policies
+      for processes that it launches and can modify existing processes. In
+      many respects, the parameters are easier to specify than
+        <span class="package">taskset</span>. For example, it can bind a task to all
+      CPUs on a specified node instead of having to specify individual CPUs
+      with <span class="package">taskset</span>. Most importantly, it can set the
+      memory allocation policy without requiring application
+      awareness.</p><p>Using policies, a preferred node can be specified where the task
+      will use that node if memory is available. This is typically used in
+      combination with binding the task to CPUs on that node. If a
+      workload's memory requirements are larger than a single node and
+      predictable performance is required then the
+        <span class="quote">“<span class="quote">interleave</span>”</span> policy will round-robin allocations from
+      allowed nodes. This gives sub-optimal but predictable access
+      latencies to main memory. More importantly, interleaving reduces the
+      probability that the OS will need to reclaim any data belonging to a
+      large task.</p><p>Further improvements can be made to access latencies by binding a
+      workload to a single <span class="italic">CPU Complex
+        (CCX)</span> within a node. Since L3 caches are not shared
+      between CCXs, binding a workload to a CCX avoids L3 cache misses
+      caused by workload migration.</p><p>Find examples below on how <span class="package">taskset</span> and
+        <span class="package">numactl</span> can be used to start commands bound to
+      different CPUs depending on the topology.</p><pre class="screen"># Run a command bound to CPU 1
+epyc:~ # taskset -c 1 [command]
+
+# Run a command bound to CPUs belonging to node 0
+epyc:~ # taskset -c `cat /sys/devices/system/node/node0/cpulist` [command]
+
+# Run a command bound to CPUs belonging to nodes 0 and 1
+epyc:~ # numactl –cpunodebind=0,1 [command]
+
+# Run a command bound to CPUs that share L3 cache with cpu 1
+epyc:~ # taskset -c `cat /sys/devices/system/cpu/cpu1/cache/index3/shared_cpu_list` [command]</pre><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-tuning-without-binding"></a>Tuning for Local Access Without Binding</h3></div></div></div><p>The ability to use local memory where possible and remote
+        memory if necessary is valuable but there are cases where it is
+        imperative that local memory always be used. If this is the case,
+        the first priority is to bind the task to that node. If that is not
+        possible then the command <span class="command"><strong>sysctl
+          vm.zone_reclaim_mode=1</strong></span> can be used to aggressively
+        reclaim memory if local memory is not available. </p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">High Costs</h3><p>While this option is good from a locality perspective, it can
+          incur high costs because of stalls related to reclaim and the
+          possibility that data from the task will be reclaimed. Treat this
+          option with a high degree of caution and testing.</p></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-hazards-cpu-binding"></a>Hazards with CPU Binding</h3></div></div></div><p>There are three major hazards to consider with CPU
+        binding.</p><p>The first is to watch for remote memory nodes being used where
+        the process is not allowed to run on CPUs local to that node. While
+        going more in detail here is outside the scope of this paper, the
+        most common scenario is an IO-bound thread communicating with a
+        kernel IO thread on a remote node bound to the IO controller whose
+        accesses are never local. Similarly, the version of
+          <span class="package">irqbalance</span> shipped with SUSE Linux Enterprise
+        Server 12 SP3 is not necessarily optimal for EPYC. Thus it is worth
+        considering disabling <span class="package">irqbalance</span> and manually
+        binding IRQs from storage or network devices to CPUs that are local
+        to the IO channel. Depending on the kernel version and drivers in
+        use, it may not be possible to manually bind IRQs. For example,
+        some devices multi-queue support may not permit IRQs affinities to
+        be changed. </p><p>The second is that guides about CPU binding tend to focus on
+        binding to a single CPU. This is not always optimal when the task
+        communicates with other threads as fixed bindings potentially miss
+        an opportunity for the processes to use idle cores sharing an L1 or
+        L2 cache. This is particularly true when dispatching IO, be it to
+        disk or a network interface where a task may benefit from being
+        able to migrate close to the related threads. But it also applies
+        to pipeline-based communicating threads for a computational
+        workload. Hence, focus <span class="italic">initially</span>
+        on binding to CPUs sharing L3 cache and <span class="italic">then</span> consider whether to bind based on a L1/L2 cache
+        or a single CPU using the primary metric of the workload to
+        establish whether the tuning is appropriate. </p><p>The final hazard is similar in that if many tasks are bound to
+        a smaller set of CPUs then the subset of CPUs could be
+        over-saturated even though the machine overall has spare
+        capacity.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-cpusets-memory-control-groups"></a>CPUsets and Memory Control Groups</h3></div></div></div><p><span class="italic">CPUsets</span> are ideal when
+        multiple workloads must be isolated on a machine in a predictable
+        fashion. CPUsets allow a machine to be partitioned into subsets.
+        These sets may overlap, and in that case they suffer from similar
+        problems as CPU affinities. If there is no overlap, they can be
+        switched to <span class="quote">“<span class="quote">exclusive</span>”</span> mode which treats them
+        completely in isolation with relatively little overhead. The caveat
+        in doing so is that one overloaded CPUset can be saturated leaving
+        another CPUset completely idle. Similarly, they are well suited
+        when a primary workload must be protected from interference because
+        of low-priority tasks in which case the low priority tasks can be
+        placed in a CPUset. The caveat with CPUsets is that the overhead is
+        higher than using scheduler and memory policies. Ordinarily, the
+        accounting code for CPUsets is completely disabled. But when a
+        single CPUset is created there are additional essential checks that
+        are made when checking scheduler and memory policies.</p><p>Similarly <span class="package">memcg</span> can be used to limit the
+        amount of memory that can be used by a set of processes. When the
+        limits are exceeded then the memory will be reclaimed by tasks
+        within <span class="package">memcg</span> directly without interfering with
+        any other tasks. This is ideal for ensuring there is no inference
+        between two or more sets of tasks. Similar to CPUsets, there is
+        some management overhead incurred so if tasks can simply be
+        isolated on a NUMA boundary then it is preferred from a performance
+        perspective. The major hazard is that if the limits are exceeded
+        then the processes directly stall to reclaim the memory which can
+        incur significant latencies. </p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title"></h3><p>Without <span class="package">memcg</span>, when memory gets low, the
+          global reclaim daemon does work in the background and if it
+          reclaims quickly enough, no stalls are incurred. When using
+            <span class="package">memcg</span>, observe the
+            <span class="package">allocstall</span> counter in
+            <code class="filename">/proc/vmstat</code> as this can detect early if
+          stalling is a problem.</p></div></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="sec-epyc-topology.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="sec-hp-storage-interrupt-affinity.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">EPYC Topology </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> High-performance Storage Devices and Interrupt Affinity</td></tr></table></div></body></html>

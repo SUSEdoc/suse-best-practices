@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Appendix B: Changes, Updates and References</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="Kernel Module Packages Manual for SUSE-based Distributions" /><link rel="up" href="index.html" title="Kernel Module Packages Manual for SUSE-based Distributions" /><link rel="prev" href="sec-appendix-a1.html" title="Appendix A.1: Sample Spec File for Use with SUSE Build Services" /><link rel="next" href="ar01s15.html" title="Legal notice" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Appendix B: Changes, Updates and References</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="sec-appendix-a1.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="ar01s15.html">Next</a></td></tr></table><hr /></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-appendix-b"></a>Appendix B: Changes, Updates and References</h2></div></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-code10-to-code11"></a>Code 10 to Code 11 Notes for Kernel Module
+                Packagers</h3></div></div></div><p>Following is a brief list of CODE 10 to CODE 11 changes
+                which can affect kernel module packagers</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+                        <span class="italic">Kernel packages</span>: </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>The Code 11 kernel is provided via two
+                                packages:
+                                    <span class="package">kernel-FLAVOR-base</span>
+                                and <span class="package">kernel-FLAVOR</span>.
+                                    <span class="package">kernel-FLAVOR</span> is
+                                dependent on
+                                    <span class="package">kernel-FLAVOR-base</span>.
+                                Both packages are required to provide
+                                checksums for all the kernel symbol
+                                groups.</p></li><li class="listitem"><p>Code 11 automatically installs the
+                                    <span class="strong"><strong>-pae</strong></span>
+                                kernel flavor for 32-bit pae-enabled
+                                systems.</p></li><li class="listitem"><p>The Code 11
+                                    <span class="package">kernel-source</span>
+                                package does not include the sample Kernel
+                                Module Package source provided in Appendix
+                                A.</p></li><li class="listitem"><p>Kernel packages in SUSE Linux Enterprise
+                                Server 12 or SUSE Linux Enterprise Desktop
+                                12 (including all service packs) provide
+                                checksums for individual symbols rather
+                                than for groups of symbols
+                                (symsets).</p></li></ul></div></li><li class="listitem"><p><span class="italic">Kernel module
+                            packages</span>:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>Starting with SUSE Linux Enterprise
+                                Server 11 SP3 or SUSE Linux Enterprise
+                                Desktop 11 SP3, kernel module packages can
+                                contain modules that have been signed in
+                                order to support UEFI Secure Boot.</p></li><li class="listitem"><p>Kernel Module Packages built for SUSE
+                                Linux Enterprise Server 12 or SUSE Linux
+                                Enterprise Desktop 12 (including all
+                                service packs) require checksums for
+                                individual symbols rather than for groups
+                                of symbols (symsets).</p></li></ul></div></li><li class="listitem"><p><span class="italic">Package and file
+                            locations</span>:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>In Code 11, several packages have been
+                                moved from the base SUSE Linux Enterprise
+                                Server product to the SUSE Linux Enterprise
+                                SDK. Developers building Kernel Module
+                                Packages on Code 11 will need to include
+                                the SDK in their build environment to
+                                ensure that all build-time package
+                                dependencies are resolved.</p></li><li class="listitem"><p>In Code 11, the RPM macros used to build
+                                Kernel Module Packages are provided in the
+                                    <span class="package">kernel-source</span>
+                                package (instead of the RPM package) and
+                                installed under
+                                    <code class="filename">/etc/rpm</code> and
+                                    <code class="filename">/usr/lib/rpm</code>.</p></li></ul></div></li><li class="listitem"><p><span class="italic">RPM macro
+                            changes</span>:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>Code 11 includes RPM macros to facilitate
+                                creating Kernel Module Package build
+                                structures that support multiple RPM-based
+                                distributions. The spec file template in
+                                Appendix A includes these macros:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: square; "><li class="listitem"><p><span class="strong"><strong></strong></span>
+                                     %kernel_module_package_buildreqs -
+                                     used for
+                                     <span class="quote">“<span class="quote">BuildRequires</span>”</span>.</p></li><li class="listitem"><p><span class="strong"><strong>%kernel_module_package</strong></span> -
+                                     used instead of <span class="strong"><strong>
+                                     %suse_kernel_module_package</strong></span>
+                                     (keep in mind that the options are
+                                     slightly different: with <span class="strong"><strong>
+                                     %kernel_module_package</strong></span>,
+                                     <code class="option">-x</code> is used to exclude
+                                     flavors from the build, and
+                                     <code class="option">-t</code> replaces
+                                     <code class="option">-s</code> as the option to
+                                     override the default sub-package
+                                     template. See section <a class="xref" href="sec-kernel-module-packages.html" title="Kernel Module Packages">the section called “Kernel Module Packages”</a> for a
+                                     complete description of all <span class="strong"><strong>%kernel_module_package</strong></span>
+                                     options.)</p></li><li class="listitem"><p><span class="strong"><strong>%kernel_source</strong></span> – used with
+                                     the <code class="option">$flavor</code> argument
+                                     to specify the location of the
+                                     top-level kernel Makefile.</p></li></ul></div></li><li class="listitem"><p>Starting with SUSE Linux Enterprise
+                                Server 11 SP2 or SUSE Linux Enterprise
+                                Desktop 11 SP2, the <span class="strong"><strong>%kernel_module_package</strong></span>
+                                macro includes a <code class="option">-b</code> option
+                                that can be used to force initial RAM disk
+                                creation when a KMP is installed.</p></li><li class="listitem"><p>Starting with SUSE Linux Enterprise
+                                Server/SUSE Linux Enterprise Desktop 11
+                                SP3, the <span class="strong"><strong>%kernel_module_package
+                                    macro</strong></span> includes a <code class="option">-c
+                                    &lt;module-signing-certificate&gt;</code>
+                                option that can be used when building
+                                secure-boot-enabled packages.</p></li></ul></div></li></ul></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-doc-updates"></a>Documentation Updates</h3></div></div></div><p>April 27, 2017 – andavis@suse.com</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Update to incorporate SUSE Linux Enterprise
+                        Server/SUSE Linux Enterprise Desktop 12
+                        changes</p></li></ul></div><p>June 27, 2013 – andavis@suse.com</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Change Novell to SUSE</p></li><li class="listitem"><p>Add <code class="option">-b</code> option to
+                        kernel_module_package macro</p></li><li class="listitem"><p>Support building of secure-boot-enabled
+                        packages</p></li></ul></div><p>August 13, 2009 – andavis@suse.com</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Correctly reflect behavior of <code class="option">-f</code>
+                        option to kernel_module_package macro</p></li></ul></div><p>December 22, 2008 – andavis@suse.com</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Initial Version: Update Code 10 Kernel Module
+                        Packages Manual, and adapt it to Code 11
+                        process</p></li></ul></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-references"></a>References</h3></div></div></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>SUSE SolidDriver Documentation: SUSE Kernel ABI
+                        Stability: <a class="link" href="https://drivers.suse.com/doc/SolidDriver/SUSE_Kernel_ABI_Stability.html" target="_top">https://drivers.suse.com/doc/SolidDriver/SUSE_Kernel_ABI_Stability.html</a></p></li><li class="listitem"><p>Greg Kroah-Hartman: The Linux Kernel Driver
+                        Interface, <a class="link" href="http://www.kroah.com/log/linux/stable_api_nonsense.html" target="_top">http://www.kroah.com/log/linux/stable_api_nonsense.html</a>
+                        (also provided as stable_api_nonsense.txt in the
+                        upstream kernel source tree)</p></li><li class="listitem"><p>Andreas Gruenbacher, Michal Marek: Working With
+                        The SUSE 2.6.x and 3.x Kernel Sources (provided as
+                        README.SUSE in SUSE kernel-source packages)</p></li><li class="listitem"><p>Peter Jay Salzman, Michael Burian, Ori Pomerantz:
+                        The Linux Kernel Module Programming Guide, <a class="link" href="http://www.tldp.org/LDP/lkmpg/2.6/html/index.html" target="_top">http://www.tldp.org/LDP/lkmpg/2.6/html/index.html</a></p></li><li class="listitem"><p>Jonathan Corbet, Alessandro Rubini, Greg
+                        Kroah-Hartman: Linux Device Drivers, Third Edition,
+                        February 2005, <a class="link" href="http://www.oreilly.com/catalog/linuxdrive3/" target="_top">http://www.oreilly.com/catalog/linuxdrive3/</a>
+                        (also available online at <a class="link" href="http://lwn.net/Kernel/LDD3/" target="_top">http://lwn.net/Kernel/LDD3/</a>
+                    </p></li><li class="listitem"><p>Andreas Gruenbacher: Kernel Module Packages
+                        Manual for CODE 10, <a class="link" href="http://www.novell.com/developer/kernel_module_packages_manuals.html" target="_top">http://www.novell.com/developer/kernel_module_packages_manuals.html</a></p></li><li class="listitem"><p>Documentation of The Linux Foundation Driver
+                        Backport Workgroup, <a class="link" href="http://www.linuxfoundation.org/en/Driver_Backport" target="_top">http://www.linuxfoundation.org/en/Driver_Backport</a></p></li><li class="listitem"><p>UEFI Specification, <a class="link" href="http://www.uefi.org/specs" target="_top">http://www.uefi.org/specs</a></p></li></ul></div></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="sec-appendix-a1.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="ar01s15.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Appendix A.1: Sample Spec File for Use with SUSE Build
+            Services </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Legal notice</td></tr></table></div></body></html>

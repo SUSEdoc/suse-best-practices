@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Submit</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="How to Modify a Package in the Open Build Service" /><link rel="up" href="index.html" title="How to Modify a Package in the Open Build Service" /><link rel="prev" href="sec-test.html" title="Test" /><link rel="next" href="sec-propagate-patch.html" title="Propagate a patch" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Submit</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="sec-test.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="sec-propagate-patch.html">Next</a></td></tr></table><hr /></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-submit"></a>Submit</h2></div></div></div><p>After you have tested the package successfully, you usually
+            want to release it. This task is called <span class="strong"><strong>submit</strong></span>.</p><p>If you haven’t done so already, add a comment to the
+            changelog with the command <span class="command"><strong>osc vc</strong></span>
+        </p><p>To submit the package, type <span class="command"><strong>osc sr</strong></span>. This
+            command requires no further arguments as the changes are
+            submitted to where the package was checked out from beforehand.
+            Also, if you submit to your branch, a request is sent to the
+            maintainer or to the bugowner of the package to include the
+            changes into the repository where you branched from. If you are
+            the maintainer or bugowner and had checked out from the
+                <span class="italic">devel repo</span>, this command
+            updates the <span class="italic">devel repo</span>. If
+            you branched via the command <span class="command"><strong>osc mbranch</strong></span> and
+            you submit now to one of the branches, the command <span class="command"><strong>osc
+                sr</strong></span> will detect this and will <span class="quote">“<span class="quote">request to
+                open a NEW maintenance incident instead</span>”</span>. If you
+            submitted from an <span class="italic">mbranch</span> or
+            to your <span class="italic">personal </span> branch,
+            your work is done: others will follow up and finish the
+            work.</p><p>If you submitted to the <span class="italic">devel
+                repo</span>, to fulfill the <span class="strong"><strong>Factory first</strong></span> policy, you should then submit
+            the changes to <span class="italic">Factory</span>/&gt;
+            with the command</p><pre class="screen">osc sr &lt;PRJ&gt;/&lt;PKG&gt; openSUSE:Factory</pre><p>This will not immediately submit the package to <span class="italic">Factory</span>, but it will be marked for
+            submission. When the package is accepted in the <span class="italic">devel repo</span>, it will automatically
+            be submitted to <span class="italic">Factory</span>,
+            where it again needs to be accepted.</p><p>All requests can be inspected at</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>the <span class="italic">Open Build Service</span> at <a class="link" href="https://build.opensuse.org/request/show/&lt;RequestID&gt;" target="_top">https://build.opensuse.org/request/show/&lt;RequestID</a>
+                    for normal submit requests, or at</p></li><li class="listitem"><p>the <span class="italic">Internal Build Service</span> for maintenance
+                    requests.</p></li></ul></div><p>After a certain period of time your new package will be
+            accepted.</p></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="sec-test.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="sec-propagate-patch.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Test </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Propagate a patch</td></tr></table></div></body></html>

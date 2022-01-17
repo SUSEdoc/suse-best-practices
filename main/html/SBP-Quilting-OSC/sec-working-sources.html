@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Working on the Sources</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="How to Modify a Package in the Open Build Service" /><link rel="up" href="index.html" title="How to Modify a Package in the Open Build Service" /><link rel="prev" href="sec-get-package.html" title="Getting the Package" /><link rel="next" href="sec-build-package.html" title="Build the Package" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Working on the Sources</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="sec-get-package.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="sec-build-package.html">Next</a></td></tr></table><hr /></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-working-sources"></a>Working on the Sources</h2></div></div></div><p>The sources are now available on your local system and you
+            can start modifying them. Change to the package’s working
+            directory. If you checked out from the <span class="italic">devel repo</span> or from a <span class="italic">distribution repo</span>, type the command</p><pre class="screen">cd &lt;PRJ&gt;/&lt;PKG&gt;</pre><p>If you have branched and checked out of that branch, type the
+            command</p><pre class="screen">cd home:&lt;username&gt;:branches:&lt;PRJ&gt;/&lt;PKG&gt;</pre><p>Inside the current working directory, you should find at
+            least the following files:</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>the spec file
+                    <code class="filename">&lt;PKG&gt;.spec</code>,</p></li><li class="listitem"><p>the pristine sources, for example
+                        <code class="filename">&lt;PKG&gt;-&lt;vers&gt;.tar.bz2</code>,</p></li><li class="listitem"><p>the changes file
+                        <code class="filename">&lt;PKG&gt;.changes</code>,</p></li><li class="listitem"><p>any patches,</p></li><li class="listitem"><p>possibly some other files that belong to this package
+                    like an <code class="filename">rpmlintrc</code> file.</p></li></ol></div><p>Your next steps depend on whether you want to</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>upgrade the package to a new version, which is
+                    explained in <a class="xref" href="sec-working-sources.html#sec-upgrading" title="Upgrading">the section called “Upgrading”</a>, or</p></li><li class="listitem"><p>patch the package to add functionality or fix a bug,
+                    which is explained in <a class="xref" href="sec-working-sources.html#sec-patching" title="Patching">the section called “Patching”</a>.</p></li></ol></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-upgrading"></a>Upgrading</h3></div></div></div><p>When you upgrade the package to a new version of the
+                sources, you must also check if any of the old patches are
+                obsoleted by the new version and if they still apply
+                without (major) problems. You might hit upon an obsolete or
+                faulty patch when one or more patches have been submitted
+                and accepted upstream and integrated into the sources.
+                Existing patches sometimes do not apply without problems
+                when the relevant source sections have changed
+                considerably, thus confusing the patching program. Fixing
+                issues caused by faulty patches can become an iterative and
+                painful process.</p><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-pristine-sources"></a>Pristine Sources</h4></div></div></div><p>As you created a complete set of new sources, the
+                    first step should be to replace the old sources by the
+                    new ones. Do not forget to remove the old sources to
+                    avoid any <span class="quote">“<span class="quote">hiccup</span>”</span> within the build
+                    service. You might however want to save the old sources
+                    to a subdirectory of your HOME directory for reference
+                    and fallback. In addition, if the sources come with a
+                    checksum (for example an MD5SUM) or a signature, you
+                    should include it.</p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-spec-file"></a>Spec File</h4></div></div></div><p>Modify the spec File to reflect the new release
+                    (version, release, source name). First, disable all
+                    existing patches, as some of them might be obsolete or
+                    have problems being applied (for example if the sources
+                    have changed considerably to disrupt the patch
+                    program). You can also temporarily move all patches to
+                    another directory and bring them back in when
+                    required.</p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-build-source-tree"></a>Build the Source Tree</h4></div></div></div><p>Set up the source tree by running the command:</p><pre class="screen">quilt setup &lt;PKG&gt;.spec</pre><p>As there are no patches (yet) available, this command
+                    mainly unpacks the TAR archive.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Asterisk Wild Card</h3><p>Often you can use the command <span class="command"><strong>quilt
+                            setup *.spec</strong></span> with the asterisk wild
+                        card, because usually there is only one spec file.
+                        As <span class="command"><strong>quilt setup</strong></span> accepts only a
+                        single non-option argument, no damage occurs if
+                        more than one spec file exists. However, a warning
+                        message is emitted. This means you can redo the
+                        command with the desired spec file.</p></div></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-check-patches"></a>Check the Patches</h4></div></div></div><p>Now, one by one, inspect the patches that you removed
+                    previously. Determine whether they are still needed. As
+                    these are ordinary <span class="quote">“<span class="quote">patch</span>”</span> type patches,
+                    you can use the command </p><pre class="screen">patch –dry-run -p1 &lt; &lt;wherever&gt;/patchfile</pre><p>to see if the patch applies well. As some patches
+                    were built one directory level deeper, you might need
+                    to change to that directory and exchange the
+                        <span class="command"><strong>-p1</strong></span> with <span class="command"><strong>-p0</strong></span>. </p><p>If the patch works well, use the command </p><pre class="screen">quilt import &lt;wherever&gt;/patchfile</pre><p>to import the patch and add it to the
+                        <code class="filename">series</code> file.</p><p>With the command <span class="command"><strong>quilt push</strong></span> (no
+                    further arguments) you actually apply the patch. Add
+                    the patch to the spec file, while keeping the original
+                    numbering, and continue with <a class="xref" href="sec-build-package.html" title="Build the Package">the section called “Build the Package”</a>. </p><p>If you prefer, you can re-introduce all the patches
+                    you removed earlier and build the package subsequently.
+                    You can also add one patch at a time and build the
+                    package after each addition.</p><p>If a patch is not accepted, you most probably need to
+                    re-create it. <a class="xref" href="sec-working-sources.html#sec-patching" title="Patching">the section called “Patching”</a> details
+                    how to build a new patch. When you have finished adding
+                    all the patches, proceed to <a class="xref" href="sec-build-package.html" title="Build the Package">the section called “Build the Package”</a>.</p></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-patching"></a>Patching</h3></div></div></div><p>The previous paragraphs describe how to update a package
+                to a new release or version. But usually, you need to work
+                on an existing package and add a patch to fix a bug or
+                implement a feature.</p><p>If an upstream patch is already available you can use
+                that patch (see <a class="xref" href="sec-working-sources.html#sec-check-patches" title="Check the Patches">the section called “Check the Patches”</a>). This
+                can be the case if, for example, you need to fix a security
+                vulnerability and someone else has already posted a patch
+                for it.</p><p>In other cases, you need to create the patch yourself.
+                This can be the case if you</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>cannot apply an existing patch,</p></li><li class="listitem"><p>have analyzed a problem and found a fix
+                        yourself,</p></li><li class="listitem"><p>or implemented a new feature.</p></li></ul></div><p>Start by checking out the sources as described in section
+                    <a class="xref" href="sec-get-package.html" title="Getting the Package">the section called “Getting the Package”</a>. Then proceed to work
+                on the sources.</p><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-setup"></a>Setup</h4></div></div></div><p>At this stage, you have branched and checked out the
+                        <span class="italic">package</span>. It now
+                    resides in its directory, and consists of the
+                        <code class="filename">spec</code> file, the TAR archive,
+                    any patches, the <code class="filename">changes</code> file and
+                    some additional files.</p><p>The TAR archive contains the <span class="italic">pristine sources</span>. These are the
+                    unmodified sources cloned from a Git repository or
+                    downloaded from the project’s upstream Web site. Most
+                    packages also already come with a set of patches.
+                    Extract the source files from the TAR archive and apply
+                    these patches first, as specified in the
+                        <code class="filename">spec</code> file, before starting to
+                    build your own patch. </p><p><span class="command"><strong>Quilt</strong></span> offers subcommands that will
+                    do this for you.</p><p>Initialize the source tree from the TAR archive.
+                    Unpack the TAR archive and prepare for the application
+                    of the <code class="filename">%prep</code>section of the
+                        <code class="filename">spec</code> file with the
+                    command</p><pre class="screen">quilt setup &lt;packagename&gt;.spec</pre><p>You can also try to use the asterisk wild card
+                        <code class="filename">*.spec</code>, but if a package has
+                    more than one <code class="filename">spec</code> file, using the
+                    wild card does not work. If this is the case,
+                        <span class="command"><strong>quilt</strong></span> alerts you.</p><p>While the command <span class="command"><strong>quilt setup</strong></span>
+                    prepares the sources, it does not apply the patches. It
+                    merely creates a <code class="filename">series</code> file which
+                    contains the list of patches from the
+                        <code class="filename">spec</code> file in the correct
+                    order. To apply the patches, change to the source
+                    directory and run the command <span class="command"><strong>quilt push
+                        -a</strong></span>.</p><p>This command applies the patches in the order
+                    specified in the <code class="filename">series</code> file. The
+                    output of this command shows you which patches are
+                    applied to which files, and if everything went smoothly
+                    during the application. You are now prepared to add
+                    your own patch.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Symbolic Link</h3><p>Occasionally, especially if there are no patches
+                        to be applied, you need do create a symbolic link
+                        from the source directory to the checkout directory
+                        by typing <span class="command"><strong>ln -s ..
+                        patches</strong></span>.</p></div></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-build-patch"></a>Building the patch</h4></div></div></div><p>When you build a new patch, you first need to name
+                    it. To do so, in the root of the source tree (this is
+                    where you just ran the command <span class="command"><strong>quilt push
+                        -a</strong></span>), run the command</p><pre class="screen">quilt new &lt;patchname&gt;</pre><p>For a guide on how to name the patch, see the
+                    instructions on the openSUSE Web site at <a class="link" href="https://en.opensuse.org/openSUSE:Packaging_Patches_guidelines#Patch_naming" target="_top">https://en.opensuse.org/openSUSE:Packaging_Patches_guidelines#Patch_naming</a></p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Name Your Patch</h3><p>Do not forget to name your new patch, else any
+                        changes you make will be added to the last
+                        patch!</p></div><p>To keep everything under control, you <span class="strong"><strong>must not</strong></span> use your favorite
+                    editor to modify a file (although it is perfectly fine
+                    to peek into a file using your editor). From the root
+                    of the source tree, run the command: </p><pre class="screen">quilt edit dir/file </pre><p>This command does some <span class="quote">“<span class="quote">bookkeeping</span>”</span>;
+                    for example it saves the original version of the file.
+                    Then it invokes your editor (from the <span class="italic">EDITOR</span> environment
+                    variable) on the respective file. Subsequently it adds
+                    some more information so that the changes later end up
+                    in your patch. </p><p>You can run the command <span class="command"><strong>quilt edit</strong></span>
+                    on several files at once: </p><pre class="screen">quilt edit dir1/file1 dir2/file2</pre><p>You can also run <span class="command"><strong>quilt edit</strong></span>
+                    multiple times on the same file, reverting and amending
+                    previous changes. Only the differences between the
+                    original version and the end version are recorded in
+                    the patch. The first time you run this command the
+                    original file is saved. Each time you leave the editor,
+                    the current state of the file is compared to this copy
+                    and the patch is created from the differences. If you,
+                    for example, make thousands of changes, which, in
+                    effect, only change one line, then the patch will
+                    contain only the changes to this single line.</p><p>When you build a patch, you should follow these
+                    rules:</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>Make sure you include all required changes in
+                            one patch. Do not combine multiple fixes in one
+                            patch.</p></li><li class="listitem"><p>Create multiple patches, if required.</p></li></ol></div><p> This will make it easier to remove a single patch
+                    later, for example if the changes are accepted
+                    upstream.</p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-including-patch"></a>Including the Patch</h4></div></div></div><p>When you have finished the modifications of the
+                    sources, run the command <span class="command"><strong>quilt
+                        refresh</strong></span> to make sure that the patch is
+                    stored in the same directory as all other patches. </p><p>Then change to the checkout directory by typing
+                        <span class="command"><strong>cd ..</strong></span> and prepare for the
+                    inclusion of the patch.</p><div class="sect4"><div class="titlepage"><div><div><h5 class="title"><a id="sec-incl-patch-build-service"></a>Build Service</h5></div></div></div><p>Now make your patch known to the build service
+                        with the command <span class="command"><strong>osc ar</strong></span>.</p><p>You can also use the command <span class="command"><strong>osc add
+                            &lt;patchname&gt;</strong></span> but the former one
+                        helps you to remove files no longer needed.</p></div><div class="sect4"><div class="titlepage"><div><div><h5 class="title"><a id="sec-incl-patch-spec-file"></a>Spec File</h5></div></div></div><p>Next, add the patch to the spec file. Add at
+                        least two lines:</p><pre class="screen">Patch&lt;n&gt;: &lt;patchname&gt;</pre><p>and</p><pre class="screen">%patch&lt;n&gt; -p1</pre><p>The first line belongs to the header section,
+                        usually right after any <span class="strong"><strong>Source&lt;n&gt;:</strong></span> lines. Above the
+                            <span class="strong"><strong>Patch&lt;
+                            n&gt;:</strong></span> line you should also add a
+                        comment line describing what the patch tries to
+                        accomplish. Make sure to align the patch name with
+                        any other columns above, for example the <span class="strong"><strong>Source&lt;n&gt;:</strong></span>
+                        lines.</p><p>The second line goes into the <span class="strong"><strong>%prep </strong></span> section, again
+                        appended to the end of any list of existing
+                            <span class="strong"><strong>%patch&lt;n&gt;</strong></span> lines. Don't
+                        forget that the command <span class="command"><strong>quilt
+                            edit</strong></span> creates a patch with a patch
+                        level of <span class="strong"><strong>-p1</strong></span>.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Adding Lines to Spec File</h3><p>Whenever you add these two lines, keep to the
+                            given style, aligning columns and appending
+                            lines to already existing sets of lines of the
+                            same type. Also, do not fill holes in the patch
+                            numbers: your patches number is the number of
+                            the last patch <span class="strong"><strong>plus
+                                one</strong></span>. If your patch is the first
+                            one, then it is named <span class="strong"><strong>Patch1</strong></span>.</p></div></div><div class="sect4"><div class="titlepage"><div><div><h5 class="title"><a id="sec-incl-patch-changes"></a>Changes</h5></div></div></div><p>Another important file is the
+                            <code class="filename">changes</code> file. The naming
+                        convention usually is
+                            <code class="filename">&lt;package&gt;.changes</code>.
+                        This file is maintained through the command
+                            <span class="command"><strong>osc vc</strong></span>.</p><p>This command opens an editor on the given
+                            <code class="filename">changes</code> file. As there is
+                        not much space to fill in your changes, try to
+                        limit the number of items you want to include here.
+                        This is especially difficult if you update a
+                        package where a lot of changes were made upstream.
+                        In this case, mention only the most important
+                        changes and refer to the respective change log on
+                        the Web.</p><p>In the change file, you <span class="strong"><strong>must</strong></span> mention the following
+                        information:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>A BUGZILLA reference if a bug was fixed
+                                with this patch. To help others find the
+                                bug, prepend the number with a shorthand
+                                for bugzilla: <span class="strong"><strong>bsc
+                                    (suse.com)</strong></span>, <span class="strong"><strong>bnc
+                                    (novell.com)</strong></span>, <span class="strong"><strong>boo
+                                    (opensuse.org)</strong></span> followed by a
+                                hash sign (for example <span class="strong"><strong>bsc#1234567</strong></span>)</p></li><li class="listitem"><p>A FATE reference if you add a feature.
+                                Like the BUGZILLA references, this consists
+                                of the word <span class="quote">“<span class="quote">fate</span>”</span> followed by
+                                a hash, followed by the FATE number (for
+                                example <span class="strong"><strong>fate#123456</strong></span>). </p></li><li class="listitem"><p>The patch name</p></li><li class="listitem"><p>The Common Vulnerabilities and Exposures
+                                (CVE) ID if the patch closes a security
+                                issue (for example <span class="strong"><strong>CVE-1234-5678</strong></span>).</p></li></ul></div><p>For more information about how to create a
+                            <code class="filename">changes</code> file, refer to the
+                        openSUSE Web page at <a class="link" href="https://en.opensuse.org/openSUSE:Creating_a_changes_file_(RPM)" target="_top">https://en.opensuse.org/openSUSE:Creating_a_changes_file_(RPM)</a>.</p><p>If you have more than one BUGZILLA or FATE
+                        reference, because the bug was reported or the
+                        feature was requested for more than one release,
+                        you must add all references. To avoid the rejection
+                        of your patch, make sure that you include the
+                        requested information in the
+                            <code class="filename">changes</code> file. </p></div></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-commit"></a>Commit</h4></div></div></div><div class="important" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Embargoed Bugs</h3><p>Occasionally you will be asked to fix a bug that
+                        is EMBARGOED. These bugs usually concern security
+                        violations (CVEs). This means no information has
+                        been released yet about this bug. Never commit
+                        anything to OBS while bugs are still
+                        embargoed.</p></div><p>If your local machine runs one of the architectures
+                    the package will need to be built for, you can build it
+                    locally with the command <span class="command"><strong>osc
+                    build</strong></span>.</p><p>This command creates a build environment on your
+                    local machine, installs tools and packages required to
+                    build the package and actually builds it. You can use
+                    this command also to keep all the information local.
+                    After the package is built, you can immediately get it
+                    and test it locally. </p><p>At this stage, you have:</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>added your patch(es) to the
+                                <code class="filename">spec</code> file (<span class="strong"><strong>&lt;some
+                                editor&gt;</strong></span>
+                            <code class="filename">*.spec</code>)</p></li><li class="listitem"><p>added an entry to the
+                                <code class="filename">changes</code> file (with the
+                            command <span class="command"><strong>osc vc</strong></span>)</p></li><li class="listitem"><p>made your patches known to
+                                <span class="command"><strong>osc</strong></span> (with the command
+                                <span class="command"><strong>osc ar</strong></span>)</p></li></ol></div><p>To send the changed files to the build server and
+                    build the package, run the command <span class="command"><strong>osc
+                        commit</strong></span> without further arguments. This
+                    command:</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>starts an editor to allow you to add a
+                            message; even if you have already added
+                            information to the
+                            <code class="filename">changes</code>, an additional
+                            commit message is helpful</p></li><li class="listitem"><p>synchronizes the files on the build server
+                            with the local files by:</p><div class="orderedlist"><ol class="orderedlist" type="a"><li class="listitem"><p>adding or removing files according to
+                                    the command <span class="command"><strong>osc
+                                    ar</strong></span>and</p></li><li class="listitem"><p>transferring modified files</p></li></ol></div></li><li class="listitem"><p>triggers one or more builds for various
+                            architectures and/or releases</p></li></ol></div></div></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="sec-get-package.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="sec-build-package.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Getting the Package </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Build the Package</td></tr></table></div></body></html>

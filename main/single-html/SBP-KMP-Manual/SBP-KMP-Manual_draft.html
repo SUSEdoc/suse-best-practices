@@ -1,0 +1,1342 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Kernel Module Packages Manual for SUSE-based Distributions</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><meta name="description" content="SUSE-based distributions use the RPM Package Manager for software management. As such, any external kernel modules (these are kernel modules not included in SUSE kernel packages) should be packaged in RPM packages. These RPMs should be built in accordance with specific guidelines to ensure that the resulting Kernel Module Packages (KMPs) can be installed and updated appropriately, in synchronization with kernel updates. This document specifies the requirements for RPM packages that contain kernel modules, and describes the processes surrounding those packages including building, signing, installing and upgrading. A complete example is given and explained. Disclaimer: Documents published as part of the SUSE Best Practices series have been contributed voluntarily by SUSE employees and third parties. They are meant to serve as examples of how particular actions can be performed. They have been compiled with utmost attention to detail. However, this does not guarantee complete accuracy. SUSE cannot verify that actions described in these documents do what is claimed or whether actions described have unintended consequences. SUSE LLC, its affiliates, the authors, and the translators may not be held liable for possible errors or the consequences thereof." /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div xml:lang="en" class="article" lang="en"><div class="titlepage"><div><div><h1 class="title"><a id="art-sbp-rpm-packaging"></a>Kernel Module Packages Manual for SUSE-based
+            Distributions</h1></div><div><h3 class="subtitle"><em></em></h3></div><div><div class="author"><h3 class="author"><span class="firstname">Document Owner: Ann</span> <span class="surname">Davis, Senior Software Engineer, SUSE</span></h3></div></div><div><div class="abstract"><p class="title"><strong>Abstract</strong></p><p>SUSE-based distributions use the RPM Package Manager for
+                software management. As such, any external kernel modules
+                (these are kernel modules not included in SUSE kernel
+                packages) should be packaged in RPM packages. These RPMs
+                should be built in accordance with specific guidelines to
+                ensure that the resulting Kernel Module Packages (KMPs) can
+                be installed and updated appropriately, in synchronization
+                with kernel updates. </p><p>This document specifies the requirements for RPM packages
+                that contain kernel modules, and describes the processes
+                surrounding those packages including building, signing,
+                installing and upgrading.</p><p>A complete example is given and explained. </p><p>
+                <span class="strong"><strong>Disclaimer: </strong></span>
+                Documents published as part of the SUSE Best Practices series have been contributed voluntarily
+                by SUSE employees and third parties. They are meant to serve as examples of how particular
+                actions can be performed. They have been compiled with utmost attention to detail. However,
+                this does not guarantee complete accuracy. SUSE cannot verify that actions described in these
+                documents do what is claimed or whether actions described have unintended consequences.
+                SUSE LLC, its affiliates, the authors, and the translators may not be held liable for possible errors
+                or the consequences thereof.
+            </p></div></div></div><hr /></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="sect1"><a href="#sec-scope">Scope</a></span></dt><dt><span class="sect1"><a href="#sec-background">Background</a></span></dt><dt><span class="sect1"><a href="#sec-kernel-packages">Kernel Packages</a></span></dt><dt><span class="sect1"><a href="#sec-kernel-modules">Kernel Modules</a></span></dt><dt><span class="sect1"><a href="#sec-kernel-module-packages">Kernel Module Packages</a></span></dt><dt><span class="sect1"><a href="#sec-provides-requires">RPM Provides and Requires</a></span></dt><dt><span class="sect1"><a href="#sec-building-kmp">Building Kernel Module Packages</a></span></dt><dt><span class="sect1"><a href="#sec-signing">Signing</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec-signing-packages">Signing Packages</a></span></dt><dt><span class="sect2"><a href="#sec-signing-module-object">Signing Module Object Files <span class="italic">(UEFI Secure Boot)</span></a></span></dt></dl></dd><dt><span class="sect1"><a href="#sec-deploying-kmp">Deploying Kernel Module Packages</a></span></dt><dt><span class="sect1"><a href="#sec-installation-and-kmp">System Installation and Kernel Module Packages</a></span></dt><dt><span class="sect1"><a href="#sec-kernel-updates">Kernel Updates and Kernel Module Packages</a></span></dt><dt><span class="sect1"><a href="#sec-appendix-a">Appendix A: Sample Source for <span class="package">suse-hello</span>
+            Kernel Module Package</a></span></dt><dt><span class="sect1"><a href="#sec-appendix-a1">Appendix A.1: Sample Spec File for Use with SUSE Build
+            Services</a></span></dt><dt><span class="sect1"><a href="#sec-appendix-b">Appendix B: Changes, Updates and References</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec-code10-to-code11">Code 10 to Code 11 Notes for Kernel Module
+                Packagers</a></span></dt><dt><span class="sect2"><a href="#sec-doc-updates">Documentation Updates</a></span></dt><dt><span class="sect2"><a href="#sec-references">References</a></span></dt></dl></dd><dt><span class="sect1"><a href="#id1337">Legal notice</a></span></dt><dt><span class="sect1"><a href="#id1338">GNU Free Documentation License</a></span></dt></dl></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-scope"></a>Scope</h2></div></div></div><p>This version of the Kernel Module Packages Manual applies
+            to:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>the Code 11 code base, which includes openSUSE 11.1
+                    and newer, SUSE Linux Enterprise Server or Desktop 11
+                    (along with service packs)</p></li><li class="listitem"><p>SUSE Linux Enterprise Server or Desktop 12 (along
+                    with service packs)</p></li><li class="listitem"><p>All products and extensions based on SUSE Linux
+                    Enterprise Server 11 and SUSE Linux Enterprise Server
+                    12</p></li></ul></div><p>Versions of this document for Code 9 and Code 10 are
+            available as well and can be found at <a class="link" href="http://www.novell.com/developer/kernel_module_packages_manuals.html" target="_top">http://www.novell.com/developer/kernel_module_packages_manuals.html</a></p><p>This document's Appendix B highlights Code 10 to Code 11
+            changes and secure boot changes for SUSE Linux Enterprise
+            Server and SUSE Linux Enterprise Desktop 11 SP3 and later
+            versions. </p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-background"></a>Background</h2></div></div></div><p>The Linux kernel supports adding functionality at runtime
+            through kernel-loadable modules. It includes more than 1500
+            modules, about 75 percent of which are hardware drivers. These
+            modules are shipped as part of the kernel packages. In some
+            cases it is desirable to add additional modules or replace
+            existing ones. For example, a driver for a particular storage
+            controller that was not available at the time of product
+            release might be added later to support new hardware.</p><p>Kernel modules interact with the kernel by the means of
+            exported symbols, in a way similar to how user space binaries
+            use shared libraries. The /proc/kallsyms file lists all symbols
+            currently known to the kernel. To ensure that the kernel and
+            modules refer to the same symbols, a version checksum
+            (modversion) is added to each symbol. The checksum is computed
+            from the symbol's type: in the case of function symbols, the
+            checksum is determined by the function's parameters and return
+            type.</p><p>When any of a function's parameters or the return type
+            changes, the checksum changes as well. This includes all the
+            data types involved recursively:</p><p>If a function takes a <span class="strong"><strong>struct
+                task_struct</strong></span> as parameter and <span class="strong"><strong>struct task_struct</strong></span> includes a
+            field of type <span class="strong"><strong>struct dentry</strong></span>,
+            then a change to <span class="strong"><strong>struct
+                dentry</strong></span> will cause the symbol's version checksum
+            to change as well. Symbol version checksums for different
+            kernel flavors (for example <span class="strong"><strong>kernel-default</strong></span> versus <span class="strong"><strong>kernel-xen</strong></span>) will not match, and symbol versions
+            of the same kernel package on different architectures (for
+            example <span class="strong"><strong>kernel-default</strong></span> on
+            i386 versus x86_64) will not match either. This mechanism
+            ensures that the kernel and kernel modules agree on the types
+            of data structures that they use to communicate.</p><p>Unless symbol version checking is disabled, modules will load
+            only if the checksums of the symbols they use match the
+            checksums of the symbols that the kernel exports. The exported
+            symbols and their version checksums comprise the kernel
+            Application Binary Interface (kABI). When an updated kernel
+            includes kABI changes, kernel modules that use any modified
+            symbols must be updated as well. </p><p>During its multi-year lifecycle, products like SUSE Linux
+            Enterprise Server undergo continuous changes. In addition,
+            different kinds of updates like service packs (SPs),
+            maintenance/security updates, and customer-specific updates
+            (Program Temporary Fixes) are released. The Application Binary
+            Interface (ABI) between the kernel and kernel modules is
+            volatile. Some kernel updates will change the kernel ABI (kABI)
+            by adding or removing exported symbols, or existing symbol
+            checksums can change in a kernel update because of changes in
+            data structures they reference. SUSE strives to keep the kernel
+            ABI stable in maintenance and security and customer-specific
+            updates, but sometimes changes cannot be avoided. In service
+            packs, SUSE reserves the right to introduce more intrusive
+            changes, which increases the likelihood of ABI changes. SUSE
+            believes that the added flexibility outweighs the disadvantages
+            of breaking older modules. For full discussion of this topic,
+            see the documentation <span class="quote">“<span class="quote">SUSE SolidDriver Documentation:
+                SUSE Kernel ABI Stability</span>”</span> at <a class="link" href="https://drivers.suse.com/doc/SolidDriver/SUSE_Kernel_ABI_Stability.html" target="_top">https://drivers.suse.com/doc/SolidDriver/SUSE_Kernel_ABI_Stability.html</a>
+            and <span class="quote">“<span class="quote">The Linux Kernel Driver Interface</span>”</span> from Greg
+            Kroah-Hartman at <a class="link" href="http://www.kroah.com/log/linux/stable_api_nonsense.html" target="_top">http://www.kroah.com/log/linux/stable_api_nonsense.html
+            </a> (also provided as <span class="strong"><strong>stable_api_nonsense.txt</strong></span> in the upstream kernel
+            source tree).</p><p>SUSE-based operating systems include technology to ensure
+            that kernel modules can be reused or updated in synchronization
+            with kernel updates. To use this technology, kernel modules
+            must be packaged into Kernel Module Packages (KMPs) as defined
+            in this document.</p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-kernel-packages"></a>Kernel Packages</h2></div></div></div><p>All SUSE products based on kernels 2.6.x, 3.0.x, and 4.4.x
+            contain a set of kernel packages that share the same version
+            and release number; they are built from the same kernel
+            sources. These packages are:</p><h3><a id="id1339"></a><span class="package">kernel-FLAVOR</span>,
+                <span class="package">kernel-FLAVOR-base</span></h3><p>The binary kernel packages. Each architecture has its own set
+            of kernel flavors (for example, kernel-pae, kernel-default,
+            kernel-xen, etc.). These are the packages that the kernel
+            modules will be used with.</p><h3><a id="id1340"></a>
+            <span class="package">kernel-source</span>
+        </h3><p>The kernel source tree, generated by unpacking the vanilla
+            kernel sources and applying all necessary patches. Although the
+                <span class="package">kernel-FLAVOR</span> packages technically are
+            not built from the <span class="package">kernel-source</span> package,
+            they are built from the same source tree. This tree should be
+            used for module building.</p><h3><a id="id1341"></a>
+            <span class="package">kernel-syms, kernel-FLAVOR-devel</span>
+        </h3><p>Kernel symbol version information for compiling external
+            modules. The kernel-flavor-devel package is required for
+            building external modules. If this package is not used, the
+            resulting modules will be missing symbol version information,
+            which will cause them to break during kernel updates. The
+            kernel-source and kernel-devel packages used for compiling
+            external modules must match each other exactly.</p><p>Starting with SUSE Linux Enterprise Server and SUSE Linux
+            Enterprise Desktop 11 SP1, the <span class="package">kernel-syms</span>
+            package is a place-holder package which depends on the
+                <span class="package">kernel-FLAVOR-devel</span> packages for all
+            kernel flavors.</p><p>For more information, refer to the document <span class="quote">“<span class="quote">Working
+                With The SUSE 2.6.x and 3.x Kernel Sources</span>”</span> from
+            Andreas Gruenbacher and Michal Marek. This document is provided
+            as README.SUSE in the SUSE kernel-source package.</p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-kernel-modules"></a>Kernel Modules</h2></div></div></div><p>Documentation on general kernel module building can be found
+            in abundance on the Internet. Two good lectures are: </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Peter Jay Salzman, Michael Burian, Ori Pomerantz: The
+                    Linux Kernel Module Programming Guide, <a class="link" href="http://www.tldp.org/LDP/lkmpg/2.6/html/index.html" target="_top">http://www.tldp.org/LDP/lkmpg/2.6/html/index.html
+                    </a></p></li><li class="listitem"><p>Jonathan Corbet, Alessandro Rubini, Greg
+                    Kroah-Hartman: Linux Device Drivers, Third Edition,
+                    February 2005, <a class="link" href="http://www.oreilly.com/catalog/linuxdrive3/" target="_top">http://www.oreilly.com/catalog/linuxdrive3/</a>
+                    (also available online at <a class="link" href="http://lwn.net/Kernel/LDD3/" target="_top">http://lwn.net/Kernel/LDD3/</a>)</p></li></ul></div><p>SUSE-specific information is found in README.SUSE in the
+            kernel-source package.</p><p>When built, kernel module binaries are installed below
+                <code class="filename">/lib/modules/VERSION-RELEASE-FLAVOR</code> on
+            the file system (example:
+                <code class="filename">/lib/modules/3.0.101-63-default</code> for
+            the <code class="filename">kernel-default-3.0.101-63</code> package).
+            Different kernels have different module directories, and will
+            usually not see each others modules.</p><p>Update modules are modules intended to replace or augment the
+            modules that are provided in the kernel packages. Update
+            modules must be stored below the
+                <code class="filename">/lib/modules/VERSION-RELEASE-FLAVOR/updates/</code>
+            directory. Modules in the updates/ directory have precedence
+            over other modules with the same name. Never replace modules
+            from the kernel package by overwriting files: this would lead
+            to inconsistencies between the file system and the RPM
+            database.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Where to Store Modules</h3><p>Modules intended to take precedence over in-kernel
+                modules of the same name should be stored below
+                    <code class="filename">/lib/modules/VERSION-RELEASE-FLAVOR/updates/</code>.
+                Other add-on modules can be stored below
+                    <code class="filename">/lib/modules/VERSION-RELEASE-FLAVOR/extra/</code>.</p></div><p>Modules usually remain compatible with a range of
+                <span class="package">kernel-FLAVOR</span> packages. To make such
+            modules visible to other <span class="package">kernel-FLAVOR</span>
+            packages, symbolic links to compatible modules are put in
+                <code class="filename">/lib/modules/VERSION-RELEASE-FLAVOR/weak-updates/</code>
+            directories. Modules in the weak-updates/ directory have lower
+            priority than modules in the updates/ directory, but higher
+            priority than all other modules in
+                <code class="filename">/lib/modules/VERSION-RELEASE-FLAVOR</code>.
+            If more than one compatible module is available for a kernel,
+            the module with the highest kernel release is chosen. Kernel
+            Module Packages must never install modules into weak-updates or
+            directories.</p><p>Kernel modules must never be installed as individual files on
+            a production system, but always as part of a Kernel Module
+            Package.</p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-kernel-module-packages"></a>Kernel Module Packages</h2></div></div></div><p>SUSE has worked closely with the Linux Foundation Driver
+            Backport Workgroup to establish a standard structure for
+            building Kernel Module Packages for all RPM-based
+            distributions. The information in this document includes the
+            standards as appropriate.</p><p>Kernel Module Package spec files define a main package, and a
+            sub-package for each kernel flavor supported. The
+            kernel-flavor-specific sub-packages are defined with the
+            %kernel_module_package rpm macro. The macro automatically
+            determines for which kernel flavors to generate sub-packages.
+            Several options are available to modify the macro's behavior,
+            which are described below: </p><p>
+            <span class="strong"><strong>%kernel_module_package [-f filelist]
+                [-p preamble] [-n name] [-v version] [-r release] [-t
+                template] [-x flavor] [-b] [-c
+                module-signing-certificate]</strong></span>
+        </p><p>The main package of a Kernel Module Package can either
+            contain no <span class="strong"><strong>%files</strong></span> section,
+            in which case <span class="command"><strong>rpm</strong></span> will not create a
+            binary package with the main package's name, or the files
+            section can also be used for the user-space part associated
+            with the kernel modules that end up in the kernel specific
+            sub-packages. The example Kernel Module Package in Appendix A
+            has a main package without a <span class="strong"><strong>%files</strong></span> section.</p><p>Kernel Module Packages must adhere to the following
+            rules:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>The package <span class="strong"><strong>Name</strong></span>
+                    should consist of two components: a unique provider
+                    prefix, and a driver name. Hyphens are disallowed in
+                    the provider prefix, and allowed in the driver name.
+                    The provider prefix serves to create a non-overlapping
+                    name space for all providers.</p><p>The sub-package names are composed of the main
+                    package name, followed by a dash, the string
+                        <span class="quote">“<span class="quote">kmp</span>”</span>, followed by another dash and
+                    the flavor of the supported kernel. The first component
+                    (main package name) can be overridden with a different
+                    value by using the <code class="option">-n</code> option of the
+                        <span class="strong"><strong>%kernel_module_package</strong></span> macro.</p></li><li class="listitem"><p>The kernel module package <span class="strong"><strong>Version</strong></span> can have an arbitrary
+                    value.</p><p>The sub-package versions are composed of the main
+                    package version, followed by an underscore, and the
+                    version of the kernel source used during the
+                    build.</p><p>Since sub-packages already include the supported
+                    kernel's flavor in their name, the flavor is not again
+                    included in the sub-package's version. Dashes in the
+                    kernel release are replaced by underscores. The first
+                    component (main package version) can be overridden with
+                    the <code class="option">-v</code> option of the <span class="strong"><strong>%kernel_module_package</strong></span>
+                    macro.</p></li><li class="listitem"><p>The kernel module package <span class="strong"><strong>Release</strong></span> can be assigned freely as
+                    required. It must be incremented at least once for each
+                    package release.</p><p>The sub-package release numbers equal the main
+                    package's release number. It can be overridden with the
+                        <code class="option">-r</code> option of the <span class="strong"><strong>%kernel_module_package</strong></span>
+                    macro.</p></li><li class="listitem"><p>The appropriate <span class="strong"><strong>Requires</strong></span> and <span class="strong"><strong>Provides</strong></span> tags are computed
+                    automatically by <span class="command"><strong>rpm</strong></span> as
+                    described in the RPM Provides and Requires section
+                    below. Requires and Provides tags in the spec file will
+                    only be effective for the main package.</p></li><li class="listitem"><p>Kernel modules must be installed below
+                        <code class="filename">/lib/modules/VERSION-RELEASE-FLAVOR/updates/</code>.</p></li><li class="listitem"><p>Packages must be signed with a public/private key
+                    pair, and the public key of the private/public key-pair
+                    used for signing must be made known to RPM. See the
+                    section <span class="quote">“<span class="quote">Signing Kernel Module Packages</span>”</span>
+                    below for details.</p></li><li class="listitem"><p>If a kernel module package is intended to support
+                    UEFI Secure Boot, the modules in the package must be
+                    signed with a private key and the corresponding public
+                    key must be provided at package installation time. The
+                    macro's <code class="option">-c</code> option provides a way to
+                    create a separate package to provide the UEFI
+                    certificate with the required public key. Other spec
+                    file changes can be included to actually sign the
+                    modules. The <code class="option">-c</code> option is available
+                    starting with SUSE Linux Enterprise Server 11
+                    SP3.</p></li></ul></div><p>The <span class="strong"><strong>%description</strong></span> tag will
+            be applied to both the main package and the
+            sub-packages.</p><p>The <span class="strong"><strong>%kernel_module_package</strong></span>
+            macro uses a default sub-package template that should work for
+            most Kernel Module Packages. This template can be overridden
+            using the macro's <code class="option">-t</code> option. The default
+            template takes care of the following:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>When a Kernel Module Package package is installed,
+                        <span class="command"><strong>depmod</strong></span> is called to update
+                    module dependency information and various maps.
+                    Symbolic links pointing at the new modules are created
+                    in other kernels' <code class="filename">weak-modules/</code>
+                    directories for all compatible modules. Initial RAM
+                    disks used during booting are re-created automatically
+                    if they contain some of the added modules. Using the
+                    macro's <code class="option">-b</code> option will force the
+                    recreation of the initial RAM disk regardless of
+                    whether the existing RAM disk contains modules with the
+                    same names as the modules being installed. The
+                        <code class="option">-b</code> option is available starting
+                    with SUSE Linux Enterprise Server 11 SP2).</p></li><li class="listitem"><p>When a Kernel Module Package is removed,
+                        <span class="command"><strong>depmod</strong></span> is called to update
+                    module dependency information and various maps. The
+                    symbolic links pointing to the modules being removed
+                    are removed as well. Initial RAM disks are re-created
+                    in case they did contain some of the removed
+                    modules.</p></li></ul></div><p>By default, each kernel-specific sub-package will have the
+            following list of files, which can separately be overridden
+            with the <code class="option">-f</code> option:</p><pre class="screen">%defattr (-,root,root)
+/lib/modules/%2-%1</pre><p>Additional sub-package preamble lines such as <span class="strong"><strong>Requires</strong></span>, <span class="strong"><strong>Provides</strong></span>, and <span class="strong"><strong>Obsoletes</strong></span> tags can be specified with the
+                <code class="option">-p</code> option. File name arguments specified
+            in <code class="option">-f</code>, <code class="option">-p</code> and
+                <code class="option">-t</code> should be given as absolute path names
+            (for example <code class="filename">%_sourcedir/file</code>) and should
+            be listed as sources. The following substitutions are defined
+            in those files:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>%1 Flavor of the sub-package (for example:
+                    default)</p></li><li class="listitem"><p>%2 Kernel release string without flavor (for example:
+                    2.6.27.8-1)</p></li><li class="listitem"><p>%{-v*} The sub-package version</p></li><li class="listitem"><p>%{-r*} The sub-package release</p></li></ul></div><p>Some Kernel Module Packages may make sense only for some of
+            the kernel flavors a given architecture supports. A list of
+            flavors to exclude from the build should be passed with the
+                <span class="strong"><strong>-x</strong></span> option to the
+                <span class="strong"><strong>%kernel_module_package</strong></span>
+            macro.</p><p>Appendix A contains an example Kernel Module Package spec
+            file and the source code referenced by it. When this spec file
+            and its accompanying source is built into an x86_64 RPM as
+            described in section <a class="xref" href="#sec-building-kmp" title="Building Kernel Module Packages">the section called “Building Kernel Module Packages”</a>, the <span class="strong"><strong>BuildRequires</strong></span> tag in the spec file will pull
+            the <span class="package">module-init-tools</span>,
+                <span class="package">kernel-source</span>,
+                <span class="package">kernel-syms</span> and
+                <span class="package">kernel-devel</span> packages into the build
+            root. </p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Dependency</h3><p>The <span class="strong"><strong>%kernel_module_package_buildreqs</strong></span> macro does
+                not need to explicitly list <span class="quote">“<span class="quote">kernel-source</span>”</span>
+                since the <span class="package">kernel-syms</span> package has a
+                dependency on the <span class="package">kernel-source</span>
+                package.</p></div><p>Now assume that the required packages are available in SUSE
+            Linux Enterprise Server 11 SP4 (kernel 3.0.101-63), and that
+            the default, trace, and Xen kernel flavors are available on
+            that platform. Assuming a release number of <span class="quote">“<span class="quote">0</span>”</span>,
+                <span class="command"><strong>rpm</strong></span> would then create the
+            following packages:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+                    <span class="package">suse-hello-kmp-default-1.0_3.0.101_63-0.x86_64.rpm</span>
+                </p></li><li class="listitem"><p>
+                    <span class="package">suse-hello-kmp-trace-1.0_3.0.101_63-0.x86_64.rpm</span>
+                </p></li><li class="listitem"><p>
+                    <span class="package">suse-hello-kmp-xen-1.0_3.0.101_63-0.x86_64.rpm</span>
+                </p></li></ul></div><p>The generated packages would contain the following modules,
+            and require and provide the following symbols:</p><div class="table"><a id="id1558"></a><p class="title"><strong>Table 1. Package Information</strong></p><div class="table-contents"><table class="table" summary="Package Information" border="1"><colgroup><col /><col /><col /><col /></colgroup><thead><tr><th>Package</th><th>Requires</th><th>Provides</th><th>Modules</th></tr></thead><tbody><tr><td>suse-hello-kmp-default</td><td>
+                            <p>kernel(default:kernel_printk) =
+                                f06347de1657cfa8</p>
+                            <p>...</p>
+                        </td><td>
+                            <p>suse-hello-kmp = 1.0_3.0.101_63
+                                ksym(default:exported_function) =
+                                e52d5bcf</p>
+                            <p>suse-hello-kmp-default =
+                                1.0_3.0.101_63-0</p>
+                        </td><td>/lib/modules/ 3.0.101-63-default/
+                            updates/hello.ko</td></tr><tr><td>suse-hello-kmp-trace</td><td>
+                            <p>kernel(trace:kernel_printk) =
+                                7a87f1ab614120c0</p>
+                            <p>...</p>
+                        </td><td>
+                            <p>suse-hello-kmp = 1.0_3.0.101_63
+                                ksym(trace:exported_function) =
+                                e52d5bcf</p>
+                            <p>suse-hello-kmp-trace =
+                                1.0_3.0.101_63-0</p>
+                        </td><td>/lib/modules/ 2.6.27.8_1.0-trace/
+                            updates/hello.ko</td></tr><tr><td>suse-hello-kmp-xen</td><td>
+                            <p>kernel(xen:kernel_printk) =
+                                69e7f9b015806194</p>
+                            <p>...</p>
+                        </td><td>
+                            <p>suse-hello-kmp = 1.0_3.0.101_63
+                                ksym(xen:exported_function) =
+                                e52d5bcf</p>
+                            <p>suse-hello-kmp-xen =
+                                1.0_3.0.101_63-0</p>
+                        </td><td>/lib/modules/ 2.6.27.8_1.0-xen/
+                            updates/hello.ko</td></tr></tbody></table></div></div><br class="table-break" /><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title"><span class="quote">“<span class="quote">k</span>”</span> Character</h3><p>KMPs built for SUSE Linux Enterprise Server 12 releases
+                will include the “k” character before the kernel version in
+                the KMP version string. As an example, the
+                suse-hello-kmp-default package built for SUSE Linux
+                Enterprise Server 12 SP2 (kernel 4.4.21-69) would have the
+                full file name
+                suse-hello-kmp-default-k4.4.21_69-0.x86_64.rpm.</p></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-provides-requires"></a>RPM Provides and Requires</h2></div></div></div><p>Kernels export symbols that kernel modules use. Symbols have
+            version checksums attached, and the checksums of the exported
+            kernel symbols must match the checksums of the kernel symbols
+            that the kernel module package uses. In SUSE Linux Enterprise
+            Server 11 releases, kernels do not provide each kernel symbol
+            individually; instead they group symbols together into classes
+            (called <span class="quote">“<span class="quote">symsets</span>”</span>) and provide checksums of these
+            classes. </p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Number of Classes</h3><p>The number of classes is much smaller than the full
+                number of symbols provided by the kernel.</p></div><p>Similarly, SUSE Linux Enterprise Server 11 Kernel Module
+            Packages require checksums for classes rather than for
+            individual symbols. In SUSE Linux Enterprise Server 12
+            releases, kernels provide checksums for each individual symbol.
+            Therefore, SUSE Linux Enterprise Server 12 Kernel Module
+            Packages require checksums for individual symbols.</p><p>When modules in Kernel Module Packages export additional
+            symbols, such symbols are mapped to per-symbol <span class="strong"><strong>Provides</strong></span> of those packages.
+            Modules in other Kernel Module Packages can require those
+            symbols; they would also do so on a per-symbol basis. As an
+            example, assume that a Kernel Module Package provides an
+            exported function as <span class="italic">ksym(default:exported_function)
+                = e52d5bcf</span>. Any Kernel Module Package that uses
+            this function would require this same symbol and
+            checksum.</p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-building-kmp"></a>Building Kernel Module Packages</h2></div></div></div><p>In addition to the C and kernel programming skills required
+            for writing the kernel module source code, creating proper
+            Kernel Module Packages requires some familiarity with
+                <span class="command"><strong>rpm</strong></span> and with build environments.
+            For more information on kernel module building refer to the
+            above-mentioned <span class="quote">“<span class="quote">Linux Kernel Module Programming
+                Guide</span>”</span> and the <span class="quote">“<span class="quote">Linux Device Drivers</span>”</span>
+            book. Additional SUSE-specific kernel and kernel module
+            information can be found in the README.SUSE in the
+            kernel-source package. SUSE recommends using the example
+            package found in Appendix A as a template to reduce the
+            complexities related to <span class="command"><strong>rpm</strong></span>. A lot
+            of additional information on <span class="command"><strong>rpm</strong></span> can
+            be found at <a class="link" href="http://www.rpm.org/" target="_top">http://www.rpm.org/</a>, including a reference to the
+            excellent Maximum RPM.</p><p>SUSE strongly recommends using the kernel build
+            infrastructure (kbuild) for building and installing the kernel
+            modules, as done in the example package. Kbuild is documented
+            in /usr/src/linux/Documentation/kbuild/ from the kernel-source
+            package. Trying to emulate kbuild will lead to various problems
+            including mis-compilations and missing or wrong symbol
+            versions, and increased support load because of subtle
+            breakages.</p><p>To achieve consistent and reproducible builds in a defined
+            environment independent of the software installed on the system
+            used for building, use the build script from the
+                <span class="package">build.rpm</span> package. This script sets up a
+            build environment from the RPM packages the script is pointed
+            at. The packages are then built in this environment using
+                <span class="command"><strong>chroot</strong></span> (see the chroot(1) manual
+            page). All SUSE packages are built using the same mechanism.
+            When building Kernel Module Packages with
+                <span class="package">build.rpm</span>, the following options of the
+            build script are particularly relevant:</p><h3><a id="id1628"></a>--root <span class="italic">directory</span></h3><p>Define the directory in which to set up the build
+            environment. Defaults to the BUILD_ROOT environment variable,
+            and to <code class="filename">/var/tmp/build-root</code> if
+            unset.</p><h3><a id="id1632"></a>--RPMs <span class="italic">path1</span>[:<span class="italic">path2</span>:...]</h3><p>Define where build will look for packages for constructing
+            the build environment. The directories are searched
+            recursively. Packages found earlier in the path have precedence
+            over packages found later, similar to how the PATH environment
+            variable works. Defaults to the BUILD_RPMS environment
+            variable, and to <code class="filename">/media/dvd/suse</code> if unset.
+            The <code class="option">--rpms</code> option must only be specified
+            once.</p><h3><a id="id1638"></a>--clean, --no-init</h3><p>Reconstruct the build environment entirely from scratch
+                (<code class="option">--clean</code>), or start the build without
+            initializing the build environment
+            (<code class="option">--no-init</code>), which skips checking whether all
+            packages in the build environment are up-to-date.</p><p>Build stores the created packages below
+                <code class="filename">usr/src/packages/</code> in the build
+            environment.</p><p>On dual-architecture machines, packages for the other
+            supported architecture can be built by running the build script
+            inside an architecture selector. On x86_64, the selector is
+            called linux32, on ppc64 this is ppc32, and on s390x the
+            selector is called s390. The same build environment cannot be
+            reused for different architectures unless it is reinitialized
+            with build's <code class="option">--clean</code> option.</p><p>See the build(1) manual page for further information.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Building External Modules</h3><p>For building external modules, you need to have both the
+                kernel-source and kernel-&lt;flavor&gt;-devel packages
+                installed in the build environment. The BuildRequires line
+                in spec files takes care of this: the <span class="strong"><strong>%kernel_module_package_buildreqs</strong></span> macro
+                specifies the kernel-syms package, which pulls in the
+                kernel-source package and the kernel-&lt;flavor&gt;-devel
+                packages because of its dependency on them. Note that
+                without the kernel-syms the module build can still succeed
+                depending on how you do the build, but the resulting
+                modules will have module symbol versions disabled. Kernel
+                Module Packages without module symbol versions will appear
+                to match any kernel although in fact they do not. This can
+                easily lead to very hard-to-diagnose system
+                malfunctions.</p></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-signing"></a>Signing</h2></div></div></div><p>Signing (as applied to a piece of software) is the process of
+            digitally tagging the software to verify the author and
+            guarantee that the software has not been altered since it was
+            signed. SUSE Linux Enterprise Server and SUSE Linux Enterprise
+            Desktop include utilities to sign and validate signatures on
+            packages and repositories. In addition, SUSE Linux Enterprise
+            Server and SUSE Linux Enterprise Desktop 11 SP3 and later
+            versions include technology to sign and validate signatures on
+            kernel modules.</p><p>The following sections describe how to sign packages and
+            kernel modules. The topic of repository signing is beyond the
+            scope of this document.</p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-signing-packages"></a>Signing Packages</h3></div></div></div><p>All packages that are provided in SUSE Linux Enterprise
+                Server and SUSE Linux Enterprise Desktop are digitally
+                signed with the SUSE Build key. SolidDriver/PLDP packages
+                that are built on the SolidDriver Build Server by the SUSE
+                SolidDriver team are automatically signed with the SUSE
+                SolidDriver/PLDP key (see <a class="link" href="https://drivers.suse.com/doc/Usage/Package_Signing_Key.html#package-signing-key" target="_top">https://drivers.suse.com/doc/Usage/Package_Signing_Key.html#package-signing-key</a>
+                ). Partners who build and/or provide their own packages are
+                encouraged to sign them with their own keys. </p><p>To sign packages, a private/public key pair must be
+                installed on the GNU Privacy Guard (GPG) keyring of the
+                signing user (see the <code class="option">--gen-key</code> option in
+                the gpg(1) manual page at <a class="link" href="https://linux.die.net/man/1/gpg" target="_top">https://linux.die.net/man/1/gpg</a>). Then the
+                following command can be used to sign a package (replace
+                build@suse.com with the identity that identifies your
+                signing key):</p><pre class="screen">$ rpm --eval “%define _signature gpg” \
+      --eval “%define _gpg_name build@suse.com” \
+      --addsign package.rpm</pre><p>Note that a package can only be signed once. Another
+                    <code class="option">--addsign</code> operation will replace an
+                existing old signature, and will add the new one.</p><p>The public key used for signing must then be exported
+                into a file with the command:</p><pre class="screen">$ gpg --armor --export build &gt;build-pubkey.txt</pre><p>Then, import the key into the RPM database with the
+                command:</p><pre class="screen">$ rpm --import build-pubkey.txt</pre><p>You can verify that both package signing and key import
+                have succeeded with RPM's <code class="option">--checksig</code>
+                option (note the <span class="quote">“<span class="quote">gpg</span>”</span> in the output):</p><pre class="screen">$ rpm --checksig package.rpm
+package.rpm: (sha1) dsa sha1 md5 gpg OK</pre><p>The public key exported to
+                    <code class="filename">build-pubkey.txt</code> must be delivered
+                to customers in a way that they will trust. It must be
+                imported into the RPM database on systems on which the
+                signed packages are to be installed.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-signing-module-object"></a>Signing Module Object Files <span class="italic">(UEFI Secure Boot)</span></h3></div></div></div><p>Although using signed packages and other OS security
+                features can secure an installed and running system, they
+                cannot prevent system subversion before the OS has booted.
+                To address pre-OS security concerns, the UEFI 2.2 Secure
+                Boot specification (see <a class="link" href="http://www.uefi.org/specs " target="_top">http://www.uefi.org/specs</a>) details a protocol
+                to prevent the loading of boot loaders or kernels
+                (including modules) that are not signed with an approved
+                digital key stored in the system firmware.</p><p>The UEFI Secure Boot specification allows for variation
+                in implementation. A simple way to implement secure boot is
+                to ensure that the base system (as provided by the system
+                vendor) contains all the keys that will be used by the boot
+                loader, the OS, and any drivers. But having the system
+                vendor simply place all needed keys into the firmware is
+                not a full solution, as it does not give appropriate
+                control to the system user/owner. SUSE's secure boot
+                implementation addresses this control issue by extending
+                the secure-boot-enabled EFI shim loader to accept keys that
+                have been approved by the system owner. Thus, if there is a
+                need to load a module with an unrecognized key, the key can
+                be added to the <span class="quote">“<span class="quote">approved key</span>”</span> database
+                (reboot and system-owner approval required).</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Module Without Signature</h3><p>If a module has no signature, it cannot be loaded on
+                    a secure-boot-enabled system. Users who wish to load
+                    unsigned modules on SUSE Linux Enterprise Server/SUSE
+                    Linux Enterprise Desktop 11 SP3 or later versions must
+                    disable secure boot.</p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-creating-key"></a>Creating a Key and Certificate</h4></div></div></div><p>There are several ways to sign modules, but all
+                    methods require providing a key and certificate.
+                    Official keys and certificates can be provided by an
+                    organization's security team or by build services (such
+                    as the Open Build Service or the SolidDriver/PLDP Build
+                    Service). Developers and packagers can also generate
+                    their own keys and certificates for testing purposes.
+                    To create a key and certificate using the
+                        <span class="command"><strong>openssl req</strong></span> command, type the
+                    following:</p><pre class="screen">export USER="your company name"
+openssl req -new -x509 -newkey rsa:2048 -sha256 -keyout key.asc -out cert.der \
+            -outform der -nodes -days 4745 -subj "/CN=$USER/"</pre><p>The above sequence of commands will create a
+                        <code class="filename">key.asc</code> key file and a
+                        <code class="filename">cert.der</code> x509 certificate in
+                    the current working directory. The
+                        <code class="option">4745</code> option generates a
+                    certificate which will be valid for 13 years.</p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-sign-existing-kmp"></a>Signing an Existing KMP</h4></div></div></div><p>The <span class="package">pesign-obs-integration</span> package
+                    in SUSE Linux Enterprise Server 11 SP3 and later
+                    versions provides a
+                        <span class="command"><strong>modsign-repackage</strong></span> utility that
+                    can be used to sign kernel modules in an existing KMP.
+                        <span class="command"><strong>modsign-repackage</strong></span> unpacks the
+                    original RPM, signs any included modules and re-creates
+                    the RPM. It also creates a second
+                        <span class="package">&lt;name&gt;-ueficert</span> RPM that
+                    installs the certificate and calls the
+                        <span class="command"><strong>mokutil</strong></span> utility to enroll the
+                    public key. The re-packaged RPM will have a dependency
+                    on the <span class="package">&lt;name&gt;-ueficert</span> RPM,
+                    ensuring that the certificates will be installed at the
+                    same time as the module(s).</p><p>To use <span class="command"><strong>modsign-repackage</strong></span> with the
+                        <span class="strong"><strong>key.asc</strong></span> key and
+                    the <span class="strong"><strong>cert.der</strong></span>
+                    certificate created above to repackage a
+                        <span class="package">./suse-hello-kmp-default-1.0_3.0.101_63-0.x86_64.rpm</span>
+                    package, do the following:</p><pre class="screen">modsign-repackage -c ./cert.der -k ./key.asc ./suse-hello-kmp-default-1.0-3.0.101_63-0.x86_64.rpm</pre><p>The above command will create the following
+                    directories and files in the current working
+                    directory:</p><pre class="screen">    ./RPMS/
+      x86_64/
+          suse-hello-kmp-default-1.0-3.0.101_63-0.x86_64.rpm
+          suse-hello-ueficert-1.0-0.x86_64.rpm</pre></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-signing-packaging"></a>Signing Modules During Packaging</h4></div></div></div><p>Signing modules as part of the packaging process
+                    requires making a few changes to the KMP spec file
+                    template. The spec file template in Appendix A includes
+                    these changes along with conditionals to ensure that
+                    the changes will apply only when building KMPs for SUSE
+                    Linux Enterprise Server or SUSE Linux Enterprise
+                    Desktop 11 SP3 or later versions. The changes
+                    are:</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>List the certificate file as a <span class="strong"><strong>%Source</strong></span> file. The
+                            top-level directory of the build structure
+                            (where the spec file is located) should include
+                            both a private key file and a certificate file.
+                            The spec file should list the certificate as a
+                                <span class="emphasis"><em>%Source</em></span> file. The spec
+                            file should not list the key file (since the
+                            private key should not be included in the
+                            source KMP).</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Naming</h3><p>To be recognized by the kernel Makefile,
+                                the key file must be named
+                                    <span class="quote">“<span class="quote">signing_key.priv</span>”</span> and the
+                                certificate file must be named
+                                    <span class="quote">“<span class="quote">signing_key.x509</span>”</span>. The
+                                example above describes how to use the
+                                    <span class="command"><strong>openssl req</strong></span> command
+                                to create a <code class="filename">key.asc</code>
+                                key file and a
+                                    <code class="filename">cert.der</code>
+                                certificate file; to use these files at
+                                packaging-time, they should be renamed to
+                                    <span class="quote">“<span class="quote">signing_key.priv</span>”</span> and
+                                    <span class="quote">“<span class="quote">signing_key.x509</span>”</span>.</p></div></li><li class="listitem"><p>Add code to determine the build target's
+                            service pack level. This is done by adding the
+                                <span class="package">sles-release</span> (or
+                                <span class="package">sled-release</span>) package to
+                                <span class="strong"><strong>%BuildRequires</strong></span> and then
+                            defining a <span class="strong"><strong>%sle_version</strong></span> macro based on the
+                            contents of the
+                                <code class="filename">/etc/SuSE-release</code>
+                            file.</p></li><li class="listitem"><p>For SUSE Linux Enterprise Server 11 SP3 and
+                            later versions, invoke the <span class="strong"><strong>%kernel_module_package</strong></span> macro
+                            with the <code class="option">-c
+                                %_sourcedir/signing_key.x509</code>
+                            option to specify the certificate (and thus the
+                            key) to use in signing. Using the
+                            kernel_module_package <code class="option">-c</code>
+                            option does not cause any module signing; it
+                            simply ensures the creation of a
+                                <span class="package">&lt;name&gt;-ueficert</span>
+                            package which installs the certificate and
+                            calls the <span class="command"><strong>mokutil</strong></span> utility to
+                            enroll the public key. The actual module
+                            signing is handled in the <span class="strong"><strong>%install</strong></span> section
+                            of the spec file.</p></li><li class="listitem"><p>For SUSE Linux Enterprise Server 11 SP3 and
+                            later versions, add <span class="strong"><strong>%install</strong></span> section code to ensure
+                            that the modules will get signed. This is done
+                            by setting the CONFIG_MODULE_SIG_ALL kernel
+                            configuration parameter. When
+                            CONFIG_MODULE_SIG_ALL is set, the <span class="command"><strong>make
+                                modules_install</strong></span> step
+                            automatically includes module signing.</p></li></ol></div><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Own Keys and Certificates</h3><p>The Appendix A sample spec file is designed to be
+                        used by developers and packagers who provide their
+                        own keys and certificates. Partners who use the
+                        Open Build Service will not need to provide keys
+                        and certificates and thus should use the spec file
+                        in Appendix A.1.</p></div></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-secure-boot-kmp"></a>Installation of Secure-boot-enabled KMPs</h4></div></div></div><p>As discussed above, secure-boot-enabled KMPs include
+                    an additional <span class="package">&lt;name&gt;-ueficert</span>
+                    package to install the certificate and enroll the
+                    public key. The
+                        <span class="package">&lt;name&gt;-kmp-&lt;flavor&gt;</span>
+                    packages require the
+                        <span class="package">&lt;name&gt;-ueficert</span>
+                    package.</p><p>After the <span class="package">&lt;name&gt;-ueficert</span>
+                    package is installed, the system must be rebooted and
+                    the newly-enrolled key approved by the system owner
+                    before the key (and thus the signed modules) can be
+                    used.</p><p>The <span class="command"><strong>mokutil</strong></span> utility can also be
+                    used on its own to view and manage keys in the key
+                    database.</p></div></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-deploying-kmp"></a>Deploying Kernel Module Packages</h2></div></div></div><p>Kernel Module Packages can be distributed on Driver Update
+            Disks, as add-on products, in full Bootable Driver
+            Kits/Installation Kits, or simply as stand-alone RPMs.</p><p>If a Kernel Module Package's driver is required to boot an
+            installation kernel, the Kernel Module Package should be
+            provided on a Driver Update Disk (DUD) or in a Bootable Driver
+            Kit/Installation Kit. Otherwise, it is recommended to provide
+            Kernel Module Packages as add-on products complete with URL(s)
+            for functioning update sites.</p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-installation-and-kmp"></a>System Installation and Kernel Module Packages</h2></div></div></div><p>Initial system installation is carried out by YaST from some
+            installation media (CDs or DVDs, network locations, etc.). As
+            noted above, support for additional hardware that the
+            installation media do not provide can be added with Driver
+            Update Disks or Bootable Driver Kits/Installation Kits. This is
+            most important to enable hardware needed for booting, such as
+            storage controllers.</p><p>Update media such as Driver Update Disks and Bootable Driver
+            Kits/Installation Kits provide two kinds of modules: those
+            which the kernel that runs the installation uses, and those
+            which are installed onto the final target system. Both types of
+            modules are provided by including Kernel Module Packages on the
+            update media. In addition, update media can contain scripts
+            which are run at specific times during the installation. The
+            <span class="quote">“<span class="quote">Update Media HOWTO</span>”</span> at <a class="link" href="ftp://ftp.suse.com/pub/people/hvogel/Update-Media-HOWTO" target="_top">ftp://ftp.suse.com/pub/people/hvogel/Update-Media-HOWTO</a>
+            describes in more detail what a Driver Update Disk must contain
+            to work.</p><p>After the initial YaST installation, additional driver
+            packages can be installed using any of the mechanisms for
+            installing RPM packages (YaST Add-on Products, YaST Software
+            Management, YaST Online Update, the <span class="command"><strong>rpm</strong></span>
+            command, etc.). The add-on product format supports the ability
+            to register the system for an update site.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">initrd</h3><p>Any drivers required for getting to and accessing the
+                root file system must be part of the initial RAM disk
+                (initrd). YaST will automatically include necessary kernel
+                modules in the initrd created during installation. But when
+                Kernel Module Packages are installed by hand or updated, it
+                can be necessary to explicitly rebuild the initrd to
+                include the new modules. A Kernel Module Package will
+                automatically rebuild the initrd in its <span class="strong"><strong>%postinstall</strong></span> script if the
+                module being installed is already part of the existing
+                initrd or if the <code class="option">-b</code> option to the
+                    <span class="strong"><strong>%kernel_module_package</strong></span> macro is
+                used.</p><p>The <code class="option">-b</code> option simply forces an initrd
+                rebuild using the existing initrd configuration: If the
+                existing initrd configuration (for example, the <span class="strong"><strong>/etc/sysconfig/kernel
+                    INITRD_MODULES</strong></span> variable) does not include
+                the module being installed, then simply using the
+                    <code class="option">-b</code> option will not include the new
+                module in the new initrd. In such cases, the Kernel Module
+                Package also needs to make appropriate initrd configuration
+                changes (such as updating INITRD_MODULES) to include the
+                new module. </p></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-kernel-updates"></a>Kernel Updates and Kernel Module Packages</h2></div></div></div><p>After all software repositories that should be checked for
+            updates have been added, the package manager will automatically
+            detect when new kernel packages and new Kernel Module Packages
+            become available. The dependencies between those packages will
+            ensure that the installed kernel packages match the installed
+            Kernel Module Packages.</p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-appendix-a"></a>Appendix A: Sample Source for <span class="package">suse-hello</span>
+            Kernel Module Package</h2></div></div></div><p>The following sample is described in the section <a class="xref" href="#sec-kernel-module-packages" title="Kernel Module Packages">the section called “Kernel Module Packages”</a>. The spec file includes conditional code
+            that will build secure-boot-enabled packages for SUSE Linux
+            Enterprise Server 11 SP3 and later versions and
+            non-secure-boot-enabled packages for SUSE Linux Enterprise
+            Server 11 – SUSE Linux Enterprise Server 11 SP2. The
+            conditional code is shown in bold and can be removed if there
+            is no need to build secure-boot-enabled packages.</p><p>When using the sample to build secure-boot-enabled packages,
+            the build structure must also include
+                <code class="filename">signing_key.priv</code> and
+                <code class="filename">signing_key.x509</code> files as described in
+            the <a class="xref" href="#sec-signing-packaging" title="Signing Modules During Packaging">the section called “Signing Modules During Packaging”</a> section above. The
+                <code class="filename">signing_key.*</code> files must be located in
+            the same directory as the spec file.</p><p>
+            <span class="strong"><strong>suse-hello.spec</strong></span>
+        </p><pre class="screen"># norootforbuild
+
+Name:			suse-hello
+BuildRequires:	%kernel_module_package_buildreqs
+<span class="strong"><strong># Required to support secure-boot:  Include sles-release in order to determine
+# service-pack version
+BuildRequires:	sles-release</strong></span>
+License:		GPL
+Group:		System/Kernel
+Summary:		Sample Kernel Module Package
+Version:		1.0
+Release:		0
+Source0:		%{name}-%{version}.tar.bz2
+<span class="strong"><strong># Required to support secure-boot:  Include certificate named “signing_key.x509”
+# Build structure should also include a private key named “signing_key.priv”
+# Private key should not be listed as a source file
+Source1:		signing_key.x509</strong></span>
+BuildRoot:		%{_tmppath}/%{name}-%{version}-build
+
+<span class="strong"><strong># Required to support secure-boot:  Determine service-pack level
+%define sle_version %(tr '\\n' ' ' &lt; /etc/SuSE-release | sed -rn 's/^SUSE Linux
+Enterprise ([A-z]+) ([0-9]+).*PATCHLEVEL = ([0-9]+).*$/\\2\\3/p')</strong></span>
+
+<span class="strong"><strong># Required to support secure-boot:  The -c option tells the macro to generate a
+# suse-hello-ueficert subpackage that enrolls the certificate
+%if 0%{?sle_version} &gt; 112
+%kernel_module_package -c %_sourcedir/signing_key.x509
+%else</strong></span>
+%kernel_module_package
+<span class="strong"><strong>%endif</strong></span>
+
+%description
+This package contains the hello.ko module.
+
+%prep
+%setup
+<span class="strong"><strong># Required to support secure-boot:  Copy the signing key to the build area
+%if 0%{?sle_version} &gt; 112
+cp %_sourcedir/signing_key.* .
+%endif</strong></span>
+set -- *
+
+mkdir source
+mv "$@" source/
+mkdir obj
+
+%build
+for flavor in %flavors_to_build; do
+rm -rf obj/$flavor
+cp -r source obj/$flavor
+make -C %{kernel_source $flavor} modules M=$PWD/obj/$flavor
+done
+
+%install
+export INSTALL_MOD_PATH=$RPM_BUILD_ROOT
+export INSTALL_MOD_DIR=updates
+for flavor in %flavors_to_build; do
+     <span class="strong"><strong># Required to support secure-boot:  By default, kernel modules are not
+      # signed by make. The CONFIG_MODULE_SIG_ALL=y setting overrides this for
+      # flavors with module signing enabled.
+      unset CONFIG_MODULE_SIG_ALL
+      if grep '^CONFIG_MODULE_SIG=y' %{kernel_source $flavor}/.config; then
+         export CONFIG_MODULE_SIG_ALL=y
+      fi </strong></span>
+      make -C %{kernel_source $flavor} modules_install M=$PWD/obj/$flavor
+done
+
+%changelog
+* Fri Apr 27 2017 – andavis@suse.com
+- Typo fixes; remove excluded flavors from kernel_module_package macro line
+* Wed Apr 24 2013 - mmarek@suse.cz
+- Sign the module by a supplied keypair.
+* Tue Dec 22 2008 - andavis@suse.com
+- Updated to reflect CODE 11 changes and LF standard spec file work.
+* Sat Jan 28 2006 - agruen@suse.de
+- Initial package.</pre><p>The following two files should be compressed to form the
+                <code class="filename">suse-hello-1.0.tar.bz2</code> TAR archive
+            referenced as Source0 in the
+                <code class="filename">suse-hello.spec</code> file above.</p><p>
+            <span class="strong"><strong>suse-hello-1.0/Kbuild</strong></span>
+        </p><pre class="screen">obj-m		:= hello.o
+hello-y	+= main.o</pre><p>
+            <span class="strong"><strong>suse-hello-1.0/main.c</strong></span>
+        </p><pre class="screen">/*
+ * main.c - A demo kernel module.
+ *
+ * Copyright (C) 2003, 2004, 2005, 2006
+ * Andreas Gruenbacher &lt;agruen@suse.de&gt;, SUSE Labs
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation.
+ *
+ * A copy of the GNU General Public License can be obtained from
+ * http://www.gnu.org/.
+ */
+
+#include &lt;linux/module.h&gt;
+#include &lt;linux/init.h&gt;
+
+MODULE_AUTHOR("Andreas Gruenbacher &lt;agruen@suse.de&gt;");
+MODULE_DESCRIPTION("Hello world module");
+MODULE_LICENSE("GPL");
+
+int param;
+
+module_param(param, int, 0);
+MODULE_PARM_DESC(param, "Example parameter");
+
+void exported_function(void)
+{
+        printk(KERN_INFO "Exported function called.\n");
+}
+EXPORT_SYMBOL_GPL(exported_function);
+
+int __init init_hello(void)
+{
+        printk(KERN_INFO "Hello world.\n");
+        return 0;
+}
+
+void __exit exit_hello(void)
+{
+        printk(KERN_INFO "Goodbye world.\n");
+}
+
+module_init(init_hello);
+module_exit(exit_hello);</pre></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-appendix-a1"></a>Appendix A.1: Sample Spec File for Use with SUSE Build
+            Services</h2></div></div></div><p>Packagers who use the Open Build Service (see <a class="link" href="https://build.opensuse.org/" target="_top">https://build.opensuse.org/</a>) to create KMPs can
+            take advantage of the fact that this build service provides
+            keys and certificates for package and module signing. The
+            following spec file can be used in the Open Build Service to
+            build secure-boot-enabled KMPs for SUSE Linux Enterprise Server
+            and SUSE Linux Enterprise Desktop 11 SP3 and later versions. It
+            can also be used to build non-secure-boot-enabled KMPs for all
+            versions from SUSE Linux Enterprise Server and SUSE Linux
+            Enterprise Desktop 11 up to SUSE Linux Enterprise Server and
+            SUSE Linux Enterprise Desktop 11 SP2. The secure-boot
+            conditional code is emphasized in bold.</p><p>A sample package similar to this one is available in the Open
+            Build Service at <a class="link" href="https://build.opensuse.org/package/show/home:andavis:PLDP/suse-hello-1.0" target="_top">https://build.opensuse.org/package/show/home:andavis:PLDP/suse-hello-1.0</a>
+        </p><p>
+            <span class="strong"><strong>suse-hello.spec</strong></span>
+        </p><pre class="screen"><span class="strong"><strong># The following line tells the buildservice to save the project certificate as
+# %_sourcedir/_projectcert.crt
+
+# needssslcertforbuild</strong></span>
+
+Name:			suse-hello
+BuildRequires:	%kernel_module_package_buildreqs
+<span class="strong"><strong># Required to support secure-boot:  Include sles-release in order to determine
+# service-pack version
+BuildRequires:	sles-release</strong></span>
+License:		GPL
+Group:		    System/Kernel
+Summary:		Sample Kernel Module Package
+Version:		1.0
+Release:		0
+Source0:		%{name}-%{version}.tar.bz2
+BuildRoot:		%{_tmppath}/%{name}-%{version}-build
+
+<span class="strong"><strong># Required to support secure-boot:  Determine service-pack level
+%define sle_version %(tr '\\n' ' ' &lt; /etc/SuSE-release | sed -rn 's/^SUSE Linux
+Enterprise ([A-z]+) ([0-9]+).*PATCHLEVEL = ([0-9]+).*$/\\2\\3/p')</strong></span>
+
+<span class="strong"><strong># Required to support secure-boot:  The -c option tells the macro to generate a
+# suse-hello-ueficert supackage that enrolls the certificate
+# The _projectcert.crt certificate is provided by the build service
+%if 0%{?sle_version} &gt; 112
+%kernel_module_package -c %_sourcedir/_projectcert.crt
+%else</strong></span>
+%kernel_module_package
+<span class="strong"><strong>%endif</strong></span>
+
+%description
+This package contains the hello.ko module.
+
+%prep
+%setup
+set -- *
+mkdir source
+mv "$@" source/
+mkdir obj
+
+%build
+for flavor in %flavors_to_build; do
+      rm -rf obj/$flavor
+      cp -r source obj/$flavor
+      make -C %{kernel_source $flavor} modules M=$PWD/obj/$flavor
+done
+
+%install
+export INSTALL_MOD_PATH=$RPM_BUILD_ROOT
+export INSTALL_MOD_DIR=updates
+for flavor in %flavors_to_build; do
+      make -C %{kernel_source $flavor} modules_install M=$PWD/obj/$flavor
+done
+
+<span class="strong"><strong># The BRP_PESIGN_FILES variable must be set to a space separated list of
+# directories or patterns matching files that need to be signed.  E.g., packages
+# that include firmware files would set BRP_PESIGN_FILES='*.ko /lib/firmware'
+export BRP_PESIGN_FILES='*.ko'</strong></span>
+
+%changelog
+* Fri Apr 27 2017 – andavis@suse.com
+- Typo fixes; remove excluded flavors from kernel_module_package macro line.
+* Wed Apr 24 2013 - mmarek@suse.cz
+- Sign the module by a supplied keypair.
+* Tue Dec 22 2008 - andavis@suse.com
+- Updated to reflect CODE 11 changes and LF standard spec file work.
+* Sat Jan 28 2006 - agruen@suse.de
+- Initial package.</pre></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-appendix-b"></a>Appendix B: Changes, Updates and References</h2></div></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-code10-to-code11"></a>Code 10 to Code 11 Notes for Kernel Module
+                Packagers</h3></div></div></div><p>Following is a brief list of CODE 10 to CODE 11 changes
+                which can affect kernel module packagers</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+                        <span class="italic">Kernel packages</span>: </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>The Code 11 kernel is provided via two
+                                packages:
+                                    <span class="package">kernel-FLAVOR-base</span>
+                                and <span class="package">kernel-FLAVOR</span>.
+                                    <span class="package">kernel-FLAVOR</span> is
+                                dependent on
+                                    <span class="package">kernel-FLAVOR-base</span>.
+                                Both packages are required to provide
+                                checksums for all the kernel symbol
+                                groups.</p></li><li class="listitem"><p>Code 11 automatically installs the
+                                    <span class="strong"><strong>-pae</strong></span>
+                                kernel flavor for 32-bit pae-enabled
+                                systems.</p></li><li class="listitem"><p>The Code 11
+                                    <span class="package">kernel-source</span>
+                                package does not include the sample Kernel
+                                Module Package source provided in Appendix
+                                A.</p></li><li class="listitem"><p>Kernel packages in SUSE Linux Enterprise
+                                Server 12 or SUSE Linux Enterprise Desktop
+                                12 (including all service packs) provide
+                                checksums for individual symbols rather
+                                than for groups of symbols
+                                (symsets).</p></li></ul></div></li><li class="listitem"><p><span class="italic">Kernel module
+                            packages</span>:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>Starting with SUSE Linux Enterprise
+                                Server 11 SP3 or SUSE Linux Enterprise
+                                Desktop 11 SP3, kernel module packages can
+                                contain modules that have been signed in
+                                order to support UEFI Secure Boot.</p></li><li class="listitem"><p>Kernel Module Packages built for SUSE
+                                Linux Enterprise Server 12 or SUSE Linux
+                                Enterprise Desktop 12 (including all
+                                service packs) require checksums for
+                                individual symbols rather than for groups
+                                of symbols (symsets).</p></li></ul></div></li><li class="listitem"><p><span class="italic">Package and file
+                            locations</span>:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>In Code 11, several packages have been
+                                moved from the base SUSE Linux Enterprise
+                                Server product to the SUSE Linux Enterprise
+                                SDK. Developers building Kernel Module
+                                Packages on Code 11 will need to include
+                                the SDK in their build environment to
+                                ensure that all build-time package
+                                dependencies are resolved.</p></li><li class="listitem"><p>In Code 11, the RPM macros used to build
+                                Kernel Module Packages are provided in the
+                                    <span class="package">kernel-source</span>
+                                package (instead of the RPM package) and
+                                installed under
+                                    <code class="filename">/etc/rpm</code> and
+                                    <code class="filename">/usr/lib/rpm</code>.</p></li></ul></div></li><li class="listitem"><p><span class="italic">RPM macro
+                            changes</span>:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>Code 11 includes RPM macros to facilitate
+                                creating Kernel Module Package build
+                                structures that support multiple RPM-based
+                                distributions. The spec file template in
+                                Appendix A includes these macros:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: square; "><li class="listitem"><p><span class="strong"><strong></strong></span>
+                                     %kernel_module_package_buildreqs -
+                                     used for
+                                     <span class="quote">“<span class="quote">BuildRequires</span>”</span>.</p></li><li class="listitem"><p><span class="strong"><strong>%kernel_module_package</strong></span> -
+                                     used instead of <span class="strong"><strong>
+                                     %suse_kernel_module_package</strong></span>
+                                     (keep in mind that the options are
+                                     slightly different: with <span class="strong"><strong>
+                                     %kernel_module_package</strong></span>,
+                                     <code class="option">-x</code> is used to exclude
+                                     flavors from the build, and
+                                     <code class="option">-t</code> replaces
+                                     <code class="option">-s</code> as the option to
+                                     override the default sub-package
+                                     template. See section <a class="xref" href="#sec-kernel-module-packages" title="Kernel Module Packages">the section called “Kernel Module Packages”</a> for a
+                                     complete description of all <span class="strong"><strong>%kernel_module_package</strong></span>
+                                     options.)</p></li><li class="listitem"><p><span class="strong"><strong>%kernel_source</strong></span> – used with
+                                     the <code class="option">$flavor</code> argument
+                                     to specify the location of the
+                                     top-level kernel Makefile.</p></li></ul></div></li><li class="listitem"><p>Starting with SUSE Linux Enterprise
+                                Server 11 SP2 or SUSE Linux Enterprise
+                                Desktop 11 SP2, the <span class="strong"><strong>%kernel_module_package</strong></span>
+                                macro includes a <code class="option">-b</code> option
+                                that can be used to force initial RAM disk
+                                creation when a KMP is installed.</p></li><li class="listitem"><p>Starting with SUSE Linux Enterprise
+                                Server/SUSE Linux Enterprise Desktop 11
+                                SP3, the <span class="strong"><strong>%kernel_module_package
+                                    macro</strong></span> includes a <code class="option">-c
+                                    &lt;module-signing-certificate&gt;</code>
+                                option that can be used when building
+                                secure-boot-enabled packages.</p></li></ul></div></li></ul></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-doc-updates"></a>Documentation Updates</h3></div></div></div><p>April 27, 2017 – andavis@suse.com</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Update to incorporate SUSE Linux Enterprise
+                        Server/SUSE Linux Enterprise Desktop 12
+                        changes</p></li></ul></div><p>June 27, 2013 – andavis@suse.com</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Change Novell to SUSE</p></li><li class="listitem"><p>Add <code class="option">-b</code> option to
+                        kernel_module_package macro</p></li><li class="listitem"><p>Support building of secure-boot-enabled
+                        packages</p></li></ul></div><p>August 13, 2009 – andavis@suse.com</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Correctly reflect behavior of <code class="option">-f</code>
+                        option to kernel_module_package macro</p></li></ul></div><p>December 22, 2008 – andavis@suse.com</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Initial Version: Update Code 10 Kernel Module
+                        Packages Manual, and adapt it to Code 11
+                        process</p></li></ul></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-references"></a>References</h3></div></div></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>SUSE SolidDriver Documentation: SUSE Kernel ABI
+                        Stability: <a class="link" href="https://drivers.suse.com/doc/SolidDriver/SUSE_Kernel_ABI_Stability.html" target="_top">https://drivers.suse.com/doc/SolidDriver/SUSE_Kernel_ABI_Stability.html</a></p></li><li class="listitem"><p>Greg Kroah-Hartman: The Linux Kernel Driver
+                        Interface, <a class="link" href="http://www.kroah.com/log/linux/stable_api_nonsense.html" target="_top">http://www.kroah.com/log/linux/stable_api_nonsense.html</a>
+                        (also provided as stable_api_nonsense.txt in the
+                        upstream kernel source tree)</p></li><li class="listitem"><p>Andreas Gruenbacher, Michal Marek: Working With
+                        The SUSE 2.6.x and 3.x Kernel Sources (provided as
+                        README.SUSE in SUSE kernel-source packages)</p></li><li class="listitem"><p>Peter Jay Salzman, Michael Burian, Ori Pomerantz:
+                        The Linux Kernel Module Programming Guide, <a class="link" href="http://www.tldp.org/LDP/lkmpg/2.6/html/index.html" target="_top">http://www.tldp.org/LDP/lkmpg/2.6/html/index.html</a></p></li><li class="listitem"><p>Jonathan Corbet, Alessandro Rubini, Greg
+                        Kroah-Hartman: Linux Device Drivers, Third Edition,
+                        February 2005, <a class="link" href="http://www.oreilly.com/catalog/linuxdrive3/" target="_top">http://www.oreilly.com/catalog/linuxdrive3/</a>
+                        (also available online at <a class="link" href="http://lwn.net/Kernel/LDD3/" target="_top">http://lwn.net/Kernel/LDD3/</a>
+                    </p></li><li class="listitem"><p>Andreas Gruenbacher: Kernel Module Packages
+                        Manual for CODE 10, <a class="link" href="http://www.novell.com/developer/kernel_module_packages_manuals.html" target="_top">http://www.novell.com/developer/kernel_module_packages_manuals.html</a></p></li><li class="listitem"><p>Documentation of The Linux Foundation Driver
+                        Backport Workgroup, <a class="link" href="http://www.linuxfoundation.org/en/Driver_Backport" target="_top">http://www.linuxfoundation.org/en/Driver_Backport</a></p></li><li class="listitem"><p>UEFI Specification, <a class="link" href="http://www.uefi.org/specs" target="_top">http://www.uefi.org/specs</a></p></li></ul></div></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id1337"></a>Legal notice</h2></div></div></div><p> Copyright ©2006-2021 SUSE LLC and contributors. All rights reserved. </p><p> Permission is granted to copy, distribute and/or modify this document under the terms of the
+  GNU Free Documentation License, Version 1.2 or (at your option) version 1.3; with the Invariant
+  Section being this copyright notice and license. A copy of the license version 1.2 is included in
+  the section entitled <span class="quote">“<span class="quote">GNU Free Documentation License</span>”</span>. </p><p> SUSE, the SUSE logo and YaST are registered trademarks of SUSE LLC in the United States and
+  other countries. For SUSE trademarks, see <a class="link" href="http://www.suse.com/company/legal/" target="_top">http://www.suse.com/company/legal/</a>. Linux is a registered trademark of Linus Torvalds.
+  All other names or trademarks mentioned in this document may be trademarks or registered
+  trademarks of their respective owners. </p><p> Documents published as part of the <span class="strong"><strong>SUSE Best Practices</strong></span>
+  series have been contributed voluntarily by SUSE employees and third parties. They are meant to
+  serve as examples of how particular actions can be performed. They have been compiled with utmost
+  attention to detail. However, this does not guarantee complete accuracy. SUSE cannot verify that
+  actions described in these documents do what is claimed or whether actions described have
+  unintended consequences. SUSE LLC, its affiliates, the authors, and the translators may not be held
+  liable for possible errors or the consequences thereof.</p><p> Below we draw your attention to the license under which the articles are published.</p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id1338"></a>GNU Free Documentation License</h2></div></div></div><p>
+  Copyright (C) 2000, 2001, 2002 Free Software Foundation, Inc. 51 Franklin St,
+  Fifth Floor, Boston, MA 02110-1301 USA. Everyone is permitted to copy and
+  distribute verbatim copies of this license document, but changing it is not
+  allowed.
+ </p><h5><a id="id1970"></a> 0. PREAMBLE </h5><p>
+  The purpose of this License is to make a manual, textbook, or other
+  functional and useful document "free" in the sense of freedom: to assure
+  everyone the effective freedom to copy and redistribute it, with or without
+  modifying it, either commercially or non-commercially. Secondarily, this
+  License preserves for the author and publisher a way to get credit for their
+  work, while not being considered responsible for modifications made by
+  others.
+ </p><p>
+  This License is a kind of "copyleft", which means that derivative works of
+  the document must themselves be free in the same sense. It complements the
+  GNU General Public License, which is a copyleft license designed for free
+  software.
+ </p><p>
+  We have designed this License to use it for manuals for free software,
+  because free software needs free documentation: a free program should come
+  with manuals providing the same freedoms that the software does. But this
+  License is not limited to software manuals; it can be used for any textual
+  work, regardless of subject matter or whether it is published as a printed
+  book. We recommend this License principally for works whose purpose is
+  instruction or reference.
+ </p><h5><a id="id1974"></a> 1. APPLICABILITY AND DEFINITIONS </h5><p>
+  This License applies to any manual or other work, in any medium, that
+  contains a notice placed by the copyright holder saying it can be distributed
+  under the terms of this License. Such a notice grants a world-wide,
+  royalty-free license, unlimited in duration, to use that work under the
+  conditions stated herein. The "Document", below, refers to any such manual or
+  work. Any member of the public is a licensee, and is addressed as "you". You
+  accept the license if you copy, modify or distribute the work in a way
+  requiring permission under copyright law.
+ </p><p>
+  A "Modified Version" of the Document means any work containing the Document
+  or a portion of it, either copied verbatim, or with modifications and/or
+  translated into another language.
+ </p><p>
+  A "Secondary Section" is a named appendix or a front-matter section of the
+  Document that deals exclusively with the relationship of the publishers or
+  authors of the Document to the Document's overall subject (or to related
+  matters) and contains nothing that could fall directly within that overall
+  subject. (Thus, if the Document is in part a textbook of mathematics, a
+  Secondary Section may not explain any mathematics.) The relationship could be
+  a matter of historical connection with the subject or with related matters,
+  or of legal, commercial, philosophical, ethical or political position
+  regarding them.
+ </p><p>
+  The "Invariant Sections" are certain Secondary Sections whose titles are
+  designated, as being those of Invariant Sections, in the notice that says
+  that the Document is released under this License. If a section does not fit
+  the above definition of Secondary then it is not allowed to be designated as
+  Invariant. The Document may contain zero Invariant Sections. If the Document
+  does not identify any Invariant Sections then there are none.
+ </p><p>
+  The "Cover Texts" are certain short passages of text that are listed, as
+  Front-Cover Texts or Back-Cover Texts, in the notice that says that the
+  Document is released under this License. A Front-Cover Text may be at most 5
+  words, and a Back-Cover Text may be at most 25 words.
+ </p><p>
+  A "Transparent" copy of the Document means a machine-readable copy,
+  represented in a format whose specification is available to the general
+  public, that is suitable for revising the document straightforwardly with
+  generic text editors or (for images composed of pixels) generic paint
+  programs or (for drawings) some widely available drawing editor, and that is
+  suitable for input to text formatters or for automatic translation to a
+  variety of formats suitable for input to text formatters. A copy made in an
+  otherwise Transparent file format whose markup, or absence of markup, has
+  been arranged to thwart or discourage subsequent modification by readers is
+  not Transparent. An image format is not Transparent if used for any
+  substantial amount of text. A copy that is not "Transparent" is called
+  "Opaque".
+ </p><p>
+  Examples of suitable formats for Transparent copies include plain ASCII
+  without markup, Texinfo input format, LaTeX input format, SGML or XML using a
+  publicly available DTD, and standard-conforming simple HTML, PostScript or
+  PDF designed for human modification. Examples of transparent image formats
+  include PNG, XCF and JPG. Opaque formats include proprietary formats that can
+  be read and edited only by proprietary word processors, SGML or XML for which
+  the DTD and/or processing tools are not generally available, and the
+  machine-generated HTML, PostScript or PDF produced by some word processors
+  for output purposes only.
+ </p><p>
+  The "Title Page" means, for a printed book, the title page itself, plus such
+  following pages as are needed to hold, legibly, the material this License
+  requires to appear in the title page. For works in formats which do not have
+  any title page as such, "Title Page" means the text near the most prominent
+  appearance of the work's title, preceding the beginning of the body of the
+  text.
+ </p><p>
+  A section "Entitled XYZ" means a named subunit of the Document whose title
+  either is precisely XYZ or contains XYZ in parentheses following text that
+  translates XYZ in another language. (Here XYZ stands for a specific section
+  name mentioned below, such as "Acknowledgements", "Dedications",
+  "Endorsements", or "History".) To "Preserve the Title" of such a section when
+  you modify the Document means that it remains a section "Entitled XYZ"
+  according to this definition.
+ </p><p>
+  The Document may include Warranty Disclaimers next to the notice which states
+  that this License applies to the Document. These Warranty Disclaimers are
+  considered to be included by reference in this License, but only as regards
+  disclaiming warranties: any other implication that these Warranty Disclaimers
+  may have is void and has no effect on the meaning of this License.
+ </p><h5><a id="id1985"></a> 2. VERBATIM COPYING </h5><p>
+  You may copy and distribute the Document in any medium, either commercially
+  or noncommercially, provided that this License, the copyright notices, and
+  the license notice saying this License applies to the Document are reproduced
+  in all copies, and that you add no other conditions whatsoever to those of
+  this License. You may not use technical measures to obstruct or control the
+  reading or further copying of the copies you make or distribute. However, you
+  may accept compensation in exchange for copies. If you distribute a large
+  enough number of copies you must also follow the conditions in section 3.
+ </p><p>
+  You may also lend copies, under the same conditions stated above, and you may
+  publicly display copies.
+ </p><h5><a id="id1988"></a> 3. COPYING IN QUANTITY </h5><p>
+  If you publish printed copies (or copies in media that commonly have printed
+  covers) of the Document, numbering more than 100, and the Document's license
+  notice requires Cover Texts, you must enclose the copies in covers that
+  carry, clearly and legibly, all these Cover Texts: Front-Cover Texts on the
+  front cover, and Back-Cover Texts on the back cover. Both covers must also
+  clearly and legibly identify you as the publisher of these copies. The front
+  cover must present the full title with all words of the title equally
+  prominent and visible. You may add other material on the covers in addition.
+  Copying with changes limited to the covers, as long as they preserve the
+  title of the Document and satisfy these conditions, can be treated as
+  verbatim copying in other respects.
+ </p><p>
+  If the required texts for either cover are too voluminous to fit legibly, you
+  should put the first ones listed (as many as fit reasonably) on the actual
+  cover, and continue the rest onto adjacent pages.
+ </p><p>
+  If you publish or distribute Opaque copies of the Document numbering more
+  than 100, you must either include a machine-readable Transparent copy along
+  with each Opaque copy, or state in or with each Opaque copy a
+  computer-network location from which the general network-using public has
+  access to download using public-standard network protocols a complete
+  Transparent copy of the Document, free of added material. If you use the
+  latter option, you must take reasonably prudent steps, when you begin
+  distribution of Opaque copies in quantity, to ensure that this Transparent
+  copy will remain thus accessible at the stated location until at least one
+  year after the last time you distribute an Opaque copy (directly or through
+  your agents or retailers) of that edition to the public.
+ </p><p>
+  It is requested, but not required, that you contact the authors of the
+  Document well before redistributing any large number of copies, to give them
+  a chance to provide you with an updated version of the Document.
+ </p><h5><a id="id1993"></a> 4. MODIFICATIONS </h5><p>
+  You may copy and distribute a Modified Version of the Document under the
+  conditions of sections 2 and 3 above, provided that you release the Modified
+  Version under precisely this License, with the Modified Version filling the
+  role of the Document, thus licensing distribution and modification of the
+  Modified Version to whoever possesses a copy of it. In addition, you must do
+  these things in the Modified Version:
+ </p><div class="orderedlist"><ol class="orderedlist" type="A"><li class="listitem"><p>
+    Use in the Title Page (and on the covers, if any) a title distinct from
+    that of the Document, and from those of previous versions (which should, if
+    there were any, be listed in the History section of the Document). You may
+    use the same title as a previous version if the original publisher of that
+    version gives permission.
+   </p></li><li class="listitem"><p>
+    List on the Title Page, as authors, one or more persons or entities
+    responsible for authorship of the modifications in the Modified Version,
+    together with at least five of the principal authors of the Document (all
+    of its principal authors, if it has fewer than five), unless they release
+    you from this requirement.
+   </p></li><li class="listitem"><p>
+    State on the Title page the name of the publisher of the Modified Version,
+    as the publisher.
+   </p></li><li class="listitem"><p>
+    Preserve all the copyright notices of the Document.
+   </p></li><li class="listitem"><p>
+    Add an appropriate copyright notice for your modifications adjacent to the
+    other copyright notices.
+   </p></li><li class="listitem"><p>
+    Include, immediately after the copyright notices, a license notice giving
+    the public permission to use the Modified Version under the terms of this
+    License, in the form shown in the Addendum below.
+   </p></li><li class="listitem"><p>
+    Preserve in that license notice the full lists of Invariant Sections and
+    required Cover Texts given in the Document's license notice.
+   </p></li><li class="listitem"><p>
+    Include an unaltered copy of this License.
+   </p></li><li class="listitem"><p>
+    Preserve the section Entitled "History", Preserve its Title, and add to it
+    an item stating at least the title, year, new authors, and publisher of the
+    Modified Version as given on the Title Page. If there is no section
+    Entitled "History" in the Document, create one stating the title, year,
+    authors, and publisher of the Document as given on its Title Page, then add
+    an item describing the Modified Version as stated in the previous sentence.
+   </p></li><li class="listitem"><p>
+    Preserve the network location, if any, given in the Document for public
+    access to a Transparent copy of the Document, and likewise the network
+    locations given in the Document for previous versions it was based on.
+    These may be placed in the "History" section. You may omit a network
+    location for a work that was published at least four years before the
+    Document itself, or if the original publisher of the version it refers to
+    gives permission.
+   </p></li><li class="listitem"><p>
+    For any section Entitled "Acknowledgements" or "Dedications", Preserve the
+    Title of the section, and preserve in the section all the substance and
+    tone of each of the contributor acknowledgements and/or dedications given
+    therein.
+   </p></li><li class="listitem"><p>
+    Preserve all the Invariant Sections of the Document, unaltered in their
+    text and in their titles. Section numbers or the equivalent are not
+    considered part of the section titles.
+   </p></li><li class="listitem"><p>
+    Delete any section Entitled "Endorsements". Such a section may not be
+    included in the Modified Version.
+   </p></li><li class="listitem"><p>
+    Do not retitle any existing section to be Entitled "Endorsements" or to
+    conflict in title with any Invariant Section.
+   </p></li><li class="listitem"><p>
+    Preserve any Warranty Disclaimers.
+   </p></li></ol></div><p>
+  If the Modified Version includes new front-matter sections or appendices that
+  qualify as Secondary Sections and contain no material copied from the
+  Document, you may at your option designate some or all of these sections as
+  invariant. To do this, add their titles to the list of Invariant Sections in
+  the Modified Version's license notice. These titles must be distinct from any
+  other section titles.
+ </p><p>
+  You may add a section Entitled "Endorsements", provided it contains nothing
+  but endorsements of your Modified Version by various parties--for example,
+  statements of peer review or that the text has been approved by an
+  organization as the authoritative definition of a standard.
+ </p><p>
+  You may add a passage of up to five words as a Front-Cover Text, and a
+  passage of up to 25 words as a Back-Cover Text, to the end of the list of
+  Cover Texts in the Modified Version. Only one passage of Front-Cover Text and
+  one of Back-Cover Text may be added by (or through arrangements made by) any
+  one entity. If the Document already includes a cover text for the same cover,
+  previously added by you or by arrangement made by the same entity you are
+  acting on behalf of, you may not add another; but you may replace the old
+  one, on explicit permission from the previous publisher that added the old
+  one.
+ </p><p>
+  The author(s) and publisher(s) of the Document do not by this License give
+  permission to use their names for publicity for or to assert or imply
+  endorsement of any Modified Version.
+ </p><h5><a id="id2030"></a> 5. COMBINING DOCUMENTS </h5><p>
+  You may combine the Document with other documents released under this
+  License, under the terms defined in section 4 above for modified versions,
+  provided that you include in the combination all of the Invariant Sections of
+  all of the original documents, unmodified, and list them all as Invariant
+  Sections of your combined work in its license notice, and that you preserve
+  all their Warranty Disclaimers.
+ </p><p>
+  The combined work need only contain one copy of this License, and multiple
+  identical Invariant Sections may be replaced with a single copy. If there are
+  multiple Invariant Sections with the same name but different contents, make
+  the title of each such section unique by adding at the end of it, in
+  parentheses, the name of the original author or publisher of that section if
+  known, or else a unique number. Make the same adjustment to the section
+  titles in the list of Invariant Sections in the license notice of the
+  combined work.
+ </p><p>
+  In the combination, you must combine any sections Entitled "History" in the
+  various original documents, forming one section Entitled "History"; likewise
+  combine any sections Entitled "Acknowledgements", and any sections Entitled
+  "Dedications". You must delete all sections Entitled "Endorsements".
+ </p><h5><a id="id2034"></a> 6. COLLECTIONS OF DOCUMENTS </h5><p>
+  You may make a collection consisting of the Document and other documents
+  released under this License, and replace the individual copies of this
+  License in the various documents with a single copy that is included in the
+  collection, provided that you follow the rules of this License for verbatim
+  copying of each of the documents in all other respects.
+ </p><p>
+  You may extract a single document from such a collection, and distribute it
+  individually under this License, provided you insert a copy of this License
+  into the extracted document, and follow this License in all other respects
+  regarding verbatim copying of that document.
+ </p><h5><a id="id2037"></a> 7. AGGREGATION WITH INDEPENDENT WORKS </h5><p>
+  A compilation of the Document or its derivatives with other separate and
+  independent documents or works, in or on a volume of a storage or
+  distribution medium, is called an "aggregate" if the copyright resulting from
+  the compilation is not used to limit the legal rights of the compilation's
+  users beyond what the individual works permit. When the Document is included
+  in an aggregate, this License does not apply to the other works in the
+  aggregate which are not themselves derivative works of the Document.
+ </p><p>
+  If the Cover Text requirement of section 3 is applicable to these copies of
+  the Document, then if the Document is less than one half of the entire
+  aggregate, the Document's Cover Texts may be placed on covers that bracket
+  the Document within the aggregate, or the electronic equivalent of covers if
+  the Document is in electronic form. Otherwise they must appear on printed
+  covers that bracket the whole aggregate.
+ </p><h5><a id="id2040"></a> 8. TRANSLATION </h5><p>
+  Translation is considered a kind of modification, so you may distribute
+  translations of the Document under the terms of section 4. Replacing
+  Invariant Sections with translations requires special permission from their
+  copyright holders, but you may include translations of some or all Invariant
+  Sections in addition to the original versions of these Invariant Sections.
+  You may include a translation of this License, and all the license notices in
+  the Document, and any Warranty Disclaimers, provided that you also include
+  the original English version of this License and the original versions of
+  those notices and disclaimers. In case of a disagreement between the
+  translation and the original version of this License or a notice or
+  disclaimer, the original version will prevail.
+ </p><p>
+  If a section in the Document is Entitled "Acknowledgements", "Dedications",
+  or "History", the requirement (section 4) to Preserve its Title (section 1)
+  will typically require changing the actual title.
+ </p><h5><a id="id2043"></a> 9. TERMINATION </h5><p>
+  You may not copy, modify, sublicense, or distribute the Document except as
+  expressly provided for under this License. Any other attempt to copy, modify,
+  sublicense or distribute the Document is void, and will automatically
+  terminate your rights under this License. However, parties who have received
+  copies, or rights, from you under this License will not have their licenses
+  terminated so long as such parties remain in full compliance.
+ </p><h5><a id="id2045"></a> 10. FUTURE REVISIONS OF THIS LICENSE </h5><p>
+  The Free Software Foundation may publish new, revised versions of the GNU
+  Free Documentation License from time to time. Such new versions will be
+  similar in spirit to the present version, but may differ in detail to address
+  new problems or concerns. See
+  <a class="link" href="http://www.gnu.org/copyleft/" target="_top">http://www.gnu.org/copyleft/</a>.
+ </p><p>
+  Each version of the License is given a distinguishing version number. If the
+  Document specifies that a particular numbered version of this License "or any
+  later version" applies to it, you have the option of following the terms and
+  conditions either of that specified version or of any later version that has
+  been published (not as a draft) by the Free Software Foundation. If the
+  Document does not specify a version number of this License, you may choose
+  any version ever published (not as a draft) by the Free Software Foundation.
+ </p><h5><a id="id2049"></a> ADDENDUM: How to use this License for your
+  documents </h5><pre class="screen">Copyright (c) YEAR YOUR NAME.
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.2
+or any later version published by the Free Software Foundation;
+with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
+A copy of the license is included in the section entitled "GNU
+ Free Documentation License".</pre><p>
+  If you have Invariant Sections, Front-Cover Texts and Back-Cover Texts,
+  replace the "with...Texts". line with this:
+ </p><pre class="screen">with the Invariant Sections being LIST THEIR TITLES, with the
+Front-Cover Texts being LIST, and with the Back-Cover Texts being LIST.</pre><p>
+  If you have Invariant Sections without Cover Texts, or some other combination
+  of the three, merge those two alternatives to suit the situation.
+ </p><p>
+  If your document contains nontrivial examples of program code, we recommend
+  releasing these examples in parallel under your choice of free software
+  license, such as the GNU General Public License, to permit their use in free
+  software.
+ </p></div></div></body></html>

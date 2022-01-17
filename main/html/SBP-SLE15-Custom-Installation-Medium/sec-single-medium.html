@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Creating One Single Installation Medium for SUSE Linux Enterprise 15</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="How to Create a Custom Installation Medium for SUSE Linux Enterprise 15" /><link rel="up" href="index.html" title="How to Create a Custom Installation Medium for SUSE Linux Enterprise 15" /><link rel="prev" href="sec-preparing.html" title="Preparing the Installation" /><link rel="next" href="ar01s04.html" title="Legal notice" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Creating One Single Installation Medium for SUSE Linux Enterprise 15</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="sec-preparing.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="ar01s04.html">Next</a></td></tr></table><hr /></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-single-medium"></a>Creating One Single Installation Medium for SUSE Linux Enterprise 15</h2></div></div></div><p>You can easily create a combined installation medium by following the steps described
+   below.</p><div class="procedure"><ol class="procedure" type="1"><li class="step"><p>Download the installer medium and create a directory for each module on it.</p><p>The initial structure of your custom installation medium looks like the following
+     example:</p><pre class="screen">
+/
+- media.1
+- repodata
+- noarch
+- x86_64
+- [...]
+- SLE-Module-Basesystem
+- SLE-Module-XXX  
+ </pre></li><li class="step"><p>Copy the repository from the module to the respective directory for all modules. You can
+     copy it either from the modules DVD or from the repository mirror on your local SMT or RMT
+     server. Type the following command:</p><pre class="screen">cp -a /srv/www/htdocs/repo/SUSE/Products/SLE-Module-&lt;name&gt;/15/&lt;arch&gt;/product/* SLE-Module-&lt;name&gt;</pre><p>Alternatively, you can create your own repository with the command
+      <span class="command"><strong>createrepo</strong></span> or import the repository from any other source as long as the
+     repository uses the <span class="italic">rpm-md</span> format of metadata.</p><div class="important" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">SUSE Tags</h3><p>Do not use repositories with the <span class="italic">SUSE Tags</span> metadata
+      format.</p></div></li><li class="step"><p>Append new lines to the end of the file <code class="filename">/media.1/products</code> on the
+    medium. For each of the modules, add one line in the following format:</p><p><code class="literal">
+      <em class="replaceable"><code>&lt;Path on media&gt;</code></em>
+      <em class="replaceable"><code>&lt;Name of the module&gt;</code></em>
+    </code></p><p>The module name can consist of any text, which will later be presented by the installer.
+     For example, it can be as follows: </p><p></p><p>
+     <span class="italic">/SLE-Module-Basesystem SLE-15-Module Basesystem</span>
+    </p></li><li class="step"><p>Automate the selection of modules.</p><p>To automatically preselect the modules, create an <code class="filename">add_on_products.xml</code>
+     file in the root of the media and specify all modules which should be pre-selected by the
+     installer. Find an example for such a file below:</p><pre class="screen">&lt;add_on_products xmlns="http://www.suse.com/1.0/yast2ns"
+        xmlns:config="http://www.suse.com/1.0/configns"&gt;
+ &lt;product_items config:type="list"&gt;
+  &lt;product_item&gt;
+   &lt;url&gt;relurl:////&lt;/url&gt;
+   &lt;path&gt;/SLE-15-Module-Basesystem&lt;/path&gt;
+   &lt;install_products config:type="list"&gt;
+    &lt;product&gt;sle-module-basesystem&lt;/product&gt;
+   &lt;/install_products&gt;
+  &lt;/product_item&gt;
+ &lt;/product_items&gt;
+&lt;/add_on_products&gt;</pre><p>Repeat the <span class="italic">product_item</span> element for every module you
+     want to pre-select. The <span class="italic">&lt;product&gt;</span> entry must match
+     the identifier of the product to ensure the correct release package gets installed.</p></li><li class="step"><p>Create a bootable DVD with the following command: </p><pre class="screen">mksusecd --create My-SLE-15-Installer-DVD.iso &lt;path&gt;</pre></li><li class="step"><p>Boot the DVD.</p></li><li class="step"><p>In the add-on step, select the additional modules you want to install.</p><div class="important" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Modules Selection</h3><p>In the list of modules to select, the installer will also offer the product which comes
+      from the root of media (corresponding to the already existing line in the
+       <code class="filename">media.1/products</code> file). Do <span class="strong"><strong>not</strong></span> select
+      this one. Also, do <span class="strong"><strong>not</strong></span> remove this entry from
+       <code class="filename">media.1/products</code>, as it is necessary for bootstratpping the
+      installation.</p></div></li></ol></div><p>At this point, having followed the steps as described above, your custom installation medium
+   for SUSE Linux Enterprise 15 containing the installer plus the modules you have chosen to install
+   is ready to use. </p><p>Find an example structure of the final custom installation medium below:</p><pre class="screen">
+/
+ - media.1
+ - repodata
+ - noarch
+ - x86_64
+ - [...]
+ - SLE-Module-Basesystem
+   - repodata
+   - noarch
+   - x86_64
+   - [...]
+ - SLE-Module-XXX
+   - repodata
+   - noarch
+   - x86_64
+   - [...] 
+</pre></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="sec-preparing.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="ar01s04.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Preparing the Installation </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Legal notice</td></tr></table></div></body></html>

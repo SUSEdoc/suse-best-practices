@@ -1,0 +1,1103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>SUSE Public Cloud Infrastructure Setup Guide (SLES12 SP1)</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><meta name="description" content="This guide describes the setup of the required infrastructure for a SUSE public cloud in generic terms that scale from small to large cloud installations. The implementation of this setup is a requirement to obtain SUSE Certified Cloud Provider status. Additionally this setup can also be implemented in a private cloud setup. Disclaimer: Documents published as part of the SUSE Best Practices series have been contributed voluntarily by SUSE employees and third parties. They are meant to serve as examples of how particular actions can be performed. They have been compiled with utmost attention to detail. However, this does not guarantee complete accuracy. SUSE cannot verify that actions described in these documents do what is claimed or whether actions described have unintended consequences. SUSE LLC, its affiliates, the authors, and the translators may not be held liable for possible errors or the consequences thereof." /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div xml:lang="en" class="article" lang="en"><div class="titlepage"><div><div><h1 class="title"><a id="art-sbp-public-cloud"></a>SUSE Public Cloud Infrastructure Setup Guide (SLES12 SP1)</h1></div><div><div class="author"><h3 class="author"><span class="firstname">Robert</span> <span class="surname">Schweikert</span></h3></div></div><div><div class="abstract"><p class="title"><strong>Abstract</strong></p><p>This guide describes the setup of the required infrastructure for
+    a SUSE public cloud in generic terms that scale from small to large
+    cloud installations. The implementation of this setup is a requirement
+    to obtain SUSE Certified Cloud Provider status. Additionally this setup
+    can also be implemented in a private cloud setup. </p><p>
+    <span class="strong"><strong>Disclaimer: </strong></span>
+    Documents published as part of the SUSE Best Practices series have been contributed voluntarily
+    by SUSE employees and third parties. They are meant to serve as examples of how particular
+    actions can be performed. They have been compiled with utmost attention to detail. However,
+    this does not guarantee complete accuracy. SUSE cannot verify that actions described in these
+    documents do what is claimed or whether actions described have unintended consequences.
+    SUSE LLC, its affiliates, the authors, and the translators may not be held liable for possible errors
+    or the consequences thereof.
+   </p></div></div></div><hr /></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="sect1"><a href="#sec-intro">Introduction</a></span></dt><dt><span class="sect1"><a href="#sec-overview">High Level Overview</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec-region-server-s">Region Server(s)</a></span></dt><dt><span class="sect2"><a href="#sec-smt-server-s">SMT Server(s)</a></span></dt></dl></dd><dt><span class="sect1"><a href="#sec-detailed-setup-guide">Detailed Setup Guide</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec-general-setup">General Setup</a></span></dt><dt><span class="sect2"><a href="#sec-smt-server-setup">SMT Server Setup</a></span></dt><dt><span class="sect2"><a href="#sec-smt-server-monitoring">SMT Server Monitoring</a></span></dt><dt><span class="sect2"><a href="#sec-region-server-setup">Region Server Setup</a></span></dt><dt><span class="sect2"><a href="#sec-region-server-monitoring">Region Server Monitoring</a></span></dt><dt><span class="sect2"><a href="#sec-server-access-control">Server Access Control</a></span></dt><dt><span class="sect2"><a href="#sec-guest-image">Guest Image</a></span></dt><dt><span class="sect2"><a href="#sec-appendix-a">Appendix A</a></span></dt></dl></dd><dt><span class="sect1"><a href="#id1337">Legal notice</a></span></dt><dt><span class="sect1"><a href="#id1338">GNU Free Documentation License</a></span></dt></dl></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-intro"></a>Introduction</h2></div></div></div><p>Use of public cloud resources is one of the fastest growing areas
+   of the IT industry. In many cases Infrastructure as a Service (IaaS) is
+   a leading use case of public cloud. The public cloud brings with it a
+    <span class="quote">“<span class="quote">start and use</span>”</span> expectation. This poses a challenge for an
+   Enterprise Linux distribution such as SUSE Linux Enterprise to provide access to the
+   update repositories without formal registration of the OS
+   installation.</p><p>In a traditional data center a SUSE customer will set up a
+   new machine (physical or virtual) and configure the system to connect to
+   a local SMT server, be managed by SUSE Manager, or connect to the
+   SUSE Customer Center (SCC), for SUSE Linux Enterprise 12 based releases, or to the Novell Customer Center
+   (NCC), for SUSE Linux Enterprise 11 based releases to obtain updates. In the public
+   cloud the data center workflow is not practical.</p><p>Generating registration entitlements for every instance for use
+   with SCC/NCC and providing these to the user would not meet the
+    <span class="quote">“<span class="quote">fire up and use</span>”</span> expectation. Automated generation of
+   entitlements and injection into instances, while possible, would provide
+   registration with SCC/NCC. But it may generate additional cost for the
+   customer as packages would need to be downloaded from outside the cloud
+   provider`s network for update purposes. Additionally a direct
+   registration of instances with SCC/NCC would put the burden of
+   verification concerning eligibility into the SCC/NCC code base. For NCC
+   this is not possible and for SCC this is undesirable. Therefore, in a
+   public cloud setting it is important that the update infrastructure be
+   operated inside the public cloud environment.</p><p>This guide describes the setup of the required infrastructure in
+   generic terms that scale from small to large cloud installations. The
+   implementation of this setup is a requirement to obtain SUSE Certified
+   Cloud Provider status. Additionally this setup can also be implemented
+   in a private cloud setup.</p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-overview"></a>High Level Overview</h2></div></div></div><p>The update infrastructure consists of 2 major components:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Region Servers</p></li><li class="listitem"><p>SMT Servers</p></li></ul></div><p>Both run as VMs within the cloud framework. All services run on
+   SUSE Linux Enterprise Server 12 SP1 or higher. These systems may be
+   registered directly to SCC or may be managed using SUSE Manager. In
+   addition to having the base repository the systems must also have the
+   Public Cloud Module repository configured.</p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-region-server-s"></a>Region Server(s)</h3></div></div></div><p>The Region Server uses information provided in a configuration
+    file, <code class="filename">/etc/regionService/regionData.cfg</code> by
+    default, to associate SMT server information with a particular region
+    of the cloud framework. If the cloud service offered has only one
+    region it is still useful to use the region server to allow for easy
+    future expansion. The goal of the overall architecture is to always
+    deliver updates for SUSE Linux Enterprise guests region local. In general, IP
+    addresses for guests are provided by a DHCP service that is part of the
+    cloud framework, and various CIDR blocks are used in various regions.
+    This region association of IP addresses, IPv4 and/or IPv6, is part of
+    the cloud framework configuration and is captured in the configuration
+    file for the region server. For cases where the association of CIDR
+    blocks to specific regions is more dynamic the Region Server REST API
+    also accepts a <code class="option">regionHint</code> argument that the guest may
+    send to obtain information about the SMT servers in the
+    guest’s region.</p><p>SUSE Linux Enterprise Server guest instances connect to a Region Server to receive a
+    list of SMT Servers available in the region in which the guest instance
+    was launched. The information provided to the client is in XML format
+    and is sufficient for the client to automatically register with the
+    region local SMT Server.</p><p>Generally, multiple Region Server instances should be operated in
+    the cloud environment to ensure availability of the Region Service if
+    any Region Server is too distant (high latency), down, or otherwise
+    unavailable. Information about the Region Servers in the cloud
+    framework is encoded in the guest images by including the region
+    server’s public certificate in the
+     <code class="filename">/var/lib/regionService/certs/</code> directory. The name
+    of the certificate files is used to attempt to connect to the Region
+    Server via HTTPS.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-smt-server-s"></a>SMT Server(s)</h3></div></div></div><p>The SMT (Subscription Management Tool) Server serves as cache for
+    the package repositories obtained from SCC (SUSE Customer Center). The SMT Server
+    itself is registered with SCC, or managed via SUSE Manager, as it would
+    be in a traditional data center.</p><p>Given the data provided by a Region Server, the client proceeds
+    through a <span class="quote">“<span class="quote">regular</span>”</span> automated registration process. This
+    registration process is identical to the process an administrator in a
+    data center would complete when registering a new system against an SMT
+    Server operated in a traditional data center.</p></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-detailed-setup-guide"></a>Detailed Setup Guide</h2></div></div></div><p>Although the Region Server is the first service used by a client,
+   its setup and configuration is dependent on the setup of SMT Servers.
+   Therefore, the setup guide will describe the setup in reverse order as
+   compared to the previous section.</p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-general-setup"></a>General Setup</h3></div></div></div><p>Before any of the servers are set up and configured some general
+    preparations should be completed. Access restriction to the servers is
+    a multi-level process as described in more detail later. Generally
+    cloud frameworks provide a feature often called <span class="quote">“<span class="quote">Security
+     Groups</span>”</span>. This is a firewalling mechanism that the cloud
+    framework network infrastructure provides.</p><p>Use this mechanism to set up two security groups: one used by the
+    SMT Servers and one used for the Region Service. The security group
+    (firewall rules) for the SMT Server (suggested name: smt-server) needs
+    to allow incoming traffic on ports 22, 80, and 443 from all addresses
+     (<code class="systemitem">0.0.0.0/0</code>; <code class="systemitem">::/0</code>). All other ports should be
+    blocked. The security group (firewall rules) for the Region Service
+    (suggested name: region-server) needs to allow incoming traffic on
+    ports 22 and 443 from all addresses (<code class="systemitem">0.0.0.0/0</code>; <code class="systemitem">::/0</code>). If you so desire you can move SSH to run on a
+    different port and configure your firewall rules accordingly.</p><p>Allocate static IP addresses in the cloud framework. For each
+    region there should be at least two SMT Servers. Additionally there
+    should be at least two Region Servers. Depending on the footprint of
+    the cloud environment more Region Servers, with instances running in
+    different regions, may be desired. Thus, allocate at least two static
+    IPs per region plus one or more static IPs in each region where a
+    Region Server will be set up.</p><p>The final preparatory step is to generate SSH key pairs for the
+    servers. Most cloud frameworks provide a way to generate keys or to
+    import keys. The SSH key does not need to be built into the image as in
+    general it will be injected by the cloud framework on instance launch.
+    It is recommended to use different keys for the SMT Server and the
+    Region Server.</p><pre class="screen">ssh-keygen -t rsa -f smt
+ssh-keygen -t rsa -f regionsrv</pre></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-smt-server-setup"></a>SMT Server Setup</h3></div></div></div><p>The SMT Server is a VM inside the cloud environment. For each
+    region at least two SMT Servers should be configured. The number of SMT
+    Servers in a region depends on the bandwidth within the data center and
+    the number of expected simultaneous users. As a reference, SUSE
+    operates two SMT Servers per region in AWS and can satisfy throughput
+    needs for registered clients. Thus, it is unlikely that more than two
+    SMT Servers are needed in your setup. The setup of an SMT Server inside
+    a virtual machine is no different than the setup of an SMT Server on a
+    physical machine. Therefore you can refer to the <a class="link" href="https://documentation.suse.com/sles/12-SP4/html/SLES-all/book-smt.html" target="_top">https://documentation.suse.com/sles/12-SP4/html/SLES-all/book-smt.html</a> SMT documentation for guidance. Alternatively you can build an image
+    with kiwi; a template used to build SUSE-operated SMT Servers is
+    attached in appendix A.</p><p>The SMT Server functions as a cache for all packages SUSE releases
+    as updates for all enabled products. Therefore, it potentially requires
+    a large amount of disk space. It is recommended that a 1TB virtual disk
+    (or larger) be created inside the cloud environment and attached to the
+    SMT Server VM. This storage device will be used to store the
+    repositories. In addition it is recommended to store the database on an
+    attached virtual disk; a size of 40 GB or more is suggested for the DB
+    storage device.</p><p>Having the storage of the repositories on a separate device
+    preserves the data should the SMT server VM need to be rebuilt. This
+    improves the recovery time since the repositories do not need to be
+    repopulated from SCC. Keeping the DB on a separate device ensures that
+    the existing registrations do not get lost if the SMT VM needs to be
+    rebuilt.</p><p>After the installation of the SMT Server package
+     (<span class="emphasis"><em>smt</em></span>) the directory structure required by SMT is
+    set up in <code class="filename">/srv/www/htdocs/repo</code>. We want to use
+    this directory as the mount point for the external virtual disk that is
+    supposed to hold the repositories. The following process outlines the
+    steps necessary to set the external device up to hold the
+    repositories:</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p> In the cloud framework, either via the customary web-UI, or the
+      available command line tools create a virtual disk of 1 TB or larger.
+     </p></li><li class="listitem"><p> After the virtual disk creation is complete attach the device
+      to the running SMT instance. </p></li><li class="listitem"><p> When the disk is attached log in to the SMT Server as root, or
+      become root after logging in. </p></li><li class="listitem"><p> Use <span class="command"><strong>fdisk -l</strong></span> to list the available block
+      devices. </p></li><li class="listitem"><p> Create a partition table (using YaST, gparted, or fdisk) and
+      create one partition on the device. </p></li><li class="listitem"><p> Create a file system on the newly created partition; XFS is the
+      recommended file system for this storage device. </p></li><li class="listitem"><p> Copy the content of the SMT directory to a <span class="quote">“<span class="quote">safe</span>”</span>
+      place: </p><pre class="screen">mkdir /tmp/smtData; rsync -av /srv/www/htdocs/repo/ /tmp/smtData</pre></li><li class="listitem"><p> Mount the storage partition: </p><pre class="screen">mount /dev/sd? /srv/www/htdocs/repo/</pre></li><li class="listitem"><p> Restore the content of the repo directory: </p><pre class="screen">rsync -av /tmp/smtData/ /srv/www/htdocs/repo; rm -rf /tmp/smtData</pre></li></ol></div><p>Note that <code class="filename">/srv/www/htdocs/repo</code> and its
+    content must be owned by the <code class="systemitem">smt</code> user and have <code class="systemitem">www</code> group ownership. The procedure for placing the DB
+    data onto a separate device is the same.</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p> In the cloud framework, either via the customary web-UI, or the
+      available command line tools create a virtual disk of 40 GB. </p></li><li class="listitem"><p> After the virtual disk creation is complete attach the device
+      to the running SMT instance. </p></li><li class="listitem"><p> When the disk is attached log in to the SMT Server as root, or
+      become root after logging in. </p></li><li class="listitem"><p> Use <span class="command"><strong>fdisk -l</strong></span> to list the available block
+      devices. </p></li><li class="listitem"><p> Create a partition table (using YaST, gparted, or fdisk) and
+      create one partition on the device. </p></li><li class="listitem"><p> Create a file system on the newly created partition; XFS is the
+      recommended file system for this storage device. </p></li><li class="listitem"><p> Copy the content of the DB directory to a <span class="quote">“<span class="quote">safe</span>”</span>
+      place: </p><pre class="screen">mkdir /tmp/dbData; rsync -av /var/lib/mysql/ /tmp/dbData</pre></li><li class="listitem"><p> Mount the storage partition: </p><pre class="screen">mount /dev/sd? /var/lib/mysql</pre></li><li class="listitem"><p> Restore the content of the repo directory: </p><pre class="screen">rsync -av /tmp/dbData/ /var/lib/mysql; rm -rf /tmp/dbData</pre></li></ol></div><p>The process of mounting the external devices upon instance
+    start-up is cloud framework specific. Thus it depends on the cloud
+    framework whether you want to create entries for the mount points in
+     <code class="filename">/etc/fstab</code>.</p><p>At the protocol level several functions of SMT for the client
+    registration use HTTPS, that is these are SSL dependent. Therefore,
+    certificate handling is important. In general the assumption is that an
+    SMT Server uses a self signed certificate. If you choose to follow the
+    path of using a self signed certificate you should use the integrated
+    certificate creation step included in the SMT setup process in
+    YaST. This process will be followed later after some more
+    preliminary settings are complete. However, at your choice you may use
+    a certificate signed by a public CA. In this case you need to handle
+    certificate placement manually. In cases where SUSE operates an
+    infrastructure self signed certificates are used.</p><p>If you choose to use a certificate that is signed by a public CA
+    and is thus acceptable by using the known trust chain, it is still
+    necessary that the <code class="filename">/srv/www/htdocs/smt.crt</code> file
+    exists. This file, in a self signed certificate setup, represents the
+    root CA and is imported into the trust chain on the guest that is
+    registering with the SMT server. The registration automation downloads
+    this file and registration will fail if it does not exist. Thus, even
+    for certificates signed by a public CA the root CA must be made
+    available via <code class="filename">/srv/www/htdocs/smt.crt</code>.</p><p>The next step for the SMT server configuration is to set up
+    registration sharing. Registration sharing is enabled by the
+    installation of the <span class="emphasis"><em>smt-ha</em></span> package and is used to
+    configure the SMT servers in an active HA configuration. Registration
+    sharing can be configured between two or more SMT Servers. The
+    certificate setup has an implication on the configuration of
+    registration sharing between multiple SMT Servers as well. Registration
+    sharing is configured in the SMT configuration file
+     <code class="filename">/etc/smt.conf</code>. In the <code class="literal">[LOCAL]</code>
+    section add the following configuration entries:</p><pre class="screen">#
+# This string is used to verify that any sender trying to share a
+# registration is allowed to do so. Provide a comma separated list of
+# names or IP addresses.
+acceptRegistrationSharing=
+#
+# This string is used to set the host names and or IP addresses of sibling
+# SMT servers to which the registration data should be sent. For multiple
+# siblings provide a comma separated list.
+shareRegistrations=
+#
+# This string provides information for SSL verification of the siblings.
+# Certificates for the siblings should reside in the given directory.
+# If not defined siblings are assumed to have the same CA as this server
+siblingCertDir=</pre><p>When a client system registers with the SMT server the SMT
+    implementation will send a <span class="quote">“<span class="quote">share registration request</span>”</span> to
+    all the servers configured with the
+     <span class="emphasis"><em>shareRegistrations</em></span> option. The value is a comma
+    separated list of IP addresses or host names. Note that the entries
+    must match the way the certificate was set up as the <span class="quote">“<span class="quote">share
+     registration request</span>”</span> is sent to the other SMT server(s) via
+    HTTPS. So if you encoded the FQDN of the sibling SMT servers in the
+    certificate this name must be used as a value of the
+     <span class="emphasis"><em>shareRegistration</em></span> configuration option. If the
+    certificate of the sibling server(s) is not imported into the default
+    trust chain you may set the <span class="emphasis"><em>siblingCertDir</em></span> option
+    to point the verification code to the directory where the sibling
+    server certificates are located.</p><p>When a <span class="quote">“<span class="quote">share registration request</span>”</span> is received by an
+    SMT Server the list of IP addresses and/or host names (comma separated
+    string) provided with the <code class="option">acceptRegistrationSharing</code>
+    setting is consulted to verify that the sending system is authorized to
+    share a registration. This share request is not propagated to any SMT
+    Servers that may be listed in the <code class="option">shareRegistration</code>
+    option. Only registration requests received from clients using the
+     <span class="command"><strong>suse_register</strong></span> or <span class="command"><strong>SUSEConnect</strong></span>
+    commands are shared with SMT Servers listed with the
+     <span class="emphasis"><em>shareRegistrations</em></span> setting.</p><p>Sharing of registration information is important to provide
+    failover capabilities for the update infrastructure.</p><p>Before proceeding with the configuration for repository mirroring,
+    access control to the SMT server(s) needs to be configured. The SMT
+    Server in a public cloud is by definition public, or it could not be
+    accessed by the instances of SUSE Linux Enterprise that run within the cloud
+    framework. Therefore, access to the SMT Server must be restricted to
+    eligible SUSE Linux Enterprise installations. Eligible SUSE Linux Enterprise installations are
+    defined to be those for which the cloud provider can account and report
+    accurate usage hours to SUSE. The level of access control behind the
+    security group setting described earlier (which is considered level 1)
+    occurs on two levels:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>HTTP and HTTPS traffic access</p></li><li class="listitem"><p>repository access verification</p></li></ul></div><p>Depending on the offering of SUSE Linux Enterprise in the cloud framework
+    repository, access verification may not be necessary.</p><p>Access to the server on the protocol level needs to be restricted
+    to IP addresses (IPv4 and/or IPv6) that are handed out by the cloud
+    framework DHCP server(s). This process can be automated using the
+    utility provided by the <code class="systemitem">python-serviceAccessConfig</code> package. The service provided
+    with this package generates ACL information for Apache. More details
+    about the configuration of this service are provided in the
+     <span class="emphasis"><em>Server Access Control</em></span> section below. You may also
+    consult the man page,<code class="literal">man serviceAccessConfig</code> for
+    details about the configuration. The file
+     <code class="filename">/etc/smt.d/nu_server.conf</code> can be used as a target
+    for the ACL generation to control access to the SMT functionality.
+    However a higher level Apache file can be used to block access from
+    outside IP addresses to Apache altogether.</p><p>If only on-demand images of SUSE Linux Enterprise are offered in the cloud
+    framework it is not necessary to implement a repository access
+    verification mechanism. However, if BYOS (Bring Your Own Subscription)
+    is offered within the cloud framework a repository access mechanism
+    needs to be implemented. This is accomplished by adding</p><pre class="screen">#
+# This string is used to load a cloud specific verification module to verify
+# the guest issuing the registration request is eligible to access the
+# repositories. The value none indicates that no verification should
+# take place.
+cloudGuestVerify=PERL_PLUGIN_NAME</pre><p>to the <code class="filename">/etc/smt.conf</code> file in the
+     <code class="literal">[LOCAL]</code> section. The PERL_PLUGIN_NAME in the above
+    example is a placeholder for a Perl module that needs to be implemented
+    to verify that the guest is eligible to access the repositories. This
+    plug-in may perform verification based on accessing a cloud framework
+    API or by verifying metadata sent by the guest, or a combination
+    thereof.</p><p>The verification module must implement two interfaces,
+     <span class="emphasis"><em>verifyGuest</em></span> and
+     <span class="emphasis"><em>verifySCCGuest</em></span>. The
+     <span class="emphasis"><em>verifyGuest</em></span> implementation is called when a
+    client accesses the SMT Server via <span class="emphasis"><em>suse_register</em></span>
+    for the first time and the <span class="emphasis"><em>verifySCCGuest</em></span>
+    implementation is used when the client uses
+     <span class="emphasis"><em>SUSEConnect</em></span> for registration purposes.</p><p><span class="emphasis"><em>suse_register</em></span> is the implementation shipped
+    with SUSE Linux Enterprise 11 to register a SUSE Linux Enterprise installation with NCC (Novell
+    Customer Center) or SMT. <span class="command"><strong>SUSEConnect</strong></span> was developed
+    to interface with SCC (SUSE Customer Center) and SMT and is shipped with SUSE Linux Enterprise
+    12.</p><p>The implementation of the access verification plug-in is placed in
+    a file named to match the configuration option, PERL_PLUGIN_NAME.pm for
+    the example above, that is placed in the
+     <code class="filename">/srv/www/perl-lib/SMT/Client</code> directory. The
+    following example shows a stub implementation of the verification
+    module that also dumps the received data:</p><div class="example"><a id="id1339"></a><p class="title"><strong>Example 1. 
+     <code class="filename">/srv/www/perl-lib/SMT/Client/exampleVerify.pm</code>
+    </strong></p><div class="example-contents"><pre class="screen">use strict;
+use warnings;
+
+use Apache2::RequestRec ();
+use Apache2::RequestIO ();
+
+use Data::Dumper;
+
+sub verifyGuest {
+
+    my $self    = shift;
+    my $r       = shift;
+    my $regroot = shift;
+    # Insert code to connect to cloud framework and verify the guest
+    # return 1 for successful verification, undef for verification failure
+    # $r       -&gt; the request, i.e. an Apache request object
+    #             http://perl.apache.org/docs/2.0/api/Apache2/RequestRec.html
+    # $regroot -&gt; HASHREF containing information sent by the client.
+    open(my $DBGOUT, '&gt;', '/tmp/verifyGuest.txt');
+    print $DBGOUT "The client information\n\n";
+    my $dumper = Data::Dumper-&gt;new([$regroot]);
+    print $DBGOUT $dumper-&gt;Dump();
+    return 1;
+}
+
+sub verifySCCGuest {
+
+    my $self     = shift;
+    my $r        = shift;
+    my $clntData = shift;
+    my $result   = shift;
+    # Insert code to connect to cloud framework and verify the guest
+    # return the result HASHREF for successful verification, undef for
+    # verification failure
+    # $r        -&gt; the request, i.e an Apache request object
+    #              http://perl.apache.org/docs/2.0/api/Apache2/RequestRec.html
+    # $clntData -&gt; data received from the client
+    # $result   -&gt; HASHREF of results of various previous operations
+    open(my $DBGOUT, '&gt;', '/tmp/sccVerifyGuest.txt');
+    print $DBGOUT "The client information\n\n";
+    my $dumper = Data::Dumper-&gt;new([$clntData]);
+    print $DBGOUT $dumper-&gt;Dump();
+    my $dd = Data::Dumper-&gt;new([$result]);
+    print $DBGOUT $dd-&gt;Dump();
+    return $result;
+}
+
+1;</pre></div></div><br class="example-break" /><p>A similar file is provided as part of the
+     <span class="emphasis"><em>smt-ha</em></span> package.</p><p>This completes the configuration of the access control of the SMT
+    server. In summary the access control of the SMT server occurs on
+    potentially three levels:</p><div class="variablelist"><dl class="variablelist"><dt><span class="term">Level 1</span></dt><dd><p>Access control at the cloud framework level, via firewall
+       opening ports 22, 80, and 443.</p></dd><dt><span class="term">Level 2</span></dt><dd><p>Access control at the protocol level allowing only systems with
+       IP addresses used by the cloud framework to access the server. This
+       can be accomplished using the <code class="option">serviceAccessConfig</code>
+       tool.</p></dd><dt><span class="term">Level 3</span></dt><dd><p>Repository access verification via SMT plug-in. This is only
+       necessary if BYOS images are supported in the cloud
+       framework.</p></dd></dl></div><p>The final modifications to the <code class="filename">etc/smt.conf</code>
+    file prior to registering SMT with SCC and configuring the repositories
+    are to set the authentication and the forwarding information. In
+     <code class="filename">etc/smt.conf</code> set the
+     <code class="option">forwardRegistration</code> setting to
+     <code class="literal">false</code> and set the <code class="option">requiredAuthType</code>
+    to <code class="literal">lazy</code>.</p><p>You are now ready to complete the higher level SMT setup and
+    eventually synchronize the repository content from SCC. Use YaST
+    to configure the remaining settings of SMT following the SMT setup
+    documentation. As part of this process, if you are using a self signed
+    certificate, the certificate creation workflow can be invoked.</p><p>The final step is to set up the repositories that should be
+    mirrored. This can be completed with YaST or the
+     <span class="command"><strong>smt-repos</strong></span> command. Mirror the repositories
+     <code class="literal">Pool</code>, and <code class="literal">Update</code> for the base
+    distributions SLES 11 and SLES 12, as well as the
+     <code class="literal">Debuginfo</code> and <code class="literal">SDK</code> repositories.
+    In addition both SLES 11 and SLES 12 offer specific module repositories
+    that are considered to be part of SLES but are delivered as separate
+    repositories. These should also be enabled for mirroring.</p><p>You only need to mirror the repositories for the architecture of
+    interest to you. In most cases this will be only x86_64. There is
+    generally no advantage in a cloud environment to run 32-bit instances
+    as the underlying hardware is generally 64-bit capable and 64-bit
+    instances are fully capable of running 32-bit applications. If you need
+    to mirror more than one architecture you may need to increase the size
+    of the storage that holds the packages.</p><p>The final step in the SMT setup is to mirror the repositories from
+    SCC using the <span class="emphasis"><em>smt-mirror</em></span> command as root. This
+    will download all the packages for the configured repositories and
+    takes some time. Usually the synchronization will complete
+    overnight.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-smt-server-monitoring"></a>SMT Server Monitoring</h3></div></div></div><p>The SMT servers should be monitored for health status. In addition
+    to the general statistics</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>CPU Load/Utilization</p></li><li class="listitem"><p>Memory Usage</p></li><li class="listitem"><p>Disk I/O</p></li><li class="listitem"><p>Kernel Health</p></li><li class="listitem"><p>File system space</p></li><li class="listitem"><p>Uptime</p></li></ul></div><p>the following SMT Server specific system functions and files
+    should be monitored:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>/etc/apache2/conf.d/nu_server.conf - monitor for presence and
+      changes</p></li><li class="listitem"><p>/etc/serviceaccess/srvAccess.cfg - monitor for presence</p></li><li class="listitem"><p>/etc/regionService/regionData.cfg - monitor for presence</p></li><li class="listitem"><p>/srv/www/htdocs/smt.crt - monitor for presence and
+      changes</p></li><li class="listitem"><p>mariadb - process running</p></li><li class="listitem"><p>serviceAccessConfig - process running</p></li><li class="listitem"><p>apache - process running</p></li><li class="listitem"><p>Mount points - DB and repositories</p></li></ul></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-region-server-setup"></a>Region Server Setup</h3></div></div></div><p>The function of the Region Server is to provide information about
+    the SMT Servers in a given region to the connecting guest. The Region
+    Server runs as a Python script using the Flask framework in Apache. The
+    Region Server is provided with the
+     <code class="systemitem">cloud-regionsrv</code> package. As with the SMT
+    server the region server should be access restricted to the IP address
+    ranges for the cloud framework. More on this access control in the
+    section <a class="xref" href="#sec-server-access-control" title="Server Access Control">the section called “Server Access Control”</a>.</p><p>The service itself uses two configuration files: one file,
+     <code class="filename">/etc/regionService/regionInfo.cfg</code> is used to
+    configure the service, the other,
+     <code class="filename">/etc/regionService/regionData.cfg</code> provides the
+    data the Region Server will provide to the connecting client; both
+    files are in the ini format.</p><p>The <code class="filename">regionInfo.cfg</code> file is used to configure
+    the location of the log file and the location of the
+     <code class="filename">regionData.cfg</code> file with the
+     <code class="option">logFile</code> and <code class="option">regionConfig</code> options,
+    respectively. The default settings for the configuration file are shown
+    below and should suffice for most installations.</p><pre class="screen">[server]
+logFile = /var/log/regionService/regionInfo.log
+regionConfig = /etc/regionService/regionData.cfg</pre><p>The default <code class="filename">regionData.cfg</code> file provides a
+    template for the configuration file. This file can be maintained
+    manually or be auto-generated, depending on your setup for IP address
+    allocation within your cloud framework. The
+     <code class="filename">regionData.cfg</code> file needs to contain one
+    configuration section per region. Often regions in a given cloud setup
+    are named by geographic location, such as <span class="quote">“<span class="quote">us-east-1</span>”</span> for
+    the Amazon cloud setup in the eastern geography of the United States.
+    This location indicator is also often available through querying of
+    metadata in the guest image. It is therefore recommended that the
+    section name in the <code class="filename">regionData.cfg</code> file match the
+    names of the region names available through the metadata of the
+    framework. In cases where IP addresses are not stable in their
+    association with regions the region metadata can be queried in the
+    guest and passed to the Region Server as a hint to obtain the SMT
+    Server information for the given region. The hint is processed with
+    string matching and thus having section names match the configured
+    region names is important. The server implementation has no option of
+    name mapping. For each region all options in the section must be
+    configured.</p><p>The section options are as follows:</p><div class="variablelist"><dl class="variablelist"><dt><span class="term"> public-ips </span></dt><dd><p> The value for this option is a comma separated list of IP
+       ranges in CIDR format, for example: </p><pre class="screen">public-ips = 62.135.16.0/18,56.56.130.0/16</pre><p>These are the ranges the DHCP server in the given region is
+       configured to use. If the access configuration utility
+        <span class="command"><strong>python-serviceAccessConfig</strong></span> is used and pointed
+       at this file it will use the <code class="option">public-ips</code> entry to
+       generate the ACL.</p></dd><dt><span class="term"> smt-server-ip </span></dt><dd><p> The value for this option is a comma separated list of the SMT
+       Server IP addresses in the region being configured. </p></dd><dt><span class="term"> smt-server-name </span></dt><dd><p> The value for this option sets the host name of the SMT Server
+       that was encoded into the certificate during the setup of the SMT
+       Server. If only one value is supplied it will be used for all IP
+       addresses provided by the <code class="option">smt-server-ip</code> setting. If
+       more than one value is supplied the number of names must match the
+       number of IP addresses given with the <code class="option">smt-server-ip</code>
+       option. The order of the names and IP addresses must match as well.
+      </p></dd><dt><span class="term"> smt-fingerprint </span></dt><dd><p> The value for this option is the fingerprint of the root CA
+       created during the SMT Server setup. On the SMT Server, the
+        <code class="filename">/srv/www/htdocs</code> includes the
+        <code class="filename">smt.crt</code> file, which is the root CA transferred
+       to the client and verified prior to accepting the repositories from
+       the SMT Server. Obtain the fingerprint with the command: </p><pre class="screen">openssl x509 -in smt.crt -noout -fingerprint | /usr/bin/cut -d= -f2</pre><p>Use this fingerprint for the <code class="option">smt-fingerprint</code>
+       value. As with the <code class="option">smt-server-name</code> supplying one
+       value is sufficient if all SMT Servers have the same root CA. If
+       each server has its own CA supply a comma separated list. The order
+       must match the order of the IP addresses or certificate acceptance
+       will fail and the guest cannot register with the SMT Server.</p></dd></dl></div><p>The following shows an example of a completed section for a region
+    in a cloud setup.</p><pre class="screen">[nor-north]
+public-ips = 62.135.16.0/18,56.56.130.0/16
+smt-server-ip = 62.153.16.20,56.56.130.253
+smt-server-name = smt-nor.supertuxcloud.com
+smt-fingerprint = 9D:B9:88:DB:87:52:00:55:F0:FF:5D:5C:66:60:D3:E0:5C:D4:FB:79</pre><p>In the example above both SMT Servers share the same certificate.
+    If this were not the case another value for the
+     <code class="option">smt-server-name</code> and for the
+     <code class="option">smt-fingerprint</code> options would need to be
+    configured.</p><pre class="screen">[mid-north]
+public-ips = 62.135.16.0/18,56.56.130.0/16
+smt-server-ip = 62.153.16.20,56.56.130.253
+smt-server-name = smt-mid-a.supertuxcloud.com, smt-mid-b.supertuxcloud.com
+smt-fingerprint = 9D:B9:88:DB:87:52:00:55:F0:FF:5D:5C:66:60:D3:E0:5C:D4:FB:79</pre><p>In this example the servers share the same certificate, but have
+    different names. The certificate in this case would contain a wild
+    card.</p><p>The Region Server reads the <code class="filename">regionData.cfg</code>
+    file as configured in the <code class="filename">regionInfo.cfg</code> file at
+    start-up and creates a hash table from the information provided in the
+     <code class="filename">regionData.cfg</code> file. Depending on the number of
+    IP address ranges this may result in a relatively large requirement of
+    memory. For estimation purposes one can use a requirement of 20 MB per
+    octet (254 IP addresses). The Region Server also creates a secondary
+    hash table that relates the region names to the SMT Server information.
+    The secondary hash table is consulted if the Region Server receives a
+    region hint from the client.</p><p>The Region Server provides the <code class="option">regionInfo</code> REST
+    API, that is to obtain SMT information the client image will access the
+    Region Server via: <a class="link" href="https://IP_ADDRESS_OF_REGION_SERVER/regionInfo" target="_top">https://IP_ADDRESS_OF_REGION_SERVER/regionInfo</a>
+   </p><p>The knowledge of the IP addresses of the Region Servers and the
+    certificates for the Region Servers are built into the guest image. It
+    is recommended to create a package for the Region Service client; for
+    more details see the section concerning the guest image.</p><p>As mentioned previously, for environments where the IP address
+    assignment per region is not stable or accessible via API the option
+    exists to let the client pass a region hint to the Region Server. If
+    the region hint is passed the Region Server will first try to provide
+    SMT information to the client based on the region name given in the
+    hint. If this fails the Region Server will fall back to using the IP
+    address. A request using the region hint option provides the region
+    hint as an argument with the URL: <a class="link" href="https://IP_ADDRESS_OF_REGION_SERVER/regionInfo?regionHint=REGION_NAME" target="_top">https://IP_ADDRESS_OF_REGION_SERVER/regionInfo?regionHint=REGION_NAME</a>
+   </p><p>In this case <span class="emphasis"><em>REGION_NAME</em></span> must match a name of
+    one of the sections in the <code class="filename">regionData.cfg</code> file as
+    indicated previously.</p><p>Instead of using IP addresses directly for the Region Servers in
+    the client it is also possible to use name resolution via DNS. One
+    potential advantage of using DNS for the Region Server is that no new
+    package would need to be released if a Region Server needs to move out
+    of a given region and into a new region where a new IP address would
+    need to be allocated. However, this implies that an entire cloud region
+    would be shut down, which is a very unlikely scenario. The Region
+    Server package (<code class="systemitem">cloud-regionsrv</code>) provides a
+    convenient executable to generate the server certificate. After the
+    region server instance is booted run:</p><pre class="screen">genRegionServerCert -c COUNTRY -d DEPARTMENT --host IP_ADDRESS_OR_HOSTNAME -l LOCATION -o ORGANIZATION -s STATE</pre><p>This will generate the server certificate and place the public
+    cert into <code class="filename">/root/regionServCert/</code> . This certificate
+    needs to be included in the SUSE Linux Enterprise guest image. The details about
+    the Region Server certificate are described in the guest image creation
+    section. The cert generation script will restart the Apache Web
+    server.</p><p>With the configuration in place and the certificate generated the
+    Region Server setup is complete.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-region-server-monitoring"></a>Region Server Monitoring</h3></div></div></div><p>The Region servers should be monitored for health status. In
+    addition to the general statistics</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>CPU Load/Utilization</p></li><li class="listitem"><p>Memory Usage</p></li><li class="listitem"><p>Disk I/O</p></li><li class="listitem"><p>Kernel Health</p></li><li class="listitem"><p>File system space</p></li><li class="listitem"><p>Uptime</p></li></ul></div><p>the following SMT Server specific system functions and files
+    should be monitored:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>/etc/apache2/vhosts.d/regionsrv_vhost.conf - monitor for
+      presence</p></li><li class="listitem"><p>/etc/serviceaccess/srvAccess.cfg - monitor for presence</p></li><li class="listitem"><p>/etc/regionService/regionData.cfg - monitor for presence</p></li><li class="listitem"><p>serviceAccessConfig - process running</p></li><li class="listitem"><p>apache - process running</p></li></ul></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-server-access-control"></a>Server Access Control</h3></div></div></div><p>Both the Region Server and the SMT server should be configured to
+    have ACL level control to allow access to the services only from the IP
+    ranges that are used by the DHCP servers of the cloud framework. This
+    configuration can be set up manually or it can be automated using the
+     <code class="systemitem">python-serviceAccessConfig</code> tool.</p><p>For both the SMT server and the Region Server, access control has
+    two layers: the firewall rule and the ACL rules as described earlier.
+    The SMT server may also implement a third layer. The
+     <code class="systemitem">python-serviceAccessConfig</code> generates ACL
+    rules for Apache and can be pointed to the
+     <code class="literal">regionData.cfg</code> file to collect all the public IP
+    addresses used by the cloud framework. This set of CIDR blocks is used
+    to generate the access control rules for Apache. Therefore, it is
+    recommended that the same
+     <code class="filename">/etc/regionService/regionData.cfg</code> exist on SMT
+    and Region servers.</p><p>The <code class="option">serviceAccessConfig</code> process monitors the
+     <code class="filename">/etc/regionServer/regionData.cfg</code> file and
+    generates new access rules when changes are detected. It is therefore
+    possible to fully automate the access rule generation by implementing a
+    generator for <code class="filename">regionData.cfg</code> that may parse the
+    DHCP rules and then push out a new file to all servers when the rules
+    change, for example.</p><p>The <code class="option">serviceAccessConfig</code> process is configured
+    with the <code class="filename">/etc/cloudServiceAccess/srvAccess.cfg</code>
+    configuration file; consult the man page for detailed
+    information.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-guest-image"></a>Guest Image</h3></div></div></div><p>The content of the guest image, that is the image that provides
+    the basis for the instances CSP customers use is customizable to the
+    desires of the cloud framework provider.</p><p>For an image to be considered supportable the image must have at
+    least the so-called <code class="systemitem">Minimal Pattern</code> installed.
+    In addition to this a cloud image generally requires some
+    initialization code that handles SSH key injection, account creation,
+    and other housekeeping tasks. This initialization code can be
+     <span class="emphasis"><em>cloud-init</em></span>, an open source solution found in the
+    Public Cloud Module repository, or some other initialization
+    implementation.</p><p>The package <code class="systemitem">cloud-regionsrv-client</code>
+    provides the necessary executable to handle automated guest image
+    registration with the update infrastructure. The client code is
+    configured with the <code class="filename">/etc/regionserverclnt.cfg</code>
+    file. The configuration file has two sections with the options shown
+    below:</p><pre class="screen">[server]
+api = regionInfo
+certLocation = /var/lib/regionService/certs
+regionsrv = COMMA_SEP_LIST_OF_CLOUD_SPECIFIC_REGION_SERVER
+
+[instance]
+dataProvider = none
+instanceArgs = none</pre><p>The <code class="literal">[server]</code> section and all options are
+    mandatory.</p><div class="variablelist"><dl class="variablelist"><dt><span class="term"> api </span></dt><dd><p> The value of the api determines the API the client should
+       call. In a <span class="quote">“<span class="quote">standard</span>”</span> setup this will be set to
+        <code class="option">regionInfo</code> (as shown in the example above).</p></dd><dt><span class="term"> certLocation </span></dt><dd><p> The value of this option indicates the location of the server
+       certificates for the Region Server(s). These are the public certs
+       that were generated with the <span class="command"><strong>genRegionServerCert</strong></span>
+       command shown earlier during Region Server setup. All certificates
+       from the region servers are collected in the specified location.
+      </p></dd><dt><span class="term"> regionsrv </span></dt><dd><p> The value is a comma separated list of the names or IP
+       addresses of the Region Servers. The names listed here must match
+       with the certificate names, without the .pem extension. The client
+       code will randomize the list to distribute the access load across
+       the Region Servers and will then try to obtain the SMT information
+       in the order the list randomization produced. Generally it is
+       expected that SMT information is provided by the first region server
+       contacted. </p></dd></dl></div><p>The <code class="literal">[instance]</code> configuration section is
+    optional.</p><div class="variablelist"><dl class="variablelist"><dt><span class="term"> dataProvider </span></dt><dd><p> Specifies a command that generates data passed to the SMT
+       Server. For verification purposes it may be necessary to collect
+       information from the instance and pass it to the SMT Server. This
+       command must produce data in the format expected by the repository
+       access verification plug-in discussed in <a class="xref" href="#sec-smt-server-s" title="SMT Server(s)">the section called “SMT Server(s)”</a>. </p></dd><dt><span class="term"> instanceArgs </span></dt><dd><p> The value of this option specifies the name of a plug-in to
+       load that will provide the information for the
+        <code class="option">regionHint</code> passed to the Region Server. The name
+       provided must match the file name without the
+        <code class="filename">.py</code> extension. </p></dd></dl></div><p>The <code class="systemitem">instanceArgs</code> plug-in needs to be
+    implemented in Python and be located in the
+     <code class="filename">python-sitelib</code> path in the
+     <code class="filename">cloudregister</code> directory. The plug-in must
+    implement the <code class="literal">generateRegionSrvArgs</code> function. No
+    arguments are passed to the function and the return value is expected
+    to be a string that will match a section in the
+     <code class="filename">regionData.cfg</code> file. The return value of the
+     <code class="literal">generateRegionSrvArgs</code> is expected to be a string
+    and provides the value for the <code class="option">regionHint</code> argument the
+    region server accepts.</p><p>The format of the guest image is cloud framework dependent and
+    dictated by the hypervisor used by the cloud framework. <a class="link" href="https://doc.opensuse.org/projects/kiwi/doc/" target="_top">KIWI</a>,
+    the open source, SUSE sponsored image build tool can produce images in
+    almost any format required by the known hypervisors. KIWI can also
+    produce so-called OEM images that can be used for bare metal
+    deployment. Images can also be created with <a class="link" href="https://susestudio.com" target="_top">SUSE Studio</a>. Other means of
+    image creation are possible and feasible; ultimately it is the
+    CSP’s responsibility to create images that boot and perform
+    within the CSP’s cloud framework.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-appendix-a"></a>Appendix A</h3></div></div></div><pre class="screen">&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;image schemaversion="6.2" name="SMTServer" displayname="SMTServer"&gt;
+    &lt;description type="system"&gt;
+        &lt;author&gt;Public Cloud Team&lt;/author&gt;
+        &lt;contact&gt;&lt;/contact&gt;
+        &lt;specification&gt;SUSE Linux Enterprise Server 12 SPX SMT Server image&lt;/specification&gt;
+    &lt;/description&gt;
+    &lt;preferences&gt;
+        &lt;type image="oem" boot="oemboot/suse-SLES12" filesystem="ext4" boottimeout="1" bootloader="grub2"&gt;
+            &lt;size unit="M"&gt;8192&lt;/size&gt;
+            &lt;oemconfig&gt;
+                &lt;oem-swap&gt;false&lt;/oem-swap&gt;
+            &lt;/oemconfig&gt;
+        &lt;/type&gt;
+        &lt;version&gt;0.1.4&lt;/version&gt;
+        &lt;packagemanager&gt;zypper&lt;/packagemanager&gt;
+        &lt;rpm-check-signatures&gt;false&lt;/rpm-check-signatures&gt;
+        &lt;locale&gt;en_US&lt;/locale&gt;
+        &lt;keytable&gt;us.map.gz&lt;/keytable&gt;
+        &lt;hwclock&gt;utc&lt;/hwclock&gt;
+        &lt;timezone&gt;utc&lt;/timezone&gt;
+    &lt;/preferences&gt;
+    &lt;users group="root"&gt;
+        &lt;user password="linux" pwdformat="plain" home="/root" name="root"/&gt;
+    &lt;/users&gt;
+    &lt;!-- Repository definition goes here --&gt;
+    &lt;packages type="image"&gt;
+        &lt;!-- jeos server --&gt;
+        &lt;package name="patterns-sles-Minimal"/&gt;
+        &lt;package name="dhcp-client"/&gt;
+        &lt;package name="fontconfig"/&gt;
+        &lt;package name="fonts-config"/&gt;
+        &lt;package name="grub2"/&gt;
+        &lt;package name="iproute2"/&gt;
+        &lt;package name="iputils"/&gt;
+        &lt;package name="lvm2"/&gt;
+        &lt;package name="openssh"/&gt;
+        &lt;package name="parted"/&gt;
+        &lt;package name="psmisc"/&gt;
+        &lt;package name="rsync"/&gt;
+        &lt;package name="syslinux"/&gt;
+        &lt;package name="systemd"/&gt;
+        &lt;package name="systemd-sysvinit"/&gt;
+        &lt;package name="sudo"/&gt;
+        &lt;package name="tar"/&gt;
+        &lt;package name="vim"/&gt;
+        &lt;package name="which"/&gt;
+        &lt;!-- end jeos server --&gt;
+        &lt;!-- basic functionality --&gt;
+        &lt;package name="at"/&gt;
+        &lt;package name="attr"/&gt;
+        &lt;package name="audit"/&gt;
+        &lt;package name="autofs"/&gt;
+        &lt;package name="bc"/&gt;
+        &lt;package name="binutils"/&gt;
+        &lt;package name="blktrace"/&gt;
+        &lt;package name="command-not-found"/&gt;
+        &lt;package name="crash"/&gt;
+        &lt;package name="cryptconfig"/&gt;
+        &lt;package name="curl"/&gt;
+        &lt;!-- Authentication functionality --&gt;
+        &lt;package name="cyrus-sasl"/&gt;
+        &lt;package name="cyrus-sasl-digestmd5"/&gt;
+        &lt;package name="cyrus-sasl-gssapi"/&gt;
+        &lt;package name="cyrus-sasl-plain"/&gt;
+        &lt;package name="cyrus-sasl-saslauthd"/&gt;
+        &lt;!-- Authentication functionality end --&gt;
+        &lt;package name="deltarpm"/&gt;
+        &lt;package name="dos2unix"/&gt;
+        &lt;package name="dosfstools"/&gt;
+        &lt;package name="ethtool"/&gt;
+        &lt;package name="expect"/&gt;
+        &lt;package name="fping"/&gt;
+        &lt;package name="glibc-i18ndata"/&gt;
+        &lt;package name="haveged"/&gt;
+        &lt;package name="icmpinfo"/&gt;
+        &lt;package name="irqbalance"/&gt;
+        &lt;package name="kernel-default"/&gt;
+        &lt;package name="klogd"/&gt;
+        &lt;package name="ksh"/&gt;
+        &lt;package name="libnl1"/&gt;
+        &lt;!-- netlink protocol support --&gt;
+        &lt;package name="libnettle4"/&gt;
+        &lt;!-- used by gpg --&gt;
+        &lt;package name="lockdev"/&gt;
+        &lt;package name="man"/&gt;
+        &lt;package name="man-pages"/&gt;
+        &lt;package name="mozilla-nss-certs"/&gt;
+        &lt;package name="netcat-openbsd"/&gt;
+        &lt;package name="nfsidmap"/&gt;
+        &lt;package name="nscd"/&gt;
+        &lt;package name="ntp"/&gt;
+        &lt;package name="openldap2-client"/&gt;
+        &lt;package name="opie"/&gt;
+        &lt;package name="pam-modules"/&gt;
+        &lt;package name="polkit-default-privs"/&gt;
+        &lt;package name="prctl"/&gt;
+        &lt;package name="procinfo"/&gt;
+        &lt;package name="quota"/&gt;
+        &lt;package name="recode"/&gt;
+        &lt;package name="rsh"/&gt;
+        &lt;package name="screen"/&gt;
+        &lt;package name="strace"/&gt;
+        &lt;package name="supportutils"/&gt;
+        &lt;package name="SUSEConnect"/&gt;
+        &lt;package name="SuSEfirewall2"/&gt;
+        &lt;package name="suse-build-key"/&gt;
+        &lt;package name="tcpd"/&gt;
+        &lt;package name="tcpdump"/&gt;
+        &lt;package name="tcsh"/&gt;
+        &lt;package name="telnet"/&gt;
+        &lt;package name="terminfo"/&gt;
+        &lt;package name="vlock"/&gt;
+        &lt;package name="wget"/&gt;
+        &lt;package name="x86info"/&gt;
+        &lt;package name="xfsprogs"/&gt;
+        &lt;package name="xinetd"/&gt;
+        &lt;package name="zip"/&gt;
+        &lt;package name="zsh"/&gt;
+        &lt;!-- packages needed for resolution in OBS --&gt;
+        &lt;package name="acl"/&gt;
+        &lt;package name="fipscheck"/&gt;
+        &lt;package name="ncurses-utils"/&gt;
+        &lt;package name="sg3_utils"/&gt;
+        &lt;package name="pkg-config"/&gt;
+        &lt;package name="elfutils"/&gt;
+        &lt;!-- end packages needed for resolution in OBS --&gt;
+        &lt;!-- end basic functionality --&gt;
+        &lt;!-- user configuration tools --&gt;
+        &lt;package name="libyui-ncurses-pkg7"/&gt;
+        &lt;package name="yast2"/&gt;
+        &lt;package name="yast2-ntp-client"/&gt;
+        &lt;package name="yast2-pam"/&gt;
+        &lt;package name="yast2-perl-bindings"/&gt;
+        &lt;package name="yast2-pkg-bindings"/&gt;
+        &lt;package name="yast2-registration"/&gt;
+        &lt;package name="yast2-schema"/&gt;
+        &lt;package name="yast2-security"/&gt;
+        &lt;package name="yast2-sudo"/&gt;
+        &lt;package name="yast2-support"/&gt;
+        &lt;package name="yast2-sysconfig"/&gt;
+        &lt;package name="yast2-update"/&gt;
+        &lt;package name="yast2-users"/&gt;
+        &lt;package name="yast2-xml"/&gt;
+        &lt;package name="yast2-ycp-ui-bindings"/&gt;
+        &lt;!-- end user configuration tools --&gt;
+        &lt;!-- framework specific packages --&gt;
+        &lt;!-- instance initialization --&gt;
+        &lt;!-- SMT server and framework specific --&gt;
+        &lt;!-- End SMT server and framework specific --&gt;
+        &lt;!-- end framework specific packages --&gt;
+        &lt;!-- SMT server specific --&gt;
+        &lt;package name="apache2"/&gt;
+        &lt;package name="apache2-mod_perl"/&gt;
+        &lt;package name="apache2-prefork"/&gt;
+        &lt;package name="apache2-utils"/&gt;
+        &lt;package name="python-serviceAccessConfig"/&gt;
+        &lt;package name="smt"/&gt;
+        &lt;package name="smt-ha"/&gt;
+        &lt;package name="smt-support"/&gt;
+        &lt;!-- end SMT server specific --&gt;
+        &lt;!-- Infrastructure server monitoring --&gt;
+    &lt;/packages&gt;
+    &lt;packages type="bootstrap"&gt;
+        &lt;!-- products --&gt;
+        &lt;package name="sles-release"/&gt;
+        &lt;package name="sles-release-POOL"/&gt;
+        &lt;package name="filesystem"/&gt;
+        &lt;package name="glibc-locale"/&gt;
+    &lt;/packages&gt;
+&lt;/image&gt;</pre></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id1337"></a>Legal notice</h2></div></div></div><p> Copyright ©2006-2021 SUSE LLC and contributors. All rights reserved. </p><p> Permission is granted to copy, distribute and/or modify this document under the terms of the
+  GNU Free Documentation License, Version 1.2 or (at your option) version 1.3; with the Invariant
+  Section being this copyright notice and license. A copy of the license version 1.2 is included in
+  the section entitled <span class="quote">“<span class="quote">GNU Free Documentation License</span>”</span>. </p><p> SUSE, the SUSE logo and YaST are registered trademarks of SUSE LLC in the United States and
+  other countries. For SUSE trademarks, see <a class="link" href="http://www.suse.com/company/legal/" target="_top">http://www.suse.com/company/legal/</a>. Linux is a registered trademark of Linus Torvalds.
+  All other names or trademarks mentioned in this document may be trademarks or registered
+  trademarks of their respective owners. </p><p> Documents published as part of the <span class="strong"><strong>SUSE Best Practices</strong></span>
+  series have been contributed voluntarily by SUSE employees and third parties. They are meant to
+  serve as examples of how particular actions can be performed. They have been compiled with utmost
+  attention to detail. However, this does not guarantee complete accuracy. SUSE cannot verify that
+  actions described in these documents do what is claimed or whether actions described have
+  unintended consequences. SUSE LLC, its affiliates, the authors, and the translators may not be held
+  liable for possible errors or the consequences thereof.</p><p> Below we draw your attention to the license under which the articles are published.</p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id1338"></a>GNU Free Documentation License</h2></div></div></div><p>
+  Copyright (C) 2000, 2001, 2002 Free Software Foundation, Inc. 51 Franklin St,
+  Fifth Floor, Boston, MA 02110-1301 USA. Everyone is permitted to copy and
+  distribute verbatim copies of this license document, but changing it is not
+  allowed.
+ </p><h5><a id="id1776"></a> 0. PREAMBLE </h5><p>
+  The purpose of this License is to make a manual, textbook, or other
+  functional and useful document "free" in the sense of freedom: to assure
+  everyone the effective freedom to copy and redistribute it, with or without
+  modifying it, either commercially or non-commercially. Secondarily, this
+  License preserves for the author and publisher a way to get credit for their
+  work, while not being considered responsible for modifications made by
+  others.
+ </p><p>
+  This License is a kind of "copyleft", which means that derivative works of
+  the document must themselves be free in the same sense. It complements the
+  GNU General Public License, which is a copyleft license designed for free
+  software.
+ </p><p>
+  We have designed this License to use it for manuals for free software,
+  because free software needs free documentation: a free program should come
+  with manuals providing the same freedoms that the software does. But this
+  License is not limited to software manuals; it can be used for any textual
+  work, regardless of subject matter or whether it is published as a printed
+  book. We recommend this License principally for works whose purpose is
+  instruction or reference.
+ </p><h5><a id="id1780"></a> 1. APPLICABILITY AND DEFINITIONS </h5><p>
+  This License applies to any manual or other work, in any medium, that
+  contains a notice placed by the copyright holder saying it can be distributed
+  under the terms of this License. Such a notice grants a world-wide,
+  royalty-free license, unlimited in duration, to use that work under the
+  conditions stated herein. The "Document", below, refers to any such manual or
+  work. Any member of the public is a licensee, and is addressed as "you". You
+  accept the license if you copy, modify or distribute the work in a way
+  requiring permission under copyright law.
+ </p><p>
+  A "Modified Version" of the Document means any work containing the Document
+  or a portion of it, either copied verbatim, or with modifications and/or
+  translated into another language.
+ </p><p>
+  A "Secondary Section" is a named appendix or a front-matter section of the
+  Document that deals exclusively with the relationship of the publishers or
+  authors of the Document to the Document's overall subject (or to related
+  matters) and contains nothing that could fall directly within that overall
+  subject. (Thus, if the Document is in part a textbook of mathematics, a
+  Secondary Section may not explain any mathematics.) The relationship could be
+  a matter of historical connection with the subject or with related matters,
+  or of legal, commercial, philosophical, ethical or political position
+  regarding them.
+ </p><p>
+  The "Invariant Sections" are certain Secondary Sections whose titles are
+  designated, as being those of Invariant Sections, in the notice that says
+  that the Document is released under this License. If a section does not fit
+  the above definition of Secondary then it is not allowed to be designated as
+  Invariant. The Document may contain zero Invariant Sections. If the Document
+  does not identify any Invariant Sections then there are none.
+ </p><p>
+  The "Cover Texts" are certain short passages of text that are listed, as
+  Front-Cover Texts or Back-Cover Texts, in the notice that says that the
+  Document is released under this License. A Front-Cover Text may be at most 5
+  words, and a Back-Cover Text may be at most 25 words.
+ </p><p>
+  A "Transparent" copy of the Document means a machine-readable copy,
+  represented in a format whose specification is available to the general
+  public, that is suitable for revising the document straightforwardly with
+  generic text editors or (for images composed of pixels) generic paint
+  programs or (for drawings) some widely available drawing editor, and that is
+  suitable for input to text formatters or for automatic translation to a
+  variety of formats suitable for input to text formatters. A copy made in an
+  otherwise Transparent file format whose markup, or absence of markup, has
+  been arranged to thwart or discourage subsequent modification by readers is
+  not Transparent. An image format is not Transparent if used for any
+  substantial amount of text. A copy that is not "Transparent" is called
+  "Opaque".
+ </p><p>
+  Examples of suitable formats for Transparent copies include plain ASCII
+  without markup, Texinfo input format, LaTeX input format, SGML or XML using a
+  publicly available DTD, and standard-conforming simple HTML, PostScript or
+  PDF designed for human modification. Examples of transparent image formats
+  include PNG, XCF and JPG. Opaque formats include proprietary formats that can
+  be read and edited only by proprietary word processors, SGML or XML for which
+  the DTD and/or processing tools are not generally available, and the
+  machine-generated HTML, PostScript or PDF produced by some word processors
+  for output purposes only.
+ </p><p>
+  The "Title Page" means, for a printed book, the title page itself, plus such
+  following pages as are needed to hold, legibly, the material this License
+  requires to appear in the title page. For works in formats which do not have
+  any title page as such, "Title Page" means the text near the most prominent
+  appearance of the work's title, preceding the beginning of the body of the
+  text.
+ </p><p>
+  A section "Entitled XYZ" means a named subunit of the Document whose title
+  either is precisely XYZ or contains XYZ in parentheses following text that
+  translates XYZ in another language. (Here XYZ stands for a specific section
+  name mentioned below, such as "Acknowledgements", "Dedications",
+  "Endorsements", or "History".) To "Preserve the Title" of such a section when
+  you modify the Document means that it remains a section "Entitled XYZ"
+  according to this definition.
+ </p><p>
+  The Document may include Warranty Disclaimers next to the notice which states
+  that this License applies to the Document. These Warranty Disclaimers are
+  considered to be included by reference in this License, but only as regards
+  disclaiming warranties: any other implication that these Warranty Disclaimers
+  may have is void and has no effect on the meaning of this License.
+ </p><h5><a id="id1791"></a> 2. VERBATIM COPYING </h5><p>
+  You may copy and distribute the Document in any medium, either commercially
+  or noncommercially, provided that this License, the copyright notices, and
+  the license notice saying this License applies to the Document are reproduced
+  in all copies, and that you add no other conditions whatsoever to those of
+  this License. You may not use technical measures to obstruct or control the
+  reading or further copying of the copies you make or distribute. However, you
+  may accept compensation in exchange for copies. If you distribute a large
+  enough number of copies you must also follow the conditions in section 3.
+ </p><p>
+  You may also lend copies, under the same conditions stated above, and you may
+  publicly display copies.
+ </p><h5><a id="id1794"></a> 3. COPYING IN QUANTITY </h5><p>
+  If you publish printed copies (or copies in media that commonly have printed
+  covers) of the Document, numbering more than 100, and the Document's license
+  notice requires Cover Texts, you must enclose the copies in covers that
+  carry, clearly and legibly, all these Cover Texts: Front-Cover Texts on the
+  front cover, and Back-Cover Texts on the back cover. Both covers must also
+  clearly and legibly identify you as the publisher of these copies. The front
+  cover must present the full title with all words of the title equally
+  prominent and visible. You may add other material on the covers in addition.
+  Copying with changes limited to the covers, as long as they preserve the
+  title of the Document and satisfy these conditions, can be treated as
+  verbatim copying in other respects.
+ </p><p>
+  If the required texts for either cover are too voluminous to fit legibly, you
+  should put the first ones listed (as many as fit reasonably) on the actual
+  cover, and continue the rest onto adjacent pages.
+ </p><p>
+  If you publish or distribute Opaque copies of the Document numbering more
+  than 100, you must either include a machine-readable Transparent copy along
+  with each Opaque copy, or state in or with each Opaque copy a
+  computer-network location from which the general network-using public has
+  access to download using public-standard network protocols a complete
+  Transparent copy of the Document, free of added material. If you use the
+  latter option, you must take reasonably prudent steps, when you begin
+  distribution of Opaque copies in quantity, to ensure that this Transparent
+  copy will remain thus accessible at the stated location until at least one
+  year after the last time you distribute an Opaque copy (directly or through
+  your agents or retailers) of that edition to the public.
+ </p><p>
+  It is requested, but not required, that you contact the authors of the
+  Document well before redistributing any large number of copies, to give them
+  a chance to provide you with an updated version of the Document.
+ </p><h5><a id="id1799"></a> 4. MODIFICATIONS </h5><p>
+  You may copy and distribute a Modified Version of the Document under the
+  conditions of sections 2 and 3 above, provided that you release the Modified
+  Version under precisely this License, with the Modified Version filling the
+  role of the Document, thus licensing distribution and modification of the
+  Modified Version to whoever possesses a copy of it. In addition, you must do
+  these things in the Modified Version:
+ </p><div class="orderedlist"><ol class="orderedlist" type="A"><li class="listitem"><p>
+    Use in the Title Page (and on the covers, if any) a title distinct from
+    that of the Document, and from those of previous versions (which should, if
+    there were any, be listed in the History section of the Document). You may
+    use the same title as a previous version if the original publisher of that
+    version gives permission.
+   </p></li><li class="listitem"><p>
+    List on the Title Page, as authors, one or more persons or entities
+    responsible for authorship of the modifications in the Modified Version,
+    together with at least five of the principal authors of the Document (all
+    of its principal authors, if it has fewer than five), unless they release
+    you from this requirement.
+   </p></li><li class="listitem"><p>
+    State on the Title page the name of the publisher of the Modified Version,
+    as the publisher.
+   </p></li><li class="listitem"><p>
+    Preserve all the copyright notices of the Document.
+   </p></li><li class="listitem"><p>
+    Add an appropriate copyright notice for your modifications adjacent to the
+    other copyright notices.
+   </p></li><li class="listitem"><p>
+    Include, immediately after the copyright notices, a license notice giving
+    the public permission to use the Modified Version under the terms of this
+    License, in the form shown in the Addendum below.
+   </p></li><li class="listitem"><p>
+    Preserve in that license notice the full lists of Invariant Sections and
+    required Cover Texts given in the Document's license notice.
+   </p></li><li class="listitem"><p>
+    Include an unaltered copy of this License.
+   </p></li><li class="listitem"><p>
+    Preserve the section Entitled "History", Preserve its Title, and add to it
+    an item stating at least the title, year, new authors, and publisher of the
+    Modified Version as given on the Title Page. If there is no section
+    Entitled "History" in the Document, create one stating the title, year,
+    authors, and publisher of the Document as given on its Title Page, then add
+    an item describing the Modified Version as stated in the previous sentence.
+   </p></li><li class="listitem"><p>
+    Preserve the network location, if any, given in the Document for public
+    access to a Transparent copy of the Document, and likewise the network
+    locations given in the Document for previous versions it was based on.
+    These may be placed in the "History" section. You may omit a network
+    location for a work that was published at least four years before the
+    Document itself, or if the original publisher of the version it refers to
+    gives permission.
+   </p></li><li class="listitem"><p>
+    For any section Entitled "Acknowledgements" or "Dedications", Preserve the
+    Title of the section, and preserve in the section all the substance and
+    tone of each of the contributor acknowledgements and/or dedications given
+    therein.
+   </p></li><li class="listitem"><p>
+    Preserve all the Invariant Sections of the Document, unaltered in their
+    text and in their titles. Section numbers or the equivalent are not
+    considered part of the section titles.
+   </p></li><li class="listitem"><p>
+    Delete any section Entitled "Endorsements". Such a section may not be
+    included in the Modified Version.
+   </p></li><li class="listitem"><p>
+    Do not retitle any existing section to be Entitled "Endorsements" or to
+    conflict in title with any Invariant Section.
+   </p></li><li class="listitem"><p>
+    Preserve any Warranty Disclaimers.
+   </p></li></ol></div><p>
+  If the Modified Version includes new front-matter sections or appendices that
+  qualify as Secondary Sections and contain no material copied from the
+  Document, you may at your option designate some or all of these sections as
+  invariant. To do this, add their titles to the list of Invariant Sections in
+  the Modified Version's license notice. These titles must be distinct from any
+  other section titles.
+ </p><p>
+  You may add a section Entitled "Endorsements", provided it contains nothing
+  but endorsements of your Modified Version by various parties--for example,
+  statements of peer review or that the text has been approved by an
+  organization as the authoritative definition of a standard.
+ </p><p>
+  You may add a passage of up to five words as a Front-Cover Text, and a
+  passage of up to 25 words as a Back-Cover Text, to the end of the list of
+  Cover Texts in the Modified Version. Only one passage of Front-Cover Text and
+  one of Back-Cover Text may be added by (or through arrangements made by) any
+  one entity. If the Document already includes a cover text for the same cover,
+  previously added by you or by arrangement made by the same entity you are
+  acting on behalf of, you may not add another; but you may replace the old
+  one, on explicit permission from the previous publisher that added the old
+  one.
+ </p><p>
+  The author(s) and publisher(s) of the Document do not by this License give
+  permission to use their names for publicity for or to assert or imply
+  endorsement of any Modified Version.
+ </p><h5><a id="id1836"></a> 5. COMBINING DOCUMENTS </h5><p>
+  You may combine the Document with other documents released under this
+  License, under the terms defined in section 4 above for modified versions,
+  provided that you include in the combination all of the Invariant Sections of
+  all of the original documents, unmodified, and list them all as Invariant
+  Sections of your combined work in its license notice, and that you preserve
+  all their Warranty Disclaimers.
+ </p><p>
+  The combined work need only contain one copy of this License, and multiple
+  identical Invariant Sections may be replaced with a single copy. If there are
+  multiple Invariant Sections with the same name but different contents, make
+  the title of each such section unique by adding at the end of it, in
+  parentheses, the name of the original author or publisher of that section if
+  known, or else a unique number. Make the same adjustment to the section
+  titles in the list of Invariant Sections in the license notice of the
+  combined work.
+ </p><p>
+  In the combination, you must combine any sections Entitled "History" in the
+  various original documents, forming one section Entitled "History"; likewise
+  combine any sections Entitled "Acknowledgements", and any sections Entitled
+  "Dedications". You must delete all sections Entitled "Endorsements".
+ </p><h5><a id="id1840"></a> 6. COLLECTIONS OF DOCUMENTS </h5><p>
+  You may make a collection consisting of the Document and other documents
+  released under this License, and replace the individual copies of this
+  License in the various documents with a single copy that is included in the
+  collection, provided that you follow the rules of this License for verbatim
+  copying of each of the documents in all other respects.
+ </p><p>
+  You may extract a single document from such a collection, and distribute it
+  individually under this License, provided you insert a copy of this License
+  into the extracted document, and follow this License in all other respects
+  regarding verbatim copying of that document.
+ </p><h5><a id="id1843"></a> 7. AGGREGATION WITH INDEPENDENT WORKS </h5><p>
+  A compilation of the Document or its derivatives with other separate and
+  independent documents or works, in or on a volume of a storage or
+  distribution medium, is called an "aggregate" if the copyright resulting from
+  the compilation is not used to limit the legal rights of the compilation's
+  users beyond what the individual works permit. When the Document is included
+  in an aggregate, this License does not apply to the other works in the
+  aggregate which are not themselves derivative works of the Document.
+ </p><p>
+  If the Cover Text requirement of section 3 is applicable to these copies of
+  the Document, then if the Document is less than one half of the entire
+  aggregate, the Document's Cover Texts may be placed on covers that bracket
+  the Document within the aggregate, or the electronic equivalent of covers if
+  the Document is in electronic form. Otherwise they must appear on printed
+  covers that bracket the whole aggregate.
+ </p><h5><a id="id1846"></a> 8. TRANSLATION </h5><p>
+  Translation is considered a kind of modification, so you may distribute
+  translations of the Document under the terms of section 4. Replacing
+  Invariant Sections with translations requires special permission from their
+  copyright holders, but you may include translations of some or all Invariant
+  Sections in addition to the original versions of these Invariant Sections.
+  You may include a translation of this License, and all the license notices in
+  the Document, and any Warranty Disclaimers, provided that you also include
+  the original English version of this License and the original versions of
+  those notices and disclaimers. In case of a disagreement between the
+  translation and the original version of this License or a notice or
+  disclaimer, the original version will prevail.
+ </p><p>
+  If a section in the Document is Entitled "Acknowledgements", "Dedications",
+  or "History", the requirement (section 4) to Preserve its Title (section 1)
+  will typically require changing the actual title.
+ </p><h5><a id="id1849"></a> 9. TERMINATION </h5><p>
+  You may not copy, modify, sublicense, or distribute the Document except as
+  expressly provided for under this License. Any other attempt to copy, modify,
+  sublicense or distribute the Document is void, and will automatically
+  terminate your rights under this License. However, parties who have received
+  copies, or rights, from you under this License will not have their licenses
+  terminated so long as such parties remain in full compliance.
+ </p><h5><a id="id1851"></a> 10. FUTURE REVISIONS OF THIS LICENSE </h5><p>
+  The Free Software Foundation may publish new, revised versions of the GNU
+  Free Documentation License from time to time. Such new versions will be
+  similar in spirit to the present version, but may differ in detail to address
+  new problems or concerns. See
+  <a class="link" href="http://www.gnu.org/copyleft/" target="_top">http://www.gnu.org/copyleft/</a>.
+ </p><p>
+  Each version of the License is given a distinguishing version number. If the
+  Document specifies that a particular numbered version of this License "or any
+  later version" applies to it, you have the option of following the terms and
+  conditions either of that specified version or of any later version that has
+  been published (not as a draft) by the Free Software Foundation. If the
+  Document does not specify a version number of this License, you may choose
+  any version ever published (not as a draft) by the Free Software Foundation.
+ </p><h5><a id="id1855"></a> ADDENDUM: How to use this License for your
+  documents </h5><pre class="screen">Copyright (c) YEAR YOUR NAME.
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.2
+or any later version published by the Free Software Foundation;
+with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
+A copy of the license is included in the section entitled "GNU
+ Free Documentation License".</pre><p>
+  If you have Invariant Sections, Front-Cover Texts and Back-Cover Texts,
+  replace the "with...Texts". line with this:
+ </p><pre class="screen">with the Invariant Sections being LIST THEIR TITLES, with the
+Front-Cover Texts being LIST, and with the Back-Cover Texts being LIST.</pre><p>
+  If you have Invariant Sections without Cover Texts, or some other combination
+  of the three, merge those two alternatives to suit the situation.
+ </p><p>
+  If your document contains nontrivial examples of program code, we recommend
+  releasing these examples in parallel under your choice of free software
+  license, such as the GNU General Public License, to permit their use in free
+  software.
+ </p></div></div></body></html>

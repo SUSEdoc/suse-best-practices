@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Getting the Package</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="How to Modify a Package in the Open Build Service" /><link rel="up" href="index.html" title="How to Modify a Package in the Open Build Service" /><link rel="prev" href="sec-package.html" title="Package" /><link rel="next" href="sec-working-sources.html" title="Working on the Sources" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Getting the Package</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="sec-package.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="sec-working-sources.html">Next</a></td></tr></table><hr /></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-get-package"></a>Getting the Package</h2></div></div></div><p>At a certain point in time, you need to modify a package.
+            You</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>either have worked out a fix for a bug
+                    yourself,</p></li><li class="listitem"><p>or found an upstream patch that you want to
+                    include,</p></li><li class="listitem"><p>or you want to upgrade a package to a new
+                    version.</p></li></ol></div><p>If you want to update a <span class="italic">package</span>, you should use the existing one as the
+            skeleton. You also you must keep and amend the
+                <code class="filename">changes</code> file. If you want to write a
+            patch or use an existing patch, you need the current version of
+            the package because you simply add your patch to the package. </p><p>At this stage, you should also have a clear idea of the
+            directory structure you want to use. One option is to store all
+            your patches and packages under your <span class="strong"><strong>HOME</strong></span> directory. But you can also consider to
+            create subdirectories by topics for the work you currently have
+            in progress. In any case, the meta data that are stored by
+                <span class="command"><strong>osc</strong></span> ensure that the package is submitted
+            to the correct directory.</p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-devel-repo-main"></a>Development Repository – Maintainer or Bugowner</h3></div></div></div><p>You can always check out the sources from the <span class="italic">devel repo</span>. But as long as you
+                are not the maintainer or bugowner of that repository, you
+                usually cannot submit your changes directly. The tool
+                    <span class="command"><strong>osc</strong></span> knows where a package comes from
+                and will automatically submit it back to the correct
+                repository.</p><p>After you moved to the directory where you want to work
+                on the sources, you can check out the current revision of
+                the package by running the command:</p><pre class="screen">osc co &lt;PRJ&gt; &lt;PKG&gt;</pre><p>where &lt;PRJ&gt; is the project the package is part of
+                and &lt;PKG&gt; is the package’s name.</p><p>Example:</p><pre class="screen">osc co devel:languages:perl perl-RPM-VersionSort</pre><p>This command checks out a complete directory tree and
+                creates <span class="strong"><strong>devel:languages:perl/perl-RPM-VersionSort</strong></span>.
+                Inside the <span class="strong"><strong>perl-RPM-VersionSort</strong></span> directory, all
+                required files are available: <code class="filename">spec</code>
+                file, <code class="filename">source</code> archive,
+                    <code class="filename">changes</code> file, patches etc.</p><p>In case you have created several working directories and
+                you try to check out a package you already have a working
+                copy of, you will get an error message:</p><pre class="screen">error: ‘PRJ/PKG’ is already an initialized osc working copy</pre><p>Change to the indicated directory and update the content
+                running the command</p><pre class="screen">cd &lt;PRJ&gt;/&lt;PKG&gt;; osc update</pre><p>or short</p><pre class="screen">cd &lt;PRJ&gt;/&lt;PKG&gt;; osc up</pre><p>This will check out any changed files and tell you which
+                revision is the current one. Everything is now set and you
+                may proceed to <a class="xref" href="sec-working-sources.html" title="Working on the Sources">the section called “Working on the Sources”</a>.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-devel-repo-non-main"></a>Development Repository - Non-Maintainer or Non-Bugowner </h3></div></div></div><p>There are at least two situations where you <span class="strong"><strong>must not</strong></span> check out directly
+                from the <span class="italic">devel
+                repo</span>:</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>If you need to patch an already released package,
+                        the <span class="italic">devel repo</span>
+                        usually holds a more current version than the
+                        released package. You must not update the release
+                        version of such a package (the procedure <span class="italic">devel repo → factory → product
+                            repo</span> will not work).</p></li><li class="listitem"><p>If you are not the maintainer or bugowner of the
+                        package, you cannot submit your changes back to the
+                            <span class="italic">devel
+                        repo</span>.</p></li></ol></div><p>In these cases you need to create a <span class="italic">branch</span> first. Then you need to
+                check out the sources from this branch.</p><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-branching"></a>Branching</h4></div></div></div><p>The branch you work on will be created on the build
+                    server. When you have finished your work and submitted
+                    your changes, remove the branch on the build server to
+                    free up resources. If you need the branch for
+                    additional tasks, you can remove it also at a later
+                    point in time. </p><p>Create a branch with the command</p><pre class="screen">osc branch &lt;PRJ&gt; &lt;PKG&gt;</pre><p>This command creates the subdirectory <span class="strong"><strong>home:&lt;username&gt;:branches:&lt;PRJ&gt;/&lt;PKG&gt;</strong></span>
+                    on the server and populates it with the source files
+                    (spec file, pristine sources, changes file, current set
+                    of patches, etc.) of the package. </p><p>If the patch also needs to be applied to maintained
+                    versions, this means versions already released as a
+                    product, use the command <span class="command"><strong>osc mbranch
+                        &lt;PKG&gt;</strong></span> to branch the projects. The
+                        <span class="strong"><strong>
+                        <span class="quote">“<span class="quote">m</span>”</span>
+                    </strong></span> in <span class="strong"><strong>
+                        <span class="quote">“<span class="quote">mbranch</span>”</span>
+                    </strong></span> stands for <span class="strong"><strong>
+                        <span class="quote">“<span class="quote">multiple</span>”</span>
+                    </strong></span>, and not as often wrongly assumed for
+                        <span class="strong"><strong>
+                        <span class="quote">“<span class="quote">maintenance</span>”</span>
+                    </strong></span>.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Add Package Name</h3><p>Make sure you add the <span class="italic">package</span> name and <span class="strong"><strong>not</strong></span> the <span class="italic">project</span> name to the
+                        command <span class="command"><strong>osc branch</strong></span>.
+                            <span class="command"><strong>mbranch</strong></span> automatically
+                        detects in which releases the package is under
+                        maintenance and creates the appropriate directory
+                        structure. Both commands <span class="command"><strong>osc
+                            branch</strong></span> and <span class="command"><strong>osc
+                            mbranch</strong></span> provide a list of the files
+                        they have created a branch for, and allow you to
+                        easily see which releases you need to work
+                        on.</p></div></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-checkout"></a>Check Out</h4></div></div></div><p>The commands <span class="command"><strong>osc branch</strong></span> and
+                        <span class="command"><strong>osc mbranch</strong></span> only create a branch
+                    on the build server. To create a branch on your local
+                    system including copies of the packages you want to
+                    work on, check them out with the command</p><pre class="screen">osc co home:&lt;username&gt;:branches:&lt;PRJ&gt;&lt;PKG&gt;</pre><p>Remember you check out a package from the <span class="italic">devel repo</span> in the same
+                    way. </p><p>This command creates the directory structure
+                        <span class="strong"><strong>home:&lt;username&gt;:branches:&lt;PRJ&gt;/&lt;PKG&gt;</strong></span>
+                    in the current directory on your local machine and
+                    populates it with all files. </p><p>If you created your new subdirectory by mistake
+                    within the wrong local directory, you can remove the
+                    newly created one with the command <span class="command"><strong>rm
+                        -rf</strong></span>. Then move to the correct directory
+                    where the new subdirectory should be located, and check
+                    out again.</p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-branch-checkout"></a>Branch and Check Out</h4></div></div></div><p>When you update or modify a package, you usually need
+                    to perform both steps, branching the repository, and
+                    checking out the package. You can easily combine both
+                    steps into one command by typing</p><pre class="screen">osc branchco &lt;PRJ&gt; &lt;PKG&gt;</pre><p>or by using the short command version</p><pre class="screen">osc bco &lt;PRJ&gt; &lt;PKG&gt;</pre><p>If you have used the <span class="command"><strong>osc mbranch</strong></span>
+                    command for branching, you cannot combine the two steps
+                        <span class="command"><strong>mbranch</strong></span> and
+                        <span class="command"><strong>checkout</strong></span> into one command.
+                    However, you can specify the
+                        <code class="option">--checkout</code> option by typing</p><pre class="screen">osc mbranch –-checkout &lt;PKG&gt;</pre><p>or in short</p><pre class="screen">osc mbranch -c &lt;PKG&gt;</pre><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Add Package Name</h3><p>Make sure you add the package name and <span class="strong"><strong>not</strong></span> the project name
+                        to the command, as this command will branch and
+                        check out all projects where the respective package
+                        is under maintenance.</p></div></div></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="sec-package.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="sec-working-sources.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Package </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Working on the Sources</td></tr></table></div></body></html>

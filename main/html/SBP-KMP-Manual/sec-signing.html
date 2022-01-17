@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Signing</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="Kernel Module Packages Manual for SUSE-based Distributions" /><link rel="up" href="index.html" title="Kernel Module Packages Manual for SUSE-based Distributions" /><link rel="prev" href="sec-building-kmp.html" title="Building Kernel Module Packages" /><link rel="next" href="sec-deploying-kmp.html" title="Deploying Kernel Module Packages" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Signing</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="sec-building-kmp.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="sec-deploying-kmp.html">Next</a></td></tr></table><hr /></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-signing"></a>Signing</h2></div></div></div><p>Signing (as applied to a piece of software) is the process of
+            digitally tagging the software to verify the author and
+            guarantee that the software has not been altered since it was
+            signed. SUSE Linux Enterprise Server and SUSE Linux Enterprise
+            Desktop include utilities to sign and validate signatures on
+            packages and repositories. In addition, SUSE Linux Enterprise
+            Server and SUSE Linux Enterprise Desktop 11 SP3 and later
+            versions include technology to sign and validate signatures on
+            kernel modules.</p><p>The following sections describe how to sign packages and
+            kernel modules. The topic of repository signing is beyond the
+            scope of this document.</p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-signing-packages"></a>Signing Packages</h3></div></div></div><p>All packages that are provided in SUSE Linux Enterprise
+                Server and SUSE Linux Enterprise Desktop are digitally
+                signed with the SUSE Build key. SolidDriver/PLDP packages
+                that are built on the SolidDriver Build Server by the SUSE
+                SolidDriver team are automatically signed with the SUSE
+                SolidDriver/PLDP key (see <a class="link" href="https://drivers.suse.com/doc/Usage/Package_Signing_Key.html#package-signing-key" target="_top">https://drivers.suse.com/doc/Usage/Package_Signing_Key.html#package-signing-key</a>
+                ). Partners who build and/or provide their own packages are
+                encouraged to sign them with their own keys. </p><p>To sign packages, a private/public key pair must be
+                installed on the GNU Privacy Guard (GPG) keyring of the
+                signing user (see the <code class="option">--gen-key</code> option in
+                the gpg(1) manual page at <a class="link" href="https://linux.die.net/man/1/gpg" target="_top">https://linux.die.net/man/1/gpg</a>). Then the
+                following command can be used to sign a package (replace
+                build@suse.com with the identity that identifies your
+                signing key):</p><pre class="screen">$ rpm --eval “%define _signature gpg” \
+      --eval “%define _gpg_name build@suse.com” \
+      --addsign package.rpm</pre><p>Note that a package can only be signed once. Another
+                    <code class="option">--addsign</code> operation will replace an
+                existing old signature, and will add the new one.</p><p>The public key used for signing must then be exported
+                into a file with the command:</p><pre class="screen">$ gpg --armor --export build &gt;build-pubkey.txt</pre><p>Then, import the key into the RPM database with the
+                command:</p><pre class="screen">$ rpm --import build-pubkey.txt</pre><p>You can verify that both package signing and key import
+                have succeeded with RPM's <code class="option">--checksig</code>
+                option (note the <span class="quote">“<span class="quote">gpg</span>”</span> in the output):</p><pre class="screen">$ rpm --checksig package.rpm
+package.rpm: (sha1) dsa sha1 md5 gpg OK</pre><p>The public key exported to
+                    <code class="filename">build-pubkey.txt</code> must be delivered
+                to customers in a way that they will trust. It must be
+                imported into the RPM database on systems on which the
+                signed packages are to be installed.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-signing-module-object"></a>Signing Module Object Files <span class="italic">(UEFI Secure Boot)</span></h3></div></div></div><p>Although using signed packages and other OS security
+                features can secure an installed and running system, they
+                cannot prevent system subversion before the OS has booted.
+                To address pre-OS security concerns, the UEFI 2.2 Secure
+                Boot specification (see <a class="link" href="http://www.uefi.org/specs " target="_top">http://www.uefi.org/specs</a>) details a protocol
+                to prevent the loading of boot loaders or kernels
+                (including modules) that are not signed with an approved
+                digital key stored in the system firmware.</p><p>The UEFI Secure Boot specification allows for variation
+                in implementation. A simple way to implement secure boot is
+                to ensure that the base system (as provided by the system
+                vendor) contains all the keys that will be used by the boot
+                loader, the OS, and any drivers. But having the system
+                vendor simply place all needed keys into the firmware is
+                not a full solution, as it does not give appropriate
+                control to the system user/owner. SUSE's secure boot
+                implementation addresses this control issue by extending
+                the secure-boot-enabled EFI shim loader to accept keys that
+                have been approved by the system owner. Thus, if there is a
+                need to load a module with an unrecognized key, the key can
+                be added to the <span class="quote">“<span class="quote">approved key</span>”</span> database
+                (reboot and system-owner approval required).</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Module Without Signature</h3><p>If a module has no signature, it cannot be loaded on
+                    a secure-boot-enabled system. Users who wish to load
+                    unsigned modules on SUSE Linux Enterprise Server/SUSE
+                    Linux Enterprise Desktop 11 SP3 or later versions must
+                    disable secure boot.</p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-creating-key"></a>Creating a Key and Certificate</h4></div></div></div><p>There are several ways to sign modules, but all
+                    methods require providing a key and certificate.
+                    Official keys and certificates can be provided by an
+                    organization's security team or by build services (such
+                    as the Open Build Service or the SolidDriver/PLDP Build
+                    Service). Developers and packagers can also generate
+                    their own keys and certificates for testing purposes.
+                    To create a key and certificate using the
+                        <span class="command"><strong>openssl req</strong></span> command, type the
+                    following:</p><pre class="screen">export USER="your company name"
+openssl req -new -x509 -newkey rsa:2048 -sha256 -keyout key.asc -out cert.der \
+            -outform der -nodes -days 4745 -subj "/CN=$USER/"</pre><p>The above sequence of commands will create a
+                        <code class="filename">key.asc</code> key file and a
+                        <code class="filename">cert.der</code> x509 certificate in
+                    the current working directory. The
+                        <code class="option">4745</code> option generates a
+                    certificate which will be valid for 13 years.</p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-sign-existing-kmp"></a>Signing an Existing KMP</h4></div></div></div><p>The <span class="package">pesign-obs-integration</span> package
+                    in SUSE Linux Enterprise Server 11 SP3 and later
+                    versions provides a
+                        <span class="command"><strong>modsign-repackage</strong></span> utility that
+                    can be used to sign kernel modules in an existing KMP.
+                        <span class="command"><strong>modsign-repackage</strong></span> unpacks the
+                    original RPM, signs any included modules and re-creates
+                    the RPM. It also creates a second
+                        <span class="package">&lt;name&gt;-ueficert</span> RPM that
+                    installs the certificate and calls the
+                        <span class="command"><strong>mokutil</strong></span> utility to enroll the
+                    public key. The re-packaged RPM will have a dependency
+                    on the <span class="package">&lt;name&gt;-ueficert</span> RPM,
+                    ensuring that the certificates will be installed at the
+                    same time as the module(s).</p><p>To use <span class="command"><strong>modsign-repackage</strong></span> with the
+                        <span class="strong"><strong>key.asc</strong></span> key and
+                    the <span class="strong"><strong>cert.der</strong></span>
+                    certificate created above to repackage a
+                        <span class="package">./suse-hello-kmp-default-1.0_3.0.101_63-0.x86_64.rpm</span>
+                    package, do the following:</p><pre class="screen">modsign-repackage -c ./cert.der -k ./key.asc ./suse-hello-kmp-default-1.0-3.0.101_63-0.x86_64.rpm</pre><p>The above command will create the following
+                    directories and files in the current working
+                    directory:</p><pre class="screen">    ./RPMS/
+      x86_64/
+          suse-hello-kmp-default-1.0-3.0.101_63-0.x86_64.rpm
+          suse-hello-ueficert-1.0-0.x86_64.rpm</pre></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-signing-packaging"></a>Signing Modules During Packaging</h4></div></div></div><p>Signing modules as part of the packaging process
+                    requires making a few changes to the KMP spec file
+                    template. The spec file template in Appendix A includes
+                    these changes along with conditionals to ensure that
+                    the changes will apply only when building KMPs for SUSE
+                    Linux Enterprise Server or SUSE Linux Enterprise
+                    Desktop 11 SP3 or later versions. The changes
+                    are:</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>List the certificate file as a <span class="strong"><strong>%Source</strong></span> file. The
+                            top-level directory of the build structure
+                            (where the spec file is located) should include
+                            both a private key file and a certificate file.
+                            The spec file should list the certificate as a
+                                <span class="emphasis"><em>%Source</em></span> file. The spec
+                            file should not list the key file (since the
+                            private key should not be included in the
+                            source KMP).</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Naming</h3><p>To be recognized by the kernel Makefile,
+                                the key file must be named
+                                    <span class="quote">“<span class="quote">signing_key.priv</span>”</span> and the
+                                certificate file must be named
+                                    <span class="quote">“<span class="quote">signing_key.x509</span>”</span>. The
+                                example above describes how to use the
+                                    <span class="command"><strong>openssl req</strong></span> command
+                                to create a <code class="filename">key.asc</code>
+                                key file and a
+                                    <code class="filename">cert.der</code>
+                                certificate file; to use these files at
+                                packaging-time, they should be renamed to
+                                    <span class="quote">“<span class="quote">signing_key.priv</span>”</span> and
+                                    <span class="quote">“<span class="quote">signing_key.x509</span>”</span>.</p></div></li><li class="listitem"><p>Add code to determine the build target's
+                            service pack level. This is done by adding the
+                                <span class="package">sles-release</span> (or
+                                <span class="package">sled-release</span>) package to
+                                <span class="strong"><strong>%BuildRequires</strong></span> and then
+                            defining a <span class="strong"><strong>%sle_version</strong></span> macro based on the
+                            contents of the
+                                <code class="filename">/etc/SuSE-release</code>
+                            file.</p></li><li class="listitem"><p>For SUSE Linux Enterprise Server 11 SP3 and
+                            later versions, invoke the <span class="strong"><strong>%kernel_module_package</strong></span> macro
+                            with the <code class="option">-c
+                                %_sourcedir/signing_key.x509</code>
+                            option to specify the certificate (and thus the
+                            key) to use in signing. Using the
+                            kernel_module_package <code class="option">-c</code>
+                            option does not cause any module signing; it
+                            simply ensures the creation of a
+                                <span class="package">&lt;name&gt;-ueficert</span>
+                            package which installs the certificate and
+                            calls the <span class="command"><strong>mokutil</strong></span> utility to
+                            enroll the public key. The actual module
+                            signing is handled in the <span class="strong"><strong>%install</strong></span> section
+                            of the spec file.</p></li><li class="listitem"><p>For SUSE Linux Enterprise Server 11 SP3 and
+                            later versions, add <span class="strong"><strong>%install</strong></span> section code to ensure
+                            that the modules will get signed. This is done
+                            by setting the CONFIG_MODULE_SIG_ALL kernel
+                            configuration parameter. When
+                            CONFIG_MODULE_SIG_ALL is set, the <span class="command"><strong>make
+                                modules_install</strong></span> step
+                            automatically includes module signing.</p></li></ol></div><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Own Keys and Certificates</h3><p>The Appendix A sample spec file is designed to be
+                        used by developers and packagers who provide their
+                        own keys and certificates. Partners who use the
+                        Open Build Service will not need to provide keys
+                        and certificates and thus should use the spec file
+                        in Appendix A.1.</p></div></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-secure-boot-kmp"></a>Installation of Secure-boot-enabled KMPs</h4></div></div></div><p>As discussed above, secure-boot-enabled KMPs include
+                    an additional <span class="package">&lt;name&gt;-ueficert</span>
+                    package to install the certificate and enroll the
+                    public key. The
+                        <span class="package">&lt;name&gt;-kmp-&lt;flavor&gt;</span>
+                    packages require the
+                        <span class="package">&lt;name&gt;-ueficert</span>
+                    package.</p><p>After the <span class="package">&lt;name&gt;-ueficert</span>
+                    package is installed, the system must be rebooted and
+                    the newly-enrolled key approved by the system owner
+                    before the key (and thus the signed modules) can be
+                    used.</p><p>The <span class="command"><strong>mokutil</strong></span> utility can also be
+                    used on its own to view and manage keys in the key
+                    database.</p></div></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="sec-building-kmp.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="sec-deploying-kmp.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Building Kernel Module Packages </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Deploying Kernel Module Packages</td></tr></table></div></body></html>

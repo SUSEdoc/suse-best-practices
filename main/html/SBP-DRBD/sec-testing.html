@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Testing Failovers and Recovery</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="Data Replication across Geo Clusters via DRBD" /><link rel="up" href="index.html" title="Data Replication across Geo Clusters via DRBD" /><link rel="prev" href="sec-interop-booth.html" title="Interoperability with Booth" /><link rel="next" href="sec-further-documentation.html" title="Further Documentation" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Testing Failovers and Recovery</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="sec-interop-booth.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="sec-further-documentation.html">Next</a></td></tr></table><hr /></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-testing"></a>Testing Failovers and Recovery</h2></div></div></div><p>After you have configured everything as described, you should check that your setup is
+            working as expected.</p><p>The following command from any node running the booth daemon will tell you which
+            tickets it knows about, which site currently holds the ticket, and when that ticket will
+            expire if it is not renewed:</p><pre class="screen"># booth list
+ticket: ticket-nfs, leader: 192.168.201.100, expires: 2016-04-14 07:50:48</pre><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-failover"></a>Failover</h3></div></div></div><p>There are many ways to test that failovers will work as expected. An easy way to
+                test is to sever network communications between sites using IPtables. You only need
+                to cut communication on the Booth ports to see a ticket expire and services
+                failover.</p><p>On the node currently running the booth daemon, issue the following IPtables
+                commands to sever Booth’s communications with its peers:</p><pre class="screen">/usr/sbin/iptables -I INPUT -p udp --dport 9929 -j DROP
+/usr/sbin/iptables -I OUTPUT -p udp --dport 9929 -j DROP</pre><p>After the ticket's <span class="italic">expire</span> time has lapsed, you
+                should see services begin to demote at the current Primary site. After the <span class="italic">expire</span> plus <span class="italic">acquire-after</span> time lapses, you should see services begin to start at
+                the Secondary site.</p><p>Remove the IPtables rules you inserted before continuing:</p><pre class="screen"># /usr/sbin/iptables -D INPUT -p udp --dport 9929 -j DROP
+# /usr/sbin/iptables -D OUTPUT -p udp --dport 9929 -j DROP</pre></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-failback"></a>Failback</h3></div></div></div><p>To failback to the original Primary site you need to manually revoke the ticket
+                from the site currently running services, and grant the ticket to the original
+                Primary site.</p><p>You can issue the following commands from any of the nodes currently running the
+                Booth daemon:</p><pre class="screen"># booth revoke -s 192.168.202.100 ticket-nfs
+  booth[30268]: 2016/04/14_08:21:05 info: revoke request sent, waiting for the result ...
+  booth[30268]: 2016/04/14_08:21:09 info: revoke succeeded!
+# booth grant -s 192.168.201.100 ticket-nfs
+  booth[30269]: 2016/04/14_08:21:17 info: grant request sent, waiting for the result ...
+  booth[30269]: 2016/04/14_08:21:28 info: grant succeeded</pre></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="sec-interop-booth.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="sec-further-documentation.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Interoperability with Booth </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Further Documentation</td></tr></table></div></body></html>

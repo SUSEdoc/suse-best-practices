@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Migrate SUSE Linux Enterprise Server 12 SP1 to SUSE Linux Enterprise Server for SAP Applications 12 SP1</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><meta name="description" content="This short technical document outlines the procedure to migrate a newly installed SUSE Linux Enterprise Server 12 SP1 for Power Systems to SUSE Linux Enterprise Server for SAP Applications 12 SP1 for IBM Power Systems. Disclaimer: Documents published as part of the SUSE Best Practices series have been contributed voluntarily by SUSE employees and third parties. They are meant to serve as examples of how particular actions can be performed. They have been compiled with utmost attention to detail. However, this does not guarantee complete accuracy. SUSE cannot verify that actions described in these documents do what is claimed or whether actions described have unintended consequences. SUSE LLC, its affiliates, the authors, and the translators may not be held liable for possible errors or the consequences thereof." /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="Migrate SUSE Linux Enterprise Server 12 SP1 to SUSE Linux Enterprise Server for SAP Applications 12 SP1" /><link rel="next" href="sec-migration-to-sap.html" title="Migration Procedure" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Migrate SUSE Linux Enterprise Server 12 SP1 to SUSE Linux
+            Enterprise Server for SAP Applications 12 SP1 </th></tr><tr><td width="20%" align="left"> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="sec-migration-to-sap.html">Next</a></td></tr></table><hr /></div><div xml:lang="en" class="article" lang="en"><div class="titlepage"><div><div><h1 class="title"><a id="art-sbp-geo-drbd"></a>Migrate SUSE Linux Enterprise Server 12 SP1 to SUSE Linux
+            Enterprise Server for SAP Applications 12 SP1 </h1></div><div><h3 class="subtitle"><em>For SAP HANA 2.0 Deployments on IBM Power
+            Systems</em></h3></div><div><div class="author"><h3 class="author"><span class="firstname">Mike</span> <span class="surname">Friesenegger, Technology Strategist - Alliances
+                    and Integrated Systems, SUSE</span></h3></div></div><div><div class="abstract"><p class="title"><strong>Abstract</strong></p><p>This short technical document outlines the procedure to
+                migrate a newly installed SUSE Linux Enterprise Server 12
+                SP1 for Power Systems to SUSE Linux Enterprise Server for
+                SAP Applications 12 SP1 for IBM Power Systems.</p><p>
+                <span class="strong"><strong>Disclaimer: </strong></span>
+                Documents published as part of the SUSE Best Practices series have been contributed voluntarily
+                by SUSE employees and third parties. They are meant to serve as examples of how particular
+                actions can be performed. They have been compiled with utmost attention to detail. However,
+                this does not guarantee complete accuracy. SUSE cannot verify that actions described in these
+                documents do what is claimed or whether actions described have unintended consequences.
+                SUSE LLC, its affiliates, the authors, and the translators may not be held liable for possible errors
+                or the consequences thereof.
+            </p></div></div></div><hr /></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="sect1"><a href="index.html#sec-overview">Overview</a></span></dt><dt><span class="sect1"><a href="sec-migration-to-sap.html">Migration Procedure</a></span></dt><dt><span class="sect1"><a href="sec-next.html">Next Steps</a></span></dt><dt><span class="sect1"><a href="sec-add-info.html">Additional Information</a></span></dt><dt><span class="sect1"><a href="ar01s05.html">Legal notice</a></span></dt><dt><span class="sect1"><a href="ar01s06.html">GNU Free Documentation License</a></span></dt></dl></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-overview"></a>Overview</h2></div></div></div><p>SAP unveiled SAP HANA 2 on November 8, 2016 (see <a class="link" href="http://news.sap.com/sap-to-unveil-sap-hana-2/" target="_top">http://news.sap.com/sap-to-unveil-sap-hana-2/</a>). Little endian support for IBM Power Systems will be
+            officially available when SAP HANA 2 is released to customers
+            on November 30, 2016. SUSE, the only Linux distribution for SAP
+            HANA on Power Systems, is supporting the SAP HANA 2
+            availability by releasing SUSE Linux Enterprise Server for SAP
+            Applications 12 SP1 for IBM Power Systems on November 30, 2016.
+            This means that IBM Power Systems customers can get all of the
+            benefits of SUSE Linux Enterprise Server for SAP Applications
+            for Power Systems especially the built-in high-availability
+            clustering and automated failover for SAP HANA but on little
+            endian. </p><p>To meet the release schedule, no installation media will be
+            provided for SUSE Linux Enterprise Server for SAP Applications
+            12 SP1 for IBM Power Systems (SLES for SAP12 SP1 ppc64le). This
+            means that a deployment will install SUSE Linux Enterprise
+            Server 12 SP1 for Power Systems (SLES12 SP1 ppc64le) and then
+            migrate and register the installed product to SLES for SAP12
+            SP1 ppc64le.</p><p>The sections below outline the procedure to migrate a newly
+            installed SUSE Linux Enterprise Server 12 SP1 for Power Systems
+            to SUSE Linux Enterprise Server for SAP Applications 12 SP1 for
+            IBM Power Systems.</p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="sec-migration-to-sap.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top"> </td><td width="20%" align="center"> </td><td width="40%" align="right" valign="top"> Migration Procedure</td></tr></table></div></body></html>

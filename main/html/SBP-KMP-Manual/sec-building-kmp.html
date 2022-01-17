@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Building Kernel Module Packages</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="Kernel Module Packages Manual for SUSE-based Distributions" /><link rel="up" href="index.html" title="Kernel Module Packages Manual for SUSE-based Distributions" /><link rel="prev" href="sec-provides-requires.html" title="RPM Provides and Requires" /><link rel="next" href="sec-signing.html" title="Signing" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Building Kernel Module Packages</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="sec-provides-requires.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="sec-signing.html">Next</a></td></tr></table><hr /></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-building-kmp"></a>Building Kernel Module Packages</h2></div></div></div><p>In addition to the C and kernel programming skills required
+            for writing the kernel module source code, creating proper
+            Kernel Module Packages requires some familiarity with
+                <span class="command"><strong>rpm</strong></span> and with build environments.
+            For more information on kernel module building refer to the
+            above-mentioned <span class="quote">“<span class="quote">Linux Kernel Module Programming
+                Guide</span>”</span> and the <span class="quote">“<span class="quote">Linux Device Drivers</span>”</span>
+            book. Additional SUSE-specific kernel and kernel module
+            information can be found in the README.SUSE in the
+            kernel-source package. SUSE recommends using the example
+            package found in Appendix A as a template to reduce the
+            complexities related to <span class="command"><strong>rpm</strong></span>. A lot
+            of additional information on <span class="command"><strong>rpm</strong></span> can
+            be found at <a class="link" href="http://www.rpm.org/" target="_top">http://www.rpm.org/</a>, including a reference to the
+            excellent Maximum RPM.</p><p>SUSE strongly recommends using the kernel build
+            infrastructure (kbuild) for building and installing the kernel
+            modules, as done in the example package. Kbuild is documented
+            in /usr/src/linux/Documentation/kbuild/ from the kernel-source
+            package. Trying to emulate kbuild will lead to various problems
+            including mis-compilations and missing or wrong symbol
+            versions, and increased support load because of subtle
+            breakages.</p><p>To achieve consistent and reproducible builds in a defined
+            environment independent of the software installed on the system
+            used for building, use the build script from the
+                <span class="package">build.rpm</span> package. This script sets up a
+            build environment from the RPM packages the script is pointed
+            at. The packages are then built in this environment using
+                <span class="command"><strong>chroot</strong></span> (see the chroot(1) manual
+            page). All SUSE packages are built using the same mechanism.
+            When building Kernel Module Packages with
+                <span class="package">build.rpm</span>, the following options of the
+            build script are particularly relevant:</p><h3><a id="id1626"></a>--root <span class="italic">directory</span></h3><p>Define the directory in which to set up the build
+            environment. Defaults to the BUILD_ROOT environment variable,
+            and to <code class="filename">/var/tmp/build-root</code> if
+            unset.</p><h3><a id="id1630"></a>--RPMs <span class="italic">path1</span>[:<span class="italic">path2</span>:...]</h3><p>Define where build will look for packages for constructing
+            the build environment. The directories are searched
+            recursively. Packages found earlier in the path have precedence
+            over packages found later, similar to how the PATH environment
+            variable works. Defaults to the BUILD_RPMS environment
+            variable, and to <code class="filename">/media/dvd/suse</code> if unset.
+            The <code class="option">--rpms</code> option must only be specified
+            once.</p><h3><a id="id1636"></a>--clean, --no-init</h3><p>Reconstruct the build environment entirely from scratch
+                (<code class="option">--clean</code>), or start the build without
+            initializing the build environment
+            (<code class="option">--no-init</code>), which skips checking whether all
+            packages in the build environment are up-to-date.</p><p>Build stores the created packages below
+                <code class="filename">usr/src/packages/</code> in the build
+            environment.</p><p>On dual-architecture machines, packages for the other
+            supported architecture can be built by running the build script
+            inside an architecture selector. On x86_64, the selector is
+            called linux32, on ppc64 this is ppc32, and on s390x the
+            selector is called s390. The same build environment cannot be
+            reused for different architectures unless it is reinitialized
+            with build's <code class="option">--clean</code> option.</p><p>See the build(1) manual page for further information.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Building External Modules</h3><p>For building external modules, you need to have both the
+                kernel-source and kernel-&lt;flavor&gt;-devel packages
+                installed in the build environment. The BuildRequires line
+                in spec files takes care of this: the <span class="strong"><strong>%kernel_module_package_buildreqs</strong></span> macro
+                specifies the kernel-syms package, which pulls in the
+                kernel-source package and the kernel-&lt;flavor&gt;-devel
+                packages because of its dependency on them. Note that
+                without the kernel-syms the module build can still succeed
+                depending on how you do the build, but the resulting
+                modules will have module symbol versions disabled. Kernel
+                Module Packages without module symbol versions will appear
+                to match any kernel although in fact they do not. This can
+                easily lead to very hard-to-diagnose system
+                malfunctions.</p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="sec-provides-requires.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="sec-signing.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">RPM Provides and Requires </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Signing</td></tr></table></div></body></html>

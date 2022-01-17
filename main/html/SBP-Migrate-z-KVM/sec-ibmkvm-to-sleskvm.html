@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Moving an Existing KVM for IBM z Systems Virtual Machine to KVM in SUSE Linux Enterprise Server</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="Migrating from KVM for IBM z Systems to KVM integrated with SUSE Linux Enterprise Server" /><link rel="up" href="index.html" title="Migrating from KVM for IBM z Systems to KVM integrated with SUSE Linux Enterprise Server" /><link rel="prev" href="sec-managing-kvm.html" title="Managing KVM Instances" /><link rel="next" href="sec-troubleshooting.html" title="Troubleshooting" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Moving an Existing KVM for IBM z Systems Virtual Machine to KVM in SUSE Linux Enterprise
+            Server</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="sec-managing-kvm.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="sec-troubleshooting.html">Next</a></td></tr></table><hr /></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-ibmkvm-to-sleskvm"></a>Moving an Existing KVM for IBM z Systems Virtual Machine to KVM in SUSE Linux Enterprise
+            Server</h2></div></div></div><p>The following section explains how to move a KVM for IBM z Systems virtual machine to KVM
+            integrated with SUSE Linux Enterprise Server. A VM was created on KVM for IBM z Systems
+            following the section 3.7 of the IBM Redbook <span class="quote">“<span class="quote">Getting Started with KVM for IBM z
+                Systems </span>”</span> at <a class="link" href="http://www.redbooks.ibm.com/redbooks/pdfs/sg248332.pdf" target="_top">http://www.redbooks.ibm.com/redbooks/pdfs/sg248332.pdf</a>. This
+            procedure assumes that the KVM for IBM z Systems VM has a virtual disk file and is
+            attached to a virtual network defined using libvirt. Below is the XML definition of the
+            VM and virtual network based on the example in the IBM Redbook.</p><h3><a id="id1338"></a>VM Definition</h3><pre class="screen">&lt;domain type='kvm'&gt;
+  &lt;name&gt;s12s2&lt;/name&gt;
+  &lt;uuid&gt;97968b48-295e-465a-9265-2cc89f4fb9cd&lt;/uuid&gt;
+  &lt;description&gt;IBM KVM to SLES KVM&lt;/description&gt;
+  &lt;memory unit='KiB'&gt;524288&lt;/memory&gt;
+  &lt;currentMemory unit='KiB'&gt;524288&lt;/currentMemory&gt;
+  &lt;vcpu placement='static'&gt;1&lt;/vcpu&gt;
+  &lt;os&gt;
+    &lt;type arch='s390x' machine='s390-ccw-kvmibm-1.1.1'&gt;hvm&lt;/type&gt;
+    &lt;boot dev='hd'/&gt;
+  &lt;/os&gt;
+  &lt;clock offset='utc'/&gt;
+  &lt;on_poweroff&gt;destroy&lt;/on_poweroff&gt;
+  &lt;on_reboot&gt;restart&lt;/on_reboot&gt;
+  &lt;on_crash&gt;preserve&lt;/on_crash&gt;
+  &lt;devices&gt;
+    &lt;emulator&gt;/usr/bin/qemu-system-s390x&lt;/emulator&gt;
+      &lt;disk type='file' device='disk'&gt;
+        &lt;driver name='qemu' type='qcow2'/&gt;
+        &lt;source file='/var/lib/libvirt/images/s12s2.img'/&gt;
+        &lt;target dev='vda' bus='virtio'/&gt;
+        &lt;address type='ccw' cssid='0xfe' ssid='0x0' devno='0x0002'/&gt;
+      &lt;/disk&gt;
+      &lt;interface type='bridge'&gt;
+        &lt;mac address='52:54:00:58:35:20'/&gt;
+        &lt;source bridge='virbr0'/&gt;
+        &lt;model type='virtio'/&gt;
+        &lt;address type='ccw' cssid='0xfe' ssid='0x0' devno='0x0000'/&gt;
+      &lt;/interface&gt;
+      &lt;console type='pty'&gt;
+        &lt;target type='sclp' port='0'/&gt;
+      &lt;/console&gt;
+      &lt;memballoon model='virtio'&gt;
+        &lt;address type='ccw' cssid='0xfe' ssid='0x0' devno='0x0001'/&gt;
+      &lt;/memballoon&gt;
+   &lt;/devices&gt;
+&lt;/domain&gt;</pre><h3><a id="id1339"></a>Virtual Network Definition</h3><pre class="screen">&lt;network&gt;
+  &lt;name&gt;default&lt;/name&gt;
+  &lt;uuid&gt;4e4ab47a-3889-4eba-81d0-dda245a44091&lt;/uuid&gt;
+  &lt;forward mode='nat'&gt;
+    &lt;nat&gt;
+      &lt;port start='1024' end='65535'/&gt;
+    &lt;/nat&gt;
+   &lt;/forward&gt;
+   &lt;bridge name='virbr0' stp='on' delay='0'/&gt;
+   &lt;mac address='52:54:00:c0:47:bc'/&gt;
+   &lt;ip address='192.168.122.1' netmask='255.255.255.0'&gt;
+     &lt;dhcp&gt;
+       &lt;range start='192.168.122.2' end='192.168.122.254'/&gt;
+     &lt;/dhcp&gt;
+   &lt;/ip&gt;
+&lt;/network&gt;
+        </pre><p>The VM and network definition for a customer deployment may be considerably different
+            but the basic procedure to move the VM to KVM in SUSE Linux Enterprise Server will be
+            the same, as outlined below.</p><div class="procedure"><ol class="procedure" type="1"><li class="step"><p>Connect via SSH to the KVM for IBM z Systems host as root or as the user used
+                    to define VMs</p></li><li class="step"><p>Find a VM configured on the KVM for IBM z Systems host that you want to move
+                    to a SUSE Linux Enterprise Server KVM host</p><ol type="a" class="substeps"><li class="step"><p>List all defined VMs with <span class="command"><strong>virsh list --all</strong></span> and
+                            choose the VM to migrate</p></li><li class="step"><p>Dump the XML definition of the VM to be migrated via the command
+                                <span class="command"><strong>'virsh dumpxml &lt;vmname&gt; &gt; ~/&lt;vmname&gt;.xml'
+                            </strong></span> (where &lt;vmname&gt; is the name of a VM to move)</p></li><li class="step"><p>View the content of the XML file via the command <span class="command"><strong>less
+                                ~/&lt;vmname&gt;.xml</strong></span> and make note of the following
+                            information</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Location of the VM disk file(s) which is &lt;source file=
+                                    in the above VM definition</p></li><li class="listitem"><p>The name of the network bridge(s) which is &lt;source
+                                    bridge= in the above VM definition</p></li></ul></div></li></ol></li><li class="step"><p>Determine the virtual network(s) associated to the VM</p><ol type="a" class="substeps"><li class="step"><p>List all defined network bridges with <span class="command"><strong>virsh net-list
+                                --all</strong></span></p></li><li class="step"><p>Repeat the command <span class="command"><strong>virsh net-dumpxml &lt;network name&gt; &gt;
+                                ~/net-&lt;network name&gt;.xml</strong></span>for each network bridge to
+                            dump the XML definition for all of the network bridges</p></li><li class="step"><p>Repeat the command <span class="command"><strong>grep -H &lt;network bridge name from
+                                the information gathered before&gt; ~/net-*.xml</strong></span> for each
+                            network bridge to determine the XML file to migrate</p></li><li class="step"><p>Make note of the filename(s) from the grep output above</p></li></ol></li><li class="step"><p>Copy the VM disk file(s), the VM xml file and the network xml file(s) to the
+                    SUSE Linux Enterprise Server KVM host</p><ol type="a" class="substeps"><li class="step"><p> Enter the command <span class="command"><strong>rsync -S --progress &lt;VM disk file&gt;
+                                &lt;VM xml file&gt; &lt;network xml&gt; &lt;SLES KVM
+                                Host&gt;:/var/lib/libvirt/images</strong></span></p></li></ol></li><li class="step"><p>Connect via SSH to the SUSE Linux Enterprise Server KVM host as root or as the
+                    user used to define VMs</p></li><li class="step"><p>Remove the bridge if it already exists on the KVM host</p><ol type="a" class="substeps"><li class="step"><p>Type <span class="command"><strong>virsh net-list --all</strong></span></p></li><li class="step"><p>Type <span class="command"><strong>virsh net-undefine &lt;network name&gt;</strong></span> when
+                            the network name is the same as a network name on the KVM for IBM z
+                            Systems host</p></li></ol></li><li class="step"><p>Add the bridge from KVM for IBM z Systems</p><ol type="a" class="substeps"><li class="step"><p>Define the network name(s) with <span class="command"><strong>virsh net-define
+                                &lt;network xml file(s)&gt;</strong></span></p></li><li class="step"><p>Start the network name(s) with <span class="command"><strong>virsh net-start
+                                &lt;network xml file(s)&gt;</strong></span></p></li><li class="step"><p>Autostart the network name(s) on system restart with <span class="command"><strong>virsh
+                                net-autostart &lt;network xml file(s)&gt;</strong></span></p></li></ol></li><li class="step"><p>Edit the VM xml file by changing</p><pre class="screen">&lt;type arch='s390x' machine='s390-ccw-kvmibm-1.1.1'&gt;hvm&lt;/type&gt;</pre><p>to</p><pre class="screen">&lt;type arch='s390x' machine='s390-ccw-virtio'&gt;hvm&lt;/type&gt;</pre></li><li class="step"><p>Define the VM in SUSE Linux Enterprise Server KVM</p><ol type="a" class="substeps"><li class="step"><p>Use the command <span class="command"><strong>virsh define &lt;VM xml
+                            file&gt;</strong></span></p></li></ol></li><li class="step"><p>Start and verify the newly migrated VM is running</p><ol type="a" class="substeps"><li class="step"><p>Start the VM with <span class="command"><strong>virsh start &lt;VM
+                            name&gt;</strong></span></p></li><li class="step"><p>Verify that the VM is running with <span class="command"><strong>virsh
+                            list</strong></span></p></li><li class="step"><p>Connect via SSH to the VM to verify that networking is working</p></li></ol></li></ol></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="sec-managing-kvm.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="sec-troubleshooting.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Managing KVM Instances </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Troubleshooting</td></tr></table></div></body></html>

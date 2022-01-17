@@ -1,0 +1,551 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>How to Directly Connect SUSE Manager to Red Hat Content Delivery Network</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><meta name="description" content="The described solution allows you to directly connect SUSE Manager to the Red Hat Content Delivery Network (CDN) to retrieve your software updates and patches. This is useful if you plan on continuing your agreement with Red Hat, and/or you do not want to use Expanded Support from SUSE. It is also useful when you have multiple distributions that you want to update and patch from SUSE Manager. Finally, it is helpful if you use an updated code stream of the Satellite 5 series, and continue your use of an enhanced road map to the Spacewalk project. You must have a current subscription with Red Hat. This in no way requires that you have a subscription to Satellite Server from Red Hat. Disclaimer: Documents published as part of the SUSE Best Practices series have been contributed voluntarily by SUSE employees and third parties. They are meant to serve as examples of how particular actions can be performed. They have been compiled with utmost attention to detail. However, this does not guarantee complete accuracy. SUSE cannot verify that actions described in these documents do what is claimed or whether actions described have unintended consequences. SUSE LLC, its affiliates, the authors, and the translators may not be held liable for possible errors or the consequences thereof." /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div xml:lang="en" class="article" lang="en"><div class="titlepage"><div><div><h1 class="title"><a id="art-sbp-suma-rhconnect"></a>How to Directly Connect SUSE Manager to Red Hat Content
+            Delivery Network</h1></div><div><h3 class="subtitle"><em>Methods to Receive Your Red Hat Updates and
+            Patches</em></h3></div><div><div class="author"><h3 class="author"><span class="firstname">Cameron</span> <span class="surname">Seader, Sales Engineer, SUSE</span></h3></div></div><div><div class="author"><h3 class="author"><span class="firstname">Donald</span> <span class="surname">Vosburg, Sales Engineer, SUSE</span></h3></div></div><div><div class="abstract"><p class="title"><strong>Abstract</strong></p><p>The described solution allows you to directly connect
+                SUSE Manager to the Red Hat Content Delivery Network (CDN)
+                to retrieve your software updates and patches.</p><p>This is useful if you plan on continuing your agreement
+                with Red Hat, and/or you do not want to use Expanded
+                Support from SUSE. It is also useful when you have multiple
+                distributions that you want to update and patch from SUSE
+                Manager. Finally, it is helpful if you use an updated code
+                stream of the Satellite 5 series, and continue your use of
+                an enhanced road map to the Spacewalk project.</p><p>You must have a current subscription with Red Hat. This
+                in no way requires that you have a subscription to
+                Satellite Server from Red Hat.</p><p>
+                <span class="strong"><strong>Disclaimer: </strong></span>
+                Documents published as part of the SUSE Best Practices series have been contributed voluntarily
+                by SUSE employees and third parties. They are meant to serve as examples of how particular
+                actions can be performed. They have been compiled with utmost attention to detail. However,
+                this does not guarantee complete accuracy. SUSE cannot verify that actions described in these
+                documents do what is claimed or whether actions described have unintended consequences.
+                SUSE LLC, its affiliates, the authors, and the translators may not be held liable for possible errors
+                or the consequences thereof.
+            </p></div></div></div><hr /></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="sect1"><a href="#sec-importrhcert">Import Red Hat Entitlement and CA Certificate</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec-entitlecert">Entitlement Certificate</a></span></dt><dt><span class="sect2"><a href="#sec-rhcacert">Red Hat CA Certificate</a></span></dt><dt><span class="sect2"><a href="#sec-obtain-repo-url">Obtain Repository URL list</a></span></dt><dt><span class="sect2"><a href="#sec-import">Import</a></span></dt></dl></dd><dt><span class="sect1"><a href="#sec-createrepos">Create Software Repositories</a></span></dt><dt><span class="sect1"><a href="#sec-createswchannel">Create Software Channel Delivery</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec-parentchannels">Parent Channels Example</a></span></dt><dt><span class="sect2"><a href="#sec-child-channels">Child Channels example</a></span></dt></dl></dd><dt><span class="sect1"><a href="#sec-registration">Registration</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec-bootstrap-repo-creation">Bootstrap Repository Creation</a></span></dt><dt><span class="sect2"><a href="#sec-minion-registration">Minion Registration</a></span></dt></dl></dd><dt><span class="sect1"><a href="#sec-references">References</a></span></dt><dt><span class="sect1"><a href="#id1337">Legal notice</a></span></dt><dt><span class="sect1"><a href="#id1338">GNU Free Documentation License</a></span></dt></dl></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-importrhcert"></a>Import Red Hat Entitlement and CA Certificate</h2></div></div></div><p>During the next few paragraphs, you will learn how to import
+            the Red Hat CA and entitlement certificate.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Expiration Dates for Entitlement Certificates</h3><p>Entitlement certificates have embedded expiration dates
+                tied to the length of the support subscription. You must
+                repeat this process with updated entitlement certificates
+                as needed to avoid disruption in channel mirroring.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-entitlecert"></a>Entitlement Certificate</h3></div></div></div><p>Red Hat Subscription Manager is a local service which
+                tracks installed products and subscriptions on a local
+                system to help manage subscription assignments. To obtain
+                your certificates, you must register your system using this
+                subscription manager tool supplied by Red Hat. </p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>Register with the subscription manager tool from
+                        your Red Hat client. It will prompt you for your
+                        user name and password for authentication on the
+                        Red Hat Portal:</p><p>
+                        <span class="command"><strong>subscription-manager register</strong></span>
+                    </p></li><li class="listitem"><p>Navigate to the location of your entitlement
+                        certificate and key, and copy these files to where
+                        your Web browser connected to SUSE Manager can open
+                        them:</p><p>
+                        <span class="command"><strong>cd /etc/pki/entitlement/</strong></span>
+                    </p></li></ol></div><p>You will see two files with the data file format
+                extension <span class="strong"><strong>.pem</strong></span> (Program
+                Editor macro). One is the certificate, and the other is the
+                key and it has the word <span class="quote">“<span class="quote">key</span>”</span> in the file
+                name.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-rhcacert"></a>Red Hat CA Certificate</h3></div></div></div><p>The next step is to get the Red Hat CA Certificate file.
+                It is located on this same Red Hat system in the file
+                    <code class="filename">/etc/rhsm/ca/redhat-uep.pem</code>. Place
+                this file in the same location where, in the previous
+                section, you put the entitlement certificate. </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-obtain-repo-url"></a>Obtain Repository URL list</h3></div></div></div><p>Use the subscription manager tool to obtain the URL’s of
+                the repositories you want to mirror:</p><p>
+                <span class="command"><strong>subscription-manager repos</strong></span>
+            </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-import"></a>Import</h3></div></div></div><p>Now you are ready to import the Red Hat CA Certificate
+                and Entitlement Certificate into SUSE Manager for software
+                repository mirroring. You must create three entries here:
+                one each for the entitlement certificate, the entitlement
+                key, and the Red Hat CA certificate.</p><p>Start your SUSE Manager. Go to the <span class="strong"><strong>Systems</strong></span> tab at the top. Click
+                    <span class="strong"><strong>Autoinstallation</strong></span> on
+                the left pane. Then click <span class="strong"><strong>GPG and
+                    SSL Keys</strong></span> also on the left pane, as you can
+                see it from the screenshot below.</p><div class="figure"><a id="id1339"></a><p class="title"><strong>Figure 1. SUSE Manager GPG Public Keys and SSL
+                    Certificates</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="90%"><tr><td><img src="images/suma-connect-rhcertimport.png" width="100%" alt="SUSE Manager GPG Public Keys and SSL Certificates" /></td></tr></table></div></div></div><br class="figure-break" /><p>Click <span class="strong"><strong>Create Stored
+                    Key/Cert</strong></span> on the right. Another screen opens
+                where you can fill in the required information.</p><div class="figure"><a id="id1340"></a><p class="title"><strong>Figure 2. SUSE Manager Create GPG/SSL Keys</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="90%"><tr><td><img src="images/suma-connect-createkey.png" width="100%" alt="SUSE Manager Create GPG/SSL Keys" /></td></tr></table></div></div></div><br class="figure-break" /><p>Enter the following values, and ensure you enter the
+                date:</p><table border="0" summary="Simple list" class="simplelist"><tr><td><span class="strong"><strong>Description</strong></span>:
+                        Entitlement-Cert-<span class="emphasis"><em>date</em></span></td></tr><tr><td><span class="strong"><strong>Type</strong></span>: Ensure you
+                    select <span class="emphasis"><em>SSL</em></span>
+                </td></tr><tr><td><span class="strong"><strong>Select file to
+                        upload</strong></span>: Browse to where you saved the
+                    Entitlement Certificate .pem file and select
+                    it.</td></tr></table><p>Click the <span class="strong"><strong>Create Key</strong></span>
+                button at the bottom.</p><div class="figure"><a id="id1341"></a><p class="title"><strong>Figure 3. SUSE Manager Create Key Button</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="30%"><tr><td><img src="images/suma-connect-buttoncreatekey.png" width="100%" alt="SUSE Manager Create Key Button" /></td></tr></table></div></div></div><br class="figure-break" /><p>Repeat the above steps for the Entitlement Key and change
+                the values to match the following:</p><table border="0" summary="Simple list" class="simplelist"><tr><td><span class="strong"><strong>Description</strong></span>:
+                        Entitlement-key-<span class="emphasis"><em>date</em></span></td></tr><tr><td><span class="strong"><strong>Type</strong></span>:
+                    SSL</td></tr><tr><td><span class="strong"><strong>Select file to
+                        upload</strong></span>: Browse to the location where you
+                    saved the Entitlement key .pem file and select
+                    it.</td></tr></table><p>Repeat the above steps for the Red Hat CA Certificate
+                    (<span class="emphasis"><em>redhat-uep</em></span>) and change the values
+                to match the following:</p><table border="0" summary="Simple list" class="simplelist"><tr><td><span class="strong"><strong>Description</strong></span>:
+                    redhat-uep</td></tr><tr><td><span class="strong"><strong>Type</strong></span>:
+                    SSL</td></tr><tr><td><span class="strong"><strong>Select file to
+                        upload</strong></span>: Browse to the location where you
+                    saved the Red Hat CA Certificate and select
+                    it.</td></tr></table><p>You now have imported the Entitlement certificate, the
+                Entitlement key and the Red Hat CA into SUSE Manager for
+                use. Your outcome should look like the screen below:</p><div class="figure"><a id="id1342"></a><p class="title"><strong>Figure 4. SUSE Manager Imported Red Hat Certificates</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="90%"><tr><td><img src="images/suma-connect-sumarhcert-2.png" width="100%" alt="SUSE Manager Imported Red Hat Certificates" /></td></tr></table></div></div></div><br class="figure-break" /></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-createrepos"></a>Create Software Repositories</h2></div></div></div><p>To mirror the software from the Red Hat CDN, you need to
+            create custom channels and repositories in SUSE Manager that
+            are linked to the CDN with their respective URL. This will only
+            work if you have entitlements to these products in your Red Hat
+            Portal. To create these software repositories you need to
+            perform the following actions. </p><p>On your SUSE Manager screen, go to the <span class="strong"><strong>Software</strong></span>(or in older SUSE Manager
+            versions, to the <span class="strong"><strong>Channels</strong></span>)
+            tab at top. Click <span class="strong"><strong>Manage Software
+                Channels</strong></span> on the left pane. Then click <span class="strong"><strong>Manage Repositories</strong></span> also on the
+            left pane.</p><div class="figure"><a id="id1343"></a><p class="title"><strong>Figure 5. SUSE Manager Repositories</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="90%"><tr><td><img src="images/suma-connect-sumarepo.png" width="100%" alt="SUSE Manager Repositories" /></td></tr></table></div></div></div><br class="figure-break" /><p>Click <span class="bold"><strong>Create Repository</strong></span>. The
+            following screen opens, where you can enter the required
+            information to create the repository.</p><div class="figure"><a id="id1344"></a><p class="title"><strong>Figure 6. SUSE Manager Create Repository</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="90%"><tr><td><img src="images/suma-connect-sumacreaterepo.png" width="100%" alt="SUSE Manager Create Repository" /></td></tr></table></div></div></div><br class="figure-break" /><p>Fill in the fields with values, following the example
+            below:</p><table border="0" summary="Simple list" class="simplelist"><tr><td><span class="strong"><strong>Repository Label</strong></span>:
+                rhel-7-server-rpms</td></tr><tr><td><span class="strong"><strong>Repository URL</strong></span>:
+                https://cdn.redhat.com/content/dist/rhel/server/7/7Server/x86_64/os/</td></tr><tr><td><span class="strong"><strong>Has Signed
+                Metadata?</strong></span>: Uncheck (Uncheck for all Red Hat
+                Enterprise Repositories)</td></tr><tr><td><span class="strong"><strong>SSL CA Certificate</strong></span>:
+                redhat-uep</td></tr><tr><td><span class="strong"><strong>SSL Client
+                    Certificate</strong></span>:
+                    Entitlement-Cert-<span class="emphasis"><em>date</em></span></td></tr><tr><td><span class="strong"><strong>SSL Client Key</strong></span>:
+                    Entitlement-Key-<span class="emphasis"><em>date</em></span></td></tr></table><p>These steps need to be repeated for the Products / Repository
+            URLs you define for your environment. </p><h3><a id="id1345"></a>Repository Values</h3><p>Use the output of repository URL’s obtained earlier from the
+            subscription manager tool to create other repositories to which
+            you are entitled. Mirror only the content which you need to
+            manage your systems.</p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-createswchannel"></a>Create Software Channel Delivery</h2></div></div></div><p>Next step is to create corresponding channels to which you
+            assign these repositories.</p><p>Click <span class="strong"><strong>Channels</strong></span>, after that
+            click <span class="strong"><strong> Manage Software Channels
+            </strong></span>.</p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-parentchannels"></a>Parent Channels Example</h3></div></div></div><p>Click <span class="strong"><strong>Create Channel</strong></span>
+                and fill in the fields with at least the following
+                values:</p><table border="0" summary="Simple list" class="simplelist"><tr><td><span class="strong"><strong>Channel Name</strong></span>:
+                    RHEL 7 x86_64</td></tr><tr><td><span class="strong"><strong>Channel Label</strong></span>:
+                    rhel7-x86_64-server</td></tr><tr><td><span class="strong"><strong>Parent Channel</strong></span>:
+                    None</td></tr><tr><td>
+                    <span class="strong"><strong>Architecture</strong></span>: x86_64 </td></tr><tr><td><span class="strong"><strong>Repository Checksum
+                        Type</strong></span>: sha1</td></tr><tr><td><span class="strong"><strong>Channel Summary</strong></span>:
+                    RHEL 7 x86_64</td></tr><tr><td><span class="strong"><strong>Organization
+                        Sharing</strong></span>: Public</td></tr></table><p>After you have filled in the values, click again
+                    <span class="strong"><strong>Create
+                Channel</strong></span>.</p><p>On the screen below, click the tab <span class="strong"><strong>Repositories</strong></span>, and mark the
+                check box next to the appropriate repository.</p><div class="figure"><a id="id1346"></a><p class="title"><strong>Figure 7. Create Parent Channels</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="90%"><tr><td><img src="images/suma-connect-parent-channel-1.png" width="100%" alt="Create Parent Channels" /></td></tr></table></div></div></div><br class="figure-break" /><p>On the next screen, click the tab <span class="strong"><strong>Sync</strong></span> and set your preferred recurring
+                schedule for synchronization for this repository. You can
+                also select <span class="strong"><strong>Sync Now</strong></span> to
+                launch the synchronization immediately.</p><div class="figure"><a id="id1347"></a><p class="title"><strong>Figure 8. Synchronize Parent Channels</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="90%"><tr><td><img src="images/suma-connect-parent-channel-2.png" width="100%" alt="Synchronize Parent Channels" /></td></tr></table></div></div></div><br class="figure-break" /><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Mirroring Duration</h3><p>Red Hat Server OS channels can grow to be very large.
+                    Thus it can take several hours to complete mirroring.
+                </p></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-child-channels"></a>Child Channels example</h3></div></div></div><p>Click <span class="strong"><strong>Create Channel</strong></span>
+                and fill in the fields with at least the following
+                values:</p><table border="0" summary="Simple list" class="simplelist"><tr><td><span class="strong"><strong>Channel Name</strong></span>:
+                    RHEL 7 x86_64</td></tr><tr><td><span class="strong"><strong>Channel Label</strong></span>:
+                    rhel7-x86_64-extras</td></tr><tr><td><span class="strong"><strong>Parent Channel</strong></span>:
+                    rhel7-x86_64-server (from drop-down box)</td></tr><tr><td>
+                    <span class="strong"><strong>Architecture</strong></span>: x86_64 </td></tr><tr><td><span class="strong"><strong>Repository Checksum
+                        Type</strong></span>: sha1</td></tr><tr><td><span class="strong"><strong>Channel Summary</strong></span>:
+                    RHEL 7 x86_64 Extras</td></tr><tr><td><span class="strong"><strong>Organization
+                        Sharing</strong></span>: Public</td></tr></table><p>After you have filled in the values, click again
+                    <span class="strong"><strong>Create
+                Channel</strong></span>.</p><p>On the screen below, click the tab <span class="strong"><strong>Repositories</strong></span>, and mark the
+                check box next to the appropriate repository.</p><div class="figure"><a id="id1348"></a><p class="title"><strong>Figure 9. Create Parent Channels</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="90%"><tr><td><img src="images/suma-connect-child-channel-1.png" width="100%" alt="Create Parent Channels" /></td></tr></table></div></div></div><br class="figure-break" /><p>On the next screen, click the tab <span class="strong"><strong>Sync</strong></span> and set your preferred recurring
+                schedule for the synchronization of this repository. Ensure
+                you scroll down and click <span class="strong"><strong>Schedule</strong></span>. You can also select <span class="strong"><strong>Sync Now</strong></span> to launch the
+                synchronization immediately.</p><div class="figure"><a id="id1349"></a><p class="title"><strong>Figure 10. Create Parent Channels</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="90%"><tr><td><img src="images/suma-connect-child-channel-2.png" width="100%" alt="Create Parent Channels" /></td></tr></table></div></div></div><br class="figure-break" /><p>Now you can proceed to create the activation key in the
+                SUSE Manager Web UI, and assign appropriate channels to
+                it.</p></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-registration"></a>Registration</h2></div></div></div><p>To register your systems, follow the steps described in the
+            sections below.</p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-bootstrap-repo-creation"></a>Bootstrap Repository Creation</h3></div></div></div><p>SUSE Manager subscriptions entitle everyone to the tools
+                channels for Red Hat Expanded Support (RES) distributions.
+                Any Red Hat Enterprise Linux or CentOS 6 or 7 system should
+                use these to create the proper bootstrap repository for
+                either traditional or salt-minion connectivity.</p><div class="procedure"><ol class="procedure" type="1"><li class="step"><p>Add the corresponding SUSE Manager RES tools
+                        channel and allow it to synchronize from SUSE
+                        Customer Center. You will need the 0-package parent
+                        channel and the tools. Here is an example command
+                        to add it for RES6 on AMD64/Intel 64:</p><pre class="screen">mgr-sync add channels rhel-x86_64-server-6 res6-suse-manager-tools-x86_64</pre></li><li class="step"><p>Follow the instructions to synchronize your base
+                        media as a child repository for your distribution
+                        based on Red Hat Enterprise Linux, as explained in
+                        the SUSE Manager Wiki:</p><p>
+                        <a class="link" href="https://wiki.microfocus.com/index.php/SUSE_Manager/Sync_RHEL_media" target="_top">https://wiki.microfocus.com/index.php/SUSE_Manager/Sync_RHEL_media</a>
+                    </p></li><li class="step"><p>Create a bootstrap repository for your Red Hat
+                        Enterprise Linux clients with</p><pre class="screen">mgr-create-bootstrap-repo --with-custom-channels</pre></li></ol></div><p>This will use the base media channel to capture needed
+                dependencies. Ensure that it completes without
+                error.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-minion-registration"></a>Minion Registration</h3></div></div></div><p>On the client machine(s), perform the following steps to
+                register the minion using a bootstrap script
+                (recommended):</p><div class="procedure"><ol class="procedure" type="1"><li class="step"><p>If needed, regenerate the bootstrap script with
+                        the <code class="option">Salt</code> option enabled:</p><pre class="screen">mgr-bootstrap --salt --script=bootstrap-salt.sh</pre></li><li class="step"><p>Download and run the appropriately edited
+                        bootstrap script after adding the correct
+                        activation key and other parameters. This will
+                        install the necessary Salt packages, set the proper
+                        activation key, and start the salt-minion
+                        service:</p><pre class="screen">curl -Sks http://&lt;server&gt;/pub/bootstrap/bootstrap-salt.sh | /bin/bash</pre></li><li class="step"><p>In the SUSE Manager Web UI, go to <span class="strong"><strong>Salt</strong></span>, click <span class="strong"><strong>Onboarding</strong></span> and accept
+                        the minion's key.</p></li></ol></div><p>After a few minutes, the new minion will appear in your
+                list of systems with the channels assigned in the
+                activation key you specified in the bootstrap
+                process.</p></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-references"></a>References</h2></div></div></div><p>For more information, see:</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>Using and Configuring Red Hat Subscription Manager:
+                        <a class="link" href="https://access.redhat.com/documentation/en-us/red_hat_subscription_management/1/html-single/rhsm/index" target="_top">https://access.redhat.com/documentation/en-us/red_hat_subscription_management/1/html-single/rhsm/index</a>
+                </p></li><li class="listitem"><p>Get Started with Red Hat Subscription Management:
+                        <a class="link" href="https://access.redhat.com/articles/433903" target="_top">https://access.redhat.com/articles/433903</a>
+                </p></li><li class="listitem"><p>Update spacewalk-create-channels: <a class="link" href="https://github.com/kgibson/spacewalk/blob/master/spacewalk-create-channels" target="_top">https://github.com/kgibson/spacewalk/blob/master/spacewalk-create-channels</a>
+                </p></li><li class="listitem"><p>Wiki article <span class="quote">“<span class="quote">SUSE Manager/Sync RHEL
+                        media</span>”</span>: <a class="link" href="https://wiki.microfocus.com/index.php?title=SUSE_Manager/Sync_RHEL_media" target="_top">https://wiki.microfocus.com/index.php?title=SUSE_Manager/Sync_RHEL_media</a>
+                </p></li><li class="listitem"><p>Red Hat Enterprise Linux Release Dates: <a class="link" href="https://access.redhat.com/articles/3078" target="_top">https://access.redhat.com/articles/3078</a>
+                </p></li><li class="listitem"><p>Best Practices - SUSE Manager 3.1: <a class="link" href="https://www.suse.com/documentation/suse-manager-3/book_suma_best_practices_3/data/mgr_expanded_support.html" target="_top">https://www.suse.com/documentation/suse-manager-3/book_suma_best_practices_3/data/mgr_expanded_support.html</a>
+                </p></li></ol></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id1337"></a>Legal notice</h2></div></div></div><p> Copyright ©2006-2021 SUSE LLC and contributors. All rights reserved. </p><p> Permission is granted to copy, distribute and/or modify this document under the terms of the
+  GNU Free Documentation License, Version 1.2 or (at your option) version 1.3; with the Invariant
+  Section being this copyright notice and license. A copy of the license version 1.2 is included in
+  the section entitled <span class="quote">“<span class="quote">GNU Free Documentation License</span>”</span>. </p><p> SUSE, the SUSE logo and YaST are registered trademarks of SUSE LLC in the United States and
+  other countries. For SUSE trademarks, see <a class="link" href="http://www.suse.com/company/legal/" target="_top">http://www.suse.com/company/legal/</a>. Linux is a registered trademark of Linus Torvalds.
+  All other names or trademarks mentioned in this document may be trademarks or registered
+  trademarks of their respective owners. </p><p> Documents published as part of the <span class="strong"><strong>SUSE Best Practices</strong></span>
+  series have been contributed voluntarily by SUSE employees and third parties. They are meant to
+  serve as examples of how particular actions can be performed. They have been compiled with utmost
+  attention to detail. However, this does not guarantee complete accuracy. SUSE cannot verify that
+  actions described in these documents do what is claimed or whether actions described have
+  unintended consequences. SUSE LLC, its affiliates, the authors, and the translators may not be held
+  liable for possible errors or the consequences thereof.</p><p> Below we draw your attention to the license under which the articles are published.</p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id1338"></a>GNU Free Documentation License</h2></div></div></div><p>
+  Copyright (C) 2000, 2001, 2002 Free Software Foundation, Inc. 51 Franklin St,
+  Fifth Floor, Boston, MA 02110-1301 USA. Everyone is permitted to copy and
+  distribute verbatim copies of this license document, but changing it is not
+  allowed.
+ </p><h5><a id="id1350"></a> 0. PREAMBLE </h5><p>
+  The purpose of this License is to make a manual, textbook, or other
+  functional and useful document "free" in the sense of freedom: to assure
+  everyone the effective freedom to copy and redistribute it, with or without
+  modifying it, either commercially or non-commercially. Secondarily, this
+  License preserves for the author and publisher a way to get credit for their
+  work, while not being considered responsible for modifications made by
+  others.
+ </p><p>
+  This License is a kind of "copyleft", which means that derivative works of
+  the document must themselves be free in the same sense. It complements the
+  GNU General Public License, which is a copyleft license designed for free
+  software.
+ </p><p>
+  We have designed this License to use it for manuals for free software,
+  because free software needs free documentation: a free program should come
+  with manuals providing the same freedoms that the software does. But this
+  License is not limited to software manuals; it can be used for any textual
+  work, regardless of subject matter or whether it is published as a printed
+  book. We recommend this License principally for works whose purpose is
+  instruction or reference.
+ </p><h5><a id="id1351"></a> 1. APPLICABILITY AND DEFINITIONS </h5><p>
+  This License applies to any manual or other work, in any medium, that
+  contains a notice placed by the copyright holder saying it can be distributed
+  under the terms of this License. Such a notice grants a world-wide,
+  royalty-free license, unlimited in duration, to use that work under the
+  conditions stated herein. The "Document", below, refers to any such manual or
+  work. Any member of the public is a licensee, and is addressed as "you". You
+  accept the license if you copy, modify or distribute the work in a way
+  requiring permission under copyright law.
+ </p><p>
+  A "Modified Version" of the Document means any work containing the Document
+  or a portion of it, either copied verbatim, or with modifications and/or
+  translated into another language.
+ </p><p>
+  A "Secondary Section" is a named appendix or a front-matter section of the
+  Document that deals exclusively with the relationship of the publishers or
+  authors of the Document to the Document's overall subject (or to related
+  matters) and contains nothing that could fall directly within that overall
+  subject. (Thus, if the Document is in part a textbook of mathematics, a
+  Secondary Section may not explain any mathematics.) The relationship could be
+  a matter of historical connection with the subject or with related matters,
+  or of legal, commercial, philosophical, ethical or political position
+  regarding them.
+ </p><p>
+  The "Invariant Sections" are certain Secondary Sections whose titles are
+  designated, as being those of Invariant Sections, in the notice that says
+  that the Document is released under this License. If a section does not fit
+  the above definition of Secondary then it is not allowed to be designated as
+  Invariant. The Document may contain zero Invariant Sections. If the Document
+  does not identify any Invariant Sections then there are none.
+ </p><p>
+  The "Cover Texts" are certain short passages of text that are listed, as
+  Front-Cover Texts or Back-Cover Texts, in the notice that says that the
+  Document is released under this License. A Front-Cover Text may be at most 5
+  words, and a Back-Cover Text may be at most 25 words.
+ </p><p>
+  A "Transparent" copy of the Document means a machine-readable copy,
+  represented in a format whose specification is available to the general
+  public, that is suitable for revising the document straightforwardly with
+  generic text editors or (for images composed of pixels) generic paint
+  programs or (for drawings) some widely available drawing editor, and that is
+  suitable for input to text formatters or for automatic translation to a
+  variety of formats suitable for input to text formatters. A copy made in an
+  otherwise Transparent file format whose markup, or absence of markup, has
+  been arranged to thwart or discourage subsequent modification by readers is
+  not Transparent. An image format is not Transparent if used for any
+  substantial amount of text. A copy that is not "Transparent" is called
+  "Opaque".
+ </p><p>
+  Examples of suitable formats for Transparent copies include plain ASCII
+  without markup, Texinfo input format, LaTeX input format, SGML or XML using a
+  publicly available DTD, and standard-conforming simple HTML, PostScript or
+  PDF designed for human modification. Examples of transparent image formats
+  include PNG, XCF and JPG. Opaque formats include proprietary formats that can
+  be read and edited only by proprietary word processors, SGML or XML for which
+  the DTD and/or processing tools are not generally available, and the
+  machine-generated HTML, PostScript or PDF produced by some word processors
+  for output purposes only.
+ </p><p>
+  The "Title Page" means, for a printed book, the title page itself, plus such
+  following pages as are needed to hold, legibly, the material this License
+  requires to appear in the title page. For works in formats which do not have
+  any title page as such, "Title Page" means the text near the most prominent
+  appearance of the work's title, preceding the beginning of the body of the
+  text.
+ </p><p>
+  A section "Entitled XYZ" means a named subunit of the Document whose title
+  either is precisely XYZ or contains XYZ in parentheses following text that
+  translates XYZ in another language. (Here XYZ stands for a specific section
+  name mentioned below, such as "Acknowledgements", "Dedications",
+  "Endorsements", or "History".) To "Preserve the Title" of such a section when
+  you modify the Document means that it remains a section "Entitled XYZ"
+  according to this definition.
+ </p><p>
+  The Document may include Warranty Disclaimers next to the notice which states
+  that this License applies to the Document. These Warranty Disclaimers are
+  considered to be included by reference in this License, but only as regards
+  disclaiming warranties: any other implication that these Warranty Disclaimers
+  may have is void and has no effect on the meaning of this License.
+ </p><h5><a id="id1352"></a> 2. VERBATIM COPYING </h5><p>
+  You may copy and distribute the Document in any medium, either commercially
+  or noncommercially, provided that this License, the copyright notices, and
+  the license notice saying this License applies to the Document are reproduced
+  in all copies, and that you add no other conditions whatsoever to those of
+  this License. You may not use technical measures to obstruct or control the
+  reading or further copying of the copies you make or distribute. However, you
+  may accept compensation in exchange for copies. If you distribute a large
+  enough number of copies you must also follow the conditions in section 3.
+ </p><p>
+  You may also lend copies, under the same conditions stated above, and you may
+  publicly display copies.
+ </p><h5><a id="id1353"></a> 3. COPYING IN QUANTITY </h5><p>
+  If you publish printed copies (or copies in media that commonly have printed
+  covers) of the Document, numbering more than 100, and the Document's license
+  notice requires Cover Texts, you must enclose the copies in covers that
+  carry, clearly and legibly, all these Cover Texts: Front-Cover Texts on the
+  front cover, and Back-Cover Texts on the back cover. Both covers must also
+  clearly and legibly identify you as the publisher of these copies. The front
+  cover must present the full title with all words of the title equally
+  prominent and visible. You may add other material on the covers in addition.
+  Copying with changes limited to the covers, as long as they preserve the
+  title of the Document and satisfy these conditions, can be treated as
+  verbatim copying in other respects.
+ </p><p>
+  If the required texts for either cover are too voluminous to fit legibly, you
+  should put the first ones listed (as many as fit reasonably) on the actual
+  cover, and continue the rest onto adjacent pages.
+ </p><p>
+  If you publish or distribute Opaque copies of the Document numbering more
+  than 100, you must either include a machine-readable Transparent copy along
+  with each Opaque copy, or state in or with each Opaque copy a
+  computer-network location from which the general network-using public has
+  access to download using public-standard network protocols a complete
+  Transparent copy of the Document, free of added material. If you use the
+  latter option, you must take reasonably prudent steps, when you begin
+  distribution of Opaque copies in quantity, to ensure that this Transparent
+  copy will remain thus accessible at the stated location until at least one
+  year after the last time you distribute an Opaque copy (directly or through
+  your agents or retailers) of that edition to the public.
+ </p><p>
+  It is requested, but not required, that you contact the authors of the
+  Document well before redistributing any large number of copies, to give them
+  a chance to provide you with an updated version of the Document.
+ </p><h5><a id="id1354"></a> 4. MODIFICATIONS </h5><p>
+  You may copy and distribute a Modified Version of the Document under the
+  conditions of sections 2 and 3 above, provided that you release the Modified
+  Version under precisely this License, with the Modified Version filling the
+  role of the Document, thus licensing distribution and modification of the
+  Modified Version to whoever possesses a copy of it. In addition, you must do
+  these things in the Modified Version:
+ </p><div class="orderedlist"><ol class="orderedlist" type="A"><li class="listitem"><p>
+    Use in the Title Page (and on the covers, if any) a title distinct from
+    that of the Document, and from those of previous versions (which should, if
+    there were any, be listed in the History section of the Document). You may
+    use the same title as a previous version if the original publisher of that
+    version gives permission.
+   </p></li><li class="listitem"><p>
+    List on the Title Page, as authors, one or more persons or entities
+    responsible for authorship of the modifications in the Modified Version,
+    together with at least five of the principal authors of the Document (all
+    of its principal authors, if it has fewer than five), unless they release
+    you from this requirement.
+   </p></li><li class="listitem"><p>
+    State on the Title page the name of the publisher of the Modified Version,
+    as the publisher.
+   </p></li><li class="listitem"><p>
+    Preserve all the copyright notices of the Document.
+   </p></li><li class="listitem"><p>
+    Add an appropriate copyright notice for your modifications adjacent to the
+    other copyright notices.
+   </p></li><li class="listitem"><p>
+    Include, immediately after the copyright notices, a license notice giving
+    the public permission to use the Modified Version under the terms of this
+    License, in the form shown in the Addendum below.
+   </p></li><li class="listitem"><p>
+    Preserve in that license notice the full lists of Invariant Sections and
+    required Cover Texts given in the Document's license notice.
+   </p></li><li class="listitem"><p>
+    Include an unaltered copy of this License.
+   </p></li><li class="listitem"><p>
+    Preserve the section Entitled "History", Preserve its Title, and add to it
+    an item stating at least the title, year, new authors, and publisher of the
+    Modified Version as given on the Title Page. If there is no section
+    Entitled "History" in the Document, create one stating the title, year,
+    authors, and publisher of the Document as given on its Title Page, then add
+    an item describing the Modified Version as stated in the previous sentence.
+   </p></li><li class="listitem"><p>
+    Preserve the network location, if any, given in the Document for public
+    access to a Transparent copy of the Document, and likewise the network
+    locations given in the Document for previous versions it was based on.
+    These may be placed in the "History" section. You may omit a network
+    location for a work that was published at least four years before the
+    Document itself, or if the original publisher of the version it refers to
+    gives permission.
+   </p></li><li class="listitem"><p>
+    For any section Entitled "Acknowledgements" or "Dedications", Preserve the
+    Title of the section, and preserve in the section all the substance and
+    tone of each of the contributor acknowledgements and/or dedications given
+    therein.
+   </p></li><li class="listitem"><p>
+    Preserve all the Invariant Sections of the Document, unaltered in their
+    text and in their titles. Section numbers or the equivalent are not
+    considered part of the section titles.
+   </p></li><li class="listitem"><p>
+    Delete any section Entitled "Endorsements". Such a section may not be
+    included in the Modified Version.
+   </p></li><li class="listitem"><p>
+    Do not retitle any existing section to be Entitled "Endorsements" or to
+    conflict in title with any Invariant Section.
+   </p></li><li class="listitem"><p>
+    Preserve any Warranty Disclaimers.
+   </p></li></ol></div><p>
+  If the Modified Version includes new front-matter sections or appendices that
+  qualify as Secondary Sections and contain no material copied from the
+  Document, you may at your option designate some or all of these sections as
+  invariant. To do this, add their titles to the list of Invariant Sections in
+  the Modified Version's license notice. These titles must be distinct from any
+  other section titles.
+ </p><p>
+  You may add a section Entitled "Endorsements", provided it contains nothing
+  but endorsements of your Modified Version by various parties--for example,
+  statements of peer review or that the text has been approved by an
+  organization as the authoritative definition of a standard.
+ </p><p>
+  You may add a passage of up to five words as a Front-Cover Text, and a
+  passage of up to 25 words as a Back-Cover Text, to the end of the list of
+  Cover Texts in the Modified Version. Only one passage of Front-Cover Text and
+  one of Back-Cover Text may be added by (or through arrangements made by) any
+  one entity. If the Document already includes a cover text for the same cover,
+  previously added by you or by arrangement made by the same entity you are
+  acting on behalf of, you may not add another; but you may replace the old
+  one, on explicit permission from the previous publisher that added the old
+  one.
+ </p><p>
+  The author(s) and publisher(s) of the Document do not by this License give
+  permission to use their names for publicity for or to assert or imply
+  endorsement of any Modified Version.
+ </p><h5><a id="id1355"></a> 5. COMBINING DOCUMENTS </h5><p>
+  You may combine the Document with other documents released under this
+  License, under the terms defined in section 4 above for modified versions,
+  provided that you include in the combination all of the Invariant Sections of
+  all of the original documents, unmodified, and list them all as Invariant
+  Sections of your combined work in its license notice, and that you preserve
+  all their Warranty Disclaimers.
+ </p><p>
+  The combined work need only contain one copy of this License, and multiple
+  identical Invariant Sections may be replaced with a single copy. If there are
+  multiple Invariant Sections with the same name but different contents, make
+  the title of each such section unique by adding at the end of it, in
+  parentheses, the name of the original author or publisher of that section if
+  known, or else a unique number. Make the same adjustment to the section
+  titles in the list of Invariant Sections in the license notice of the
+  combined work.
+ </p><p>
+  In the combination, you must combine any sections Entitled "History" in the
+  various original documents, forming one section Entitled "History"; likewise
+  combine any sections Entitled "Acknowledgements", and any sections Entitled
+  "Dedications". You must delete all sections Entitled "Endorsements".
+ </p><h5><a id="id1356"></a> 6. COLLECTIONS OF DOCUMENTS </h5><p>
+  You may make a collection consisting of the Document and other documents
+  released under this License, and replace the individual copies of this
+  License in the various documents with a single copy that is included in the
+  collection, provided that you follow the rules of this License for verbatim
+  copying of each of the documents in all other respects.
+ </p><p>
+  You may extract a single document from such a collection, and distribute it
+  individually under this License, provided you insert a copy of this License
+  into the extracted document, and follow this License in all other respects
+  regarding verbatim copying of that document.
+ </p><h5><a id="id1357"></a> 7. AGGREGATION WITH INDEPENDENT WORKS </h5><p>
+  A compilation of the Document or its derivatives with other separate and
+  independent documents or works, in or on a volume of a storage or
+  distribution medium, is called an "aggregate" if the copyright resulting from
+  the compilation is not used to limit the legal rights of the compilation's
+  users beyond what the individual works permit. When the Document is included
+  in an aggregate, this License does not apply to the other works in the
+  aggregate which are not themselves derivative works of the Document.
+ </p><p>
+  If the Cover Text requirement of section 3 is applicable to these copies of
+  the Document, then if the Document is less than one half of the entire
+  aggregate, the Document's Cover Texts may be placed on covers that bracket
+  the Document within the aggregate, or the electronic equivalent of covers if
+  the Document is in electronic form. Otherwise they must appear on printed
+  covers that bracket the whole aggregate.
+ </p><h5><a id="id1358"></a> 8. TRANSLATION </h5><p>
+  Translation is considered a kind of modification, so you may distribute
+  translations of the Document under the terms of section 4. Replacing
+  Invariant Sections with translations requires special permission from their
+  copyright holders, but you may include translations of some or all Invariant
+  Sections in addition to the original versions of these Invariant Sections.
+  You may include a translation of this License, and all the license notices in
+  the Document, and any Warranty Disclaimers, provided that you also include
+  the original English version of this License and the original versions of
+  those notices and disclaimers. In case of a disagreement between the
+  translation and the original version of this License or a notice or
+  disclaimer, the original version will prevail.
+ </p><p>
+  If a section in the Document is Entitled "Acknowledgements", "Dedications",
+  or "History", the requirement (section 4) to Preserve its Title (section 1)
+  will typically require changing the actual title.
+ </p><h5><a id="id1359"></a> 9. TERMINATION </h5><p>
+  You may not copy, modify, sublicense, or distribute the Document except as
+  expressly provided for under this License. Any other attempt to copy, modify,
+  sublicense or distribute the Document is void, and will automatically
+  terminate your rights under this License. However, parties who have received
+  copies, or rights, from you under this License will not have their licenses
+  terminated so long as such parties remain in full compliance.
+ </p><h5><a id="id1360"></a> 10. FUTURE REVISIONS OF THIS LICENSE </h5><p>
+  The Free Software Foundation may publish new, revised versions of the GNU
+  Free Documentation License from time to time. Such new versions will be
+  similar in spirit to the present version, but may differ in detail to address
+  new problems or concerns. See
+  <a class="link" href="http://www.gnu.org/copyleft/" target="_top">http://www.gnu.org/copyleft/</a>.
+ </p><p>
+  Each version of the License is given a distinguishing version number. If the
+  Document specifies that a particular numbered version of this License "or any
+  later version" applies to it, you have the option of following the terms and
+  conditions either of that specified version or of any later version that has
+  been published (not as a draft) by the Free Software Foundation. If the
+  Document does not specify a version number of this License, you may choose
+  any version ever published (not as a draft) by the Free Software Foundation.
+ </p><h5><a id="id1361"></a> ADDENDUM: How to use this License for your
+  documents </h5><pre class="screen">Copyright (c) YEAR YOUR NAME.
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.2
+or any later version published by the Free Software Foundation;
+with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
+A copy of the license is included in the section entitled "GNU
+ Free Documentation License".</pre><p>
+  If you have Invariant Sections, Front-Cover Texts and Back-Cover Texts,
+  replace the "with...Texts". line with this:
+ </p><pre class="screen">with the Invariant Sections being LIST THEIR TITLES, with the
+Front-Cover Texts being LIST, and with the Back-Cover Texts being LIST.</pre><p>
+  If you have Invariant Sections without Cover Texts, or some other combination
+  of the three, merge those two alternatives to suit the situation.
+ </p><p>
+  If your document contains nontrivial examples of program code, we recommend
+  releasing these examples in parallel under your choice of free software
+  license, such as the GNU General Public License, to permit their use in free
+  software.
+ </p></div></div></body></html>

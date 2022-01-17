@@ -1,0 +1,372 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Appendix</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="Advanced Patch Lifecycle Management with SUSE Manager" /><link rel="up" href="index.html" title="Advanced Patch Lifecycle Management with SUSE Manager" /><link rel="prev" href="sec-usage.html" title="Usage Workflows" /><link rel="next" href="ar01s05.html" title="Legal notice" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Appendix</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="sec-usage.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="ar01s05.html">Next</a></td></tr></table><hr /></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-appendix"></a>Appendix</h2></div></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-spacewalksample"></a>Spacewalk-Clone-By-Date Configuration File
+                Sample</h3></div></div></div><p>This sample is stored as a text file. It is used with the
+                    <span class="strong"><strong>spacewalk-clone-by-date</strong></span> utility by using
+                the <span class="strong"><strong>-c</strong></span> flag to indicate
+                an input configuration file:</p><pre class="screen">spacewalk-clone-by-date -c Q3-2015-sles11sp3-x86_64-archive.conf</pre><p>Note that it specifies the base channel source <span class="strong"><strong>sles11-sp3-pool-x86_64</strong></span> and the
+                target base channel (destination) <span class="strong"><strong>cc_patch_archives_channel_64bit</strong></span> and uses
+                the directive of <span class="strong"><strong>existing-parent-do-not-modify</strong></span>
+                <span class="strong"><strong>: true</strong></span>. This tells the
+                utility that a child channel from one base will be cloned
+                into a completely different base channel. Note that your
+                channel names might be different; this means this example
+                may need modifications to work in your case. Example:
+                    <span class="strong"><strong>Q3-2015-sles11sp3-x86_64-archive.conf</strong></span>
+                contents below. </p><pre class="screen">
+{
+ "username":"SMadmin",
+ "to_date": "2015-09-30",
+ "skip_depsolve":false,
+ "security_only":false,
+ "use_update_date":false,
+ "no_errata_sync":false,
+ "dry_run":false,
+ "channels":[
+       {
+         "sles11-sp3-pool-x86_64": {
+            "label": "cc_patch_archives_channel_64bit",
+            "existing-parent-do-not-modify": true
+         },
+         "sles11-sp3-updates-x86_64": {
+            "label": "09_30_2015_q3_archive-sles11-sp3-updates-x86_64",
+            "name": "Q3-2015 Patch Archive - 09-30-2015 - SLES11-SP3-Updates for x86_64",
+            "summary": "Q3 - 2015 - Patch Archive Set (9-30-2015) - SUSE Linux Enterprise Server 11 SP3 x86_64",
+            "description": "Q3 - 2015 - Patch Archive Set (9-30-2015) - SUSE Linux Enterprise Server 11 SP3 x86_64"
+         }
+        }
+       ]
+}
+</pre><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Review Channel Patch Content </h3><p>When using the spacewalk-clone-by-date utility,
+                    review the channel patch content after creation
+                    to ensure that the channel contains the patches for the
+                    appropriate end date. Sometimes extra patches are
+                    included in the channel that are in the wrong time
+                    period and can be deleted manually.</p></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-samplepatch"></a>Sample Patch/Package Merge Script Using Python</h3></div></div></div><p>This script has a defined SUSE Manager server URL set in
+                the <code class="varname">MANAGER_URL</code>. The script prompts for
+                a SUSE Manager Administrator ID and password. It then asks
+                for a source and target channel. The script will then
+                confirm the channels and ask if it should continue. An
+                affirmative response (Y) will then allow the script to
+                merge the patches and packages from the source channel into
+                the target channel.</p><pre class="screen">#!/usr/bin/python
+import xmlrpclib
+import sys
+import getpass
+
+MANAGER_URL = "https://suma01.chameleoncorp.com/rpc/api"
+MANAGER_LOGIN = raw_input("Please Enter the SUSE Manager Login Name: ")
+MANAGER_PASSWORD = getpass.getpass("Please Enter the Password: ")
+
+MERGE_SOURCE = raw_input("Enter the SOURCE channel label to Merge FROM: ")
+MERGE_TARGET = raw_input("Enter the TARGET channel label to Merge INTO: ")
+
+print("This tool is going to take all packages and errata from the SOURCE")
+print("Channel : " + MERGE_SOURCE)
+print("and merge it into the TARGET ")
+print("Channel : " + MERGE_TARGET)
+
+def query_yes_no(question, default="yes"):
+    """Ask a yes/no question via raw_input() and return their answer.
+
+    "question" is a string that is presented to the user.
+    "default" is the presumed answer if the user just hits &lt;Enter&gt;.
+        It must be "yes" (the default), "no" or None (meaning
+        an answer is required of the user).
+
+        The "answer" return value is True for "yes" or False for "no".
+        """
+        valid = {"yes": True, "y": True, "ye": True,
+                 "no": False, "n": False}
+        if default is None:
+            prompt = " [y/n] "
+        elif default == "yes":
+            prompt = " [Y/n] "
+        elif default == "no":
+            prompt = " [y/N] "
+        else:
+            raise ValueError("invalid default answer: '%s'" % default)
+
+        while True:
+            sys.stdout.write(question + prompt)
+            choice = raw_input().lower()
+            if default is not None and choice == '':
+                return valid[default]
+            elif choice in valid:
+                return valid[choice]
+            else:
+                sys.stdout.write("Please respond with 'yes' or 'no' "
+                                 "(or 'y' or 'n').\n")
+
+query_yes_no("Is this information correct?")
+
+client = xmlrpclib.Server(MANAGER_URL, verbose=0)
+key = client.auth.login(MANAGER_LOGIN, MANAGER_PASSWORD)
+
+client.channel.software.mergePackages(key, MERGE_SOURCE, MERGE_TARGET)
+client.channel.software.mergeErrata(key, MERGE_SOURCE, MERGE_TARGET)
+
+client.auth.logout(key)</pre></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-samblecontab"></a>Sample Crontab Entries for Automation of Archive Channel
+                Creation</h3></div></div></div><p>Below are some sample cron entries that can be used to
+                run the <span class="strong"><strong>Archive Channel Creation
+                    Script</strong></span> resulting in channel creation for
+                each quarter. This example has two entries to
+                clone all patches received up until the end of a quarter. A
+                single entry could be used to create it at the beginning of
+                a quarter, but care must be taken to modify the
+                calculations in the <span class="strong"><strong>Archive
+                    Script</strong></span> to account for that. Currently the
+                example <span class="strong"><strong>Archive Channel Creation
+                    Script</strong></span> below figures out what quarter it is
+                by looking at the current date. Running the script in the
+                    4<sup>th</sup> quarter will name the
+                archive created as a 4<sup>th</sup> quarter
+                archive.</p><p>Cron entries for end of quarter: (for example
+                    30<sup>th</sup> of months June and
+                September and 31<sup>st</sup> of months
+                March and December):</p><pre class="screen">0 0 30 6,9 * /path/to/the/archive/script</pre><pre class="screen">0 0 31 3,12 * /path/to/the/archive/script</pre></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-samplechancreation"></a>Sample Archive Channel Creation Script for SUSE Manager 2.1 and 3.0</h3></div></div></div><p>The script below works with the <span class="strong"><strong>Archive Channel Sources</strong></span> file (see <a class="xref" href="sec-appendix.html#sec-samplechansources" title="Sample Archive Channel Sources List File">the section called “Sample Archive Channel Sources List File”</a>) to create quarterly
+                archives of the SUSE Updates channels. This example script
+                is written in <span class="strong"><strong>Bash</strong></span> but
+                calls <span class="command"><strong>spacecmd</strong></span> to accomplish the cloning
+                and to set the new archive to be public (accessible to
+                other organizations).</p><p>The script takes some time to run. The clone command
+                finishes quickly, but the actual cloned channel still takes
+                some time to settle down before the
+                    <span class="command"><strong>org-access</strong></span> command can access and
+                finish. If you want to test this manually you must be
+                patient. A normal crontab-type run of the script will
+                finish in due time.</p><pre class="screen">#!/bin/bash
+
+        ####################################################################
+        #    SUMA Archive Channel Creation Script - Called from Cron       #
+        #                                                                  #
+        #    This script creates quarterly archives of SUSE Manager        #
+        #    channels from SUSE Updates channels. It takes a list          #
+        #    of source channels from the archive-sources.lst file          #
+        #    that should be located in the same directory as this          #
+        #    script. Each entry in that file will be used as a             #
+        #    source channel to create an archive for patches/updates       #
+        #    in the appropriate archive channel.                           #
+        #                                                                  #
+        # REQUIRES:                                                        #
+        #                1. cron entries for each quarter :                #
+        #     e.g. 30th of months June and Sept. and 31st of months March  #
+        #       and December:                                              #
+        #                0 0 30 6,9 * /path/to/this/script                 #
+        #                0 0 31 3,12 * /path/to/this/script                #
+        #                                                                  #
+        #                2. archive-sources.lst :                          #
+        #     A list of the architecture, the source updates channel       #
+        #     for each distro and the suffix of the target channel         #
+        #     version and architecture (1 per line - no line-feed at EOF)  #
+        #   Example:                                                       #
+        #  S390x,sles11-sp3-updates-s390x,SLES11-SP3-Updates for s390x     #
+        #  ppc64,sles11-sp4-updates-ppc64,SLES11-SP4-Updates for PPC       #
+        #  x86_64,sles11-sp3-updates-x86_64,SLES11-SP3-Updates for x86_64  #
+        #         etc.                                                     #
+        #                                                                  #
+        ####################################################################
+        #                                                                  #
+        #       Created by - Jeff Price, SUSE Consulting - 2015            #
+        #                                                                  #
+        ####################################################################
+
+## date strings
+month=`date +%m`
+year=`date +%Y`
+fdate=`date +%m-%d-%Y`
+## set quarter
+if [ $month -le 3 ]
+then
+   quar=1
+elif [ $month -gt 3 ] &amp;&amp; [ $month -lt 7 ]
+then
+   quar=2
+elif [ $month -gt 6 ] &amp;&amp; [ $month -lt 10 ]
+then
+   quar=3
+elif [ $month -gt 9 ]
+then
+   quar=4
+fi
+
+## Create archives using source list
+
+while read line
+do
+        arch=`echo "$line" | awk -F, '{print $1}'`
+        src_ch=`echo "$line" | awk -F, '{print $2}'`
+        trg_ch=`echo "$line" | awk -F, '{print $3}'`
+## set archive channel
+
+target_parent=$arch"-patch-archives-channel"
+source_channel=$src_ch
+target_channel_name="Q"$quar" "$year" - "$fdate" - Archive of "$trg_ch
+target_summary="Q"$quar"-"$year" Archive Set "$trg_ch
+target_channel_label="q"$quar"-"$year"-archive-"$src_ch
+
+## Debug Output
+echo "Architecture: " $arch
+echo "Source Channel: "$src_ch
+echo "Target Channel Archive Suffix: "$trg_ch
+echo "Target Archive Parent Channel: "$target_parent
+echo "Source Channel (again): "$source_channel
+echo "Target Channel Name: "$target_channel_name
+lctn=`echo $target_channel_name|tr '[:upper:]' '[:lower:]'`
+echo "lowercase target name: "$lctn
+echo "Target Channel Label: "$target_channel_label
+echo "Target Channel Summary and Description: "$target_summary
+
+/usr/bin/spacecmd -d -- softwarechannel_clone -s “‘$src_ch’” -n
+“‘$target_channel_name’” -l “‘$target_channel_label’” -p “‘$target_parent’” - g
+/usr/bin/spacecmd -d -- softwarechannel_setorgaccess
+“‘$target_channel_label’” -e
+done &lt; ./archive-sources.lst
+
+</pre></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-samplechancreation-update"></a>Sample Archive Channel Creation Script for SUSE Manager 3.1 and 3.2</h3></div></div></div><p>The script below works with the <span class="strong"><strong>Archive Channel Sources</strong></span> file (see <a class="xref" href="sec-appendix.html#sec-samplechansources" title="Sample Archive Channel Sources List File">the section called “Sample Archive Channel Sources List File”</a>) to create quarterly
+                archives of the SUSE Updates channels. This example script
+                is written in <span class="strong"><strong>Bash</strong></span> but
+                calls <span class="command"><strong>spacecmd</strong></span> to accomplish the cloning
+                and to set the new archive to be public (accessible to
+                other organizations).</p><p>The script takes some time to run. The clone command
+                finishes quickly, but the actual cloned channel still takes
+                some time to settle down before the
+                <span class="command"><strong>org-access</strong></span> command can access and
+                finish. If you want to test this manually you must be
+                patient. A normal crontab-type run of the script will
+                finish in due time.</p><pre class="screen">#!/bin/bash
+                
+        ####################################################################
+        #    SUMA Archive Channel Creation Script - Called from Cron       #
+        #                                                                  #
+        #    This script creates quarterly archives of SUSE Manager        #
+        #    channels from SUSE Updates channels. It takes a list          #
+        #    of source channels from the archive-sources.lst file          #
+        #    that should be located in the same directory as this          #
+        #    script. Each entry in that file will be used as a             #
+        #    source channel to create an archive for patches/updates       #
+        #    in the appropriate archive channel.                           #
+        #                                                                  #
+        # REQUIRES:                                                        #
+        #                1. cron entries for each quarter :                #
+        #     e.g. 30th of months June and Sept. and 31st of months March  #
+        #       and December:                                              #
+        #                0 0 30 6,9 * /path/to/this/script                 #
+        #                0 0 31 3,12 * /path/to/this/script                #
+        #                                                                  #
+        #                2. archive-sources.lst :                          #
+        #     A list of the architecture, the source updates channel       #
+        #     for each distro and the suffix of the target channel         #
+        #     version and architecture (1 per line - no line-feed at EOF)  #
+        #   Example:                                                       #
+        #  S390x,sles11-sp3-updates-s390x,SLES11-SP3-Updates for s390x     #
+        #  ppc64,sles11-sp4-updates-ppc64,SLES11-SP4-Updates for PPC       #
+        #  x86_64,sles11-sp3-updates-x86_64,SLES11-SP3-Updates for x86_64  #
+        #         etc.                                                     #
+        #                                                                  #
+        ####################################################################
+        #                                                                  #
+        #       Created by - Jeff Price, SUSE Consulting - 2015            #
+        #       Updated for SUMA 3.1 &amp; 3.2 - Levin Forrest,            #
+        #       Lenovo Consulting - 2018                                   #
+        #                                                                  #
+        ####################################################################
+                
+## date strings
+month=`date +%m`
+year=`date +%Y`
+fdate=`date +%m-%d-%Y`
+## set quarter
+if [ $month -le 3 ]
+then
+   quar=1
+elif [ $month -gt 3 ] &amp;&amp; [ $month -lt 7 ]
+then
+   quar=2
+elif [ $month -gt 6 ] &amp;&amp; [ $month -lt 10 ]
+then
+   quar=3
+elif [ $month -gt 9 ]
+then
+   quar=4
+fi
+                
+## Create archives using source list
+                
+while read line
+do
+        arch=`echo "$line" | awk -F, '{print $1}'`
+        src_ch=`echo "$line" | awk -F, '{print $2}'`
+        trg_ch=`echo "$line" | awk -F, '{print $3}'`
+## set archive channel
+## Note the target_parent requires this EXACT channel already created
+target_parent=$arch"-patch-archives-channel"
+source_channel=$src_ch
+target_channel_name="Q"$quar" "$year" - "$fdate" - Archive of "$trg_ch
+target_summary="Q"$quar"-"$year" Archive Set "$trg_ch
+target_channel_label="q"$quar"-"$year"-archive-"$src_ch
+                
+## Debug Output
+echo "Architecture: " $arch
+echo "Source Channel: "$src_ch
+echo "Target Channel Archive Suffix: "$trg_ch
+echo "Target Archive Parent Channel: "$target_parent
+echo "Source Channel (again): "$source_channel
+echo "Target Channel Name: "$target_channel_name
+lctn=`echo $target_channel_name|tr '[:upper:]' '[:lower:]'`
+echo "lowercase target name: "$lctn
+echo "Target Channel Label: "$target_channel_label
+echo "Target Channel Summary and Description: "$target_summary
+                
+## removed double quotes from $src_ch to allow spacecmd to parse correctly
+## removed single quotes from $target_channel_label and $target_parent to allow spacecmd to parse correctly
+## only $target_channel_name should have single quotes as this variable contains spaces
+/usr/bin/spacecmd -d -- softwarechannel_clone -s $src_ch -n "'$target_channel_name'" -l "$target_channel_label" -p "$target_parent" -g
+## removed double quotes from $target_channel_label to allow spacecmd to parse correctly
+/usr/bin/spacecmd -d -- softwarechannel_setorgaccess $target_channel_label -e
+## added full directory structure to archive-sources location to allow call from crontab
+done &lt; /usr/sbin/archive-sources.lst               
+</pre></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-samplechansources"></a>Sample Archive Channel Sources List File</h3></div></div></div><p>This file is called and used by the Archive Channel
+                Creation script located above in the previous section (see
+                    <a class="xref" href="sec-appendix.html#sec-samplechancreation" title="Sample Archive Channel Creation Script for SUSE Manager 2.1 and 3.0">the section called “Sample Archive Channel Creation Script for SUSE Manager 2.1 and 3.0”</a>). Since the
+                function “readline” is used, there should only be lines
+                with data in the file. Any blank lines will be sourced as
+                data and will cause errors with the Archive Channel
+                Creation script above. </p><p>The first field is <span class="strong"><strong>architecture</strong></span>, which defines the source
+                parent archive channel. This is where the new archive will
+                be placed as a child channel. The second field is the
+                    <span class="strong"><strong>source channel
+                label</strong></span>, which is where the patches/packages are
+                coming FROM. The last field is used for <span class="strong"><strong>target channel naming</strong></span>. This
+                field will be part of the text that makes up the channel
+                name and part of the channel summary/description
+                fields.</p><pre class="screen">s390x,sles11-sp3-updates-s390x,SLES11-SP3-Updates for s390x
+x86_64,sles11-sp4-updates-x86_64,SLES11-SP4-Updates for x86_64
+i586,sles11-sp3-updates-x86_64,SLES11-SP3-Updates for x86_64</pre></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-spacemdauthent"></a>Spacecmd Automatic Authentication</h3></div></div></div><p>The archive script example here is written in Bash and
+                calls the spacecmd shell. Normal operation of spacecmd and
+                the SUSE Manager XMLRPC api requires authentication
+                credentials. In order for the archive script to run
+                successfully from cron, it would require some way of
+                passing appropriate user credentials when required. Luckily
+                there is a way to store user credential pairs.</p><p>Upon the first invocation of the spacecmd utility/shell,
+                a directory is created in the home directory of the user
+                who calls spacecmd. The directory is called .spacecmd (for example
+                /root/.spacecmd/). Within this directory is a file called
+                <span class="quote">“<span class="quote">config</span>”</span>, and within this file you can store parameters that
+                will be used when the user subsequently calls spacecmd. The
+                parameters are as follows (substitute your user name and
+                password):</p><pre class="screen">[spacecmd]
+server=localhost
+username=admin
+password=susemgr
+nossl=0</pre><p>When those credentials are stored, you should be able to
+                invoke the spacecmd shell or call spacecmd commands from
+                the command line without being prompted for a user name or
+                password.</p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="sec-usage.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="ar01s05.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Usage Workflows </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Legal notice</td></tr></table></div></body></html>

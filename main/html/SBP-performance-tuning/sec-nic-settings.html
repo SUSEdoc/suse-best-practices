@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>NIC settings setup</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="Performance Analysis, Tuning and Tools on SUSE Linux Enterprise Products" /><link rel="up" href="index.html" title="Performance Analysis, Tuning and Tools on SUSE Linux Enterprise Products" /><link rel="prev" href="sec-irq-config.html" title="IRQ Configuration" /><link rel="next" href="sec-references.html" title="References" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">NIC settings setup</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="sec-irq-config.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="sec-references.html">Next</a></td></tr></table><hr /></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-nic-settings"></a>NIC settings setup</h2></div></div></div><p>Different Network Interface Cards (NIC) provide different
+            features which can enhance the throughput and reduce the
+            latency of the networking traffic handled by a compute
+            host.</p><p>Use the <span class="bold"><strong>ethtool</strong></span> utility to enable
+            and configure these offload capabilities.</p><p>Together with more advanced features, there are other
+            capabilities which are common to all NICs and which – for
+            example – allow a bigger or smaller buffer to store packets
+            received by or transmitted from the NIC itself.</p><p>The next paragraphs will go through the common parameters
+            first, and then cover the more advanced features.</p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-ring-buffers"></a>Ring buffers</h3></div></div></div><p>Each NIC is equipped with memory to store network packets
+                received or to be transmitted.</p><p>A bigger buffer allows the NIC to store more packets,
+                before issuing an interrupt, thus reducing the number of
+                packets dropped at a specific rate.</p><p>It is possible to tune the number of packets to be
+                received by the NIC (either read from the network or to be
+                transmitted to the network) before triggering an interrupt.
+                You can also control how long the NIC should wait after the
+                configured amount is received before triggering the
+                interrupt. </p><p>For the example at hand, the following values are
+                set:</p><pre class="screen">Ethernet Link @ 10Gb/s
+Minimum frame size: 84 bytes (worst case scenario)
+Packet rate:
+       10,000,000,000 b/s / (84 B * 8 b/B) = 14,880,960 packets/s (maximum rate)
+       ~14,880 packets/ms (millisecond)
+       ~14 packets/us (microsecond)
+Interrupt rate: 100us (microseconds)
+Receive buffer size required: 1400 entries</pre><p>The <span class="bold"><strong>ethtool</strong></span> option to query
+                the value set for the RX (receive) and TX (transmit) ring
+                buffer is <span class="bold"><strong>-g</strong></span>. This option
+                will show the current configured values and the maximum
+                ones allowed by the NIC.</p><p>Example:</p><pre class="screen"># ethtool -g eth1
+Ring parameters for eth1:
+Pre-set maximums:
+RX:		4096
+RX Mini:	0
+RX Jumbo:	0
+TX:		4096
+Current hardware settings:
+RX:		64
+RX Mini:	0
+RX Jumbo:	0
+TX:		64</pre><p>In the example above you can see that the NIC supports up
+                to 4096 entries for both the RX and TX rings, but both
+                settings are currently set to 64.</p><p>To modify the values used by the system, use
+                    <span class="bold"><strong>ethtool</strong></span> with the <span class="strong"><strong>-G</strong></span> option.</p><p>Example:</p><pre class="screen"># ethtool -G eth1 rx 4096
+# ethtool -G eth1 tx 4096
+# ethtool -g eth1
+Ring parameters for eth1:
+Pre-set maximums:
+RX:		4096
+RX Mini:	0
+RX Jumbo:	0
+TX:		4096
+Current hardware settings:
+RX:		4096
+RX Mini:	0
+RX Jumbo:	0
+TX:		4096</pre><p>Increasing the ring buffer sizes to a bigger value allows
+                the NIC to receive or send more packets at a given rate,
+                thus increasing networking throughput. While increasing the
+                ring buffer size has a positive effect on the throughput,
+                it has a negative effect on packet latency. This is because
+                a packet will stay longer in the NIC memory before being
+                processed by the networking stack. </p><p>To not sacrifice latency too much while still increasing
+                your network throughput you can use the statistics provided
+                by <span class="bold"><strong>ethtool</strong></span> (option <span class="bold"><strong>-S</strong></span>) to balance throughput and
+                latency.</p><p>To accomplish this task, start with the default ring size
+                for both receive and transmit rings while handling your
+                target packets rate (for example 10Gb/s). Then look at
+                rx_dropped/tx_dropped counters provided by the
+                    <span class="command"><strong>ethtool -S</strong></span> command and increase (by
+                a power of 2) the ring buffers until the rx_dropped /
+                tx_dropped counters stop or reach the value which is
+                considered acceptable for your use case. Note that not all
+                scenarios impose a 0-packet-drop requirement.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-interrupt-coalescing"></a>Interrupt Coalescing</h3></div></div></div><p>As mentioned before, NICs also allow configuring:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>how many packets to be queued in the receive
+                        (rx-frames) or transmit (tx-frames) ring before
+                        triggering an interrupt</p></li><li class="listitem"><p>how long to wait after the value of rx-frames /
+                        tx-frames has been reached before triggering an
+                        interrupt (rx-usecs/tx-usecs)</p></li></ul></div><p>To fine-tune these parameters you can still use the
+                statistics provided by the <span class="command"><strong>ethtool -S</strong></span>
+                command.</p><p>However, when higher throughput is required and NAPI is
+                being used by the NIC driver, a value of 64 for the
+                rx-frames parameter can help to boost throughput, because
+                at each poll the driver would consume in polling a maximum
+                of 64 packets anyway.</p><p>To configure the above settings use the following
+                commands:</p><p>
+                <span class="command"><strong># ethtool -C eth1 rx-frames 64</strong></span>
+            </p><p>
+                <span class="command"><strong># ethtool -C eth1 tx-frames 64</strong></span>
+            </p><p>
+                <span class="command"><strong># ethtool -C eth1 tx-usecs 8</strong></span>
+            </p><p>
+                <span class="command"><strong># ethtool -C eth1 rx-usecs 8</strong></span>
+            </p><p>To verify that the new values have been set use the
+                following command:</p><p>
+                <span class="command"><strong># ethtool -c eth1</strong></span>
+            </p><p>To use custom value for the rx-frames/tx-frames and
+                rx-usecs/tx-usecs the Dynamic Interrupt Adaptation (DIA)
+                needs to be turned off. DIA is the features allowing the
+                NIC to auto-tune these settings based on network load. Not
+                all NICs implement such a feature; some require a specific
+                kernel and driver versions to support it. </p><p>To configure the DIA for both RX and TX use the two
+                following commands:</p><p>
+                <span class="command"><strong># ethtool -C eth1 adaptive-rx on</strong></span>
+            </p><p>
+                <span class="command"><strong># ethtool -C eth1 adaptive-tx on</strong></span>
+            </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-offload-capabilities"></a>Offload Capabilities</h3></div></div></div><p>Various NIC vendors offer different offload capabilities.
+                To check which features your NIC supports, use the command
+                    <span class="command"><strong>ethtool -k DEVICE</strong></span>. The features
+                which are marked with a <span class="italic">[fixed]</span> cannot be changed since possibly
+                your NIC (or driver) does not implement that feature (for
+                example <span class="italic">off [fixed])</span>, or
+                they are required for the NIC to work correctly (for
+                example <span class="italic">on
+                [fixed]</span>).</p><p>Example output:</p><pre class="screen"># ethtool -k eth1
+Features for eth1:
+rx-checksumming: on
+tx-checksumming: on
+       tx-checksum-ipv4: on
+       tx-checksum-ip-generic: off [fixed]
+       tx-checksum-ipv6: on
+       tx-checksum-fcoe-crc: on [fixed]
+       tx-checksum-sctp: on
+scatter-gather: on
+       tx-scatter-gather: on
+       tx-scatter-gather-fraglist: off [fixed]
+tcp-segmentation-offload: on
+       tx-tcp-segmentation: on
+       tx-tcp-ecn-segmentation: off [fixed]
+       tx-tcp6-segmentation: on
+udp-fragmentation-offload: off [fixed]
+generic-segmentation-offload: on
+generic-receive-offload: on
+large-receive-offload: on
+rx-vlan-offload: on
+tx-vlan-offload: on
+ntuple-filters: off
+receive-hashing: on
+highdma: on [fixed]
+rx-vlan-filter: on [fixed]
+vlan-challenged: off [fixed]
+tx-lockless: off [fixed]
+netns-local: off [fixed]
+tx-gso-robust: off [fixed]
+tx-fcoe-segmentation: on [fixed]
+tx-gre-segmentation: off [fixed]
+tx-ipip-segmentation: off [fixed]
+tx-sit-segmentation: off [fixed]
+tx-udp_tnl-segmentation: off [fixed]
+fcoe-mtu: off [fixed]
+tx-nocache-copy: off
+loopback: off [fixed]
+rx-fcs: off [fixed]
+rx-all: off
+tx-vlan-stag-hw-insert: off [fixed]
+rx-vlan-stag-hw-parse: off [fixed]
+rx-vlan-stag-filter: off [fixed]
+l2-fwd-offload: off
+busy-poll: on [fixed]
+hw-tc-offload: off</pre><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-checksum-offload"></a>Checksum offload</h4></div></div></div><p>The Linux kernel allows configuring the receive and
+                    transmit checksum offload on NICs.</p><p>The parameter identifying the receive checksum
+                    offload is called <span class="italic">rx-checksumming</span> and it can be set to
+                    either <span class="italic">on</span> or
+                        <span class="italic">off</span>.</p><p>Below you can see a full list of the
+                    sub-features:</p><pre class="screen">tx-checksumming: on
+       tx-checksum-ipv4: on
+       tx-checksum-ip-generic: off
+       tx-checksum-ipv6: on
+       tx-checksum-fcoe-crc: on
+       tx-checksum-sctp: on</pre><p>To enable or disable any of the allowed
+                    sub-parameters, it is sufficient to pass the
+                    sub-parameter name to the <span class="bold"><strong>-K</strong></span> option. Find an example in the
+                    following command:</p><p>
+                    <span class="command"><strong># ethtool -K eth1 tx-checksum-ipv4
+                        off</strong></span>
+                </p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-segmentation-offload"></a>Segmentation Offload</h4></div></div></div><p>To send a packet over a specific network, it is
+                    necessary to be compliant with the MSS and MTU of that
+                    network. Any application should be abstracted from the
+                    actual network it runs on. This increases portability
+                    and ease of maintenance so the kernel takes care of
+                    segmenting data into multiple packets before sending it
+                    over the network.</p><p>To free up CPU cycles from this duty and allow the
+                    kernel to use buffers as big as possible, most NICs
+                    implement what is called GSO (Generic Segmentation
+                    Offload) and TSO (TCP Segmentation Offload) hence
+                    performing the resizing and repackaging by
+                    itself.</p><p>To enable or disable GSO or TSO, use the following
+                    commands:</p><p>
+                    <span class="command"><strong># ethtool -K eth1 gso on</strong></span>
+                </p><p>
+                    <span class="command"><strong># ethtool -K eth1 gso off</strong></span>
+                </p><p>
+                    <span class="command"><strong># ethtool -K eth1 tso on</strong></span>
+                </p><p>
+                    <span class="command"><strong># ethtool -K eth1 tso off</strong></span>
+                </p><p>To disable TCP Segmentation Offload, you need to also
+                    disable the Generic Segmentation Offload. Otherwise any
+                    TCP traffic will be treated as generic.</p><p>On the other hand, you can have TSO enabled while the
+                    GSO is disabled. In this case, only TCP traffic will be
+                    offloaded to the NIC for segmentation. Any other
+                    protocol will be handled (for segmentation) by the
+                    Linux kernel networking stack.</p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-receive-offload"></a>Receive Offload</h4></div></div></div><p>To minimize the per packet overhead, the Linux kernel
+                    implements what is called Large Receive Offload (LRO)
+                    and Generic Receive Offload (GRO). Unfortunately, it
+                    has been proved that LRO is broken in some use cases so
+                    it is recommended to disable it.</p><p>GRO, however, implements a better technique to merge
+                    received packets: the MAC headers must be identical and
+                    only a few TCP or IP headers can differ. The set of
+                    headers which can differ is severely restricted:
+                    checksums are necessarily different, and the IP ID
+                    field is allowed to increment. Even the TCP time stamps
+                    must be identical, which is less of a restriction than
+                    it may seem; the time stamp is a relatively
+                    low-resolution field, so it is not uncommon for lots of
+                    packets to have the same time stamp. Because of these
+                    restrictions, merged packets can be resegmented
+                    losslessly. As an added benefit, the GSO code can be
+                    used to perform resegmentation. Another important
+                    aspect of GRO is that LRO is not limited to TCP/IPv4.
+                    GRO was merged since kernel 2.6.29 and is supported by
+                    a variety of 10G drivers (see also
+                    https://lwn.net/Articles/358910/]</p><p>To enable or disable GRO, use the following
+                    commands:</p><p>
+                    <span class="command"><strong># ethtool -K eth1 gro on</strong></span>
+                </p><p>
+                    <span class="command"><strong># ethtool -K eth1 gro off</strong></span>
+                </p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-vlan-offload"></a>VLAN Offload</h4></div></div></div><p>Most NICs these days support the VLAN offload for
+                    both receive and transmit path. This feature allows
+                    adding or stripping a VLAN tag from the packet when
+                    received or transmitted.</p><p>By default, most drivers enable this feature but in
+                    case it needs to be disabled the commands are:</p><p>
+                    <span class="command"><strong># ethtool -K [DEVICE] rxvlan off</strong></span>
+                </p><p>
+                    <span class="command"><strong># ethtool -K [DEVICE] txvlan off</strong></span>
+                </p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-tunnels-offload"></a>Tunnels (Stateless) Offload</h4></div></div></div><p>Each of the tunneling protocols for virtual network
+                    wraps a UDP header around the original packet (for
+                    example VxLAN packet) hence adding an additional layer.
+                    Because of this extra layer which needs to be added and
+                    removed for each packet, the CPU needs to perform more
+                    work to simply receive and send each packet. Because
+                    the CPU is busy with these <span class="quote">“<span class="quote">new</span>”</span> steps,
+                    the throughput and latency of the system for overlay
+                    networks is worse than for flat networks.</p><p>Newer NICs implement a tunnel segmentation offload,
+                    implementing for an overlay network the same concept
+                    available for TCP (TCP Segmentation Offload). </p><p>This feature offloads the segmentation of large
+                    transmit packets to NIC hardware. For instance you may
+                    have an inner payload of 9000 bytes while you still
+                    need to comply with the maximum MTU of 1500. The
+                    operation of segmenting the payload in multiple packets
+                    (VXLAN encapsulated for instance) is performed by the
+                    NIC before transmitting the packet to the
+                    network.</p><p>To enable or disable this feature, run the
+                    command:</p><p>
+                    <span class="command"><strong># ethtool -K [DEVICE] tx-udp_tnl-segmentation
+                        &lt;off&gt;</strong></span>
+                </p><p>
+                    <span class="command"><strong># ethtool -K [DEVICE] tx-udp_tnl-segmentation
+                        &lt;on&gt;</strong></span>
+                </p><p>Another feature which can be found in some NICs is
+                    the inner packet checksum offload. When this feature is
+                    enabled, it is possible to offload to the hardware the
+                    computation of the checksum for the encapsulated
+                    packet.</p><p>To enable or disable this feature, run the
+                    command:</p><p>
+                    <span class="command"><strong># ethtool -K [DEVICE]
+                        tx-udp_tnl-csum-segmentation &lt;off&gt;</strong></span>
+                </p><p>
+                    <span class="command"><strong># ethtool -K [DEVICE]
+                        tx-udp_tnl-csum-segmentation &lt;on&gt;</strong></span>
+                </p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="sec-hashing-offload"></a>Hashing and Packet Steering Offload</h4></div></div></div><p>An important aspect of modern NICs is having
+                    multiple hardware queues where packets can be placed
+                    either on the receive side or on the transmit
+                    side.</p><p>This hardware capability has many advantages in
+                    multicore architectures since each queue is also
+                    assigned a specific IRQ (see IRQ configuration). In
+                    consequence each interrupt can be pinned and handled by
+                    a specific core. </p><p>Similarly, the NIC allows you to steer particular
+                    flows matching some criteria to a particular hardware
+                    queue hence – potentially – steering that flow to a
+                    particular CPU core. This is not too far from what RSS
+                    does in software but it has the extra advantage of
+                    being performed by the hardware. The CPU is freed up
+                    from hashing the packets, classifying them and steering
+                    them to the right software queue.</p><p>The two <span class="bold"><strong>ethtool</strong></span> parameters
+                    which are involved with the hashing and steering of the
+                    flows are: <span class="bold"><strong>rxhash</strong></span> and
+                        <span class="bold"><strong>ntuple</strong></span>.</p><p>The <span class="bold"><strong>rxhash</strong></span> is a very
+                    basic parameter which can be enabled or disabled with
+                    the following commands:</p><p>
+                    <span class="command"><strong># ethtool -K [DEVICE] rxhash on</strong></span>
+                </p><p>
+                    <span class="command"><strong># ethtool -K [DEVICE] rxhash off</strong></span>
+                </p><p>The <span class="bold"><strong>ntuple</strong></span> parameter
+                    is a more complex parameter which allows you to specify
+                    the flow you are interested in by configuring the match
+                    conditions on various fields of the packet itself. You
+                    can find some examples below.</p><p>As an example, to steer the TCP flow from
+                    192.168.10.10 to 192.168.10.20 to the queue number 3,
+                    run the following command:</p><p>
+                    <span class="command"><strong># ethtool -N flow-type tcp4 src-ip
+                        192.168.10.10 dst-ip 192.168.10.20 action
+                        3</strong></span>
+                </p><p>If the value used for the parameter <span class="bold"><strong>action</strong></span> is -1 then the NIC
+                    will drop the packet received.</p><p>It is possible to match on various protocols. Some
+                    parameters to be configured only apply to some
+                    protocols (for example, <span class="italic">proto</span> only applies to <span class="italic">flow-type ether</span> whilst
+                        <span class="italic">l4proto</span> only
+                    applies to <span class="italic">flow-type
+                        ip4</span>). To see a full list of supported
+                    parameters and valid values, refer to the
+                        <span class="bold"><strong>ethtool</strong></span> manual page (see
+                        <a class="link" href="http://man.he.net/man8/ethtool" target="_top">http://man.he.net/man8/ethtool</a>
+                    and to the NIC vendor documentation.</p><p>To show the filters currently applied to an
+                    interface, use the command <span class="command"><strong>ethtool
+                        --show-ntuple</strong></span>.</p></div></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="sec-irq-config.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="sec-references.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">IRQ Configuration </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> References</td></tr></table></div></body></html>

@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>SAP Netweaver 3-tier Template</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="SUSE and Microsoft Solution Templates for SAP Applications" /><link rel="up" href="index.html" title="SUSE and Microsoft Solution Templates for SAP Applications" /><link rel="prev" href="sec-sap-hana-2-tier-db-tier-template.html" title="SAP HANA 2-tier (DB-tier) Template" /><link rel="next" href="sec-sap-netweaver-3-tier-ha-template.html" title="SAP Netweaver 3-tier HA Template" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">SAP Netweaver 3-tier Template</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="sec-sap-hana-2-tier-db-tier-template.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="sec-sap-netweaver-3-tier-ha-template.html">Next</a></td></tr></table><hr /></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-sap-netweaver-3-tier-template"></a>SAP Netweaver 3-tier Template</h2></div></div></div><p>The template provides and deploys several VMs which are
+      customized for use with SAP Netweaver and SAP HANA as database, using
+      the latest pay-as-you-go (PAYG) version of the SUSE Linux Enterprise
+      Server for SAP Applications (SLES4SAP).</p><p>It deploys all server on Premium Storage (Premium_LRS) and using
+      Managed Disks.</p><div class="figure"><a id="id1339"></a><p class="title"><strong>Figure 2. SAP Netweaver 3-tier Template Overview</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td><img src="images/azure_3tier.png" width="100%" alt="SAP Netweaver 3-tier Template Overview" /></td></tr></table></div></div></div><br class="figure-break" /><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-os-configuration-for-the-sap-netweaver-vm"></a>OS Configuration for the SAP Netweaver VM</h3></div></div></div><p>SAP Netweaver requires specific Linux kernel settings, which
+        are not part of the standard Azure images and must be set
+        manually.</p><pre class="screen">sudo saptune solution apply NETWEAVER</pre></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-os-configuration-for-the-sap-hana-vm"></a>OS Configuration for the SAP HANA VM</h3></div></div></div><p>SAP HANA requires specific Linux kernel settings, which are not
+        part of the standard Azure images and must be set manually.</p><pre class="screen">sudo saptune solution apply HANA</pre><p>For more details see the documentation at <a class="link" href="https://documentation.suse.com/sles-sap/12-SP4/html/SLES4SAP-guide/cha-s4s-tune.html#sec-saptune" target="_top">https://documentation.suse.com/sles-sap/12-SP4/html/SLES4SAP-guide/cha-s4s-tune.html#sec-saptune</a></p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-disk-overview-2"></a>Disk Overview</h3></div></div></div><p>The template uses the following disks and mount points for the
+        HANA machine:</p><p>Demo</p><div class="informaltable"><table class="informaltable" border="1"><colgroup><col class="col_1" /><col class="col_2" /><col class="col_3" /></colgroup><thead><tr><th align="left" valign="top">Mount Point </th><th align="left" valign="top"> Disk </th><th align="left" valign="top"> Size</th></tr></thead><tbody><tr><td align="left" valign="top">
+                <p>/hana/data</p>
+              </td><td align="left" valign="top">
+                <p>0,1</p>
+              </td><td align="left" valign="top">
+                <p>128 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/hana/log</p>
+              </td><td align="left" valign="top">
+                <p>2,3</p>
+              </td><td align="left" valign="top">
+                <p>128 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/hana/shared</p>
+              </td><td align="left" valign="top">
+                <p>4</p>
+              </td><td align="left" valign="top">
+                <p>128 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/usr/sap</p>
+              </td><td align="left" valign="top">
+                <p>5</p>
+              </td><td align="left" valign="top">
+                <p>128 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/hana/backup</p>
+              </td><td align="left" valign="top">
+                <p>6</p>
+              </td><td align="left" valign="top">
+                <p>128 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/sapmnt</p>
+              </td><td align="left" valign="top">
+                <p>7</p>
+              </td><td align="left" valign="top">
+                <p>128 GB</p>
+              </td></tr></tbody></table></div><p>The XSCS machine uses only the base OS disk.</p><p>The APP server machines use an additional 128 GB disk for
+        /usr/sap/&lt;SID&gt;.</p><p>Small</p><div class="informaltable"><table class="informaltable" border="1"><colgroup><col class="col_1" /><col class="col_2" /><col class="col_3" /></colgroup><thead><tr><th align="left" valign="top">Mount Point </th><th align="left" valign="top"> Disk </th><th align="left" valign="top"> Size</th></tr></thead><tbody><tr><td align="left" valign="top">
+                <p>/hana/data</p>
+              </td><td align="left" valign="top">
+                <p>0,1,2</p>
+              </td><td align="left" valign="top">
+                <p>512 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/hana/log</p>
+              </td><td align="left" valign="top">
+                <p>same disks as data</p>
+              </td><td align="left" valign="top">
+                <p></p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/hana/shared</p>
+              </td><td align="left" valign="top">
+                <p>3</p>
+              </td><td align="left" valign="top">
+                <p>512 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/usr/sap</p>
+              </td><td align="left" valign="top">
+                <p>4</p>
+              </td><td align="left" valign="top">
+                <p>64 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/hana/backup</p>
+              </td><td align="left" valign="top">
+                <p>5</p>
+              </td><td align="left" valign="top">
+                <p>1024 GB</p>
+              </td></tr></tbody></table></div><p>The XSCS machine uses only the base OS disk.</p><p>The APP server machines use an additional 128 GB disk for
+        /usr/sap/&lt;SID&gt;</p><p>Medium</p><div class="informaltable"><table class="informaltable" border="1"><colgroup><col class="col_1" /><col class="col_2" /><col class="col_3" /></colgroup><thead><tr><th align="left" valign="top">Mount Point </th><th align="left" valign="top"> Disk </th><th align="left" valign="top"> Size</th></tr></thead><tbody><tr><td align="left" valign="top">
+                <p>/hana/data</p>
+              </td><td align="left" valign="top">
+                <p>0,1,2,3</p>
+              </td><td align="left" valign="top">
+                <p>512 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/hana/log</p>
+              </td><td align="left" valign="top">
+                <p>4,5</p>
+              </td><td align="left" valign="top">
+                <p>512 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/hana/shared</p>
+              </td><td align="left" valign="top">
+                <p>6</p>
+              </td><td align="left" valign="top">
+                <p>1024 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/usr/sap</p>
+              </td><td align="left" valign="top">
+                <p>7</p>
+              </td><td align="left" valign="top">
+                <p>64 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/hana/backup</p>
+              </td><td align="left" valign="top">
+                <p>8,9</p>
+              </td><td align="left" valign="top">
+                <p>1024 GB</p>
+              </td></tr></tbody></table></div><p>Large</p><div class="informaltable"><table class="informaltable" border="1"><colgroup><col class="col_1" /><col class="col_2" /><col class="col_3" /></colgroup><thead><tr><th align="left" valign="top">Mount Point </th><th align="left" valign="top"> Disk </th><th align="left" valign="top"> Size</th></tr></thead><tbody><tr><td align="left" valign="top">
+                <p>/hana/data</p>
+              </td><td align="left" valign="top">
+                <p>0,1,2</p>
+              </td><td align="left" valign="top">
+                <p>1024 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/hana/log</p>
+              </td><td align="left" valign="top">
+                <p>3,4</p>
+              </td><td align="left" valign="top">
+                <p>512 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/hana/shared</p>
+              </td><td align="left" valign="top">
+                <p>5</p>
+              </td><td align="left" valign="top">
+                <p>1024 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/usr/sap</p>
+              </td><td align="left" valign="top">
+                <p>6</p>
+              </td><td align="left" valign="top">
+                <p>64 GB</p>
+              </td></tr><tr><td align="left" valign="top">
+                <p>/hana/backup</p>
+              </td><td align="left" valign="top">
+                <p>7,8</p>
+              </td><td align="left" valign="top">
+                <p>2048 GB</p>
+              </td></tr></tbody></table></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-other-settings-and-machines"></a>Other Settings and Machines</h3></div></div></div><p>All machines created with the template use the Azure feature
+          <span class="quote">“<span class="quote">Accelerated Network (AN)</span>”</span> (only if the VM size
+        supports AN).</p><p>The XSCS machine gets a dynamic public IP address to be able to
+        access all other machines in the private network and only uses the
+        base OS disk. There is no additional disk.</p><p>The APP server machines use an additional 128 GB disk for
+        /usr/sap/&lt;SID&gt; and the machines are placed in an
+          <span class="strong"><strong>Availability Set</strong></span> with a
+          <span class="strong"><strong>FaultDomainCount</strong></span> of 2 and an
+          <span class="strong"><strong>UpdateDomainCount</strong></span> of
+        20.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Availability Set</h3><p>An <span class="strong"><strong>Availability Set</strong></span> is a
+          logical group in Azure to ensure that the VM resources are
+          isolated from each other when they are deployed within an Azure
+          data center. It ensures that the VMs you place within such an
+            <span class="strong"><strong>Availability Set</strong></span> run across
+          multiple physical servers, compute racks, storage units and
+          network switches. The Virtual Machines are placed then into an
+            <span class="strong"><strong>Availability Set</strong></span> to minimize
+          the chances that two of them fail or are updated at the same
+          time. This is essential when you want to build reliable cloud
+          solutions and clusters.</p></div></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="sec-sap-hana-2-tier-db-tier-template.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="sec-sap-netweaver-3-tier-ha-template.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">SAP HANA 2-tier (DB-tier) Template </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> SAP Netweaver 3-tier HA Template</td></tr></table></div></body></html>

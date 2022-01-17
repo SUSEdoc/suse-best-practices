@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Implementation Phases</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="Large Scale SUSE OpenStack Clouds - An Architecture Guide" /><link rel="up" href="index.html" title="Large Scale SUSE OpenStack Clouds - An Architecture Guide" /><link rel="prev" href="id-operating-a-cloud.html" title="Operating a Cloud" /><link rel="next" href="id-suse-and-the-cloud.html" title="SUSE and the Cloud" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Implementation Phases</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="id-operating-a-cloud.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="id-suse-and-the-cloud.html">Next</a></td></tr></table><hr /></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="Implementation-Phases"></a>Implementation Phases</h2></div></div></div><div class="figure"><a id="id2254"></a><p class="title"><strong>Figure 7. Implementation Phases with milestones of a deployment</strong></p><div class="figure-contents"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="500"><tr><td align="center"><img src="images/cloudls_implementation_phases.png" align="middle" width="500" alt="cloudls implementation phases" /></td></tr></table></div></div></div><br class="figure-break" /><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="id-start-design"></a>Start &amp; Design</h3></div></div></div><p>To start your cloud project, organize a design workshop where all central
+questions are discussed and answered. The topics mentioned in chapter 1
+must be clarified in this design workshop. If they are not answered properly,
+the entire project might be at risk.</p><p>A workshop with SUSE experts takes two to three days and preferably takes place
+at the customer’s site. The list of participants should include experts
+and architects from all departments involved in the operation and
+maintenance of your future cloud environment. This is to ensure proper know-how
+is taken in consideration for the design. This should also include members from the
+datacenter operations, network operations and storage teams, and from any
+application team that runs software in the cloud.</p><p>The most important aspects to be discussed during the design workshop are:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Specific business drivers: Why is the customer looking into building a
+cloud and what challenge do they want to tackle?</p></li><li class="listitem"><p>Use cases for the cloud: What workloads are running in the cloud
+environment and what is the best technical implementation for them?</p></li><li class="listitem"><p>Implementation: How many environments are required? Is one environment
+enough, or are different environments needed, such as a production,
+staging, QA, development, or test and trial environment?</p></li><li class="listitem"><p>Expectations: What are the expectations with regard to the performance
+of the cloud in terms of capacity, bandwidth, and latency?</p></li><li class="listitem"><p>General conditions: Are there any specific in-house regulations in place
+that impact the implementation of a cloud? What are the physical conditions?</p></li><li class="listitem"><p>Responsibilities: Who drives the project at both ends? Who are the experts
+in charge, who communicates to whom during the implementation? Are there any
+foreseeable bottlenecks or issues?</p></li></ul></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a id="id-environment-types"></a>Environment Types</h4></div></div></div><p>One important question to clarify is how many OpenStack cloud environments
+a customer needs and what purpose they are serving. A production setup
+must meet requirements different from a QA or development environment.</p><p>Environments tailored for development are used to:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Test new software functionality</p></li><li class="listitem"><p>Test configuration changes</p></li><li class="listitem"><p>Test patches</p></li><li class="listitem"><p>Test temporary product fixes (PTF)</p></li><li class="listitem"><p>Test upgrade procedures</p></li><li class="listitem"><p>Troubleshoot an issue</p></li><li class="listitem"><p>Training and sandbox purposes</p></li></ul></div><p>In contrast to a production environment, a development environment only
+requires the basic OpenStack services and is easier to set up and maintain.
+It is also less complex and better to adapt.</p><p>A QA environment, however, with the purpose to test changes before merging
+them into the production platform, must be as close to the production
+environment as possible. It has the same level of complexity and
+the same operational constraints.</p></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a id="id-the-design-workshop"></a>The Design Workshop</h4></div></div></div><p>Designing the solution is the most challenging part. In previous
+chapters, the sizing (number of servers), failure domains and clusters,
+networking functionality, and key aspects of the SUSE OpenStack Cloud and
+SUSE Enterprise Storage products have been discussed. During the design
+phase of the setup, all these factors are combined with the results
+of the workshop to create a full picture of what the future cloud
+environment will look like.</p><p>In cooperation with the customer, the consultants draft a design
+document for the setup and take all mentioned factors into consideration.
+They explain how SUSE products such as SUSE Linux Enterprise,
+SUSE OpenStack Cloud, SUSE Enterprise Storage, SUSE Manager, and others help
+the customer to build a cloud fast and effectively. The design document contains
+all relevant information including:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><span class="strong"><strong>Which OpenStack services are to be used?</strong></span> What components in addition to
+the basic components are available and are useful in the environment?
+What about additions such as OpenStack Monasca?</p></li><li class="listitem"><p><span class="strong"><strong>How does the design of the network for the cloud look like?</strong></span> What SDN
+solution is used? What are the local requirements? How does the physical
+layout of the network look like? What is the target size and can the
+network handle that size? If not, how does it need to be changed? Are there
+any possible showstoppers included in the design such as firewalls? How
+does the cloud integrate into the existing structure for (external) networking?</p></li><li class="listitem"><p><span class="strong"><strong>What network services are required and how will they be rolled out in
+the future cloud?</strong></span> What protocols must be supported? Examples include
+DNS, DHCP, TFTP, PXE and many more.</p></li><li class="listitem"><p><span class="strong"><strong>How is encryption inside the cloud handled?</strong></span> When is communication with the
+outside handled? Who can organize possibly required certificates for SSL-based
+connections?</p></li><li class="listitem"><p><span class="strong"><strong>What does the operations concept looks like and what tools are being used to
+implement the concept?</strong></span> Is SUSE Manager used? How are patches handled?</p></li><li class="listitem"><p><span class="strong"><strong>What licenses and external products must be acquired?</strong></span> Who is in charge
+of acquiring those and until when does it happen?</p></li><li class="listitem"><p><span class="strong"><strong>How experienced is the staff with regard to cloud computing and the
+economy of scale in general?</strong></span> Is the staff experienced in operating an
+OpenStack cloud environment in particular? Is training necessary?</p></li></ul></div><div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Warning</h3><p>Moving to the cloud is an organizational change. Staffing is a
+critical component of a successful cloud deployment. Ensure your staff
+is technically and mentally trained and prepared for the new environment.</p></div></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a id="id-cpu-and-ram-ratio"></a>CPU and RAM Ratio</h4></div></div></div><p>During the workshop, a technical requirement document is developed. This
+document formally defines the type and amount of hardware required for
+the cloud environment. Sizing the hardware correctly before ordering it
+according to section <a class="xref" href="id-architecture.html#CPU-and-RAM-Ratio">the section called “The Compute Layer”</a> eliminates several problems
+that could otherwise arise during the progress of the project.</p></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a id="id-persistent-versus-ephemeral-storage-sizing-rules"></a>Persistent Versus Ephemeral Storage Sizing Rules</h4></div></div></div><p>The difference between persistent and ephemeral storage is important
+when sizing the hardware. To understand why ephemeral storage is an intricate
+issue, refer to section <a class="xref" href="id-storage.html#Ephemeral-and-Persistent-Storage">the section called “Required Storage Types”</a> and section
+<a class="xref" href="id-operating-a-cloud.html#Ephemeral-Issues">the section called “Some Approaches Will Fail”</a> in chapters 2 and 5.</p><p>The sizing for ephemeral storage and persistent storage (which means the storage
+available in your Ceph cluster) needs to be determined. It is important to <span class="emphasis"><em>not</em></span>
+mix up ephemeral disks and persistent block storage in this context. In addition
+to the ephemeral disk, which is automatically provided for almost every started VM,
+storage for Ceph or any other storage solution must be included in the planning.</p><p>To calculate the minimum disk space needed on a compute node, you need
+to determine the highest disk-space-to-RAM ratio from your flavors.</p><p>In the following example:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Flavor small: 2 GB RAM, 100 GB ephemeral disk ⇒ 50 GB disk / 1 GB RAM</p></li><li class="listitem"><p>Flavor large: 8 GB RAM, 200 GB ephemeral disk ⇒ 25 GB disk / 1 GB RAM</p></li></ul></div><p>50 GB disk / 1 GB RAM is the ratio that matters. If you multiply that
+value by the amount of RAM in gigabytes available on a compute node, you
+get the minimum disk space required by ephemeral disks. Pad that value
+with sufficient space for the root disks plus a buffer to leave some space
+for flavors with a higher disk-space-to-RAM ratio in the future.</p><p>After the number of required servers (see section <a class="xref" href="id-architecture.html#Reference-Architecture" title="Reference Architecture">the section called “Reference Architecture”</a>)
+is known, it is easy to calculate the required network ports and design the
+network switch layout.</p></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a id="id-compatibility-with-suse-linux-enterprise"></a>Compatibility with SUSE Linux Enterprise</h4></div></div></div><p>During the workshop, SUSE experts ensure that the hardware specified in
+the list of materials is compatible with the SUSE Linux Enterprise platform
+as the foundation of SUSE OpenStack Cloud and SUSE Enterprise Storage.</p><p>More details can be found in the SUSE OpenStack 8 Deployment Guide in the <a class="link" href="https://documentation.suse.com/soc/8/html/suse-openstack-cloud-crowbar-all/cha-depl-req.html#sec-depl-req-hardware" target="_top">Hardware Requirements</a> section.</p></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="id-bill-of-material"></a>Bill Of Material</h3></div></div></div><p>Based on the results of the workshop, a list of required hardware and software
+components and professional services is compiled. On the basis of this list,
+quotes from vendors and suppliers are requested. After having received the
+quotes, the solution can be calculated, and the total cost for setting up the
+cloud environment can be clarified.</p><p>At this stage of the project, management approval is required to determine whether
+the project is pursued further or not. It is also possible to re-design
+parts of the solution to decrease its price at the cost of having less functionality
+or less capacity available in the setup.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="id-hardware-setup"></a>Hardware Setup</h3></div></div></div><p>After the project gets formal management approval, the next logical step
+is the acquisition of the required components. When hardware, software
+and professional services are delivered, the cloud environment can be built.</p><p>At this stage, customers deploying a SUSE OpenStack Cloud solution receive
+a short technical document detailing how to prepare the implementation.
+This not only includes the configuration information for the individual
+nodes of the setup to ensure a smooth installation of the SUSE OpenStack
+Cloud and SUSE Enterprise Storage components, but also information about
+any other required component such as autoYaST for the automated deployment
+of physical servers.</p><p>The technical document also contains relevant information for staff
+from other departments such as datacenter operations or network operations.</p><p>Finally, the server hardware must be set up in the datacenter and
+installed with the operating system.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="id-deployment"></a>Deployment</h3></div></div></div><p>Using the determined solution for the roll-out of the cloud, the roll-out
+is in accordance with the governing factors laid out in the
+scope of work definition created together during the design workshop. At
+this stage of the project, SUSE architects support the customer
+(even on-site) to ensure a quick and good progress of the installation
+of your future setup. SUSE supports the customer to make sure to perform the setup
+in the right order so that the deployment tools, such as AutoYaST,
+are functional from the start and the time required for the deployment
+of your cloud is as small as possible.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="id-handover"></a>Handover</h3></div></div></div><p>When all components are rolled out as required, formal tests are completed.
+As SUSE provides many acceptance tests to choose from, the tests
+are based on a catalogue of standard tests. If all tests are completed successfully,
+the formal handover of the setup takes place and the responsibility for the
+installation is transferred to the customer.</p><p>Depending on the support level included with the subcription for the
+solution, you can open support requests and clarify your questions throughout
+the validity of your subscription.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="id-production"></a>Production</h3></div></div></div><p>After any additional testing is complete, the setup goes into production mode
+and starts to actively serve customers.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="id-summary"></a>Summary</h3></div></div></div><p>To successfully build up a large scale cloud environment, you should consider
+a few factors. Some of them are listed below:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><span class="strong"><strong>Use Open Standards</strong></span>: Rely on Open Standards and avoid getting locked-in
+to a specific vendor. Both objectives are achieved when using open source
+software.</p></li><li class="listitem"><p><span class="strong"><strong>Automate</strong></span>: Anything in cloud setups that can be automated should be
+automated. This allows your staff to focus on relevant work, such as
+developing new features or helping improve the environment.</p></li><li class="listitem"><p><span class="strong"><strong>Scale out — but do it!</strong></span>: The ability to scale out is a key
+requirement. Providers mostly scale out when they see the need to remain
+competitive. Some companies however do not use the scale-out
+capabilities for financial reasons, facing several setbacks.</p></li><li class="listitem"><p><span class="strong"><strong>Get help</strong></span>: Building a large scale cloud environment is an intricate and
+difficult task, you need to find the right partners in time and work together
+with them to turn the project into a guaranteed success.</p></li></ul></div></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="id-operating-a-cloud.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="id-suse-and-the-cloud.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Operating a Cloud </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> SUSE and the Cloud</td></tr></table></div></body></html>

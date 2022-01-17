@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>How to Directly Connect SUSE Manager to Red Hat Content Delivery Network</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><meta name="description" content="The described solution allows you to directly connect SUSE Manager to the Red Hat Content Delivery Network (CDN) to retrieve your software updates and patches. This is useful if you plan on continuing your agreement with Red Hat, and/or you do not want to use Expanded Support from SUSE. It is also useful when you have multiple distributions that you want to update and patch from SUSE Manager. Finally, it is helpful if you use an updated code stream of the Satellite 5 series, and continue your use of an enhanced road map to the Spacewalk project. You must have a current subscription with Red Hat. This in no way requires that you have a subscription to Satellite Server from Red Hat. Disclaimer: Documents published as part of the SUSE Best Practices series have been contributed voluntarily by SUSE employees and third parties. They are meant to serve as examples of how particular actions can be performed. They have been compiled with utmost attention to detail. However, this does not guarantee complete accuracy. SUSE cannot verify that actions described in these documents do what is claimed or whether actions described have unintended consequences. SUSE LLC, its affiliates, the authors, and the translators may not be held liable for possible errors or the consequences thereof." /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="How to Directly Connect SUSE Manager to Red Hat Content Delivery Network" /><link rel="next" href="sec-createrepos.html" title="Create Software Repositories" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">How to Directly Connect SUSE Manager to Red Hat Content
+            Delivery Network</th></tr><tr><td width="20%" align="left"> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="sec-createrepos.html">Next</a></td></tr></table><hr /></div><div xml:lang="en" class="article" lang="en"><div class="titlepage"><div><div><h1 class="title"><a id="art-sbp-suma-rhconnect"></a>How to Directly Connect SUSE Manager to Red Hat Content
+            Delivery Network</h1></div><div><h3 class="subtitle"><em>Methods to Receive Your Red Hat Updates and
+            Patches</em></h3></div><div><div class="author"><h3 class="author"><span class="firstname">Cameron</span> <span class="surname">Seader, Sales Engineer, SUSE</span></h3></div></div><div><div class="author"><h3 class="author"><span class="firstname">Donald</span> <span class="surname">Vosburg, Sales Engineer, SUSE</span></h3></div></div><div><div class="abstract"><p class="title"><strong>Abstract</strong></p><p>The described solution allows you to directly connect
+                SUSE Manager to the Red Hat Content Delivery Network (CDN)
+                to retrieve your software updates and patches.</p><p>This is useful if you plan on continuing your agreement
+                with Red Hat, and/or you do not want to use Expanded
+                Support from SUSE. It is also useful when you have multiple
+                distributions that you want to update and patch from SUSE
+                Manager. Finally, it is helpful if you use an updated code
+                stream of the Satellite 5 series, and continue your use of
+                an enhanced road map to the Spacewalk project.</p><p>You must have a current subscription with Red Hat. This
+                in no way requires that you have a subscription to
+                Satellite Server from Red Hat.</p><p>
+                <span class="strong"><strong>Disclaimer: </strong></span>
+                Documents published as part of the SUSE Best Practices series have been contributed voluntarily
+                by SUSE employees and third parties. They are meant to serve as examples of how particular
+                actions can be performed. They have been compiled with utmost attention to detail. However,
+                this does not guarantee complete accuracy. SUSE cannot verify that actions described in these
+                documents do what is claimed or whether actions described have unintended consequences.
+                SUSE LLC, its affiliates, the authors, and the translators may not be held liable for possible errors
+                or the consequences thereof.
+            </p></div></div></div><hr /></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="sect1"><a href="index.html#sec-importrhcert">Import Red Hat Entitlement and CA Certificate</a></span></dt><dd><dl><dt><span class="sect2"><a href="index.html#sec-entitlecert">Entitlement Certificate</a></span></dt><dt><span class="sect2"><a href="index.html#sec-rhcacert">Red Hat CA Certificate</a></span></dt><dt><span class="sect2"><a href="index.html#sec-obtain-repo-url">Obtain Repository URL list</a></span></dt><dt><span class="sect2"><a href="index.html#sec-import">Import</a></span></dt></dl></dd><dt><span class="sect1"><a href="sec-createrepos.html">Create Software Repositories</a></span></dt><dt><span class="sect1"><a href="sec-createswchannel.html">Create Software Channel Delivery</a></span></dt><dd><dl><dt><span class="sect2"><a href="sec-createswchannel.html#sec-parentchannels">Parent Channels Example</a></span></dt><dt><span class="sect2"><a href="sec-createswchannel.html#sec-child-channels">Child Channels example</a></span></dt></dl></dd><dt><span class="sect1"><a href="sec-registration.html">Registration</a></span></dt><dd><dl><dt><span class="sect2"><a href="sec-registration.html#sec-bootstrap-repo-creation">Bootstrap Repository Creation</a></span></dt><dt><span class="sect2"><a href="sec-registration.html#sec-minion-registration">Minion Registration</a></span></dt></dl></dd><dt><span class="sect1"><a href="sec-references.html">References</a></span></dt><dt><span class="sect1"><a href="ar01s06.html">Legal notice</a></span></dt><dt><span class="sect1"><a href="ar01s07.html">GNU Free Documentation License</a></span></dt></dl></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-importrhcert"></a>Import Red Hat Entitlement and CA Certificate</h2></div></div></div><p>During the next few paragraphs, you will learn how to import
+            the Red Hat CA and entitlement certificate.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Expiration Dates for Entitlement Certificates</h3><p>Entitlement certificates have embedded expiration dates
+                tied to the length of the support subscription. You must
+                repeat this process with updated entitlement certificates
+                as needed to avoid disruption in channel mirroring.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-entitlecert"></a>Entitlement Certificate</h3></div></div></div><p>Red Hat Subscription Manager is a local service which
+                tracks installed products and subscriptions on a local
+                system to help manage subscription assignments. To obtain
+                your certificates, you must register your system using this
+                subscription manager tool supplied by Red Hat. </p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>Register with the subscription manager tool from
+                        your Red Hat client. It will prompt you for your
+                        user name and password for authentication on the
+                        Red Hat Portal:</p><p>
+                        <span class="command"><strong>subscription-manager register</strong></span>
+                    </p></li><li class="listitem"><p>Navigate to the location of your entitlement
+                        certificate and key, and copy these files to where
+                        your Web browser connected to SUSE Manager can open
+                        them:</p><p>
+                        <span class="command"><strong>cd /etc/pki/entitlement/</strong></span>
+                    </p></li></ol></div><p>You will see two files with the data file format
+                extension <span class="strong"><strong>.pem</strong></span> (Program
+                Editor macro). One is the certificate, and the other is the
+                key and it has the word <span class="quote">“<span class="quote">key</span>”</span> in the file
+                name.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-rhcacert"></a>Red Hat CA Certificate</h3></div></div></div><p>The next step is to get the Red Hat CA Certificate file.
+                It is located on this same Red Hat system in the file
+                    <code class="filename">/etc/rhsm/ca/redhat-uep.pem</code>. Place
+                this file in the same location where, in the previous
+                section, you put the entitlement certificate. </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-obtain-repo-url"></a>Obtain Repository URL list</h3></div></div></div><p>Use the subscription manager tool to obtain the URL’s of
+                the repositories you want to mirror:</p><p>
+                <span class="command"><strong>subscription-manager repos</strong></span>
+            </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-import"></a>Import</h3></div></div></div><p>Now you are ready to import the Red Hat CA Certificate
+                and Entitlement Certificate into SUSE Manager for software
+                repository mirroring. You must create three entries here:
+                one each for the entitlement certificate, the entitlement
+                key, and the Red Hat CA certificate.</p><p>Start your SUSE Manager. Go to the <span class="strong"><strong>Systems</strong></span> tab at the top. Click
+                    <span class="strong"><strong>Autoinstallation</strong></span> on
+                the left pane. Then click <span class="strong"><strong>GPG and
+                    SSL Keys</strong></span> also on the left pane, as you can
+                see it from the screenshot below.</p><div class="figure"><a id="id1337"></a><p class="title"><strong>Figure 1. SUSE Manager GPG Public Keys and SSL
+                    Certificates</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="90%"><tr><td><img src="images/suma-connect-rhcertimport.png" width="100%" alt="SUSE Manager GPG Public Keys and SSL Certificates" /></td></tr></table></div></div></div><br class="figure-break" /><p>Click <span class="strong"><strong>Create Stored
+                    Key/Cert</strong></span> on the right. Another screen opens
+                where you can fill in the required information.</p><div class="figure"><a id="id1338"></a><p class="title"><strong>Figure 2. SUSE Manager Create GPG/SSL Keys</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="90%"><tr><td><img src="images/suma-connect-createkey.png" width="100%" alt="SUSE Manager Create GPG/SSL Keys" /></td></tr></table></div></div></div><br class="figure-break" /><p>Enter the following values, and ensure you enter the
+                date:</p><table border="0" summary="Simple list" class="simplelist"><tr><td><span class="strong"><strong>Description</strong></span>:
+                        Entitlement-Cert-<span class="emphasis"><em>date</em></span></td></tr><tr><td><span class="strong"><strong>Type</strong></span>: Ensure you
+                    select <span class="emphasis"><em>SSL</em></span>
+                </td></tr><tr><td><span class="strong"><strong>Select file to
+                        upload</strong></span>: Browse to where you saved the
+                    Entitlement Certificate .pem file and select
+                    it.</td></tr></table><p>Click the <span class="strong"><strong>Create Key</strong></span>
+                button at the bottom.</p><div class="figure"><a id="id1339"></a><p class="title"><strong>Figure 3. SUSE Manager Create Key Button</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="30%"><tr><td><img src="images/suma-connect-buttoncreatekey.png" width="100%" alt="SUSE Manager Create Key Button" /></td></tr></table></div></div></div><br class="figure-break" /><p>Repeat the above steps for the Entitlement Key and change
+                the values to match the following:</p><table border="0" summary="Simple list" class="simplelist"><tr><td><span class="strong"><strong>Description</strong></span>:
+                        Entitlement-key-<span class="emphasis"><em>date</em></span></td></tr><tr><td><span class="strong"><strong>Type</strong></span>:
+                    SSL</td></tr><tr><td><span class="strong"><strong>Select file to
+                        upload</strong></span>: Browse to the location where you
+                    saved the Entitlement key .pem file and select
+                    it.</td></tr></table><p>Repeat the above steps for the Red Hat CA Certificate
+                    (<span class="emphasis"><em>redhat-uep</em></span>) and change the values
+                to match the following:</p><table border="0" summary="Simple list" class="simplelist"><tr><td><span class="strong"><strong>Description</strong></span>:
+                    redhat-uep</td></tr><tr><td><span class="strong"><strong>Type</strong></span>:
+                    SSL</td></tr><tr><td><span class="strong"><strong>Select file to
+                        upload</strong></span>: Browse to the location where you
+                    saved the Red Hat CA Certificate and select
+                    it.</td></tr></table><p>You now have imported the Entitlement certificate, the
+                Entitlement key and the Red Hat CA into SUSE Manager for
+                use. Your outcome should look like the screen below:</p><div class="figure"><a id="id1340"></a><p class="title"><strong>Figure 4. SUSE Manager Imported Red Hat Certificates</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="90%"><tr><td><img src="images/suma-connect-sumarhcert-2.png" width="100%" alt="SUSE Manager Imported Red Hat Certificates" /></td></tr></table></div></div></div><br class="figure-break" /></div></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="sec-createrepos.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top"> </td><td width="20%" align="center"> </td><td width="40%" align="right" valign="top"> Create Software Repositories</td></tr></table></div></body></html>

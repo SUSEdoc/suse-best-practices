@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Initial System Configuration</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="Introduction to SUSE Linux Enterprise Server for ARM on the Raspberry Pi" /><link rel="up" href="index.html" title="Introduction to SUSE Linux Enterprise Server for ARM on the Raspberry Pi" /><link rel="prev" href="sec-rpi-usage.html" title="General System Usage" /><link rel="next" href="sec-rpi-documentation.html" title="Product Documentation" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Initial System Configuration</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="sec-rpi-usage.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="sec-rpi-documentation.html">Next</a></td></tr></table><hr /></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-rpi-configuration"></a>Initial System Configuration</h2></div></div></div><p> In this section it is explained how to perform the initial
+      system configuration for SUSE Linux Enterprise Server for ARM 12 SP3 on the
+      Raspberry Pi. </p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-rpi-hostname"></a>Changing the Host Name</h3></div></div></div><p>Follow these steps to change the default host name:</p><div class="procedure"><a id="pro-rpi-hostname-yast"></a><ol class="procedure" type="1"><li class="step"><p> Open the YaST network module either by running
+              <span class="command"><strong>yast2 lan</strong></span> or clicking the network icon in
+            the YaST control center. </p></li><li class="step"><p> Select <span class="guimenu">Hostname/DNS</span> in the top tab bar.
+          </p></li><li class="step"><p> Type the new host name into the
+              <span class="guimenu">Hostname</span> field. </p></li><li class="step"><p> Click <span class="guimenu">OK</span> to save the change. After
+            YaST exited, you need to log out and in again. </p></li></ol></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-rpi-network"></a>Setting up Networking</h3></div></div></div><p> The default configuration has DHCP enabled on the Ethernet
+        port. If that suits your network environment, you can skip this
+        section. If you require the use of a static IP address, use
+        YaST:</p><div class="procedure"><a id="pro-rpi-network-yast"></a><ol class="procedure" type="1"><li class="step"><p> Open the YaST network module either by running
+              <span class="command"><strong>yast2 lan</strong></span> or clicking the network icon in
+            the YaST control center. </p></li><li class="step"><p> In YaST, you will see the network interface being
+            selected. Select the built-in Ethernet and choose
+              <span class="guimenu">Edit</span> to open the address configuration.
+          </p></li><li class="step"><p> Select <span class="guimenu">Statically Assigned IP Address</span>
+            and type in the desired values for <span class="guimenu">IP
+              Address</span> and <span class="guimenu">Subnet Mask</span>. Click
+              <span class="guimenu">Next</span>. </p></li><li class="step"><p> With a static network configuration, you will also need to
+            specify a DNS server (if applicable) and a gateway. For the
+            gateway, select <span class="guimenu">Routing</span> in the tab bar and
+            enter the IPs of the gateways into the specific fields. </p></li><li class="step"><p> The DNS server is set in the
+              <span class="guimenu">Hostname/DNS</span> tab. After choosing that tab,
+            enter the IPs of the name servers into the respective
+              <span class="guimenu">Name Server</span> fields. </p></li></ol></div><p>Similarly to the procedure described above, YaST also lets you
+        configure the built-in Wi-Fi network adapter.</p><p> For detailed information about the network configuration in
+        SUSE Linux Enterprise Server, consult the respective sections of the SUSE
+        Linux Enterprise Server Deployment Guide and the SUSE Linux
+        Enterprise Server Administration Guide at <a class="link" href="https://documentation.suse.com/sles/12-SP3/" target="_top">https://documentation.suse.com/sles/12-SP3/</a>. To
+        access these guides, download the compressed documentation
+        folder.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="sec-rpi-registration"></a>Registration Process</h3></div></div></div><p> It is very important to register your SUSE Linux Enterprise
+        Server for ARM subscription to ensure full functionality of your
+        Raspberry Pi system. The SD card image provided by SUSE contains a
+        minimal set of packages that are intended for the initial boot
+        process and to get your Raspberry Pi onto the network. </p><p>When you have registered your SUSE Linux Enterprise Server for
+        ARM subscription, you can download other packages you may need,
+        such as compilers. The SUSE Linux Enterprise Server version that
+        runs on your Raspberry Pi is the same version that runs on x86,
+        Power, IBM Z, or on other Arm-based systems.</p><div class="important" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Setting the Clock</h3><p>Because the Raspberry Pi does not have a persistent Real Time
+          Clock, make sure that the clock is set to the current date and
+          time before attempting to use Zypper or YaST to install
+          additional packages. </p></div><p>You can register your system either during first boot or via
+        the <span class="italic">YaST Product Registration</span>
+        module.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Evaluation Code</h3><p>Sixty day evaluation subscriptions may be requested at the
+          following page: <a class="link" href="https://www.suse.com/products/arm/raspberry-pi/" target="_top">https://www.suse.com/products/arm/raspberry-pi/</a>
+        </p></div><p>
+        <span class="strong"><strong>After you obtained a registration code from
+          a subscription card, you need to activate your subscription on
+          the SUSE Customer Center at:</strong></span>
+      </p><p>
+        <a class="link" href="https://scc.suse.com" target="_top">https://scc.suse.com</a>
+      </p><p>To register your subscription, perform the following
+        steps:</p><div class="procedure"><a id="pro-rpi-reg-process"></a><ol class="procedure" type="1"><li class="step"><p>Log in to the SUSE Customer Center using a browser on
+            another machine. Create an account if required:</p><div class="informalfigure"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/rpi_scc.png" width="100%" alt="Log in to the SUSE Customer Center" /></td></tr></table></div></div></li><li class="step"><p>Click <span class="guimenu">Manually Activate
+            Subscriptions</span>:</p><div class="informalfigure"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/rpi_management_tools.png" width="100%" alt="Manual activation of subscription." /></td></tr></table></div></div></li><li class="step"><p>Click the dialog field <span class="guimenu">Activate a single
+              subscription</span>:</p><div class="informalfigure"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/rpi_activate_subscription.png" width="100%" alt="Activate a single subscription." /></td></tr></table></div></div></li><li class="step"><p>Enter the registration code and accept the terms and
+            conditions:</p><div class="informalfigure"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/rpi_enter_code.png" width="100%" alt="Enter the registration code." /></td></tr></table></div></div></li><li class="step"><p>Confirm the subscription activation and the organization
+            assignment. Click <span class="guimenu">Activate</span>:</p><div class="informalfigure"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/rpi_confirm_activation.png" width="100%" alt="Confirm the activation." /></td></tr></table></div></div></li><li class="step"><p>Your subscription is now active and ready to be
+            used:</p><div class="informalfigure"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="80%"><tr><td><img src="images/rpi_success.png" width="100%" alt="You now have an active subscription." /></td></tr></table></div></div></li></ol></div></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="sec-rpi-usage.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="sec-rpi-documentation.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">General System Usage </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Product Documentation</td></tr></table></div></body></html>

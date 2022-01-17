@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Setting up the SAP HANA system replication</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="SAP HANA System Replication Scale-Out - Performance Optimized Scenario" /><link rel="up" href="index.html" title="SAP HANA System Replication Scale-Out - Performance Optimized Scenario" /><link rel="prev" href="id-installing-the-sap-hana-databases-on-both-sites.html" title="Installing the SAP HANA databases on both sites" /><link rel="next" href="id-integrating-sap-hana-with-the-cluster.html" title="Integrating SAP HANA with the cluster" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Setting up the SAP HANA system replication</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="id-installing-the-sap-hana-databases-on-both-sites.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="id-integrating-sap-hana-with-the-cluster.html">Next</a></td></tr></table><hr /></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id-setting-up-the-sap-hana-system-replication"></a>Setting up the SAP HANA system replication</h2></div></div></div><p><a id="SAPHanaHsr"></a>This section describes the setup of the system replication (HSR) after SAP HANA has
+been installed properly.</p><p><span class="strong"><strong>Procedure</strong></span></p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>Back up the primary database</p></li><li class="listitem"><p>Enable the primary database</p></li><li class="listitem"><p>Register the secondary database</p></li><li class="listitem"><p>Verify the system replication</p></li></ol></div><div class="figure"><a id="id2087"></a><p class="title"><strong>Figure 10. <a class="xref" href="id-planning-the-installation.html#Planning">[Planning]</a> <a class="xref" href="id-setting-up-the-operating-system.html#OsSetup">[OsSetup]</a> <a class="xref" href="id-installing-the-sap-hana-databases-on-both-sites.html#SAPHanaInst">[SAPHanaInst]</a> SAPHanaHsr <a class="xref" href="id-integrating-sap-hana-with-the-cluster.html#Integration">[Integration]</a> <a class="xref" href="id-configuring-the-cluster-and-sap-hana-resources.html#Cluster">[Cluster]</a> <a class="xref" href="id-testing-the-cluster.html#Testing">[Testing]</a></strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td><img src="images/SAPHanaSR-ScaleOut-Plan-Phase4.svg" width="100%" alt="SAPHanaSR ScaleOut Plan Phase4" /></td></tr></table></div></div></div><br class="figure-break" /><p>For more information read the Section <span class="emphasis"><em>Setting Up System Replication</em></span> of the
+SAP HANA Administration Guide.</p><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="id-backing-up-the-primary-database"></a>Backing up the primary database</h3></div></div></div><p>First back up the primary database as described in the
+<span class="emphasis"><em>SAP HANA Administration Guide, Section SAP HANA Database Backup and Recovery</em></span>.</p><p>Below find examples to back up SAP HANA with SQL Commands:</p><div class="example"><a id="id2107"></a><p class="title"><strong>Example 14. Simple backup for the system database and all tenants with one single backup call</strong></p><div class="example-contents"><p>As user &lt;sid&gt;adm enter the following command:</p><pre class="screen">hdbsql -i {refInst} -u SYSTEM -d SYSTEMDB \
+   "BACKUP DATA FOR FULL SYSTEM USING FILE ('backup')"</pre><p>You get the following command output (or similar):</p><pre class="screen">0 rows affected (overall time 15.352069 sec; server time 15.347745 sec)</pre></div></div><br class="example-break" /><div class="example"><a id="id2113"></a><p class="title"><strong>Example 15. Simple backup for a single container (non-MDC) database</strong></p><div class="example-contents"><p>Enter the following command as user &lt;sid&gt;adm:</p><pre class="screen">hdbsql -i &lt;Inst&gt; -u &lt;dbuser&gt; \
+   "BACKUP DATA USING FILE ('backup')"</pre></div></div><br class="example-break" /><div class="important" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Important</h3><p>Without a valid backup, you <span class="strong"><strong>cannot</strong></span> bring SAP HANA into a system
+replication configuration.</p></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="id-enabling-the-primary-database"></a>Enabling the primary database</h3></div></div></div><p>As Linux user <span class="emphasis"><em>&lt;sid&gt;adm</em></span> enable the system replication at the primary node. You
+need to define a site name (like <span class="emphasis"><em>WDF1</em></span>) which must be unique for all SAP HANA
+databases which are connected via system replication. This means the secondary
+must have a different site name.</p><div class="example"><a id="id2125"></a><p class="title"><strong>Example 16. Enable the system replication on the primary site</strong></p><div class="example-contents"><p>As user &lt;sid&gt;adm enable the primary:</p><pre class="screen">hdbnsutil -sr_enable --name=WDF1</pre><p>Check if the command output is similar to:</p><pre class="screen">nameserver is active, proceeding ...
+successfully enabled system as system replication source site
+done.</pre></div></div><br class="example-break" /><p>The command line tool <span class="emphasis"><em>hdbnsutil</em></span> can be used to check the system replication
+mode and site name.</p><div class="example"><a id="id2133"></a><p class="title"><strong>Example 17. Check the system replication configuration status as user &lt;sid&gt;adm on the primary</strong></p><div class="example-contents"><pre class="screen">hdbnsutil -sr_stateConfiguration</pre><p>If the system replication enablement was successful at the primary, the
+output should be as follows:</p><pre class="screen">checking for active or inactive nameserver ...
+System Replication State
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+mode: primary
+site id: 1
+site name: WDF1
+done.</pre></div></div><br class="example-break" /><p>The mode has changed from “none” to “primary” and the site now has a site name
+and a site ID.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="id-registering-the-secondary-database"></a>Registering the secondary database</h3></div></div></div><p>The SAP HANA database instance on the secondary side must be stopped before the
+system can be registered for the system replication. You can use your
+preferred method to stop the instance (like <span class="emphasis"><em>HDB</em></span> or <span class="emphasis"><em>sapcontrol</em></span>). After the
+database instance has been stopped successfully, you can register the instance
+using <span class="emphasis"><em>hdbnsutil</em></span>.</p><div class="example"><a id="id2145"></a><p class="title"><strong>Example 18. Stop the secondary as Linux user <span class="emphasis"><em>&lt;sid&gt;adm</em></span>:</strong></p><div class="example-contents"><pre class="screen">sapcontrol -nr &lt;Inst&gt; -function StopSystem</pre></div></div><br class="example-break" /><div class="example"><a id="id2149"></a><p class="title"><strong>Example 19. Copy the KEY and KEY-DATA file from the primary to the secondary site</strong></p><div class="example-contents"><p>The copy of key and key-data should only be done on the master name server.
+As the files are in the global file space, you do not need to run the command
+on all cluster nodes.</p><pre class="screen">cd /usr/sap/&lt;SID&gt;/SYS/global/security/rsecssfs
+rsync -va {,&lt;node1-siteB&gt;:}$PWD/data/SSFS_&lt;SID&gt;.DAT
+rsync -va {,&lt;node1-siteB&gt;:}$PWD/key/SSFS_&lt;SID&gt;.KEY</pre></div></div><br class="example-break" /><div class="example"><a id="id2153"></a><p class="title"><strong>Example 20. Register the secondary as Linux user <span class="emphasis"><em>&lt;sid&gt;adm</em></span>:</strong></p><div class="example-contents"><pre class="screen">hdbnsutil -sr_register --name=&lt;site2&gt; \
+     --remoteHost=&lt;node1-siteA&gt; --remoteInstance=&lt;Inst&gt; \
+     --replicationMode=sync --operationMode=logreplay</pre><pre class="screen">adding site ...
+checking for inactive nameserver ...
+nameserver suse02:30001 not responding.
+collecting information ...
+updating local ini files ...
+done.</pre></div></div><br class="example-break" /><p>The <span class="emphasis"><em>remoteHost</em></span> is the primary node in our case, the <span class="emphasis"><em>remoteInstance</em></span> is the
+database instance number (here 00).</p><p>Now start the database instance again and verify the system replication status.
+On the secondary site, the mode should be one of „SYNC“, „SYNCMEM“ or „ASYNC“.
+The mode depends on the <span class="strong"><strong>sync</strong></span> option defined during the registration of the
+secondary.</p><div class="example"><a id="id2163"></a><p class="title"><strong>Example 21. Start the system on the secondary site as user &lt;sid&gt;adm</strong></p><div class="example-contents"><pre class="screen">sapcontrol -nr &lt;Inst&gt; -function StartSystem</pre><p>Wait until the SAP HANA database is started completely.</p></div></div><br class="example-break" /><div class="example"><a id="id2167"></a><p class="title"><strong>Example 22. Check the system replication configuration as Linux user &lt;sid&gt;adm</strong></p><div class="example-contents"><pre class="screen">hdbnsutil -sr_stateConfiguration</pre><p>The output should look like the following:</p><pre class="screen">System Replication State
+~~~~~~~~~~~~~~~~~~~~~~~~
+mode: sync
+site id: 2
+site name: ROT1
+active primary site: 1
+
+primary masters: suse01 suse03 suse05
+done.</pre></div></div><br class="example-break" /></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="id-verifying-the-system-replication"></a>Verifying the system replication</h3></div></div></div><p>To view the replication state of the whole SAP HANA cluster, use the following
+command as <span class="emphasis"><em>&lt;sid&gt;adm</em></span> user on the primary site.</p><div class="example"><a id="id2176"></a><p class="title"><strong>Example 23. Check the system replication status at the primary site (as &lt;sid&gt;adm)</strong></p><div class="example-contents"><pre class="screen">HDBSettings.sh systemReplicationStatus.py</pre><p>This script prints a human-readable table of the system replication channels and their status. The
+most interesting column is the <span class="strong"><strong>Replication Status</strong></span>, which should be <span class="strong"><strong>ACTIVE</strong></span>.</p><pre class="screen">| Database | Host   | .. Site Name | Secondary | .. Secondary | .. <span class="strong"><strong>Replication</strong></span>
+|          |        | ..           | Host      | .. Site Name | .. <span class="strong"><strong>Status</strong></span>
+| -------- | ------ | .. --------- | --------- | .. --------- | .. ------
+| SYSTEMDB | suse01 | .. WDF1      | suse02    | .. ROT1      | .. <span class="strong"><strong>ACTIVE</strong></span>
+| HA1      | suse01 | .. WDF1      | suse02    | .. ROT1      | .. <span class="strong"><strong>ACTIVE</strong></span>
+| HA1      | suse01 | .. WDF1      | suse02    | .. ROT1      | .. <span class="strong"><strong>ACTIVE</strong></span>
+| HA1      | suse03 | .. WDF1      | suse04    | .. ROT1      | .. <span class="strong"><strong>ACTIVE</strong></span>
+
+status system replication site "2": ACTIVE
+overall system replication status: ACTIVE
+
+Local System Replication State
+<sub>~</sub><sub>~</sub><sub>~</sub><sub>~</sub><sub>~</sub><sub>~</sub><sub>~</sub><sub>~</sub><sub>~</sub><sub>~</sub>
+
+mode: PRIMARY
+site id: 1
+site name: WDF1</pre></div></div><br class="example-break" /></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="id-installing-the-sap-hana-databases-on-both-sites.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="id-integrating-sap-hana-with-the-cluster.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Installing the SAP HANA databases on both sites </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Integrating SAP HANA with the cluster</td></tr></table></div></body></html>

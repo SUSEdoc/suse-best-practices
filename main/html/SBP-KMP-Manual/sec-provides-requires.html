@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>RPM Provides and Requires</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.2" /><style type="text/css">
+body { background-image: url('static/images/draft.png');
+       background-repeat: no-repeat;
+       background-position: top left;
+       /* The following properties make the watermark "fixed" on the page. */
+       /* I think that's just a bit too distracting for the reader... */
+       /* background-attachment: fixed; */
+       /* background-position: center center; */
+     }</style><link rel="home" href="index.html" title="Kernel Module Packages Manual for SUSE-based Distributions" /><link rel="up" href="index.html" title="Kernel Module Packages Manual for SUSE-based Distributions" /><link rel="prev" href="sec-kernel-module-packages.html" title="Kernel Module Packages" /><link rel="next" href="sec-building-kmp.html" title="Building Kernel Module Packages" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">RPM Provides and Requires</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="sec-kernel-module-packages.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="sec-building-kmp.html">Next</a></td></tr></table><hr /></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="sec-provides-requires"></a>RPM Provides and Requires</h2></div></div></div><p>Kernels export symbols that kernel modules use. Symbols have
+            version checksums attached, and the checksums of the exported
+            kernel symbols must match the checksums of the kernel symbols
+            that the kernel module package uses. In SUSE Linux Enterprise
+            Server 11 releases, kernels do not provide each kernel symbol
+            individually; instead they group symbols together into classes
+            (called <span class="quote">“<span class="quote">symsets</span>”</span>) and provide checksums of these
+            classes. </p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Number of Classes</h3><p>The number of classes is much smaller than the full
+                number of symbols provided by the kernel.</p></div><p>Similarly, SUSE Linux Enterprise Server 11 Kernel Module
+            Packages require checksums for classes rather than for
+            individual symbols. In SUSE Linux Enterprise Server 12
+            releases, kernels provide checksums for each individual symbol.
+            Therefore, SUSE Linux Enterprise Server 12 Kernel Module
+            Packages require checksums for individual symbols.</p><p>When modules in Kernel Module Packages export additional
+            symbols, such symbols are mapped to per-symbol <span class="strong"><strong>Provides</strong></span> of those packages.
+            Modules in other Kernel Module Packages can require those
+            symbols; they would also do so on a per-symbol basis. As an
+            example, assume that a Kernel Module Package provides an
+            exported function as <span class="italic">ksym(default:exported_function)
+                = e52d5bcf</span>. Any Kernel Module Package that uses
+            this function would require this same symbol and
+            checksum.</p></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="sec-kernel-module-packages.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="sec-building-kmp.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Kernel Module Packages </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Building Kernel Module Packages</td></tr></table></div></body></html>
