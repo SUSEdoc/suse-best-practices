@@ -35,11 +35,11 @@ the multi-state construct anymore. Move to a more cluster-like construct to
 start and stop the ASCS and the ERS instances themselves, but <span class="strong"><strong>not</strong></span> the complete
 multi-state resource.</p><p>With the new version of ENSA2, the ASCS instance can be started on the same host. There is no longer a need
 to follow the ERS instance. The ASCS instance receives the enqueue lock table over the network from the ERS instance. If no
-other node is available, the ASCS instance will be started on the same host where the ERS instance is running.</p><div class="figure"><a id="id1944"></a><p class="title"><strong>Figure 6. Resources and constraints</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="NaN"><tr><td><img src="images/sles4sap_s4hana1809_resources.svg" width="NaN" alt="SVG" /></td></tr></table></div></div></div><br class="figure-break" /><p>Another benefit of this concept is that you can work with native (mountable)
+other node is available, the ASCS instance will be started on the same host where the ERS instance is running.</p><div class="figure"><a id="id1949"></a><p class="title"><strong>Figure 6. Resources and constraints</strong></p><div class="figure-contents"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="NaN"><tr><td><img src="images/sles4sap_s4hana1809_resources.svg" width="NaN" alt="SVG" /></td></tr></table></div></div></div><br class="figure-break" /><p>Another benefit of this concept is that you can work with native (mountable)
 file systems instead of a shared (NFS) file system for the SAP instance
 directories.</p><div class="section"><div class="titlepage"><div><div><h4 class="title"><a id="id-preparing-the-cluster-for-adding-the-resources"></a>Preparing the Cluster for Adding the Resources</h4></div></div></div><p>To prevent the cluster from starting partially defined resources, set the cluster
 to the maintenance mode. This deactivates all monitor actions.</p><p>As user <span class="emphasis"><em>root</em></span>, type the following command:</p><pre class="screen"># crm configure property maintenance-mode="true"</pre></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a id="id-configuring-the-resources-for-the-ascs-instance"></a>Configuring the Resources for the ASCS Instance</h4></div></div></div><p>First, configure the resources for the file system, IP address and the SAP
-instance. You need to adapt the parameters for your specific environment.</p><div class="example"><a id="id1961"></a><p class="title"><strong>Example 5. ASCS primitive</strong></p><div class="example-contents"><pre class="screen">primitive rsc_fs_EN2_ASCS00 Filesystem \
+instance. You need to adapt the parameters for your specific environment.</p><div class="example"><a id="id1966"></a><p class="title"><strong>Example 5. ASCS primitive</strong></p><div class="example-contents"><pre class="screen">primitive rsc_fs_EN2_ASCS00 Filesystem \
   params device="/dev/disk/by-id/SUSE-Example-A-part2" directory="/usr/sap/EN2/ASCS00" \
          fstype=xfs \
   op start timeout=60s interval=0 \
@@ -49,17 +49,16 @@ primitive rsc_ip_EN2_ASCS00 IPaddr2 \
   params ip=192.168.1.112 \
   op monitor interval=10s timeout=20s
 primitive rsc_sap_EN2_ASCS00 SAPInstance \
-  operations $id=rsc_sap_EN2_ASCS00-operations \
   op monitor interval=11 timeout=60 on-fail=restart \
   params InstanceName=EN2_ASCS00_sapen2as \
      START_PROFILE="/usr/sap/EN2/SYS/profile/EN2_ASCS00_sapen2as" \
      AUTOMATIC_RECOVER=false \
-  meta resource-stickiness=5000</pre><p>See also manual pages ocf_heartbeat_SAPInstance(7), ocf_heartbeat_IPAddr2(7) and ocf_heartbeat_Filesystem(7).</p></div></div><br class="example-break" /><div class="example"><a id="id1965"></a><p class="title"><strong>Example 6. ASCS group</strong></p><div class="example-contents"><pre class="screen">group grp_EN2_ASCS00 \
+  meta resource-stickiness=5000</pre><p>See also manual pages ocf_heartbeat_SAPInstance(7), ocf_heartbeat_IPAddr2(7) and ocf_heartbeat_Filesystem(7).</p></div></div><br class="example-break" /><div class="example"><a id="id1970"></a><p class="title"><strong>Example 6. ASCS group</strong></p><div class="example-contents"><pre class="screen">group grp_EN2_ASCS00 \
   rsc_ip_EN2_ASCS00 rsc_fs_EN2_ASCS00 rsc_sap_EN2_ASCS00 \
 	meta resource-stickiness=3000</pre></div></div><br class="example-break" /><p>Create a <span class="emphasis"><em>txt</em></span> file (like <span class="emphasis"><em>crm_ascs.txt</em></span>) with your preferred text editor. Add
 both examples (primitives and group) to that file and load the configuration to
 the cluster manager configuration.</p><p>As user <span class="emphasis"><em>root</em></span>, type the following command:</p><pre class="screen"># crm configure load update crm_ascs.txt</pre></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a id="id-configuring-the-resources-for-the-ers-instance"></a>Configuring the Resources for the ERS Instance</h4></div></div></div><p>Second, configure the resources for the file system, IP address and the SAP
-instance. You need to adapt the parameters for your specific environment.</p><p>The specific parameter <span class="emphasis"><em>IS_ERS=true</em></span> must only be set for the ERS instance.</p><div class="example"><a id="id1979"></a><p class="title"><strong>Example 7. ERS primitive</strong></p><div class="example-contents"><pre class="screen">primitive rsc_fs_EN2_ERS10 Filesystem \
+instance. You need to adapt the parameters for your specific environment.</p><p>The specific parameter <span class="emphasis"><em>IS_ERS=true</em></span> must only be set for the ERS instance.</p><div class="example"><a id="id1984"></a><p class="title"><strong>Example 7. ERS primitive</strong></p><div class="example-contents"><pre class="screen">primitive rsc_fs_EN2_ERS10 Filesystem \
   params device="/dev/disk/by-id/SUSE-Example-A-part3" directory="/usr/sap/EN2/ERS10" fstype=xfs \
   op start timeout=60s interval=0 \
   op stop timeout=60s interval=0 \
@@ -68,11 +67,10 @@ primitive rsc_ip_EN2_ERS10 IPaddr2 \
   params ip=192.168.1.113 \
   op monitor interval=10s timeout=20s
 primitive rsc_sap_EN2_ERS10 SAPInstance \
-  operations $id=rsc_sap_EN2_ERS10-operations \
   op monitor interval=11 timeout=60 on-fail=restart \
   params InstanceName=EN2_ERS10_sapen2er \
          START_PROFILE="/usr/sap/EN2/SYS/profile/EN2_ERS10_sapen2er" \
-         AUTOMATIC_RECOVER=false IS_ERS=true</pre><p>See also manual pages ocf_heartbeat_SAPInstance(7), ocf_heartbeat_IPAddr2(7) and ocf_heartbeat_Filesystem(7).</p></div></div><br class="example-break" /><div class="example"><a id="id1983"></a><p class="title"><strong>Example 8. ERS group</strong></p><div class="example-contents"><pre class="screen">group grp_EN2_ERS10 \
+         AUTOMATIC_RECOVER=false IS_ERS=true</pre><p>See also manual pages ocf_heartbeat_SAPInstance(7), ocf_heartbeat_IPAddr2(7) and ocf_heartbeat_Filesystem(7).</p></div></div><br class="example-break" /><div class="example"><a id="id1988"></a><p class="title"><strong>Example 8. ERS group</strong></p><div class="example-contents"><pre class="screen">group grp_EN2_ERS10 \
   rsc_ip_EN2_ERS10 rsc_fs_EN2_ERS10 rsc_sap_EN2_ERS10</pre></div></div><br class="example-break" /><p>Create a <span class="emphasis"><em>txt</em></span> file (like <span class="emphasis"><em>crm_ers.txt</em></span>) with your preferred text editor. Add
 both examples (primitives and group) to that file and load the configuration to
 the cluster manager configuration.</p><p><span class="emphasis"><em>As user root</em></span></p><pre class="screen"># crm configure load update crm_ers.txt</pre></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a id="id-configuring-the-colocation-constraints-between-ascs-and-ers"></a>Configuring the Colocation Constraints Between ASCS and ERS</h4></div></div></div><p>Compared to the ENSA1 configuration, the constraints between the ASCS and ERS instances are changed.
@@ -80,7 +78,7 @@ An ASCS instance should avoid starting up on the cluster node running the ERS in
 node is available.  Today the ENSA2 setup can resynchronize the lock table over the network.</p><p>If the ASCS instance has been started by the cluster on the ERS node, the ERS instance should
 be moved to another cluster node (col_sap_EN2_no_both). This constraint
 is needed to ensure that the ERS instance will synchronize the locks again and the cluster is
-ready for an additional take-over.</p><div class="example"><a id="id1996"></a><p class="title"><strong>Example 9. Location constraint</strong></p><div class="example-contents"><pre class="screen">colocation col_sap_EN2_no_both -5000: grp_EN2_ERS10 grp_EN2_ASCS00
+ready for an additional take-over.</p><div class="example"><a id="id2001"></a><p class="title"><strong>Example 9. Location constraint</strong></p><div class="example-contents"><pre class="screen">colocation col_sap_EN2_no_both -5000: grp_EN2_ERS10 grp_EN2_ASCS00
 order ord_sap_EN2_first_start_ascs Optional: rsc_sap_EN2_ASCS00:start \
       rsc_sap_EN2_ERS10:stop symmetrical=false</pre></div></div><br class="example-break" /><p>Create a <span class="emphasis"><em>txt</em></span> file (like <span class="emphasis"><em>crm_col.txt</em></span>) with a text editor. Add
 both constraints to that file and load the configuration to the

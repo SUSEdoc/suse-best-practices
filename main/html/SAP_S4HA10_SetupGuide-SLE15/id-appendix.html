@@ -8,8 +8,8 @@ body { background-image: url('static/images/draft.png');
        /* background-attachment: fixed; */
        /* background-position: center center; */
      }</style><link rel="home" href="index.html" title="SAP S/4 HANA - Enqueue Replication 2 High Availability Cluster - Setup Guide" /><link rel="up" href="index.html" title="SAP S/4 HANA - Enqueue Replication 2 High Availability Cluster - Setup Guide" /><link rel="prev" href="id-references.html" title="References" /><link rel="next" href="id-legal-notice.html" title="Legal Notice" /></head><body onload="$('#betawarn-button-wrap').toggle();if (document.cookie.length > 0) {if (document.cookie.indexOf('betawarn=closed') != -1){$('#betawarn').toggle()}};"><div id="betawarn" style="position:fixed;bottom:0;z-index:9025;background-color:#FDE8E8;padding:1em;margin-left:10%;margin-right:10%;display:block;border-top:.75em solid #E11;width:80%"><p style="color:#333;margin:1em 0;padding:0;">This is a draft document that was built and uploaded automatically. It may document beta software and be incomplete or even incorrect. <strong>Use this document at your own risk.</strong></p> <div id="betawarn-button-wrap" style="display:none;margin:0;padding:0;"><a href="#" onclick="$('#betawarn').toggle();var d=new Date();d.setTime(d.getTime()+(0.5*24*60*60*1000));document.cookie='betawarn=closed; expires='+d.toUTCString()+'; path=/'; return false;" style="color:#333;text-decoration:underline;float:left;margin-top:.5em;padding:1em;display:block;background-color:#FABEBE;">I understand this is a draft</a></div></div><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Appendix</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="id-references.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="id-legal-notice.html">Next</a></td></tr></table><hr /></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id-appendix"></a>Appendix</h2></div></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="id-crm-configuration"></a>CRM Configuration</h3></div></div></div><p>Find below the complete crm configuration for SAP system EN2. This example
-is for the two node cluster. In multi node cluster you will find additional node entries
-like <span class="strong"><strong>node 3: valuga13</strong></span>.</p><pre class="screen">node 1: valuga11
+is for the two node cluster, but without priority fencing.
+In multi node cluster you will find additional node entries like <span class="strong"><strong>node 3: valuga13</strong></span>.</p><pre class="screen">node 1: valuga11
 node 2: valuga12
 primitive rsc_fs_EN2_ASCS00 Filesystem \
     params device="/dev/disk/by-id/SUSE-Example-A-part2" \
@@ -32,14 +32,12 @@ primitive rsc_ip_EN2_ERS10 IPaddr2 \
     params ip=192.168.1.113 \
     op monitor interval=10s timeout=20s
 primitive rsc_sap_EN2_ASCS00 SAPInstance \
-    operations $id=rsc_sap_EN2_ASCS00-operations \
     op monitor interval=11 timeout=60 on-fail=restart \
     params InstanceName=EN2_ASCS00_sapen2as \
     START_PROFILE="/sapmnt/EN2/profile/EN2_ASCS00_sapen2as" \
     AUTOMATIC_RECOVER=false \
     meta resource-stickiness=5000
 primitive rsc_sap_EN2_ERS10 SAPInstance \
-    operations $id=rsc_sap_EN2_ERS10-operations \
     op monitor interval=11 timeout=60 on-fail=restart \
     params InstanceName=EN2_ERS10_sapen2er \
     START_PROFILE="/sapmnt/EN2/profile/EN2_ERS10_sapen2er" \
@@ -65,7 +63,7 @@ rsc_defaults rsc-options: \
     migration-threshold=3
 op_defaults op-options: \
     timeout=600 \
-    record-pending=true</pre></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="id-corosync-configuration-of-the-two-node-cluster"></a>Corosync Configuration of the Two Node Cluster</h3></div></div></div><p>Find below the Corosync configuration.</p><pre class="screen">valuga11:~ # cat /etc/corosync/corosync.conf
+    record-pending=true</pre></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="id-corosync-configuration-of-the-two-node-cluster"></a>Corosync Configuration of the Two Node Cluster</h3></div></div></div><p>Find below the Corosync configuration for one corosync ring. Ideally two rings would be used.</p><pre class="screen">valuga11:~ # cat /etc/corosync/corosync.conf
 # Read the corosync.conf.5 manual page
 totem {
     version: 2
@@ -123,7 +121,7 @@ quorum {
     provider: corosync_votequorum
     expected_votes: 2
     two_node: 1
-}</pre></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="id-corosync-configuration-of-the-multi-node-cluster"></a>Corosync Configuration of the multi Node Cluster</h3></div></div></div><pre class="screen">	# Please read the corosync.conf.5 manual page
+}</pre></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="id-corosync-configuration-of-the-multi-node-cluster"></a>Corosync Configuration of the multi Node Cluster</h3></div></div></div><p>Find below the Corosync configuration for one corosync ring. Ideally two rings would be used.</p><pre class="screen">	# Please read the corosync.conf.5 manual page
 	totem {
 		version: 2
 		secauth: on
@@ -185,4 +183,6 @@ quorum {
 		provider: corosync_votequorum
 		expected_votes: 3
 		two_node: 0
-	}</pre></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="id-references.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="id-legal-notice.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">References </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Legal Notice</td></tr></table></div></body></html>
+	}</pre></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="id-usrsapsapservices-without-native-systemd-integration"></a>/usr/sap/sapservices without native systemd integration</h3></div></div></div><pre class="screen">#!/bin/sh
+LD_LIBRARY_PATH=/usr/sap/EN2/ASCS00/exe:$LD_LIBRARY_PATH; export LD_LIBRARY_PATH; /usr/sap/EN2/ASCS00/exe/sapstartsrv pf=/usr/sap/EN2/SYS/profile/EN2_ASCS00_sapen2as -D -u en2adm
+LD_LIBRARY_PATH=/usr/sap/EN2/ERS10/exe:$LD_LIBRARY_PATH; export LD_LIBRARY_PATH; /usr/sap/EN2/ERS10/exe/sapstartsrv pf=/usr/sap/EN2/ERS10/profile/EN2_ERS10_sapen2er -D -u en2adm</pre></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="id-references.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="id-legal-notice.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">References </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Legal Notice</td></tr></table></div></body></html>
