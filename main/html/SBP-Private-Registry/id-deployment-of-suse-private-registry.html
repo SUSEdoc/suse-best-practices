@@ -43,7 +43,7 @@ Update <code class="literal">harbor-values.yaml</code> with the following config
 externalURL: "https://&lt;core_fqdn&gt;"</pre><p>
 </p><p>Replace <code class="literal">&lt;core_fqdn&gt;</code> and <code class="literal">&lt;notary_fqdn&gt;</code> values with the resolvable FQDN values that were prepared as detailed in the <a class="xref" href="requirements.html" title="Requirements">the section called “Requirements”</a> section.
 If the Notary service was not enabled in the configuration, the <code class="literal">&lt;notary_fqdn&gt;</code> entry may be omitted.
-The <code class="literal">harbor-values.yaml</code> configuration would look like this, if, for example, a public service like <a class="link" href="nip.io" target="_top">nip.io</a> was used to provide FQDNs:</p><p><strong>harbor-values.yaml. </strong>
+The <code class="literal">harbor-values.yaml</code> configuration would look like this, if, for example, a public service like <a class="link" href="https://nip.io" target="_top">nip.io</a> was used to provide FQDNs:</p><p><strong>harbor-values.yaml. </strong>
 </p><pre class="screen">expose:
   ingress:
     hosts:
