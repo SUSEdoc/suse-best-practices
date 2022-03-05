@@ -65,8 +65,8 @@ ASCS, this limits the restart of the message server).</p><p>For the ERS instance
 # sapcontrol -nr 10 -function StartService EN2
 # sapcontrol -nr 10 -function Start</pre></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="id-installing-database-on-valuga01"></a>Installing Database on valuga01</h3></div></div></div><p>The HANA DB has very strict HW requirements. The storage sizing depends on many
 indicators. Check the supported configurations at
-<a class="link" href="https://www.sap.com/documents/2015/03/74cdb554-5a7c-0010-82c7-eda71af511fa.html" target="_top">SAP HANA Hardware Directory</a>
-and <a class="link" href="https://www.sap.com/documents/2015/03/74cdb554-5a7c-0010-82c7-eda71af511fa.html" target="_top">SAP HANA TDI</a>.</p><pre class="screen"># ip a a 192.168.1.114/24 dev eth0
+<a class="link" href="https://support.sap.com/en/release-upgrade-maintenance.html#section_1969201630" target="_top">SAP HANA Hardware Directory</a>
+and <a class="link" href="https://www.sap.com/documents/2016/05/e8705aae-717c-0010-82c7-eda71af511fa.html" target="_top">SAP HANA TDI</a>.</p><pre class="screen"># ip a a 192.168.1.114/24 dev eth0
 # mount /dev/disk/by-id/SUSE-Example-B-part1 /hana
 # mount /dev/disk/by-id/SUSE-Example-B-part2 /usr/sap/EN2/D01
 # mount /dev/disk/by-id/SUSE-Example-B-part3 /usr/sap/EN2/D02
